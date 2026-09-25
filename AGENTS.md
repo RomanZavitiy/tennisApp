@@ -16,7 +16,7 @@ this may change).
 
 ## 2. Stack
 
-Next.js 15 (App Router) + TypeScript · Supabase (Postgres + Auth + Storage + Realtime) ·
+Next.js 16 (App Router) + TypeScript · Supabase (Postgres + Auth + Storage + Realtime) ·
 Prisma ORM · Tailwind CSS + shadcn/ui · react-leaflet + OpenStreetMap · React Hook Form +
 Zod · Resend (email) · Vercel (hosting) · GitHub Actions (CI) · Vitest + Playwright ·
 pnpm.
