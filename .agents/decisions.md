@@ -144,3 +144,19 @@ pnpm у репо — задача 0.5; Prisma ставиться з явною �
 - На Windows з `core.autocrlf=true` git віддає файли з CRLF, а Prettier очікує LF — локально
   `format:check` падав би на кожному файлі, а в CI (Linux) проходив би. `eol=lf` робить робочу
   копію однаковою на всіх машинах.
+
+## 2026-09-26 — ESLint: strictTypeChecked + заборона console.log (задача 0.8)
+
+**Рішення:** для `.ts/.tsx` увімкнено `typescript-eslint` `strictTypeChecked` (type-aware правила
+через `projectService`); у `app/`, `lib/`, `components/` — `no-console` з дозволом лише на
+`console.warn` і `console.error`. `typescript-eslint` додано прямою devDependency тієї ж версії,
+що й у `eslint-config-next`.
+**Чому:**
+- `strictTypeChecked`, а не `recommendedTypeChecked`: код поки майже порожній, тож найсуворіший
+  набір нічого не коштує зараз, а послабити окреме правило пізніше легше, ніж посилювати на
+  готовому коді. Type-aware правила ловлять те, що людина на рев'ю легко пропустить
+  (незачекані проміси, `any`, що «протікає» в типізований код).
+- `console.warn/error` дозволені — це справжня діагностика (Epic 6 підключить моніторинг помилок);
+  заборонено лише налагоджувальний `console.log`.
+- Та сама версія `typescript-eslint` — інакше в ESLint потрапляють дві копії плагіна
+  `@typescript-eslint`, і flat config падає з конфліктом плагінів.
