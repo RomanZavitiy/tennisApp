@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "next": "16.3.6",
@@ -24,6 +25,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
     "eslint-config-prettier": "10.1.8",
+    "husky": "9.1.7",
+    "lint-staged": "17.5.1",
     "prettier": "3.9.9",
     "tailwindcss": "^4",
     "typescript": "^5",
@@ -32,5 +35,12 @@
   "engines": {
     "node": ">=24 <25"
   },
-  "packageManager": "pnpm@12.6.0"
+  "packageManager": "pnpm@12.6.0",
+  "lint-staged": {
+    "*.{ts,tsx,mts,js,mjs}": [
+      "eslint --fix --max-warnings=0 --no-warn-ignored",
+      "prettier --write"
+    ],
+    "*.{json,css,yaml,yml}": "prettier --write"
+  }
 }
