@@ -1,5 +1,17 @@
 // Database schema. Models are added by the tasks that need them.
 // Connection URLs live in prisma.config.ts (CLI) and lib/db.ts (runtime).
+//
+// Conventions (see .agents/decisions.md, task 0.12):
+// - Tables, columns and enums are snake_case in Postgres (@@map / @map), so
+//   the SQL we write by hand (RLS policies, Supabase dashboard) needs no quotes.
+// - Ids and timestamps have database defaults, so rows inserted outside Prisma
+//   (SQL editor, seeds) get them too. User.id is the exception: it is the
+//   Supabase auth.users id.
+// - Timestamps are timestamptz: stored as UTC, shown in Europe/Warsaw.
+// - Every foreign key has an index — Postgres doesn't create one for it.
+//
+// This is the skeleton only: keys, relations and statuses. Profile, club,
+// offer and result fields come with their own tasks (1.10, 2.1, 3.2, 3.10, 4.4).
 
 generator client {
   provider = "prisma-client"
@@ -8,4 +20,115 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+/// A player. One row per Supabase Auth account, created on first sign-in (task 1.9).
+model User {
+  /// Same value as auth.users.id — set by the app, never generated here.
+  /// No foreign key to auth.users: Prisma manages only the public schema.
+  id        String   @id @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  offers SparringOffer[]
+  joins  OfferJoin[]
+
+  @@map("users")
+}
+
+/// A tennis club with courts. Filled from hand-checked data (tasks 2.1–2.3).
+model Club {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  offers SparringOffer[]
+
+  @@map("clubs")
+}
+
+/// "Looking for a sparring partner" — a post on the board (Epic 3).
+model SparringOffer {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status    OfferStatus @default(OPEN)
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  /// Deleting a user deletes their offers.
+  authorId String @map("author_id") @db.Uuid
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  /// Optional: an offer can name only a district. A club that still has
+  /// offers can't be deleted — removing a club must be a deliberate step.
+  clubId String? @map("club_id") @db.Uuid
+  club   Club?   @relation(fields: [clubId], references: [id], onDelete: Restrict)
+
+  joins OfferJoin[]
+
+  @@index([authorId])
+  @@index([clubId])
+  @@map("sparring_offers")
+}
+
+/// A player's request to join an offer (Epic 3). One per player per offer.
+model OfferJoin {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status    JoinStatus @default(REQUESTED)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  /// Requests go away with their offer or with the requesting user.
+  offerId String        @map("offer_id") @db.Uuid
+  offer   SparringOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  userId  String        @map("user_id") @db.Uuid
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  result MatchResult?
+
+  @@unique([offerId, userId])
+  @@index([userId])
+  @@map("offer_joins")
+}
+
+/// The result of a singles match played through an accepted join (Epic 4).
+model MatchResult {
+  id        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status    MatchResultStatus @default(PENDING)
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  /// One result per join. Restrict, not Cascade: results feed ELO history, so
+  /// a join with a result — and through it the offer and both users — can't
+  /// be deleted until account deletion decides what happens to them (6.15).
+  offerJoinId String    @unique @map("offer_join_id") @db.Uuid
+  offerJoin   OfferJoin @relation(fields: [offerJoinId], references: [id], onDelete: Restrict)
+
+  @@map("match_results")
+}
+
+/// Past offers are hidden by their start time (3.20), so there is no EXPIRED.
+enum OfferStatus {
+  OPEN
+  FULL
+  CANCELLED
+
+  @@map("offer_status")
+}
+
+enum JoinStatus {
+  REQUESTED
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+
+  @@map("join_status")
+}
+
+/// Only a CONFIRMED result changes ELO; PENDING waits for the opponent.
+enum MatchResultStatus {
+  PENDING
+  CONFIRMED
+  DISPUTED
+
+  @@map("match_result_status")
 }
