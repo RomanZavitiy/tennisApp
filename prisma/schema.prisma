@@ -1,0 +1,11 @@
+// Database schema. Models are added by the tasks that need them.
+// Connection URLs live in prisma.config.ts (CLI) and lib/db.ts (runtime).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

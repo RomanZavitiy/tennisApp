@@ -4,3 +4,6 @@ pnpm-lock.yaml
 # Hand-written docs: Prettier re-indents list continuations and pads tables,
 # which rewrites the planning doc wholesale for no readability gain.
 *.md
+
+# Generated Prisma client
+lib/generated/
