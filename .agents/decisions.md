@@ -176,3 +176,21 @@ pnpm у репо — задача 0.5; Prisma ставиться з явною �
 - 17.6.0 вийшла в день задачі, і pnpm відхилив її правилом `minimumReleaseAge` (захист від
   щойно опублікованих, можливо скомпрометованих версій), автоматично додавши виняток у
   `pnpm-workspace.yaml`. Виняток прибрано, взято попередню версію — правило не обходимо.
+
+## 2026-09-28 — Як підключено Prisma 7 (задача 0.11)
+
+**Рішення:** Prisma **7.10.0** (`prisma`, `@prisma/client`) плюс `@prisma/adapter-pg`. Клієнт
+генерується в `lib/generated/prisma` (у `.gitignore`, перегенеровується в `postinstall`) і
+створюється лише в `lib/db.ts`. CLI (міграції, studio) ходить через `DIRECT_URL`, а застосунок —
+через `DATABASE_URL` (transaction pooler). `prisma.config.ts` читає `.env.local` вбудованим
+`process.loadEnvFile` з Node. У `pnpm-workspace.yaml` дозволено install-скрипти `prisma`
+(перевірка версії Node) і `@prisma/engines` (завантажує schema engine для міграцій).
+**Чому:**
+- У Prisma 7 клієнт працює лише через driver adapter; `@prisma/adapter-pg` — офіційний адаптер
+  Prisma для Postgres, а не окрема бібліотека поза стеком.
+- Prisma 7 сама не читає env-файли. Наші секрети лежать у `.env.local`, тому `.env` не заводимо,
+  а замість `dotenv` беремо вбудований у Node 24 завантажувач: на одну залежність менше.
+- `prisma init` не запускали: крім конфігу, він кладе свої skill-файли в `.agents/`, `.claude/`
+  і `.windsurf/`, що змішалося б з нашими документами. Ті самі файли написано вручну.
+- Клієнт тримаємо на `globalThis` у dev: перевірено 8 hot reload у `pnpm dev`, кількість
+  з'єднань до бази лишалась 3.
