@@ -104,6 +104,10 @@ asked for by name.
 - Branch per task/epic-slice (`feat/sparring-board-create`, not `feat/epic-3`).
 - Open a PR rather than pushing straight to `main`; wait for the human's review on
   anything touching auth, payments (once added), or DB migrations — see Boundaries.
+- `main` is protected: PRs land only by squash-merge with green CI, and the squash commit
+  is the PR title, which carries the task ID (`0.7: Add Prettier`). One task = one PR = one
+  commit in `main`, so `git log --oneline main` reads as the list of finished tasks — and a
+  PR whose title lacks the ID breaks that list.
 - Never `git push --force` to a shared branch, never rewrite history the human has
   already pulled.
 
