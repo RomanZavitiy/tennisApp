@@ -13,6 +13,8 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    // Plain SQL, so the seed needs no TypeScript runner (see prisma/seed.sql).
+    seed: "prisma db execute --file prisma/seed.sql",
   },
   // The CLI (migrate, db pull, studio) uses the direct connection: migrations
   // can't run through the transaction pooler. The app itself connects via
