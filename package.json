@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test": "vitest run"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
@@ -34,7 +35,8 @@
     "prisma": "7.10.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "typescript-eslint": "8.70.1"
+    "typescript-eslint": "8.70.1",
+    "vitest": "5.0.2"
   },
   "engines": {
     "node": ">=24 <25"
