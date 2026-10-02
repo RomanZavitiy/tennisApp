@@ -32,11 +32,86 @@ matchFinder, не бронювання кортів.
 
 ## Статус проєкту
 
-Зараз стадія планування. Повний бізнес-аналіз twojtenis.pl, MVP-скоуп і epics —
-у двох окремих планувальних документах (посилання людина тримає окремо). Наступний
-крок — Epic 0 (репозиторій та інфраструктура), опис — в AGENTS.md і в epics-документі.
+Epic 0 (репозиторій та інфраструктура) завершено: скелет Next.js, Prisma з першими
+міграціями, CI, деплой на Vercel, базовий layout. Наступні — Epic 1 (вхід і профіль гравця)
+та Epic 2 (корти на карті). Усі задачі з описом і критеріями готовності — у
+[docs/PLANNING.md](./docs/PLANNING.md).
 
 ## Getting started
 
-_Заповниться під час Epic 0, коли підніметься базовий скелет проєкту
-(`create-next-app`, підключення Supabase, перша міграція Prisma)._
+Від `git clone` до запущеного застосунку з базою даних. Команди однакові для Windows (Git
+Bash), macOS і Linux.
+
+### 1. Що встановити заздалегідь
+
+- **Git.**
+- **Node.js 24.** Потрібна саме 24-та версія: на іншій `pnpm install` зупиниться з помилкою
+  `ERR_PNPM_UNSUPPORTED_ENGINE`. З nvm (macOS/Linux): `nvm install && nvm use` бере версію з
+  `.nvmrc`. З nvm-windows: `nvm install 24 && nvm use 24`.
+- **pnpm:** `npm install -g pnpm`. Точна версія не важлива: pnpm сам перемкнеться на ту, що
+  вказана в `package.json` (`packageManager`).
+
+### 2. Код і залежності
+
+```bash
+git clone https://github.com/RomanZavitiy/tennisApp.git
+cd tennisApp
+pnpm install
+```
+
+`pnpm install` також генерує Prisma Client (`lib/generated/`) і вмикає pre-commit хук, що
+перед кожним комітом проганяє ESLint і Prettier.
+
+### 3. База даних і `.env.local`
+
+Застосунок працює з Postgres у Supabase. Є два варіанти:
+
+- **Спільна dev-БД проєкту.** Попроси власника репозиторію надіслати значення `DATABASE_URL` і
+  `DIRECT_URL`. Міграції там уже застосовані, тож крок 4 пропускаєш.
+- **Власний проєкт Supabase** (безкоштовний план): supabase.com → New project, регіон
+  `eu-west-1` (Ireland). Рядки підключення — Dashboard → **Connect → ORMs → Prisma**. Якщо в
+  паролі БД є спецсимволи (`@`, `#`, `/`…), їх треба закодувати в URL (наприклад, `@` → `%40`).
+
+Створи файл з секретами й заповни обидві змінні:
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` у `.gitignore` — його ніколи не комітимо. Що означає кожна змінна, написано в
+коментарях у `.env.example`.
+
+### 4. Таблиці й тестові дані (лише для власного проєкту Supabase)
+
+```bash
+pnpm prisma migrate deploy   # створює таблиці з prisma/migrations/
+pnpm prisma db seed          # додає мінімальні тестові дані
+```
+
+Перевірити, що база в актуальному стані: `pnpm prisma migrate status` → «Database schema is up
+to date!». Переглянути дані в браузері: `pnpm prisma studio`.
+
+### 5. Запуск
+
+```bash
+pnpm dev
+```
+
+Відкрий http://localhost:3000 — має з'явитись головна сторінка з хедером.
+
+### 6. Перевірки перед PR
+
+Ті самі команди запускає CI, тож якщо вони зелені локально, будуть зелені й у PR:
+
+```bash
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
+```
+
+Для e2e-тестів (Playwright) один раз встанови браузер, потім запускай тести:
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+`pnpm test:e2e` сам збирає production-білд і запускає його на порту 3100.
