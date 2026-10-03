@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { LoginForm } from "@/components/login-form";
 import { safeNextPath } from "@/lib/auth/routes";
 
@@ -19,7 +20,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
       <p className="mt-2 mb-6 text-muted-foreground">
-        We&apos;ll email you a link — no password needed.
+        Use your Google account or get a link by email — no password needed.
       </p>
       {error === "link" && (
         <p
@@ -30,6 +31,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           new one.
         </p>
       )}
+      <GoogleSignInButton next={nextPath} />
+      <p className="my-6 text-center text-sm text-muted-foreground">
+        or use your email
+      </p>
       <LoginForm next={nextPath} />
     </main>
   );

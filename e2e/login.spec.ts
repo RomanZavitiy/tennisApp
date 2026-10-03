@@ -44,3 +44,35 @@ test("an invalid or expired link returns to login with a message", async ({
     "invalid or has expired",
   );
 });
+
+// Google itself can't be driven from a test. What can be checked is our half:
+// the button sends the browser to Supabase's authorize endpoint for Google,
+// asks to come back to our callback with `next`, and starts PKCE (the code
+// challenge in the URL, the verifier in a cookie for /auth/callback).
+test("Continue with Google starts the OAuth flow back to our callback", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await page.route("**/auth/v1/authorize?**", (route) =>
+    route.fulfill({ status: 200, body: "Google sign-in stub" }),
+  );
+
+  await page.goto("/login?next=/profile");
+  const [request] = await Promise.all([
+    page.waitForRequest("**/auth/v1/authorize?**"),
+    page.getByRole("button", { name: "Continue with Google" }).click(),
+  ]);
+
+  const authorize = new URL(request.url());
+  expect(authorize.searchParams.get("provider")).toBe("google");
+  expect(authorize.searchParams.get("redirect_to")).toBe(
+    `${String(baseURL)}/auth/callback?next=%2Fprofile`,
+  );
+  expect(authorize.searchParams.get("code_challenge")).toBeTruthy();
+
+  const cookies = await context.cookies();
+  expect(
+    cookies.some((cookie) => cookie.name.endsWith("-auth-token-code-verifier")),
+  ).toBe(true);
+});
