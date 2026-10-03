@@ -5,7 +5,13 @@ import { safeNextPath } from "@/lib/auth/routes";
 
 export const metadata: Metadata = { title: "Sign in" };
 
-export default async function LoginPage({ searchParams }: PageProps<"/login">) {
+// Props are typed by hand rather than with Next's generated PageProps: that
+// type exists only after `next typegen`, and CI runs lint before it.
+type LoginPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { next, error } = await searchParams;
   const nextPath = safeNextPath(typeof next === "string" ? next : null);
 
