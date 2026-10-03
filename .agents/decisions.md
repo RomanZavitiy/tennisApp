@@ -465,3 +465,24 @@ git; якщо зміниться домен (5.13) чи порт, їх треб�
 сторінка всередині публічного розділу (напр. `/offers/new`) не має збігатися з публічним
 шаблоном — `/offers/[id]` при появі описуємо так, щоб `new` не підпадав. Proxy охороняє лише
 сторінки: server actions перевіряють користувача самі (`requireUser()`, 1.5).
+
+## 2026-10-04 — Сторінка входу: форми і шаблон листа (задача 1.6)
+
+**Рішення:**
+- Форми — React Hook Form + Zod через офіційний адаптер `@hookform/resolvers`. Схема лежить у
+  `lib/validation/`, і її перевіряють і форма в браузері, і server action. Форма має `noValidate`,
+  щоб помилку показував Zod, а не вбудована валідація браузера.
+- `/auth/callback` розбирає параметри через `parseCallbackParams()` (`lib/auth/callback.ts`):
+  `code` — Google, `token_hash` + `type` (`email` / `magiclink` / `signup`) — magic link. Помилка
+  Supabase, невідомий тип чи прострочене посилання → `/login?error=link` із повідомленням, а не
+  500.
+- Шаблони листів **Confirm signup** і **Magic Link** у Supabase (Authentication → Emails)
+  посилаються на `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`. `RedirectTo` —
+  це `https://<поточний origin>/auth/callback?next=…`, який задає server action; він завжди
+  містить `?`, тому далі йде `&`. Новому користувачу Supabase шле Confirm signup, наявному —
+  Magic Link, тож міняються обидва.
+**Чому:** без адаптера довелося б писати власний resolver для Zod — той самий код, лише наш.
+Посилання з `token_hash` працює в будь-якому браузері (див. запис 1.1).
+**Наслідки:** якщо origin деплою не входить у Redirect URLs, Supabase підставить Site URL без
+`?next=…`, і посилання з листа зламається. Тому новий домен (5.13) спершу додається в Redirect
+URLs. Шаблони живуть лише в дашборді Supabase.
