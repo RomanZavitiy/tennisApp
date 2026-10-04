@@ -2,13 +2,14 @@ import { expect, test } from "./support/fixtures";
 import { createAdminClient } from "./support/supabase-admin";
 
 // Signed-in flows, using the email-free sign-in from support/fixtures.ts.
-// /profile doesn't exist yet: reaching its 404 instead of /login proves the
-// session got past the proxy.
+// A fresh user has no profile yet, so /onboarding is the protected page they
+// can reach; reaching it instead of /login proves the session got past the
+// proxy.
 
 test("a signed-in user reaches a protected page", async ({ page, signIn }) => {
-  await signIn("/profile");
+  await signIn("/onboarding");
 
-  await expect(page).toHaveURL("/profile");
+  await expect(page).toHaveURL("/onboarding");
   await expect(
     page
       .getByRole("navigation", { name: "Main" })

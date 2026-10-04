@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 // The proxy sends signed-out users from protected pages to the login page and
-// leaves public pages alone. /profile doesn't exist yet — the redirect must
-// happen before Next.js gets to render a 404.
+// leaves public pages alone.
 
 test("a protected page redirects to login and remembers where to return", async ({
   page,
