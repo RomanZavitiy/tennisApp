@@ -1,5 +1,8 @@
 import { expect, test } from "./support/fixtures";
-import { createAdminClient } from "./support/supabase-admin";
+import {
+  completeTestProfile,
+  createAdminClient,
+} from "./support/supabase-admin";
 
 // Pages in the (member) group need a finished profile. /profile is the first
 // of them; later member pages get the same check from the shared layout.
@@ -23,18 +26,10 @@ test("an onboarded player sees their profile, with age instead of birth date", a
   signIn,
 }) => {
   const user = await signIn();
-  const { error } = await createAdminClient()
-    .from("users")
-    .update({
-      name: "Ola",
-      birth_date: "1995-04-12",
-      gender: "FEMALE",
-      district: "PODGORZE_DUCHACKIE",
-      self_rated_ntrp: 4,
-      onboarding_completed_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
-  if (error) throw error;
+  await completeTestProfile(createAdminClient(), user.id, {
+    district: "PODGORZE_DUCHACKIE",
+    self_rated_ntrp: 4,
+  });
 
   await page
     .getByRole("navigation", { name: "Main" })

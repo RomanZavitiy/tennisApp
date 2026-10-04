@@ -25,6 +25,7 @@ const complete = {
   district: "KROWODRZA",
   selfRatedNtrp: 3.5,
   onboardingCompletedAt: new Date("2026-10-04T10:00:00Z"),
+  avatarPath: "user-1/photo.webp",
 };
 
 describe("requireOnboardedUser", () => {
@@ -42,6 +43,7 @@ describe("requireOnboardedUser", () => {
       gender: "FEMALE",
       district: "KROWODRZA",
       selfRatedNtrp: 3.5,
+      avatarPath: "user-1/photo.webp",
     });
   });
 

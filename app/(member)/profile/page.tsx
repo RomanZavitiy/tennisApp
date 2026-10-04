@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 
+import { AvatarUpload } from "@/components/avatar-upload";
+import { PlayerAvatar } from "@/components/player-avatar";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { ageOn, todayInKrakow } from "@/lib/validation/profile";
 
 export const metadata: Metadata = { title: "Your profile" };
 
-// The player's own profile, read-only for now. Editing comes in task 1.15,
-// the photo in 1.14. The birth date stays private: only the age is shown.
+// The player's own profile with their photo. Editing the other fields comes
+// in task 1.15. The birth date stays private: only the age is shown.
 export default async function ProfilePage() {
   const profile = await requireOnboardedUser();
   const age = ageOn(
@@ -23,7 +25,15 @@ export default async function ProfilePage() {
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{profile.name}</h1>
+      <div className="flex items-center gap-4">
+        <PlayerAvatar name={profile.name} avatarPath={profile.avatarPath} />
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {profile.name}
+        </h1>
+      </div>
+      <div className="mt-4">
+        <AvatarUpload userId={profile.id} />
+      </div>
       <dl className="mt-6 space-y-3">
         {facts.map((fact) => (
           <div key={fact.label} className="flex justify-between gap-4">
