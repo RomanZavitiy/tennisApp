@@ -1,6 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 // Supabase admin client for e2e tests only (see the sign-in decision for task
 // 1.1). It uses SUPABASE_SECRET_KEY, which bypasses RLS — so it lives under
@@ -71,4 +72,42 @@ export async function completeTestProfile(
     })
     .eq("id", id);
   if (error) throw error;
+}
+
+// A client like the browser's: publishable key, no session (role "anon").
+export function createPublicClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+}
+
+// A browser-like client signed in as a fresh test user (role
+// "authenticated"), via the same magic-link token the sign-in fixture uses.
+// The caller deletes the user afterwards with deleteTestUser.
+export async function createSignedInClient(
+  admin: ReturnType<typeof createAdminClient>,
+): Promise<{ id: string; client: SupabaseClient }> {
+  const email = `${TEST_EMAIL_PREFIX}${randomUUID()}${TEST_EMAIL_DOMAIN}`;
+  const { data: userData, error } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+  });
+  if (error) throw error;
+
+  const { data: link, error: linkError } = await admin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+  });
+  if (linkError) throw linkError;
+
+  const client = createPublicClient();
+  const { error: otpError } = await client.auth.verifyOtp({
+    type: "magiclink",
+    token_hash: link.properties.hashed_token,
+  });
+  if (otpError) throw otpError;
+
+  return { id: userData.user.id, client };
 }

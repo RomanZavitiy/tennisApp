@@ -1,13 +1,12 @@
 import { randomUUID } from "node:crypto";
 
 import { expect, test } from "@playwright/test";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import {
   createAdminClient,
+  createPublicClient,
+  createSignedInClient,
   deleteTestUser,
-  TEST_EMAIL_DOMAIN,
-  TEST_EMAIL_PREFIX,
 } from "./support/supabase-admin";
 
 // The avatars bucket's policies (task 1.13), checked against real Supabase
@@ -24,42 +23,11 @@ const PNG = Buffer.from(
   "base64",
 );
 
-function publicClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
-}
-
-// A Supabase client signed in as a fresh test user, via the same magic-link
-// token the e2e sign-in fixture uses.
-async function signedInClient(): Promise<{
-  id: string;
-  client: SupabaseClient;
-}> {
-  const email = `${TEST_EMAIL_PREFIX}${randomUUID()}${TEST_EMAIL_DOMAIN}`;
-  const { data: userData, error } = await admin.auth.admin.createUser({
-    email,
-    email_confirm: true,
-  });
-  if (error) throw error;
-  created.push(userData.user.id);
-
-  const { data: link, error: linkError } = await admin.auth.admin.generateLink({
-    type: "magiclink",
-    email,
-  });
-  if (linkError) throw linkError;
-
-  const client = publicClient();
-  const { error: otpError } = await client.auth.verifyOtp({
-    type: "magiclink",
-    token_hash: link.properties.hashed_token,
-  });
-  if (otpError) throw otpError;
-
-  return { id: userData.user.id, client };
+// A client signed in as a fresh test user, deleted after the file's tests.
+async function signedInClient() {
+  const signedIn = await createSignedInClient(admin);
+  created.push(signedIn.id);
+  return signedIn;
 }
 
 async function filesIn(folder: string) {
@@ -128,7 +96,7 @@ test("a player can't write, replace or delete in someone else's folder", async (
 });
 
 test("a signed-out visitor can't upload", async () => {
-  const { error } = await publicClient()
+  const { error } = await createPublicClient()
     .storage.from("avatars")
     .upload(`${randomUUID()}/avatar.png`, PNG, { contentType: "image/png" });
 
