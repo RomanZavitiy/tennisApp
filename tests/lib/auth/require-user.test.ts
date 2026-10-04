@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AuthRequiredError, requireUser } from "@/lib/auth/require-user";
+import {
+  AuthRequiredError,
+  getCurrentUser,
+  requireUser,
+} from "@/lib/auth/require-user";
 
 // The Supabase client is replaced: what's under test is how requireUser
 // reacts to getClaims(), not Supabase's token verification itself.
@@ -45,5 +49,29 @@ describe("requireUser", () => {
     });
 
     await expect(requireUser()).rejects.toThrow(AuthRequiredError);
+  });
+});
+
+describe("getCurrentUser", () => {
+  beforeEach(() => {
+    getClaims.mockReset();
+  });
+
+  it("returns the user when the session is valid", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { sub: "user-1", email: "player@example.com" } },
+      error: null,
+    });
+
+    await expect(getCurrentUser()).resolves.toEqual({
+      id: "user-1",
+      email: "player@example.com",
+    });
+  });
+
+  it("returns null instead of throwing without a session", async () => {
+    getClaims.mockResolvedValue({ data: null, error: null });
+
+    await expect(getCurrentUser()).resolves.toBeNull();
   });
 });

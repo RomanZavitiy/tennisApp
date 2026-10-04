@@ -18,15 +18,23 @@ export type SessionUser = {
   email: string | undefined;
 };
 
-export async function requireUser(): Promise<SessionUser> {
+// The signed-in user, or null. For UI that only changes what it shows (the
+// header); anything that touches data uses requireUser() below.
+export async function getCurrentUser(): Promise<SessionUser | null> {
   const supabase = await createSupabaseServerClient();
   // getClaims() verifies the token's signature; getSession() would trust
   // whatever the cookie says.
   const { data } = await supabase.auth.getClaims();
 
-  if (!data) {
+  return data ? { id: data.claims.sub, email: data.claims.email } : null;
+}
+
+export async function requireUser(): Promise<SessionUser> {
+  const user = await getCurrentUser();
+
+  if (!user) {
     throw new AuthRequiredError();
   }
 
-  return { id: data.claims.sub, email: data.claims.email };
+  return user;
 }
