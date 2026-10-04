@@ -3,9 +3,9 @@ import Link from "next/link";
 
 import { AvatarUpload } from "@/components/avatar-upload";
 import { PlayerAvatar } from "@/components/player-avatar";
+import { PlayerFacts } from "@/components/player-facts";
 import { buttonVariants } from "@/components/ui/button";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
-import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { ageOn, todayInKrakow } from "@/lib/validation/profile";
 
 export const metadata: Metadata = { title: "Your profile" };
@@ -19,12 +19,6 @@ export default async function ProfilePage() {
     todayInKrakow(),
   );
 
-  const facts = [
-    { label: "Age", value: String(age) },
-    { label: "District", value: DISTRICT_LABELS[profile.district] },
-    { label: "Level (NTRP)", value: profile.selfRatedNtrp.toFixed(1) },
-  ];
-
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
       <div className="flex items-center gap-4">
@@ -36,14 +30,13 @@ export default async function ProfilePage() {
       <div className="mt-4">
         <AvatarUpload userId={profile.id} />
       </div>
-      <dl className="mt-6 space-y-3">
-        {facts.map((fact) => (
-          <div key={fact.label} className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">{fact.label}</dt>
-            <dd className="font-medium">{fact.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="mt-6">
+        <PlayerFacts
+          age={age}
+          district={profile.district}
+          selfRatedNtrp={profile.selfRatedNtrp}
+        />
+      </div>
       <Link
         href="/profile/edit"
         className={buttonVariants({
