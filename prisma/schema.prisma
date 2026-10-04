@@ -44,6 +44,10 @@ model User {
   /// the starting point for the ELO rating in Epic 4.
   selfRatedNtrp         Float?    @map("self_rated_ntrp")
   onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz
+  /// Path of the profile photo in the "avatars" Storage bucket, always inside
+  /// the user's own folder: "{id}/{random}.{ext}" (task 1.14; CHECK in the
+  /// migration). Null until a photo is uploaded.
+  avatarPath            String?   @map("avatar_path") @db.VarChar(200)
 
   offers SparringOffer[]
   joins  OfferJoin[]
