@@ -1,18 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { saveAvatar } from "@/app/(member)/profile/actions";
+import { saveAvatar, updateProfile } from "@/app/(member)/profile/actions";
 
-// Session, database and Storage are replaced: what's under test is the order
-// of checks and that the old photo goes only after the new path is saved.
+// Session, database, Storage and redirect are replaced: what's under test is
+// the order of checks and what gets saved.
 const ME = "11111111-1111-4111-8111-111111111111";
 const NEW = `${ME}/new.webp`;
 const OLD = `${ME}/old.jpg`;
 
-const { findUnique, update, exists, remove } = vi.hoisted(() => ({
+const { findUnique, update, exists, remove, redirect } = vi.hoisted(() => ({
   findUnique: vi.fn(),
   update: vi.fn(),
   exists: vi.fn(),
   remove: vi.fn(),
+  redirect: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/require-user", () => ({
@@ -24,6 +25,48 @@ vi.mock("@/lib/supabase/server", () => ({
     Promise.resolve({ storage: { from: () => ({ exists, remove }) } }),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/navigation", () => ({ redirect }));
+
+describe("updateProfile", () => {
+  const valid = {
+    name: "Ola",
+    birthDate: "1995-04-12",
+    gender: "FEMALE",
+    district: "DEBNIKI",
+    selfRatedNtrp: 4,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("saves the changes, keeps the onboarding date and returns to the profile", async () => {
+    await updateProfile(valid);
+
+    expect(update).toHaveBeenCalledWith({
+      where: { id: ME },
+      data: {
+        name: "Ola",
+        birthDate: new Date("1995-04-12T00:00:00Z"),
+        gender: "FEMALE",
+        district: "DEBNIKI",
+        selfRatedNtrp: 4,
+      },
+    });
+    expect(redirect).toHaveBeenCalledWith("/profile");
+  });
+
+  it("rejects input that skipped the form's checks, without saving", async () => {
+    const result = await updateProfile({ ...valid, name: " ", gender: "X" });
+
+    expect(result.fieldErrors).toEqual({
+      name: "Enter your name.",
+      gender: "Choose your gender.",
+    });
+    expect(update).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+});
 
 describe("saveAvatar", () => {
   beforeEach(() => {

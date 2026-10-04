@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { AvatarUpload } from "@/components/avatar-upload";
 import { PlayerAvatar } from "@/components/player-avatar";
+import { buttonVariants } from "@/components/ui/button";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { ageOn, todayInKrakow } from "@/lib/validation/profile";
 
 export const metadata: Metadata = { title: "Your profile" };
 
-// The player's own profile with their photo. Editing the other fields comes
-// in task 1.15. The birth date stays private: only the age is shown.
+// The player's own profile with their photo; the other fields are edited on
+// /profile/edit. The birth date stays private: only the age is shown.
 export default async function ProfilePage() {
   const profile = await requireOnboardedUser();
   const age = ageOn(
@@ -42,6 +44,15 @@ export default async function ProfilePage() {
           </div>
         ))}
       </dl>
+      <Link
+        href="/profile/edit"
+        className={buttonVariants({
+          variant: "outline",
+          className: "mt-6 w-full",
+        })}
+      >
+        Edit profile
+      </Link>
     </main>
   );
 }

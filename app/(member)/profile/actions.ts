@@ -1,11 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
 import { AVATAR_BUCKET, avatarPathSchema } from "@/lib/profile/avatar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  profileFieldErrors,
+  profileSchema,
+  profileToUserData,
+  type SaveProfileResult,
+} from "@/lib/validation/profile";
 
 export type SaveAvatarResult = { ok: true } | { ok: false; message: string };
 
@@ -46,4 +53,25 @@ export async function saveAvatar(path: unknown): Promise<SaveAvatarResult> {
 
   revalidatePath("/profile");
   return { ok: true };
+}
+
+// Saves /profile/edit. Same schema and checks as onboarding; it only leaves
+// onboardingCompletedAt alone and returns to the profile page.
+export async function updateProfile(
+  input: unknown,
+): Promise<SaveProfileResult> {
+  const user = await requireUser();
+
+  const parsed = profileSchema.safeParse(input);
+  if (!parsed.success) {
+    return profileFieldErrors(parsed.error);
+  }
+
+  await db.user.update({
+    where: { id: user.id },
+    data: profileToUserData(parsed.data),
+  });
+
+  revalidatePath("/profile");
+  redirect("/profile");
 }
