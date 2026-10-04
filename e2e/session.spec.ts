@@ -1,4 +1,5 @@
 import { expect, test } from "./support/fixtures";
+import { createAdminClient } from "./support/supabase-admin";
 
 // Signed-in flows, using the email-free sign-in from support/fixtures.ts.
 // /profile doesn't exist yet: reaching its 404 instead of /login proves the
@@ -13,6 +14,37 @@ test("a signed-in user reaches a protected page", async ({ page, signIn }) => {
       .getByRole("navigation", { name: "Main" })
       .getByRole("button", { name: "Sign out" }),
   ).toBeVisible();
+});
+
+test("first sign-in creates one User row, signing in again adds none", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  async function rowsFor(id: string) {
+    const { count, error } = await admin
+      .from("users")
+      .select("id", { count: "exact", head: true })
+      .eq("id", id);
+    if (error) throw error;
+    return count;
+  }
+
+  const user = await signIn();
+  expect(await rowsFor(user.id)).toBe(1);
+
+  await page
+    .getByRole("navigation", { name: "Main" })
+    .getByRole("button", { name: "Sign out" })
+    .click();
+  await expect(
+    page.getByRole("navigation", { name: "Main" }).getByRole("link", {
+      name: "Sign in",
+    }),
+  ).toBeVisible();
+
+  await signIn("/", user);
+  expect(await rowsFor(user.id)).toBe(1);
 });
 
 test("Sign out ends the session", async ({ page, context, signIn }) => {

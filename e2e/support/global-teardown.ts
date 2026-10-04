@@ -1,5 +1,6 @@
 import {
   createAdminClient,
+  deleteTestUser,
   TEST_EMAIL_DOMAIN,
   TEST_EMAIL_PREFIX,
 } from "./supabase-admin";
@@ -30,6 +31,6 @@ export default async function globalTeardown() {
   );
 
   for (const user of stale) {
-    await admin.auth.admin.deleteUser(user.id);
+    await deleteTestUser(admin, user.id);
   }
 }

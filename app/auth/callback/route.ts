@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { parseCallbackParams } from "@/lib/auth/callback";
+import { ensureUserRow } from "@/lib/auth/ensure-user-row";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Turns a sign-in link (magic link or Google) into a session cookie, then
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   if (params.kind !== "invalid") {
     const supabase = await createSupabaseServerClient();
-    const { error } =
+    const { data, error } =
       params.kind === "code"
         ? await supabase.auth.exchangeCodeForSession(params.code)
         : await supabase.auth.verifyOtp({
@@ -20,7 +21,10 @@ export async function GET(request: NextRequest) {
             token_hash: params.tokenHash,
           });
 
-    if (!error) {
+    if (!error && data.user) {
+      // A database failure here surfaces as an error page rather than a
+      // signed-in user without a row.
+      await ensureUserRow(data.user.id);
       return NextResponse.redirect(new URL(params.next, origin));
     }
   }
