@@ -4,7 +4,8 @@ import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { buttonVariants } from "@/components/ui/button";
+import { signOut } from "@/app/auth/actions";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -16,7 +17,13 @@ type NavLink = { href: string; label: string };
 
 // Below the sm breakpoint the header links collapse into a slide-in sheet.
 // It closes on navigation, otherwise it would stay open over the new page.
-export function MobileNav({ links }: { links: NavLink[] }) {
+export function MobileNav({
+  links,
+  signedIn,
+}: {
+  links: NavLink[];
+  signedIn: boolean;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -49,6 +56,17 @@ export function MobileNav({ links }: { links: NavLink[] }) {
               {link.label}
             </Link>
           ))}
+          {signedIn && (
+            <form action={signOut}>
+              <Button
+                type="submit"
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                Sign out
+              </Button>
+            </form>
+          )}
         </nav>
       </SheetContent>
     </Sheet>
