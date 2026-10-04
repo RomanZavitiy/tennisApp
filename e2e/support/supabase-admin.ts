@@ -35,10 +35,17 @@ export const TEST_EMAIL_DOMAIN = "@example.com";
 // Signing in creates a row in our `users` table (task 1.9). It has no foreign
 // key to auth.users, so deleting the auth user alone would leave it behind.
 // The secret key bypasses RLS, which lets the Data API delete it.
+// Their photos (task 1.13) go too, so the bucket doesn't fill with test files.
 export async function deleteTestUser(
   admin: ReturnType<typeof createAdminClient>,
   id: string,
 ) {
+  const avatars = admin.storage.from("avatars");
+  const { data: files } = await avatars.list(id);
+  if (files?.length) {
+    await avatars.remove(files.map((file) => `${id}/${file.name}`));
+  }
+
   const { error } = await admin.from("users").delete().eq("id", id);
   if (error) throw error;
   await admin.auth.admin.deleteUser(id);
