@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { ReactNode } from "react";
 import { useForm, type FieldError } from "react-hook-form";
 
-import type { SaveProfileResult } from "@/app/onboarding/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,24 +16,34 @@ import {
   GENDER_LABELS,
   NTRP_LEVELS,
 } from "@/lib/profile/options";
-import { profileSchema, type ProfileInput } from "@/lib/validation/profile";
+import {
+  profileSchema,
+  type ProfileInput,
+  type SaveProfileResult,
+} from "@/lib/validation/profile";
 
-// The player profile form: onboarding now, profile editing in task 1.15.
+// The player profile form, shared by onboarding (empty) and /profile/edit
+// (filled in from `defaultValues`).
 // Zod checks everything in the browser first; whatever the server action
 // still rejects comes back as per-field messages.
 export function ProfileForm({
   action,
   submitLabel,
+  defaultValues,
 }: {
   action: (values: ProfileInput) => Promise<SaveProfileResult>;
   submitLabel: string;
+  defaultValues?: ProfileInput;
 }) {
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<ProfileInput>({ resolver: zodResolver(profileSchema) });
+  } = useForm<ProfileInput>({
+    resolver: zodResolver(profileSchema),
+    defaultValues,
+  });
 
   async function onSubmit(values: ProfileInput) {
     // On success the action redirects, so only failures come back.
@@ -78,7 +87,9 @@ export function ProfileForm({
         <NativeSelect
           id="gender"
           className="w-full"
-          defaultValue=""
+          // "" keeps the disabled "Choose…" selected on an empty form;
+          // without it the browser would preselect the first real option.
+          defaultValue={defaultValues?.gender ?? ""}
           {...aria("gender", errors.gender)}
           {...register("gender")}
         >
@@ -97,7 +108,7 @@ export function ProfileForm({
         <NativeSelect
           id="district"
           className="w-full"
-          defaultValue=""
+          defaultValue={defaultValues?.district ?? ""}
           {...aria("district", errors.district)}
           {...register("district")}
         >
@@ -121,7 +132,7 @@ export function ProfileForm({
         <NativeSelect
           id="selfRatedNtrp"
           className="w-full"
-          defaultValue=""
+          defaultValue={defaultValues?.selfRatedNtrp ?? ""}
           {...aria("selfRatedNtrp", errors.selfRatedNtrp)}
           {...register("selfRatedNtrp", { valueAsNumber: true })}
         >

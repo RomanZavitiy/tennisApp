@@ -57,3 +57,32 @@ export const profileSchema = z.object({
 
 export type ProfileInput = z.input<typeof profileSchema>;
 export type ProfileValues = z.output<typeof profileSchema>;
+
+// What a profile-saving server action returns when it doesn't redirect: the
+// first message per field, for the form to show next to it.
+export type SaveProfileResult = {
+  ok: false;
+  fieldErrors: Partial<Record<keyof ProfileInput, string>>;
+};
+
+export function profileFieldErrors(error: z.ZodError): SaveProfileResult {
+  const fieldErrors: SaveProfileResult["fieldErrors"] = {};
+  for (const issue of error.issues) {
+    // A request that isn't an object at all has no field to attach to; the
+    // form never sends one, so it only gets `ok: false`.
+    const field = issue.path[0];
+    if (typeof field === "string" && field in profileSchema.shape) {
+      fieldErrors[field as keyof ProfileInput] ??= issue.message;
+    }
+  }
+  return { ok: false, fieldErrors };
+}
+
+/** Validated profile values in the shape the `users` table stores them. */
+export function profileToUserData({ birthDate, ...profile }: ProfileValues) {
+  return {
+    ...profile,
+    // A date column: midnight UTC of that calendar day stores exactly it.
+    birthDate: new Date(`${birthDate}T00:00:00Z`),
+  };
+}
