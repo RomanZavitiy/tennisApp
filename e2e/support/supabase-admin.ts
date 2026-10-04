@@ -50,3 +50,25 @@ export async function deleteTestUser(
   if (error) throw error;
   await admin.auth.admin.deleteUser(id);
 }
+
+// Fills in a test user's profile as if they had finished onboarding, for
+// tests of member pages that aren't about onboarding itself.
+export async function completeTestProfile(
+  admin: ReturnType<typeof createAdminClient>,
+  id: string,
+  profile: Record<string, unknown> = {},
+) {
+  const { error } = await admin
+    .from("users")
+    .update({
+      name: "Ola",
+      birth_date: "1995-04-12",
+      gender: "FEMALE",
+      district: "KROWODRZA",
+      self_rated_ntrp: 3.5,
+      onboarding_completed_at: new Date().toISOString(),
+      ...profile,
+    })
+    .eq("id", id);
+  if (error) throw error;
+}

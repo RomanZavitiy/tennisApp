@@ -20,6 +20,7 @@ export const requireOnboardedUser = cache(async () => {
       district: true,
       selfRatedNtrp: true,
       onboardingCompletedAt: true,
+      avatarPath: true,
     },
   });
 
@@ -43,5 +44,6 @@ export const requireOnboardedUser = cache(async () => {
     gender: profile.gender,
     district: profile.district,
     selfRatedNtrp: profile.selfRatedNtrp,
+    avatarPath: profile.avatarPath,
   };
 });
