@@ -10,8 +10,8 @@
 // - Timestamps are timestamptz: stored as UTC, shown in Europe/Warsaw.
 // - Every foreign key has an index — Postgres doesn't create one for it.
 //
-// This is the skeleton only: keys, relations and statuses. Profile, club,
-// offer and result fields come with their own tasks (1.10, 2.1, 3.2, 3.10, 4.4).
+// Started as a skeleton (keys, relations, statuses); domain fields come with
+// their own tasks: profile 1.10 (done), club 2.1, offer 3.2/3.10, result 4.4.
 
 generator client {
   provider = "prisma-client"
@@ -29,6 +29,21 @@ model User {
   id        String   @id @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Profile (task 1.10). The row exists from the first sign-in (1.9), before
+  // onboarding, so every field is nullable here; the profile schema (1.11)
+  // makes them required. A CHECK in the migration guarantees that a user with
+  // onboardingCompletedAt set has all of them.
+  name                  String?   @db.VarChar(50)
+  /// Private: only the age derived from it is ever shown.
+  birthDate             DateTime? @map("birth_date") @db.Date
+  gender                Gender?
+  district              District?
+  /// Self-declared NTRP, 1.5–7.0 in steps of 0.5 (CHECK in the migration).
+  /// Halves are exact in floating point, so no Decimal is needed. Becomes
+  /// the starting point for the ELO rating in Epic 4.
+  selfRatedNtrp         Float?    @map("self_rated_ntrp")
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz
 
   offers SparringOffer[]
   joins  OfferJoin[]
@@ -104,6 +119,38 @@ model MatchResult {
   offerJoin   OfferJoin @relation(fields: [offerJoinId], references: [id], onDelete: Restrict)
 
   @@map("match_results")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+
+  @@map("gender")
+}
+
+/// The 18 official districts (dzielnice) of Kraków, I–XVIII in order.
+/// Display names with Polish letters live in code, not here.
+enum District {
+  STARE_MIASTO
+  GRZEGORZKI
+  PRADNIK_CZERWONY
+  PRADNIK_BIALY
+  KROWODRZA
+  BRONOWICE
+  ZWIERZYNIEC
+  DEBNIKI
+  LAGIEWNIKI_BOREK_FALECKI
+  SWOSZOWICE
+  PODGORZE_DUCHACKIE
+  BIEZANOW_PROKOCIM
+  PODGORZE
+  CZYZYNY
+  MISTRZEJOWICE
+  BIENCZYCE
+  WZGORZA_KRZESLAWICKIE
+  NOWA_HUTA
+
+  @@map("district")
 }
 
 /// Past offers are hidden by their start time (3.20), so there is no EXPIRED.
