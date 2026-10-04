@@ -57,7 +57,12 @@ export function MobileNav({
             </Link>
           ))}
           {signedIn && (
-            <form action={signOut}>
+            <form
+              action={signOut}
+              onSubmit={() => {
+                setOpen(false);
+              }}
+            >
               <Button
                 type="submit"
                 variant="ghost"

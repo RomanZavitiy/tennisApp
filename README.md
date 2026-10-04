@@ -115,3 +115,8 @@ pnpm test:e2e
 ```
 
 `pnpm test:e2e` сам збирає production-білд і запускає його на порту 3100.
+
+Тести із залогіненим користувачем (`e2e/session.spec.ts` та інші, що беруть `signIn` з
+`e2e/support/fixtures.ts`) входять без листа через admin API Supabase, тож потребують
+`SUPABASE_SECRET_KEY` у `.env.local`. Тестові користувачі (`e2e-…@example.com`) видаляються
+після кожного тесту.

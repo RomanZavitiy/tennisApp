@@ -8,6 +8,8 @@ const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: "e2e",
+  // Deletes test users left behind by aborted runs (task 1.18).
+  globalTeardown: "./e2e/support/global-teardown.ts",
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : "list",
