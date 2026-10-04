@@ -1,0 +1,37 @@
+import type { Metadata } from "next";
+
+import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
+import { DISTRICT_LABELS } from "@/lib/profile/options";
+import { ageOn, todayInKrakow } from "@/lib/validation/profile";
+
+export const metadata: Metadata = { title: "Your profile" };
+
+// The player's own profile, read-only for now. Editing comes in task 1.15,
+// the photo in 1.14. The birth date stays private: only the age is shown.
+export default async function ProfilePage() {
+  const profile = await requireOnboardedUser();
+  const age = ageOn(
+    profile.birthDate.toISOString().slice(0, 10),
+    todayInKrakow(),
+  );
+
+  const facts = [
+    { label: "Age", value: String(age) },
+    { label: "District", value: DISTRICT_LABELS[profile.district] },
+    { label: "Level (NTRP)", value: profile.selfRatedNtrp.toFixed(1) },
+  ];
+
+  return (
+    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+      <h1 className="text-2xl font-semibold tracking-tight">{profile.name}</h1>
+      <dl className="mt-6 space-y-3">
+        {facts.map((fact) => (
+          <div key={fact.label} className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">{fact.label}</dt>
+            <dd className="font-medium">{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </main>
+  );
+}

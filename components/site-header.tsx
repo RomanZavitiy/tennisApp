@@ -6,18 +6,20 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 
 // Routes match the ones later tasks build: /offers (Epic 3), /clubs (2.6),
-// /login (1.6). A "Profile" link joins them once the profile page exists.
+// /login (1.6). Signed-in players also get Profile.
 const NAV_LINKS = [
   { href: "/offers", label: "Sparring" },
   { href: "/clubs", label: "Courts" },
 ];
 
 const SIGN_IN = { href: "/login", label: "Sign in" };
+const PROFILE = { href: "/profile", label: "Profile" };
 
 // Reading the session here makes every page render per request instead of
 // being prerendered: the header differs for signed-in users on every page.
 export async function SiteHeader() {
   const user = await getCurrentUser();
+  const links = user ? [...NAV_LINKS, PROFILE] : NAV_LINKS;
 
   return (
     <header className="border-b">
@@ -27,7 +29,7 @@ export async function SiteHeader() {
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-1 sm:flex">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -50,7 +52,7 @@ export async function SiteHeader() {
         </nav>
 
         <MobileNav
-          links={user ? NAV_LINKS : [...NAV_LINKS, SIGN_IN]}
+          links={user ? links : [...links, SIGN_IN]}
           signedIn={Boolean(user)}
         />
       </div>
