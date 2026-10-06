@@ -3,7 +3,7 @@
 -- Safe to run again and again: every row has a fixed id, and ON CONFLICT
 -- resets an existing row's status to its seed value instead of adding a copy.
 -- No real personal data — users are bare ids, not linked to any auth account.
--- Clubs are not seeded here; Epic 2 fills them from hand-checked data.
+-- Clubs are not seeded here: `pnpm clubs:load` loads prisma/data/clubs.json.
 --
 -- Fields added by later tasks (profile, offer details, scores) get their seed
 -- values in the same PR that adds them.
