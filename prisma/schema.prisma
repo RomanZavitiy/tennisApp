@@ -11,7 +11,7 @@
 // - Every foreign key has an index — Postgres doesn't create one for it.
 //
 // Started as a skeleton (keys, relations, statuses); domain fields come with
-// their own tasks: profile 1.10 (done), club 2.1, offer 3.2/3.10, result 4.4.
+// their own tasks: profile 1.10 (done), club 2.1 (done), offer 3.2/3.10, result 4.4.
 
 generator client {
   provider = "prisma-client"
@@ -60,6 +60,30 @@ model Club {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Club fields (task 2.1). Ranges and formats are CHECKs in the migration;
+  // the club schema (2.3) validates the data file first.
+  /// Stable key from the data file: loading the file again updates the same
+  /// row instead of adding a copy (2.3). Lowercase words joined by hyphens.
+  slug       String       @unique @db.VarChar(60)
+  name       String       @db.VarChar(100)
+  address    String       @db.VarChar(200)
+  district   District
+  latitude   Float
+  longitude  Float
+  courtCount Int          @map("court_count")
+  /// Every surface the club has; at least one.
+  surfaces   Surface[]
+  indoor     IndoorCourts
+  /// Free text: prices differ by hour, season and membership.
+  priceInfo  String?      @map("price_info") @db.VarChar(300)
+  phone      String?      @db.VarChar(30)
+  websiteUrl String?      @map("website_url") @db.VarChar(500)
+  /// The club's own booking page — the app has no booking (decision 2026-09-20).
+  bookingUrl String?      @map("booking_url") @db.VarChar(500)
+  /// When the owner last checked these details at the source. Shown on the
+  /// club page so players can tell how fresh the price and phone are.
+  verifiedAt DateTime     @map("verified_at") @db.Date
 
   offers SparringOffer[]
 
@@ -155,6 +179,28 @@ enum District {
   NOWA_HUTA
 
   @@map("district")
+}
+
+/// Court surfaces. ARTIFICIAL_GRASS is sand-filled artificial grass, common
+/// in Poland. Offers (3.2) will reuse this enum.
+enum Surface {
+  CLAY
+  HARD
+  ARTIFICIAL_GRASS
+  CARPET
+  GRASS
+
+  @@map("surface")
+}
+
+/// Whether a club has covered courts, and when: some only put up a heated
+/// bubble (balon) over outdoor courts for the winter.
+enum IndoorCourts {
+  NONE
+  YEAR_ROUND
+  WINTER_BUBBLE
+
+  @@map("indoor_courts")
 }
 
 /// Past offers are hidden by their start time (3.20), so there is no EXPIRED.
