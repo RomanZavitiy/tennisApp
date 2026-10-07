@@ -1,6 +1,7 @@
 import {
   createAdminClient,
   deleteTestUser,
+  TEST_CLUB_SLUG_PREFIX,
   TEST_EMAIL_DOMAIN,
   TEST_EMAIL_PREFIX,
 } from "./supabase-admin";
@@ -33,4 +34,12 @@ export default async function globalTeardown() {
   for (const user of stale) {
     await deleteTestUser(admin, user.id);
   }
+
+  // Test clubs would show on the real map, so leftovers go the same way.
+  const { error: clubsError } = await admin
+    .from("clubs")
+    .delete()
+    .like("slug", `${TEST_CLUB_SLUG_PREFIX}%`)
+    .lt("created_at", new Date(cutoff).toISOString());
+  if (clubsError) throw clubsError;
 }
