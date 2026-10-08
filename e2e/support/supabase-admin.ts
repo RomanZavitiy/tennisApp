@@ -74,6 +74,33 @@ export async function completeTestProfile(
   if (error) throw error;
 }
 
+// Test clubs are recognizable by slug, like test users by email, so
+// global-teardown.ts can remove leftovers from an aborted run.
+export const TEST_CLUB_SLUG_PREFIX = "e2e-";
+
+// Adds a club straight to the shared database (clubs have no other write
+// path besides `pnpm clubs:load`). The caller deletes it afterwards by id.
+export async function createTestClub(
+  admin: ReturnType<typeof createAdminClient>,
+  club: { name: string; address: string; latitude: number; longitude: number },
+): Promise<string> {
+  const { data, error } = await admin
+    .from("clubs")
+    .insert({
+      ...club,
+      slug: `${TEST_CLUB_SLUG_PREFIX}${randomUUID()}`,
+      district: "STARE_MIASTO",
+      court_count: 1,
+      surfaces: ["CLAY"],
+      indoor: "NONE",
+      verified_at: new Date().toISOString().slice(0, 10),
+    })
+    .select("id")
+    .single<{ id: string }>();
+  if (error) throw error;
+  return data.id;
+}
+
 // A client like the browser's: publishable key, no session (role "anon").
 export function createPublicClient() {
   return createClient(

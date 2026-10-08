@@ -2,7 +2,8 @@
 
 import "leaflet/dist/leaflet.css";
 
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import Link from "next/link";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 import { markerIconDefault } from "./marker-icon";
 
@@ -13,6 +14,7 @@ const DEFAULT_ZOOM = 13;
 export type ClubMapMarker = {
   id: string;
   name: string;
+  address: string;
   latitude: number;
   longitude: number;
 };
@@ -45,7 +47,17 @@ export default function ClubMap({ markers }: ClubMapProps) {
           icon={markerIconDefault}
           title={marker.name}
           alt={marker.name}
-        />
+        >
+          {/* react-leaflet renders the popup through a portal, so Link keeps
+              client-side navigation. */}
+          {/* <div>, not <p>: leaflet.css gives popup paragraphs wide margins,
+              and its unlayered rules beat Tailwind's utilities. */}
+          <Popup>
+            <div className="font-semibold">{marker.name}</div>
+            <div>{marker.address}</div>
+            <Link href={`/clubs/${marker.id}`}>Club details</Link>
+          </Popup>
+        </Marker>
       ))}
     </MapContainer>
   );
