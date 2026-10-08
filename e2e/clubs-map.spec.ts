@@ -31,12 +31,14 @@ test("a club shows as a marker with its details in a popup", async ({
   const admin = createAdminClient();
   const name = `E2E Club ${randomUUID().slice(0, 8)}`;
   const address = "Rynek Główny 1, 31-042 Kraków";
-  // At the map's center, so the marker is in view without panning.
+  // Near the map's center, so the marker is in view without panning, but
+  // not on it: clubs-page.spec.ts puts its club there, and the two files run
+  // in parallel, so the markers would cover each other.
   const id = await createTestClub(admin, {
     name,
     address,
-    latitude: 50.0614,
-    longitude: 19.9366,
+    latitude: 50.0664,
+    longitude: 19.9466,
   });
 
   try {

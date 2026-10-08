@@ -3,7 +3,8 @@
 import "leaflet/dist/leaflet.css";
 
 import Link from "next/link";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 
 import { markerIconDefault } from "./marker-icon";
 
@@ -59,6 +60,24 @@ export default function ClubMap({ markers }: ClubMapProps) {
           </Popup>
         </Marker>
       ))}
+      <FitToContainer />
     </MapContainer>
   );
+}
+
+// Leaflet measures its container once, at mount, and after window resizes.
+// On phones the map starts hidden behind the List/Map switch (size 0), so it
+// has to measure again whenever its container changes size.
+function FitToContainer() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    observer.observe(map.getContainer());
+    return () => {
+      observer.disconnect();
+    };
+  }, [map]);
+  return null;
 }
