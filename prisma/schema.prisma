@@ -65,25 +65,27 @@ model Club {
   // the club schema (2.3) validates the data file first.
   /// Stable key from the data file: loading the file again updates the same
   /// row instead of adding a copy (2.3). Lowercase words joined by hyphens.
-  slug       String       @unique @db.VarChar(60)
-  name       String       @db.VarChar(100)
-  address    String       @db.VarChar(200)
-  district   District
+  slug       String        @unique @db.VarChar(60)
+  name       String        @db.VarChar(100)
+  address    String        @db.VarChar(200)
+  /// Empty for clubs just outside the city limits (Liszki, Giebułtów).
+  district   District?
   latitude   Float
   longitude  Float
-  courtCount Int          @map("court_count")
-  /// Every surface the club has; at least one.
+  courtCount Int           @map("court_count")
+  /// Every surface the club has; empty while unknown (2.11).
   surfaces   Surface[]
-  indoor     IndoorCourts
+  /// Empty while unknown (2.11).
+  indoor     IndoorCourts?
   /// Free text: prices differ by hour, season and membership.
-  priceInfo  String?      @map("price_info") @db.VarChar(300)
-  phone      String?      @db.VarChar(30)
-  websiteUrl String?      @map("website_url") @db.VarChar(500)
+  priceInfo  String?       @map("price_info") @db.VarChar(300)
+  phone      String?       @db.VarChar(30)
+  websiteUrl String?       @map("website_url") @db.VarChar(500)
   /// The club's own booking page — the app has no booking (decision 2026-09-20).
-  bookingUrl String?      @map("booking_url") @db.VarChar(500)
+  bookingUrl String?       @map("booking_url") @db.VarChar(500)
   /// When the owner last checked these details at the source. Shown on the
   /// club page so players can tell how fresh the price and phone are.
-  verifiedAt DateTime     @map("verified_at") @db.Date
+  verifiedAt DateTime      @map("verified_at") @db.Date
 
   offers SparringOffer[]
 
@@ -182,9 +184,11 @@ enum District {
 }
 
 /// Court surfaces. ARTIFICIAL_GRASS is sand-filled artificial grass, common
-/// in Poland. Offers (3.2) will reuse this enum.
+/// in Poland; ARTIFICIAL_CLAY is synthetic clay (sztuczna mączka). Offers
+/// (3.2) will reuse this enum.
 enum Surface {
   CLAY
+  ARTIFICIAL_CLAY
   HARD
   ARTIFICIAL_GRASS
   CARPET
@@ -194,9 +198,11 @@ enum Surface {
 }
 
 /// Whether a club has covered courts, and when: some only put up a heated
-/// bubble (balon) over outdoor courts for the winter.
+/// bubble (balon) over outdoor courts for the winter. PARTIAL: some courts
+/// are in a hall all year, the rest are outdoor.
 enum IndoorCourts {
   NONE
+  PARTIAL
   YEAR_ROUND
   WINTER_BUBBLE
 

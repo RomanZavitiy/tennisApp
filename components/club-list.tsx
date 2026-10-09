@@ -7,7 +7,7 @@ export type ClubListItem = {
   id: string;
   name: string;
   address: string;
-  district: District;
+  district: District | null;
 };
 
 // The clubs next to the map on /clubs; each name links to the club's page.
@@ -27,9 +27,11 @@ export function ClubList({ clubs }: { clubs: ClubListItem[] }) {
             {club.name}
           </Link>
           <p className="text-sm text-muted-foreground">{club.address}</p>
-          <p className="text-sm text-muted-foreground">
-            {DISTRICT_LABELS[club.district]}
-          </p>
+          {club.district && (
+            <p className="text-sm text-muted-foreground">
+              {DISTRICT_LABELS[club.district]}
+            </p>
+          )}
         </li>
       ))}
     </ul>

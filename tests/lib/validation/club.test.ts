@@ -64,7 +64,6 @@ describe("clubSchema", () => {
     ["longitude", 21.0122],
     ["courtCount", 0],
     ["courtCount", 2.5],
-    ["surfaces", []],
     ["surfaces", ["CLAY", "CLAY"]],
     ["surfaces", ["SAND"]],
     ["indoor", "YES"],
@@ -82,6 +81,18 @@ describe("clubSchema", () => {
 
     expect(errors).not.toEqual([]);
     expect(errors.every((error) => error.startsWith(field))).toBe(true);
+  });
+
+  it("accepts unknown district, surfaces and indoor (2.11)", () => {
+    expect(errorsFor({ district: null, surfaces: [], indoor: null })).toEqual(
+      [],
+    );
+  });
+
+  it("accepts the surface and indoor values added in 2.11", () => {
+    expect(
+      errorsFor({ surfaces: ["ARTIFICIAL_CLAY"], indoor: "PARTIAL" }),
+    ).toEqual([]);
   });
 
   it("rejects an unknown field, so a typo can't drop data", () => {
@@ -122,6 +133,8 @@ describe("parseClubFile", () => {
   });
 
   it("accepts the data file in the repo", () => {
+    // Today's real date: the file's check dates are newer than the fake one.
+    vi.useRealTimers();
     const data: unknown = JSON.parse(
       readFileSync("prisma/data/clubs.json", "utf8"),
     );
