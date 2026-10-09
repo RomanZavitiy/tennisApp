@@ -16,7 +16,7 @@ test("courts page shows the OSM map without errors", async ({ page }) => {
   // the OSM tile servers being reachable.
   await expect(page.locator("img.leaflet-tile").first()).toHaveAttribute(
     "src",
-    /^https:\/\/tile\.openstreetmap\.org\/13\//,
+    /^https:\/\/tile\.openstreetmap\.org\/\d+\//,
   );
   // OSM tile usage policy: the attribution must link to the copyright page.
   await expect(
@@ -31,9 +31,8 @@ test("a club shows as a marker with its details in a popup", async ({
   const admin = createAdminClient();
   const name = `E2E Club ${randomUUID().slice(0, 8)}`;
   const address = "Rynek Główny 1, 31-042 Kraków";
-  // Near the map's center, so the marker is in view without panning, but
-  // not on it: clubs-page.spec.ts puts its club there, and the two files run
-  // in parallel, so the markers would cover each other.
+  // Not where the other club specs put theirs: the files run in parallel,
+  // and markers on the same spot would cover each other.
   const id = await createTestClub(admin, {
     name,
     address,

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
 
 import { createAdminClient, createTestClub } from "./support/supabase-admin";
 
@@ -42,6 +42,32 @@ test("desktop shows the club list and the map side by side", async ({
   expect(listBox?.x).toBeLessThan(mapBox?.x ?? 0);
 });
 
+test("the first view shows every club", async ({ page }) => {
+  await page.goto("/clubs");
+  const map = page.locator(".leaflet-container");
+  await expect(page.getByAltText(name)).toBeVisible();
+
+  await expectAllMarkersInside(map);
+});
+
+// Each marker's tip (bottom middle, the club's point) lies inside the map.
+async function expectAllMarkersInside(map: Locator) {
+  const mapBox = await map.boundingBox();
+  if (!mapBox) throw new Error("Map has no box.");
+  const markers = await map.locator(".leaflet-marker-icon").all();
+  expect(markers.length).toBeGreaterThan(0);
+  for (const marker of markers) {
+    const box = await marker.boundingBox();
+    if (!box) throw new Error("Marker has no box.");
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height;
+    expect(x).toBeGreaterThan(mapBox.x);
+    expect(x).toBeLessThan(mapBox.x + mapBox.width);
+    expect(y).toBeGreaterThan(mapBox.y);
+    expect(y).toBeLessThan(mapBox.y + mapBox.height);
+  }
+}
+
 test.describe("on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -56,22 +82,10 @@ test.describe("on a phone", () => {
     await page.getByRole("button", { name: "Map" }).click();
     await expect(map).toBeVisible();
     await expect(link).toBeHidden();
-    // The club sits at the map's center. A map that kept the size it measured
-    // while hidden (0×0) would draw it in the top-left corner instead.
-    const marker = page.getByAltText(name);
-    await expect(marker).toBeVisible();
-    const mapBox = await map.boundingBox();
-    const markerBox = await marker.boundingBox();
-    if (!mapBox || !markerBox) throw new Error("Map or marker has no box.");
-    // The icon's tip (bottom middle) marks the point.
-    expect(
-      Math.abs(
-        markerBox.x + markerBox.width / 2 - (mapBox.x + mapBox.width / 2),
-      ),
-    ).toBeLessThan(5);
-    expect(
-      Math.abs(markerBox.y + markerBox.height - (mapBox.y + mapBox.height / 2)),
-    ).toBeLessThan(5);
+    // Every club is in the first view (2.12). A map that kept the size it
+    // measured while hidden (0×0) would fit them into nothing instead.
+    await expect(page.getByAltText(name)).toBeVisible();
+    await expectAllMarkersInside(map);
 
     await page.getByRole("button", { name: "List" }).click();
     await expect(link).toBeVisible();
