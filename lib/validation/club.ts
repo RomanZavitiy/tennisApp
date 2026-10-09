@@ -6,7 +6,9 @@ import { todayInKrakow } from "@/lib/validation/profile";
 // One club record in prisma/data/clubs.json. The loader (prisma/load-clubs.ts)
 // checks the whole file with this before writing anything. The CHECKs from
 // task 2.1 repeat the basic rules in the database; the rules only Zod has are
-// coordinates inside Kraków and no repeated surface.
+// coordinates inside Kraków and no repeated surface. A null district, a null
+// indoor and an empty surfaces list mean "unknown" or "outside the city"
+// (2.11); the pages leave them out.
 
 /** A box around the city limits, with a little margin. */
 export const KRAKOW_BOUNDS = {
@@ -29,7 +31,7 @@ export const clubSchema = z.strictObject({
     ),
   name: z.string().trim().min(1).max(100),
   address: z.string().trim().min(1).max(200),
-  district: z.enum(District),
+  district: z.enum(District).nullable(),
   latitude: z
     .number()
     .min(KRAKOW_BOUNDS.minLatitude, "Not in Kraków.")
@@ -41,12 +43,11 @@ export const clubSchema = z.strictObject({
   courtCount: z.int().min(1),
   surfaces: z
     .array(z.enum(Surface))
-    .min(1)
     .refine(
       (surfaces) => new Set(surfaces).size === surfaces.length,
       "List each surface once.",
     ),
-  indoor: z.enum(IndoorCourts),
+  indoor: z.enum(IndoorCourts).nullable(),
   priceInfo: z.string().trim().min(1).max(300).nullable(),
   phone: z.string().trim().min(1).max(30).nullable(),
   websiteUrl: httpUrl.max(500).nullable(),
