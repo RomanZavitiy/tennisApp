@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 
-import type { Marker as LeafletMarker } from "leaflet";
+import { latLngBounds, type Marker as LeafletMarker } from "leaflet";
 import Link from "next/link";
 import { type RefObject, useEffect, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
@@ -11,11 +11,14 @@ import { useClubSelection } from "@/components/club-selection";
 
 import { markerIconDefault } from "./marker-icon";
 
-// Rynek Główny: the middle of the city, so every club fits around it.
+// Rynek Główny, the middle of the city: the view while there are no clubs.
 const KRAKOW_CENTER: [number, number] = [50.0614, 19.9366];
 const DEFAULT_ZOOM = 13;
-// Close enough to see the streets around a club picked in the list.
+// Close enough to see the streets around a club picked in the list; also the
+// closest the first view gets, so a lone club isn't shown at street level.
 const SELECTED_ZOOM = 15;
+// Room around the outermost markers in the first view, so none sits on the edge.
+const FIT_PADDING: [number, number] = [32, 32];
 
 export type ClubMapMarker = {
   id: string;
@@ -36,6 +39,9 @@ export type ClubMapProps = {
 export default function ClubMap({ markers }: ClubMapProps) {
   const clubSelection = useClubSelection();
   const leafletMarkers = useRef(new Map<string, LeafletMarker>());
+  // Whether the map has its first view: all clubs fitted (2.12), or a club
+  // picked in the list before the map was ever shown (on a phone).
+  const hasViewRef = useRef(false);
 
   return (
     <MapContainer
@@ -82,8 +88,11 @@ export default function ClubMap({ markers }: ClubMapProps) {
           </Popup>
         </Marker>
       ))}
-      <FitToContainer />
-      <ShowClubPickedInList leafletMarkers={leafletMarkers} />
+      <FitToContainer markers={markers} hasViewRef={hasViewRef} />
+      <ShowClubPickedInList
+        leafletMarkers={leafletMarkers}
+        hasViewRef={hasViewRef}
+      />
     </MapContainer>
   );
 }
@@ -91,8 +100,10 @@ export default function ClubMap({ markers }: ClubMapProps) {
 // Centers the map on a club picked in the list and opens its popup.
 function ShowClubPickedInList({
   leafletMarkers,
+  hasViewRef,
 }: {
   leafletMarkers: RefObject<Map<string, LeafletMarker>>;
+  hasViewRef: RefObject<boolean>;
 }) {
   const map = useMap();
   const selection = useClubSelection()?.selection;
@@ -106,24 +117,41 @@ function ShowClubPickedInList({
     map.invalidateSize();
     map.setView(marker.getLatLng(), Math.max(map.getZoom(), SELECTED_ZOOM));
     marker.openPopup();
-  }, [map, selection, leafletMarkers]);
+    hasViewRef.current = true;
+  }, [map, selection, leafletMarkers, hasViewRef]);
 
   return null;
 }
 
 // Leaflet measures its container once, at mount, and after window resizes.
 // On phones the map starts hidden behind the List/Map switch (size 0), so it
-// has to measure again whenever its container changes size.
-function FitToContainer() {
+// has to measure again whenever its container changes size. The first time
+// it has a real size, it zooms to show every club (2.12) — not earlier: a
+// fit on a 0×0 map picks a useless zoom.
+function FitToContainer({
+  markers,
+  hasViewRef,
+}: {
+  markers: ClubMapMarker[];
+  hasViewRef: RefObject<boolean>;
+}) {
   const map = useMap();
   useEffect(() => {
+    const container = map.getContainer();
     const observer = new ResizeObserver(() => {
       map.invalidateSize();
+      if (hasViewRef.current || container.clientWidth === 0) return;
+      hasViewRef.current = true;
+      if (markers.length === 0) return;
+      map.fitBounds(
+        latLngBounds(markers.map((m) => [m.latitude, m.longitude])),
+        { padding: FIT_PADDING, maxZoom: SELECTED_ZOOM, animate: false },
+      );
     });
-    observer.observe(map.getContainer());
+    observer.observe(container);
     return () => {
       observer.disconnect();
     };
-  }, [map]);
+  }, [map, markers, hasViewRef]);
   return null;
 }

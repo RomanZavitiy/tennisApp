@@ -5,9 +5,9 @@ import { expect, type Page, test } from "@playwright/test";
 import { createAdminClient, createTestClub } from "./support/supabase-admin";
 
 // Two test clubs, named so they sort to the end of the list, below any real
-// clubs. "Far" is outside the map's first view, so the map has to move to
-// show it; "near" is in view (away from the points the other club specs use,
-// as they run in parallel).
+// clubs. "Far" is at the city's edge, so the map has to move to center it;
+// "near" is away from the points the other club specs use, as they run in
+// parallel.
 const suffix = randomUUID().slice(0, 8);
 const far = { name: `Zz E2E Far ${suffix}`, id: "" };
 const near = { name: `Zz E2E Near ${suffix}`, id: "" };
@@ -50,17 +50,18 @@ test("a club clicked in the list is shown on the map with its popup", async ({
   const map = page.locator(".leaflet-container");
   const marker = page.getByAltText(far.name);
   await expect(map).toBeVisible();
-  await expect(marker).not.toBeInViewport();
 
   await listEntry(page, far.name).click();
 
   await expect(page.locator(".leaflet-popup")).toContainText(far.name);
   await expect(marker).toBeInViewport();
+  // Centered across. Not checked down: the popup pans the map to fit above.
   const mapBox = await map.boundingBox();
   const markerBox = await marker.boundingBox();
   if (!mapBox || !markerBox) throw new Error("Map or marker has no box.");
-  expect(markerBox.x).toBeGreaterThan(mapBox.x);
-  expect(markerBox.x + markerBox.width).toBeLessThan(mapBox.x + mapBox.width);
+  expect(
+    Math.abs(markerBox.x + markerBox.width / 2 - (mapBox.x + mapBox.width / 2)),
+  ).toBeLessThan(5);
 });
 
 test("a marker click highlights its club in the list and scrolls to it", async ({
