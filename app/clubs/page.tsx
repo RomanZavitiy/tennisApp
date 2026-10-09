@@ -9,7 +9,7 @@ import { db } from "@/lib/db";
 export const metadata: Metadata = { title: "Courts" };
 
 // The club list and the map, read here and passed down as props: no client
-// fetch. Syncing the two (click in one, highlight in the other) is task 2.7.
+// fetch. ClubsView keeps the two in sync (2.7).
 export default async function ClubsPage() {
   // Read the clubs on each request, not at build time: CI builds without a
   // database, and a reloaded club file shows up without a redeploy.
