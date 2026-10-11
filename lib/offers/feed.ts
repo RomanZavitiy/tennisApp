@@ -4,10 +4,11 @@ import type {
   OfferFormat,
   Surface,
 } from "@/lib/generated/prisma/enums";
+import { feedWhere, type FeedFilters } from "@/lib/offers/feed-filters";
 import { playersNeeded } from "@/lib/offers/players-needed";
 
 // The offer feed on /offers (task 3.6): open offers that haven't started yet,
-// soonest first, one page at a time. Public, so — as for player profiles —
+// soonest first, one page at a time, narrowed by the URL filters (3.7). Public, so — as for player profiles —
 // the select names every field that leaves the database (RLS decision, 1.2).
 
 export const FEED_PAGE_SIZE = 20;
@@ -43,11 +44,12 @@ export function parsePage(value: string | string[] | undefined): number {
 
 export async function getOfferFeed(
   page: number,
+  filters: FeedFilters = {},
   now = new Date(),
 ): Promise<FeedPage> {
   const rows = await db.sparringOffer.findMany({
     // Served by the (status, starts_at) index from task 3.2.
-    where: { status: "OPEN", startsAt: { gt: now } },
+    where: feedWhere(filters, now),
     // id breaks ties, so offers at the same time keep their order between pages.
     orderBy: [{ startsAt: "asc" }, { id: "asc" }],
     skip: (page - 1) * FEED_PAGE_SIZE,

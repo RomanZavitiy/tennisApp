@@ -50,15 +50,17 @@ describe("getOfferFeed", () => {
   });
 
   it("asks only for open offers that haven't started, soonest first", async () => {
-    await getOfferFeed(1, NOW);
+    await getOfferFeed(1, {}, NOW);
 
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
-    expect(query.where).toEqual({ status: "OPEN", startsAt: { gt: NOW } });
+    expect(query.where).toEqual({
+      AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
+    });
     expect(query.orderBy).toEqual([{ startsAt: "asc" }, { id: "asc" }]);
   });
 
   it("counts only accepted joins against the free spots", async () => {
-    await getOfferFeed(1, NOW);
+    await getOfferFeed(1, {}, NOW);
 
     const query = findMany.mock.calls[0]?.[0] as {
       select: { _count: unknown };
@@ -69,7 +71,7 @@ describe("getOfferFeed", () => {
   });
 
   it("reads one page at a time, plus one row to see if there's more", async () => {
-    await getOfferFeed(3, NOW);
+    await getOfferFeed(3, {}, NOW);
 
     expect(findMany.mock.calls[0]?.[0]).toMatchObject({
       skip: 2 * FEED_PAGE_SIZE,
@@ -82,7 +84,7 @@ describe("getOfferFeed", () => {
       Array.from({ length: FEED_PAGE_SIZE + 1 }, (_, i) => row(i)),
     );
 
-    const feed = await getOfferFeed(1, NOW);
+    const feed = await getOfferFeed(1, {}, NOW);
 
     expect(feed.offers).toHaveLength(FEED_PAGE_SIZE);
     expect(feed.hasNextPage).toBe(true);
@@ -91,7 +93,7 @@ describe("getOfferFeed", () => {
   it("says there is no next page on the last one", async () => {
     findMany.mockResolvedValue([row(1), row(2)]);
 
-    const feed = await getOfferFeed(2, NOW);
+    const feed = await getOfferFeed(2, {}, NOW);
 
     expect(feed).toMatchObject({ page: 2, hasNextPage: false });
     expect(feed.offers).toHaveLength(2);
@@ -105,9 +107,22 @@ describe("getOfferFeed", () => {
       row(4, { format: "DOUBLES", hasPartner: true }),
     ]);
 
-    const feed = await getOfferFeed(1, NOW);
+    const feed = await getOfferFeed(1, {}, NOW);
 
     expect(feed.offers.map((offer) => offer.spotsLeft)).toEqual([1, 3, 2, 2]);
     expect(feed.offers[0]).not.toHaveProperty("_count");
+  });
+
+  it("narrows the query by the filters", async () => {
+    await getOfferFeed(1, { format: "DOUBLES" }, NOW);
+
+    const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(query.where).toEqual({
+      AND: [
+        { status: "OPEN" },
+        { startsAt: { gt: NOW } },
+        { format: "DOUBLES" },
+      ],
+    });
   });
 });
