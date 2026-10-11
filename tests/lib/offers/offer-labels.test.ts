@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
-import { formatLabel, levelLabel, spotsLabel } from "@/lib/offers/offer-labels";
+import {
+  formatLabel,
+  levelLabel,
+  placeLabel,
+  spotsLabel,
+} from "@/lib/offers/offer-labels";
 
 describe("offer labels", () => {
   it("name the format", () => {
@@ -39,5 +44,17 @@ describe("offer labels", () => {
     expect(formatKrakowTime(new Date("2026-12-31T23:30:00Z"))).toBe(
       "Fri 1 Jan, 00:30",
     );
+  });
+});
+
+describe("placeLabel", () => {
+  it("names the club, the district, or both", () => {
+    expect(
+      placeLabel({ club: { name: "KS Nadwiślan" }, district: "DEBNIKI" }),
+    ).toBe("KS Nadwiślan, Dębniki");
+    expect(placeLabel({ club: { name: "Kryspinów" }, district: null })).toBe(
+      "Kryspinów",
+    );
+    expect(placeLabel({ club: null, district: "PODGORZE" })).toBe("Podgórze");
   });
 });

@@ -10,6 +10,7 @@ describe("isPublicRoute", () => {
     "/clubs",
     "/clubs/abc",
     "/offers",
+    "/offers/44444444-4444-4444-8444-444444444444",
     "/players/abc",
   ])("%s is public", (path) => {
     expect(isPublicRoute(path)).toBe(true);
@@ -22,6 +23,8 @@ describe("isPublicRoute", () => {
     "/players",
     "/clubs/a/b",
     "/loginx",
+    "/offers/new",
+    "/offers/abc",
   ])("%s needs a session", (path) => {
     expect(isPublicRoute(path)).toBe(false);
   });
