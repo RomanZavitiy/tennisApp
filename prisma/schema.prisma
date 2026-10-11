@@ -108,10 +108,31 @@ model SparringOffer {
   clubId String? @map("club_id") @db.Uuid
   club   Club?   @relation(fields: [clubId], references: [id], onDelete: Restrict)
 
+  // Offer fields (task 3.2; model in decisions.md, task 3.1). Ranges and
+  // combinations are CHECKs in the migration; the offer schema (3.3)
+  // validates first. How many players an offer needs is not stored —
+  // playersNeeded() in lib/offers computes it from format and hasPartner.
+  format     OfferFormat @default(SINGLES)
+  /// Doubles only: the author brings their own partner (a mark, not an account).
+  hasPartner Boolean     @default(false) @map("has_partner")
+  /// Stored in UTC, shown in Europe/Warsaw.
+  startsAt   DateTime    @map("starts_at") @db.Timestamptz
+  /// Set together with a club or on its own; at least one of the two is set.
+  /// Empty for an offer at a club outside the city limits.
+  district   District?
+  /// Wanted NTRP level, 1.5–7.0 in steps of 0.5. Empty — any level.
+  ntrpMin    Float?      @map("ntrp_min")
+  ntrpMax    Float?      @map("ntrp_max")
+  /// Empty — any surface.
+  surface    Surface?
+  comment    String?     @db.VarChar(500)
+
   joins OfferJoin[]
 
   @@index([authorId])
   @@index([clubId])
+  /// The feed's main query: open offers by start time (3.6).
+  @@index([status, startsAt])
   @@map("sparring_offers")
 }
 
@@ -207,6 +228,13 @@ enum IndoorCourts {
   WINTER_BUBBLE
 
   @@map("indoor_courts")
+}
+
+enum OfferFormat {
+  SINGLES
+  DOUBLES
+
+  @@map("offer_format")
 }
 
 /// Past offers are hidden by their start time (3.20), so there is no EXPIRED.
