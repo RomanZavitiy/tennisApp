@@ -22,10 +22,16 @@ ON CONFLICT (id) DO UPDATE SET
   self_rated_ntrp = EXCLUDED.self_rated_ntrp,
   onboarding_completed_at = COALESCE(users.onboarding_completed_at, EXCLUDED.onboarding_completed_at);
 
--- One open offer, not tied to a club.
-INSERT INTO sparring_offers (id, author_id, status) VALUES
-  ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-00000000a11c', 'OPEN')
-ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
+-- One singles offer in Alice's district, not tied to a club. Already played
+-- (the result below), so it starts in the past and is FULL: its one place
+-- went to Bob.
+INSERT INTO sparring_offers (id, author_id, status, starts_at, district) VALUES
+  ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-00000000a11c', 'FULL',
+   now() - interval '2 days', 'KROWODRZA')
+ON CONFLICT (id) DO UPDATE SET
+  status = EXCLUDED.status,
+  starts_at = EXCLUDED.starts_at,
+  district = EXCLUDED.district;
 
 -- Bob's request to join, already accepted by Alice.
 INSERT INTO offer_joins (id, offer_id, user_id, status) VALUES
