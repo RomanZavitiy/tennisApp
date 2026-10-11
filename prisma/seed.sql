@@ -11,15 +11,17 @@
 BEGIN;
 
 -- Two onboarded players: Alice posts an offer, Bob joins it.
-INSERT INTO users (id, name, birth_date, gender, district, self_rated_ntrp, onboarding_completed_at) VALUES
-  ('00000000-0000-4000-8000-00000000a11c', 'Alice', '1995-04-12', 'FEMALE', 'KROWODRZA', 3.5, now()),
-  ('00000000-0000-4000-8000-000000000b0b', 'Bob', '1990-09-30', 'MALE', 'PODGORZE', 4.0, now())
+-- ELO is the starting one for their NTRP (4.1): 3.5 → 1400, 4.0 → 1500.
+INSERT INTO users (id, name, birth_date, gender, district, self_rated_ntrp, elo, onboarding_completed_at) VALUES
+  ('00000000-0000-4000-8000-00000000a11c', 'Alice', '1995-04-12', 'FEMALE', 'KROWODRZA', 3.5, 1400, now()),
+  ('00000000-0000-4000-8000-000000000b0b', 'Bob', '1990-09-30', 'MALE', 'PODGORZE', 4.0, 1500, now())
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   birth_date = EXCLUDED.birth_date,
   gender = EXCLUDED.gender,
   district = EXCLUDED.district,
   self_rated_ntrp = EXCLUDED.self_rated_ntrp,
+  elo = EXCLUDED.elo,
   onboarding_completed_at = COALESCE(users.onboarding_completed_at, EXCLUDED.onboarding_completed_at);
 
 -- One singles offer in Alice's district, not tied to a club. Already played

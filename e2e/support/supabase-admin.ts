@@ -3,6 +3,8 @@ import { existsSync } from "node:fs";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import { startingElo } from "../../lib/rating/starting-elo";
+
 // Supabase admin client for e2e tests only (see the sign-in decision for task
 // 1.1). It uses SUPABASE_SECRET_KEY, which bypasses RLS — so it lives under
 // e2e/, which the app never imports, and the key is never set in Vercel.
@@ -53,12 +55,15 @@ export async function deleteTestUser(
 }
 
 // Fills in a test user's profile as if they had finished onboarding, for
-// tests of member pages that aren't about onboarding itself.
+// tests of member pages that aren't about onboarding itself. The ELO is the
+// starting one for the NTRP, as onboarding sets it (4.2).
 export async function completeTestProfile(
   admin: ReturnType<typeof createAdminClient>,
   id: string,
   profile: Record<string, unknown> = {},
 ) {
+  const ntrp =
+    typeof profile.self_rated_ntrp === "number" ? profile.self_rated_ntrp : 3.5;
   const { error } = await admin
     .from("users")
     .update({
@@ -66,7 +71,8 @@ export async function completeTestProfile(
       birth_date: "1995-04-12",
       gender: "FEMALE",
       district: "KROWODRZA",
-      self_rated_ntrp: 3.5,
+      self_rated_ntrp: ntrp,
+      elo: startingElo(ntrp),
       onboarding_completed_at: new Date().toISOString(),
       ...profile,
     })

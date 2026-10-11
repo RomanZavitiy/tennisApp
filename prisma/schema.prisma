@@ -49,6 +49,14 @@ model User {
   /// migration). Null until a photo is uploaded.
   avatarPath            String?   @map("avatar_path") @db.VarChar(200)
 
+  // Rating (task 4.2). Set from selfRatedNtrp at onboarding (startingElo,
+  // 4.1) and re-set when NTRP changes, until the first confirmed match;
+  // from then on only confirmed results move it (4.8). CHECKs in the
+  // migration: positive, and set for every onboarded user.
+  elo           Int?
+  /// Confirmed matches played; 0 means the ELO is still the starting one.
+  matchesPlayed Int  @default(0) @map("matches_played")
+
   offers SparringOffer[]
   joins  OfferJoin[]
 

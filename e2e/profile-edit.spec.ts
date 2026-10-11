@@ -64,3 +64,44 @@ test("a player without a profile can't reach the edit page", async ({
 
   await expect(page).toHaveURL("/onboarding");
 });
+
+async function eloOf(id: string) {
+  const { data, error } = await createAdminClient()
+    .from("users")
+    .select("elo")
+    .eq("id", id)
+    .single<{ elo: number }>();
+  if (error) throw error;
+  return data.elo;
+}
+
+// 4.2: a new NTRP moves the ELO only until the first confirmed match.
+test("a new level re-sets the starting ELO, but not after a confirmed match", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  const user = await signIn();
+  await completeTestProfile(admin, user.id, { self_rated_ntrp: 3.5 });
+  expect(await eloOf(user.id)).toBe(1400);
+
+  await page.goto("/profile/edit");
+  await page.getByLabel("Level (NTRP)").selectOption("4.0");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page).toHaveURL("/profile");
+  expect(await eloOf(user.id)).toBe(1500);
+
+  // One confirmed match: from now on only results move the rating.
+  const { error } = await admin
+    .from("users")
+    .update({ matches_played: 1, elo: 1520 })
+    .eq("id", user.id);
+  if (error) throw error;
+
+  await page.goto("/profile/edit");
+  await page.getByLabel("Level (NTRP)").selectOption("5.0");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page).toHaveURL("/profile");
+  await expect(page.getByText("5.0")).toBeVisible();
+  expect(await eloOf(user.id)).toBe(1520);
+});

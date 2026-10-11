@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
 import { AVATAR_BUCKET, avatarPathSchema } from "@/lib/profile/avatar";
+import { startingElo } from "@/lib/rating/starting-elo";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   profileFieldErrors,
@@ -56,7 +57,9 @@ export async function saveAvatar(path: unknown): Promise<SaveAvatarResult> {
 }
 
 // Saves /profile/edit. Same schema and checks as onboarding; it only leaves
-// onboardingCompletedAt alone and returns to the profile page.
+// onboardingCompletedAt alone and returns to the profile page. A new NTRP
+// moves the ELO only while it is still the starting one (no confirmed match
+// yet, 4.2); after that only results change the rating.
 export async function updateProfile(
   input: unknown,
 ): Promise<SaveProfileResult> {
@@ -67,10 +70,16 @@ export async function updateProfile(
     return profileFieldErrors(parsed.error);
   }
 
-  await db.user.update({
-    where: { id: user.id },
-    data: profileToUserData(parsed.data),
-  });
+  await db.$transaction([
+    db.user.update({
+      where: { id: user.id },
+      data: profileToUserData(parsed.data),
+    }),
+    db.user.updateMany({
+      where: { id: user.id, matchesPlayed: 0 },
+      data: { elo: startingElo(parsed.data.selfRatedNtrp) },
+    }),
+  ]);
 
   revalidatePath("/profile");
   redirect("/profile");
