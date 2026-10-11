@@ -1,9 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { requestToJoin } from "@/app/offers/[id]/actions";
+import {
+  acceptJoin,
+  declineJoin,
+  requestToJoin,
+  withdrawJoin,
+} from "@/app/offers/[id]/actions";
 
-// Session and database are replaced: what's under test is who may ask to
-// join, which write happens, and that the answer reveals nothing else.
+// Session and database are replaced: what's under test is who may change a
+// join, which writes happen, and that the answer reveals nothing else.
 const ME = "11111111-1111-4111-8111-111111111111";
 const AUTHOR = "22222222-2222-4222-8222-222222222222";
 const OFFER = "44444444-4444-4444-8444-444444444444";
@@ -15,12 +20,19 @@ const {
   joinFindUnique,
   joinCreateMany,
   joinUpdateMany,
+  tx,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
   offerFindUnique: vi.fn(),
   joinFindUnique: vi.fn(),
   joinCreateMany: vi.fn(),
   joinUpdateMany: vi.fn(),
+  // What the status-change transaction (3.12) sees.
+  tx: {
+    $queryRaw: vi.fn(),
+    offerJoin: { findUnique: vi.fn(), update: vi.fn() },
+    sparringOffer: { findUniqueOrThrow: vi.fn(), update: vi.fn() },
+  },
 }));
 
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
@@ -32,6 +44,7 @@ vi.mock("@/lib/db", () => ({
       createMany: joinCreateMany,
       updateMany: joinUpdateMany,
     },
+    $transaction: (run: (client: typeof tx) => Promise<unknown>) => run(tx),
   },
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
@@ -164,5 +177,178 @@ describe("requestToJoin", () => {
     const result = await requestToJoin(OFFER);
 
     expect(Object.keys(result)).toEqual(["ok"]);
+  });
+});
+
+describe("accepting, declining and withdrawing", () => {
+  const PLAYER = "33333333-3333-4333-8333-333333333333";
+
+  function setUp({
+    me = AUTHOR,
+    joinStatus = "REQUESTED",
+    offer = {},
+    accepted = 0,
+  }: {
+    me?: string;
+    joinStatus?: string;
+    offer?: Record<string, unknown>;
+    accepted?: number;
+  } = {}) {
+    requireOnboardedUser.mockResolvedValue({ id: me });
+    tx.offerJoin.findUnique.mockResolvedValue({
+      offerId: OFFER,
+      userId: PLAYER,
+      offer: { authorId: AUTHOR },
+    });
+    tx.sparringOffer.findUniqueOrThrow.mockResolvedValue({
+      status: "OPEN",
+      format: "SINGLES",
+      hasPartner: false,
+      startsAt: new Date(Date.now() + 86_400_000),
+      joins: [{ status: joinStatus }],
+      _count: { joins: accepted },
+      ...offer,
+    });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("locks the offer, then accepts and fills a singles offer", async () => {
+    setUp();
+
+    await expect(acceptJoin(JOIN)).resolves.toEqual({ ok: true });
+
+    expect(tx.$queryRaw).toHaveBeenCalled();
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      tx.sparringOffer.findUniqueOrThrow.mock.invocationCallOrder[0] ?? 0,
+    );
+    expect(tx.offerJoin.update).toHaveBeenCalledWith({
+      where: { id: JOIN },
+      data: { status: "ACCEPTED" },
+    });
+    expect(tx.sparringOffer.update).toHaveBeenCalledWith({
+      where: { id: OFFER },
+      data: { status: "FULL" },
+    });
+  });
+
+  it("accepts into doubles without filling it until the last place", async () => {
+    setUp({ offer: { format: "DOUBLES" }, accepted: 1 });
+
+    await acceptJoin(JOIN);
+
+    expect(tx.offerJoin.update).toHaveBeenCalled();
+    expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["doubles", { format: "DOUBLES" }, 2],
+    ["doubles with a partner", { format: "DOUBLES", hasPartner: true }, 1],
+  ])("fills %s with its last place", async (_, offer, accepted) => {
+    setUp({ offer, accepted });
+
+    await acceptJoin(JOIN);
+
+    expect(tx.sparringOffer.update).toHaveBeenCalledWith({
+      where: { id: OFFER },
+      data: { status: "FULL" },
+    });
+  });
+
+  it.each([
+    ["singles", {}, 1],
+    ["doubles", { format: "DOUBLES" }, 3],
+    ["doubles with a partner", { format: "DOUBLES", hasPartner: true }, 2],
+  ])("won't accept anyone more into full %s", async (_, offer, accepted) => {
+    setUp({ offer: { ...offer, status: "FULL" }, accepted });
+
+    await expect(acceptJoin(JOIN)).resolves.toEqual({
+      ok: false,
+      message: "Every place in this game is taken.",
+    });
+    expect(tx.offerJoin.update).not.toHaveBeenCalled();
+  });
+
+  it("only lets the author accept or decline", async () => {
+    setUp({ me: PLAYER });
+
+    for (const action of [acceptJoin, declineJoin]) {
+      await expect(action(JOIN)).resolves.toEqual({
+        ok: false,
+        message: "This request doesn't exist.",
+      });
+    }
+    expect(tx.$queryRaw).not.toHaveBeenCalled();
+    expect(tx.offerJoin.update).not.toHaveBeenCalled();
+  });
+
+  it("only lets the player withdraw their own request", async () => {
+    setUp({ me: ME });
+
+    await expect(withdrawJoin(JOIN)).resolves.toEqual({
+      ok: false,
+      message: "This request doesn't exist.",
+    });
+    expect(tx.offerJoin.update).not.toHaveBeenCalled();
+  });
+
+  it("declines a request and leaves the offer as it is", async () => {
+    setUp();
+
+    await expect(declineJoin(JOIN)).resolves.toEqual({ ok: true });
+
+    expect(tx.offerJoin.update).toHaveBeenCalledWith({
+      where: { id: JOIN },
+      data: { status: "DECLINED" },
+    });
+    expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+  });
+
+  it("reopens a full offer when an accepted player withdraws", async () => {
+    setUp({
+      me: PLAYER,
+      joinStatus: "ACCEPTED",
+      offer: { status: "FULL" },
+      accepted: 1,
+    });
+
+    await expect(withdrawJoin(JOIN)).resolves.toEqual({ ok: true });
+
+    expect(tx.offerJoin.update).toHaveBeenCalledWith({
+      where: { id: JOIN },
+      data: { status: "WITHDRAWN" },
+    });
+    expect(tx.sparringOffer.update).toHaveBeenCalledWith({
+      where: { id: OFFER },
+      data: { status: "OPEN" },
+    });
+  });
+
+  it("refuses a change the status no longer allows, read under the lock", async () => {
+    // Another tab declined it after the page loaded.
+    setUp({ joinStatus: "DECLINED" });
+
+    await expect(acceptJoin(JOIN)).resolves.toEqual({
+      ok: false,
+      message: "This request can't be changed any more.",
+    });
+    expect(tx.offerJoin.update).not.toHaveBeenCalled();
+  });
+
+  it("treats a bad or missing join id as a missing request", async () => {
+    setUp();
+    await expect(acceptJoin("nope")).resolves.toEqual({
+      ok: false,
+      message: "This request doesn't exist.",
+    });
+
+    tx.offerJoin.findUnique.mockResolvedValue(null);
+    await expect(acceptJoin(JOIN)).resolves.toEqual({
+      ok: false,
+      message: "This request doesn't exist.",
+    });
+    expect(tx.offerJoin.update).not.toHaveBeenCalled();
   });
 });
