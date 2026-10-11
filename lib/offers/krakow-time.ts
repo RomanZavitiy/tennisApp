@@ -45,3 +45,18 @@ export function krakowLocalToDate(local: string): Date | null {
   }
   return null;
 }
+
+const krakowDisplay = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/Warsaw",
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** How an offer's start reads on the page, in Kraków time: "Tue 20 Oct, 18:00". */
+export function formatKrakowTime(date: Date): string {
+  return krakowDisplay.format(date);
+}
