@@ -5,6 +5,7 @@ import { connection } from "next/server";
 
 import {
   acceptJoin,
+  cancelOffer,
   declineJoin,
   requestToJoin,
   withdrawJoin,
@@ -13,6 +14,7 @@ import { OfferActionButton } from "@/components/offer-action-button";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
+import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
 import {
@@ -131,9 +133,11 @@ function PlayerView({
     return (
       <div className="space-y-3">
         <p className="font-medium">
-          {viewerJoin.status === "ACCEPTED"
-            ? "You're in. See you on court!"
-            : "Request sent. The author will answer soon."}
+          {offer.status === "CANCELLED"
+            ? "The author has cancelled this game."
+            : viewerJoin.status === "ACCEPTED"
+              ? "You're in. See you on court!"
+              : "Request sent. The author will answer soon."}
         </p>
         {offer.status !== "CANCELLED" && offer.startsAt > new Date() && (
           <OfferActionButton
@@ -233,6 +237,15 @@ function AuthorView({
           </ul>
         )}
       </div>
+      {canCancelOffer(details.offer, new Date()) && (
+        <OfferActionButton
+          action={cancelOffer.bind(null, details.offer.id)}
+          label="Cancel offer"
+          confirmLabel="Yes, cancel it"
+          pendingLabel="Cancelling…"
+          variant="outline"
+        />
+      )}
     </div>
   );
 }

@@ -97,3 +97,47 @@ test("an unknown offer is a 404", async ({ page }) => {
 
   expect(response?.status()).toBe(404);
 });
+
+test("the author cancels a full offer; it leaves the feed and the player sees it cancelled", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  const authorName = `E2E Cancel ${randomUUID().slice(0, 8)}`;
+  const author = await signIn();
+  await completeTestProfile(admin, author.id, { name: authorName });
+  const player = await signIn();
+  await completeTestProfile(admin, player.id, { name: "Player" });
+
+  // A singles that the player is already in.
+  const id = await createOffer(author.id);
+  const { error } = await admin
+    .from("offer_joins")
+    .insert({ offer_id: id, user_id: player.id, status: "ACCEPTED" });
+  if (error) throw error;
+  const { error: fullError } = await admin
+    .from("sparring_offers")
+    .update({ status: "FULL" })
+    .eq("id", id);
+  if (fullError) throw fullError;
+
+  await signIn(`/offers/${id}`, author);
+  await page.getByRole("button", { name: "Cancel offer" }).click();
+  // The first click only asks to confirm.
+  await page.getByRole("button", { name: "Yes, cancel it" }).click();
+  await expect(page.getByText("Cancelled", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Cancel offer" })).toHaveCount(
+    0,
+  );
+
+  await page.goto("/offers");
+  await expect(
+    page.getByRole("listitem").filter({ hasText: `by ${authorName}` }),
+  ).toHaveCount(0);
+
+  await signIn(`/offers/${id}`, player);
+  await expect(
+    page.getByText("The author has cancelled this game."),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Withdraw" })).toHaveCount(0);
+});

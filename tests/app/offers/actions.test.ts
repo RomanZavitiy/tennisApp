@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   acceptJoin,
+  cancelOffer,
   declineJoin,
   requestToJoin,
   withdrawJoin,
@@ -31,7 +32,11 @@ const {
   tx: {
     $queryRaw: vi.fn(),
     offerJoin: { findUnique: vi.fn(), update: vi.fn() },
-    sparringOffer: { findUniqueOrThrow: vi.fn(), update: vi.fn() },
+    sparringOffer: {
+      findFirst: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      update: vi.fn(),
+    },
   },
 }));
 
@@ -350,5 +355,76 @@ describe("accepting, declining and withdrawing", () => {
       message: "This request doesn't exist.",
     });
     expect(tx.offerJoin.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("cancelOffer", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireOnboardedUser.mockResolvedValue({ id: AUTHOR });
+    tx.sparringOffer.findFirst.mockResolvedValue({
+      status: "FULL",
+      startsAt: new Date(Date.now() + 86_400_000),
+    });
+  });
+
+  it("locks and cancels the author's upcoming offer", async () => {
+    await expect(cancelOffer(OFFER)).resolves.toEqual({ ok: true });
+
+    expect(tx.$queryRaw).toHaveBeenCalled();
+    expect(tx.sparringOffer.findFirst).toHaveBeenCalledWith({
+      where: { id: OFFER, authorId: AUTHOR },
+      select: { status: true, startsAt: true },
+    });
+    expect(tx.sparringOffer.update).toHaveBeenCalledWith({
+      where: { id: OFFER },
+      data: { status: "CANCELLED" },
+    });
+    // Joins keep their status: accepted players see the game as cancelled.
+    expect(tx.offerJoin.update).not.toHaveBeenCalled();
+  });
+
+  it("treats someone else's offer as missing", async () => {
+    requireOnboardedUser.mockResolvedValue({ id: ME });
+    tx.sparringOffer.findFirst.mockResolvedValue(null);
+
+    await expect(cancelOffer(OFFER)).resolves.toEqual({
+      ok: false,
+      message: "This offer doesn't exist.",
+    });
+    expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      "already cancelled",
+      { status: "CANCELLED", startsAt: new Date(Date.now() + 86_400_000) },
+      "This offer is already cancelled.",
+    ],
+    [
+      "started",
+      { status: "OPEN", startsAt: new Date(Date.now() - 60_000) },
+      "This game has already started.",
+    ],
+  ])("refuses an offer that has %s", async (_, offer, message) => {
+    tx.sparringOffer.findFirst.mockResolvedValue(offer);
+
+    await expect(cancelOffer(OFFER)).resolves.toEqual({ ok: false, message });
+    expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+  });
+
+  it("refuses a request without a session", async () => {
+    requireOnboardedUser.mockRejectedValue(new Error("NEXT_REDIRECT"));
+
+    await expect(cancelOffer(OFFER)).rejects.toThrow("NEXT_REDIRECT");
+    expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+  });
+
+  it("treats a bad id as a missing offer", async () => {
+    await expect(cancelOffer("nope")).resolves.toEqual({
+      ok: false,
+      message: "This offer doesn't exist.",
+    });
+    expect(tx.$queryRaw).not.toHaveBeenCalled();
   });
 });

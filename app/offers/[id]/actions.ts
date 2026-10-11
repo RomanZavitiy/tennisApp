@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
 import {
   ACTION_ACTOR,
@@ -188,6 +189,54 @@ async function changeJoin(
   }
   // The offer's page and the feed's free places both change.
   revalidatePath(`/offers/${result.offerId}`);
+  revalidatePath("/offers");
+  return { ok: true };
+}
+
+/**
+ * The author cancels their offer (3.14). Joins keep their status, so accepted
+ * players still find it among their games and see it cancelled. The offer row
+ * is locked like in changeJoin: an "accept" racing the cancel runs before or
+ * after it, never on a half-cancelled offer.
+ */
+export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
+  const author = await requireOnboardedUser();
+
+  const id = z.uuid().safeParse(offerId);
+  if (!id.success) {
+    return { ok: false, message: NOT_FOUND };
+  }
+
+  const result = await db.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT 1 FROM sparring_offers WHERE id = ${id.data}::uuid FOR UPDATE`;
+    // The author is part of the lookup: someone else's offer looks missing.
+    const offer = await tx.sparringOffer.findFirst({
+      where: { id: id.data, authorId: author.id },
+      select: { status: true, startsAt: true },
+    });
+    if (!offer) {
+      return { ok: false as const, message: NOT_FOUND };
+    }
+    if (!canCancelOffer(offer, new Date())) {
+      return {
+        ok: false as const,
+        message:
+          offer.status === "CANCELLED"
+            ? "This offer is already cancelled."
+            : "This game has already started.",
+      };
+    }
+    await tx.sparringOffer.update({
+      where: { id: id.data },
+      data: { status: "CANCELLED" },
+    });
+    return { ok: true as const };
+  });
+
+  if (!result.ok) {
+    return result;
+  }
+  revalidatePath(`/offers/${id.data}`);
   revalidatePath("/offers");
   return { ok: true };
 }
