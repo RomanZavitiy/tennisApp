@@ -9,8 +9,8 @@ import {
   createTestClub,
 } from "./support/supabase-admin";
 
-// /offers/new posts a sparring offer (task 3.5). Seeing it in the feed is
-// checked once the feed exists (3.6); here the saved row is the proof.
+// /offers/new posts a sparring offer (task 3.5); the saved row and the feed
+// (3.6) are the proof.
 const clubName = `E2E Offer Club ${randomUUID().slice(0, 8)}`;
 let admin: ReturnType<typeof createAdminClient>;
 let clubId: string;
@@ -34,7 +34,8 @@ test.afterAll(async () => {
 
 test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   const user = await signIn();
-  await completeTestProfile(admin, user.id, { district: "PODGORZE" });
+  const name = `E2E Offer ${randomUUID().slice(0, 8)}`;
+  await completeTestProfile(admin, user.id, { name, district: "PODGORZE" });
   // Three days ahead, 18:00 Kraków time.
   const day = toKrakowLocal(new Date(Date.now() + 3 * 86_400_000)).slice(0, 10);
   const startsAt = `${day}T18:00`;
@@ -85,6 +86,12 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
     comment: "Evening doubles, balls on me.",
   });
   expect(toKrakowLocal(new Date(String(data.starts_at)))).toBe(startsAt);
+
+  await page.goto("/offers");
+  const card = page.getByRole("listitem").filter({ hasText: `by ${name}` });
+  await expect(card).toContainText("Doubles · has a partner");
+  await expect(card).toContainText("2 spots left");
+  await expect(card).toContainText(clubName);
 });
 
 test("an incomplete offer stays on the form with messages", async ({
