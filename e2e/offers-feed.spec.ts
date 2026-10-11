@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import { krakowLocalToDate, toKrakowLocal } from "../lib/offers/krakow-time";
+
 import { expect, test } from "./support/fixtures";
 import {
   completeTestProfile,
@@ -68,4 +70,81 @@ test("a page past the end says there's nothing more", async ({ page }) => {
 
   await expect(page.getByText("No more offers.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Previous" })).toBeVisible();
+});
+
+/** 18:00 Kraków time, `days` from today, as an ISO string for the database. */
+function daysAhead(days: number): { day: string; iso: string } {
+  const day = toKrakowLocal(new Date(Date.now() + days * 86_400_000)).slice(
+    0,
+    10,
+  );
+  return { day, iso: krakowLocalToDate(`${day}T18:00`)?.toISOString() ?? "" };
+}
+
+test("filters narrow the feed, live in the URL and work with back", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  const author = await signIn();
+  const name = `E2E Filter ${randomUUID().slice(0, 8)}`;
+  await completeTestProfile(admin, author.id, { name });
+
+  const first = daysAhead(1);
+  const second = daysAhead(2);
+  const { error } = await admin.from("sparring_offers").insert(
+    [
+      // Singles in Krowodrza for NTRP 3.0–4.0, tomorrow.
+      {
+        author_id: author.id,
+        starts_at: first.iso,
+        district: "KROWODRZA",
+        ntrp_min: 3,
+        ntrp_max: 4,
+      },
+      // Doubles in Podgórze for any level, the day after.
+      {
+        author_id: author.id,
+        starts_at: second.iso,
+        district: "PODGORZE",
+        format: "DOUBLES",
+      },
+    ],
+    { defaultToNull: false },
+  );
+  if (error) throw error;
+
+  const mine = page.getByRole("listitem").filter({ hasText: `by ${name}` });
+  const filters = page.getByRole("form", { name: "Filter offers" });
+
+  await page.goto("/offers");
+  await expect(mine).toHaveCount(2);
+
+  await filters.getByLabel("District").selectOption("Podgórze");
+  await filters.getByRole("button", { name: "Filter" }).click();
+  await expect(page).toHaveURL(/[?&]district=PODGORZE/);
+  await expect(mine).toHaveCount(1);
+  await expect(mine).toContainText("Doubles");
+
+  // Back returns to the unfiltered feed.
+  await page.goBack();
+  await expect(page).toHaveURL("/offers");
+  await expect(mine).toHaveCount(2);
+
+  // A level above the singles' range leaves only the any-level doubles.
+  await filters.getByLabel("My level (NTRP)").selectOption("4.5");
+  await filters.getByRole("button", { name: "Filter" }).click();
+  await expect(page).toHaveURL(/[?&]ntrp=4\.5/);
+  await expect(mine).toHaveCount(1);
+  await expect(mine).toContainText("Doubles");
+
+  // A shared link with filters opens the same feed; Clear removes them.
+  await page.goto(`/offers?date=${first.day}&format=SINGLES`);
+  await expect(filters.getByLabel("Format")).toHaveValue("SINGLES");
+  await expect(mine).toHaveCount(1);
+  await expect(mine).toContainText("Singles");
+  await page.getByRole("link", { name: "Clear" }).click();
+  await expect(page).toHaveURL("/offers");
+  await expect(filters.getByLabel("Format")).toHaveValue("");
+  await expect(mine).toHaveCount(2);
 });
