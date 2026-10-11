@@ -100,3 +100,21 @@ export const offerSchema = z
 
 export type OfferInput = z.input<typeof offerSchema>;
 export type OfferValues = z.output<typeof offerSchema>;
+
+// What createOffer returns when it doesn't redirect: the first message per
+// field, for the form to show next to it (same shape as the profile form's).
+export type CreateOfferResult = {
+  ok: false;
+  fieldErrors: Partial<Record<keyof OfferInput, string>>;
+};
+
+export function offerFieldErrors(error: z.ZodError): CreateOfferResult {
+  const fieldErrors: CreateOfferResult["fieldErrors"] = {};
+  for (const issue of error.issues) {
+    const field = issue.path[0];
+    if (typeof field === "string" && field in offerSchema.shape) {
+      fieldErrors[field as keyof OfferInput] ??= issue.message;
+    }
+  }
+  return { ok: false, fieldErrors };
+}
