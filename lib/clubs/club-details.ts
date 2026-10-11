@@ -1,20 +1,15 @@
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import type { IndoorCourts, Surface } from "@/lib/generated/prisma/enums";
+import type { IndoorCourts } from "@/lib/generated/prisma/enums";
 
 // What /clubs/[id] shows about a club (task 2.8), and how its enum values
 // read on the page. `Record<…, string>` makes the compiler insist on a label
 // for every enum value, so a value added to the schema can't go unlabelled.
 
-export const SURFACE_LABELS: Record<Surface, string> = {
-  CLAY: "Clay",
-  ARTIFICIAL_CLAY: "Artificial clay",
-  HARD: "Hard",
-  ARTIFICIAL_GRASS: "Artificial grass",
-  CARPET: "Carpet",
-  GRASS: "Grass",
-};
+// Surface names also label the offer form (3.5), a client component, so they
+// live in a module that doesn't import the database.
+export { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
 
 export const INDOOR_LABELS: Record<IndoorCourts, string> = {
   NONE: "Outdoor only",
