@@ -1,4 +1,5 @@
-import type { OfferFormat } from "@/lib/generated/prisma/enums";
+import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import { DISTRICT_LABELS } from "@/lib/profile/options";
 
 // How an offer's facts read on its card (3.6) and, later, its page (3.13).
 
@@ -36,4 +37,14 @@ export function levelLabel(
     return `NTRP up to ${ntrpMax.toFixed(1)}`;
   }
   return "Any level";
+}
+
+/** "Club name, District", or whichever of the two the offer has. */
+export function placeLabel(offer: {
+  club: { name: string } | null;
+  district: District | null;
+}): string {
+  return [offer.club?.name, offer.district && DISTRICT_LABELS[offer.district]]
+    .filter(Boolean)
+    .join(", ");
 }

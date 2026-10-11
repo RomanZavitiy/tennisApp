@@ -11,6 +11,8 @@ const PUBLIC_ROUTES = [
   /^\/auth\/.+$/,
   /^\/clubs(\/[^/]+)?$/,
   /^\/offers$/,
+  // Only a UUID, so /offers/new (members only) never matches.
+  /^\/offers\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
   /^\/players\/[^/]+$/,
 ];
 
