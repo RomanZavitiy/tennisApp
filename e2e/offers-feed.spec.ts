@@ -8,7 +8,9 @@ import {
   createAdminClient,
 } from "./support/supabase-admin";
 
-// /offers lists open offers that haven't started yet (task 3.6). The
+// /offers lists open offers that haven't started yet (task 3.6), ranked by
+// ELO closeness for a signed-in viewer and excluding that viewer's own
+// offers (task 3.9); a guest sees them by date, nothing excluded. The
 // database is shared, so the test finds its own offers by the author's
 // unique name rather than counting cards.
 
@@ -54,6 +56,8 @@ test("the feed shows open upcoming offers only, with format and spots left", asy
     { defaultToNull: false },
   );
   if (error) throw error;
+  // Viewed as a guest: ranking (3.9) only changes a signed-in viewer's order.
+  await page.context().clearCookies();
 
   await page.goto("/offers");
 
@@ -113,6 +117,8 @@ test("filters narrow the feed, live in the URL and work with back", async ({
     { defaultToNull: false },
   );
   if (error) throw error;
+  // Viewed as a guest: ranking (3.9) only changes a signed-in viewer's order.
+  await page.context().clearCookies();
 
   const mine = page.getByRole("listitem").filter({ hasText: `by ${name}` });
   const filters = page.getByRole("form", { name: "Filter offers" });
@@ -147,4 +153,41 @@ test("filters narrow the feed, live in the URL and work with back", async ({
   await expect(page).toHaveURL("/offers");
   await expect(filters.getByLabel("Format")).toHaveValue("");
   await expect(mine).toHaveCount(2);
+});
+
+test("a signed-in viewer sees others' offers ranked by ELO, not their own", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  const soon = new Date(Date.now() + 2 * HOUR).toISOString();
+
+  const other = await signIn();
+  const otherName = `E2E Other ${randomUUID().slice(0, 8)}`;
+  await completeTestProfile(admin, other.id, { name: otherName });
+  const { error: otherError } = await admin
+    .from("sparring_offers")
+    .insert([{ author_id: other.id, starts_at: soon, district: "PODGORZE" }], {
+      defaultToNull: false,
+    });
+  if (otherError) throw otherError;
+
+  const viewer = await signIn();
+  const viewerName = `E2E Viewer ${randomUUID().slice(0, 8)}`;
+  await completeTestProfile(admin, viewer.id, { name: viewerName });
+  const { error: viewerError } = await admin
+    .from("sparring_offers")
+    .insert([{ author_id: viewer.id, starts_at: soon, district: "PODGORZE" }], {
+      defaultToNull: false,
+    });
+  if (viewerError) throw viewerError;
+
+  await page.goto("/offers");
+
+  await expect(
+    page.getByRole("listitem").filter({ hasText: `by ${otherName}` }),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("listitem").filter({ hasText: `by ${viewerName}` }),
+  ).toHaveCount(0);
 });
