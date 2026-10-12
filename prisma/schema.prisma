@@ -57,8 +57,9 @@ model User {
   /// Confirmed matches played; 0 means the ELO is still the starting one.
   matchesPlayed Int  @default(0) @map("matches_played")
 
-  offers SparringOffer[]
-  joins  OfferJoin[]
+  offers       SparringOffer[]
+  joins        OfferJoin[]
+  sentMessages Message[]
 
   @@map("users")
 }
@@ -135,7 +136,9 @@ model SparringOffer {
   surface    Surface?
   comment    String?     @db.VarChar(500)
 
-  joins OfferJoin[]
+  joins    OfferJoin[]
+  /// The group thread for a doubles offer (task 3.21): author + accepted players.
+  messages Message[]
 
   @@index([authorId])
   @@index([clubId])
@@ -157,11 +160,41 @@ model OfferJoin {
   userId  String        @map("user_id") @db.Uuid
   user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  result MatchResult?
+  result   MatchResult?
+  /// The private thread for this join (task 3.15): author <-> this player.
+  messages Message[]
 
   @@unique([offerId, userId])
   @@index([userId])
   @@map("offer_joins")
+}
+
+/// A chat message, in one of two threads (decision 3.1): private, on a join
+/// (author <-> that player), or group, on a doubles offer (author + accepted
+/// players, task 3.21). Exactly one of offerJoinId/offerId is set (CHECK).
+/// Realtime reads these directly with the user's own session (RLS below),
+/// writes go through the server action (3.16).
+model Message {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  senderId String @map("sender_id") @db.Uuid
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  offerJoinId String?    @map("offer_join_id") @db.Uuid
+  offerJoin   OfferJoin? @relation(fields: [offerJoinId], references: [id], onDelete: Cascade)
+
+  offerId String?        @map("offer_id") @db.Uuid
+  offer   SparringOffer? @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  /// The real, shorter limit a sender can type is a Zod schema's job (3.16);
+  /// this is just an outer bound the database enforces regardless of caller.
+  content String @db.VarChar(2000)
+
+  @@index([senderId])
+  @@index([offerJoinId])
+  @@index([offerId])
+  @@map("messages")
 }
 
 /// The result of a singles match played through an accepted join (Epic 4).
