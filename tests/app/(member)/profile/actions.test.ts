@@ -8,18 +8,27 @@ const ME = "11111111-1111-4111-8111-111111111111";
 const NEW = `${ME}/new.webp`;
 const OLD = `${ME}/old.jpg`;
 
-const { findUnique, update, exists, remove, redirect } = vi.hoisted(() => ({
-  findUnique: vi.fn(),
-  update: vi.fn(),
-  exists: vi.fn(),
-  remove: vi.fn(),
-  redirect: vi.fn(),
-}));
+const { findUnique, update, updateMany, exists, remove, redirect } = vi.hoisted(
+  () => ({
+    findUnique: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+    exists: vi.fn(),
+    remove: vi.fn(),
+    redirect: vi.fn(),
+  }),
+);
 
 vi.mock("@/lib/auth/require-user", () => ({
   requireUser: () => Promise.resolve({ id: ME, email: undefined }),
 }));
-vi.mock("@/lib/db", () => ({ db: { user: { findUnique, update } } }));
+vi.mock("@/lib/db", () => ({
+  db: {
+    user: { findUnique, update, updateMany },
+    // The array form: the calls above have already run, in order.
+    $transaction: (writes: unknown[]) => Promise.all(writes),
+  },
+}));
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: () =>
     Promise.resolve({ storage: { from: () => ({ exists, remove }) } }),
@@ -56,6 +65,18 @@ describe("updateProfile", () => {
     expect(redirect).toHaveBeenCalledWith("/profile");
   });
 
+  it("re-sets the ELO from the new NTRP only while no match is confirmed", async () => {
+    await updateProfile(valid);
+
+    // The database applies it only to a player with matchesPlayed = 0, so
+    // after the first confirmed match a new NTRP leaves the ELO alone.
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: ME, matchesPlayed: 0 },
+      data: { elo: 1500 },
+    });
+    expect(update.mock.calls[0]?.[0]).not.toHaveProperty("data.elo");
+  });
+
   it("rejects input that skipped the form's checks, without saving", async () => {
     const result = await updateProfile({ ...valid, name: " ", gender: "X" });
 
@@ -64,6 +85,7 @@ describe("updateProfile", () => {
       gender: "Choose your gender.",
     });
     expect(update).not.toHaveBeenCalled();
+    expect(updateMany).not.toHaveBeenCalled();
     expect(redirect).not.toHaveBeenCalled();
   });
 });

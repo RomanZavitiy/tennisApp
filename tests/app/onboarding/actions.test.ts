@@ -15,7 +15,7 @@ vi.mock("@/lib/auth/require-user", async (importOriginal) => ({
   ...(await importOriginal<object>()),
   requireUser,
 }));
-vi.mock("@/lib/db", () => ({ db: { user: { update } } }));
+vi.mock("@/lib/db", () => ({ db: { user: { updateMany: update } } }));
 vi.mock("next/navigation", () => ({ redirect }));
 
 const valid = {
@@ -39,17 +39,19 @@ describe("completeOnboarding", () => {
     vi.useRealTimers();
   });
 
-  it("saves a valid profile, marks onboarding done and goes home", async () => {
+  it("saves a valid profile with its starting ELO, marks onboarding done and goes home", async () => {
     await completeOnboarding({ ...valid, name: "  Ola " });
 
     expect(update).toHaveBeenCalledWith({
-      where: { id: "user-1" },
+      // Only a first onboarding writes: a repeat can't reset the rating.
+      where: { id: "user-1", onboardingCompletedAt: null },
       data: {
         name: "Ola",
         birthDate: new Date("1995-04-12T00:00:00Z"),
         gender: "FEMALE",
         district: "KROWODRZA",
         selfRatedNtrp: 3.5,
+        elo: 1400,
         onboardingCompletedAt: new Date("2026-10-04T10:00:00Z"),
       },
     });
