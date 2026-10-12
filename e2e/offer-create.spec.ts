@@ -87,6 +87,9 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   });
   expect(toKrakowLocal(new Date(String(data.starts_at)))).toBe(startsAt);
 
+  // A signed-in viewer's own offers don't show as "matches" (task 3.9); view
+  // the feed as a guest to check how the new offer itself is displayed.
+  await page.context().clearCookies();
   await page.goto("/offers");
   const card = page.getByRole("listitem").filter({ hasText: `by ${name}` });
   await expect(card).toContainText("Doubles · has a partner");

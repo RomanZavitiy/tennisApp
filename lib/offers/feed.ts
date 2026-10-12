@@ -4,12 +4,19 @@ import type {
   OfferFormat,
   Surface,
 } from "@/lib/generated/prisma/enums";
+import { rankByEloCloseness } from "@/lib/matching/elo-rank";
 import { feedWhere, type FeedFilters } from "@/lib/offers/feed-filters";
 import { playersNeeded } from "@/lib/offers/players-needed";
 
 // The offer feed on /offers (task 3.6): open offers that haven't started yet,
-// soonest first, one page at a time, narrowed by the URL filters (3.7). Public, so — as for player profiles —
+// narrowed by the URL filters (3.7), then ranked — closest ELO first for a
+// signed-in viewer, soonest first for a guest (task 3.9, lib/matching). Public, so — as for player profiles —
 // the select names every field that leaves the database (RLS decision, 1.2).
+//
+// Ranking a page correctly needs the whole filtered list, not just one page
+// of it, so this reads every matching offer rather than paging in the
+// database — the feed's dataset (a single city's open offers) stays small
+// enough for that, same assumption as the unpaginated club list (2.5).
 
 export const FEED_PAGE_SIZE = 20;
 
@@ -45,16 +52,23 @@ export function parsePage(value: string | string[] | undefined): number {
 export async function getOfferFeed(
   page: number,
   filters: FeedFilters = {},
+  viewerId: string | null = null,
   now = new Date(),
 ): Promise<FeedPage> {
+  const viewer = viewerId
+    ? await db.user.findUnique({
+        where: { id: viewerId },
+        select: { elo: true },
+      })
+    : null;
+
   const rows = await db.sparringOffer.findMany({
     // Served by the (status, starts_at) index from task 3.2.
-    where: feedWhere(filters, now),
-    // id breaks ties, so offers at the same time keep their order between pages.
+    where: feedWhere(filters, now, viewerId),
+    // The base order, kept for offers that end up an equal ELO distance
+    // apart (or for a guest, who has no ELO to rank by at all); id breaks
+    // ties at the same start time.
     orderBy: [{ startsAt: "asc" }, { id: "asc" }],
-    skip: (page - 1) * FEED_PAGE_SIZE,
-    // One extra row says whether there is a next page.
-    take: FEED_PAGE_SIZE + 1,
     select: {
       id: true,
       format: true,
@@ -65,14 +79,31 @@ export async function getOfferFeed(
       ntrpMax: true,
       surface: true,
       club: { select: { id: true, name: true } },
-      author: { select: { id: true, name: true } },
+      author: { select: { id: true, name: true, elo: true } },
       _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
     },
   });
 
-  const offers = rows.slice(0, FEED_PAGE_SIZE).map(({ _count, ...offer }) => ({
+  const offers = rows.map(({ _count, author, ...offer }) => ({
     ...offer,
+    author: { id: author.id, name: author.name },
     spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),
   }));
-  return { offers, page, hasNextPage: rows.length > FEED_PAGE_SIZE };
+  // Pairs each offer with its author's ELO, purely for ranking below — kept
+  // out of FeedOffer itself, which only has the author's id and name.
+  const ranked = rankByEloCloseness(
+    offers.map((offer, i) => ({
+      offer,
+      elo: rows[i].author.elo,
+      startsAt: offer.startsAt,
+    })),
+    viewer?.elo ?? null,
+  ).map((entry) => entry.offer);
+
+  const start = (page - 1) * FEED_PAGE_SIZE;
+  return {
+    offers: ranked.slice(start, start + FEED_PAGE_SIZE),
+    page,
+    hasNextPage: ranked.length > start + FEED_PAGE_SIZE,
+  };
 }
