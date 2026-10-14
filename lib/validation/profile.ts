@@ -7,7 +7,9 @@ import { NTRP_LEVELS } from "@/lib/profile/options";
 // server action that saves it (the action re-checks, since a request can skip
 // the form). The database CHECKs from task 1.10 back up the same rules.
 
-export const MIN_AGE = 16;
+// Raised from 16 to 18 on 2026-10-14: the app puts strangers in touch
+// offline, and 18+ removes the risk of connecting an adult with a minor.
+export const MIN_AGE = 18;
 
 // Birthdays turn over at midnight in Kraków, not in UTC or wherever the
 // server happens to run: "today" is the calendar date in Europe/Warsaw.

@@ -60,7 +60,7 @@ test("an empty form shows a message for every field without saving", async ({
   expect(posts).toEqual([]);
 });
 
-test("a player under 16 is turned away by the form", async ({
+test("a player under 18 is turned away by the form", async ({
   page,
   signIn,
 }) => {
@@ -71,7 +71,7 @@ test("a player under 16 is turned away by the form", async ({
   await page.getByRole("button", { name: "Save profile" }).click();
 
   await expect(
-    page.getByText("You must be at least 16 to join."),
+    page.getByText("You must be at least 18 to join."),
   ).toBeVisible();
   await expect(page).toHaveURL("/onboarding");
 });
