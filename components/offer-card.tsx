@@ -4,6 +4,7 @@ import { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
 import type { FeedOffer } from "@/lib/offers/feed";
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
 import {
+  COURT_STATUS_LABELS,
   formatLabel,
   levelLabel,
   placeLabel,
@@ -33,6 +34,8 @@ export function OfferCard({ offer }: { offer: FeedOffer }) {
       <p className="mt-1 text-sm text-muted-foreground">
         {levelLabel(offer.ntrpMin, offer.ntrpMax)}
         {offer.surface && ` · ${SURFACE_LABELS[offer.surface]}`}
+        {" · "}
+        {COURT_STATUS_LABELS[offer.courtStatus]}
         {offer.author.name && ` · by ${offer.author.name}`}
       </p>
     </Link>

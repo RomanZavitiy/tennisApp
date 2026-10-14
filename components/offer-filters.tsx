@@ -80,6 +80,16 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
           <NativeSelectOption value="DOUBLES">Doubles</NativeSelectOption>
         </NativeSelect>
       </div>
+      <div className="flex items-center gap-2 pb-2">
+        <input
+          id="filter-courtBooked"
+          name="courtBooked"
+          type="checkbox"
+          value="1"
+          defaultChecked={filters.courtBooked ?? false}
+        />
+        <Label htmlFor="filter-courtBooked">Court already booked</Label>
+      </div>
       <div className="flex gap-2">
         <Button type="submit">Filter</Button>
         {active && (

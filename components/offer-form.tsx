@@ -14,6 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
 import type { District } from "@/lib/generated/prisma/enums";
+import { COURT_STATUS_LABELS } from "@/lib/offers/offer-labels";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
 import {
   COMMENT_MAX,
@@ -66,6 +67,7 @@ export function OfferForm({
       ntrpMin: "",
       ntrpMax: "",
       surface: "",
+      courtStatus: "WILL_BOOK",
       comment: "",
     },
   });
@@ -204,6 +206,21 @@ export function OfferForm({
         >
           <NativeSelectOption value="">Any surface</NativeSelectOption>
           {Object.entries(SURFACE_LABELS).map(([value, label]) => (
+            <NativeSelectOption key={value} value={value}>
+              {label}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </Field>
+
+      <Field id="courtStatus" label="Court" error={errors.courtStatus}>
+        <NativeSelect
+          id="courtStatus"
+          className="w-full"
+          {...aria("courtStatus", errors.courtStatus)}
+          {...register("courtStatus")}
+        >
+          {Object.entries(COURT_STATUS_LABELS).map(([value, label]) => (
             <NativeSelectOption key={value} value={value}>
               {label}
             </NativeSelectOption>

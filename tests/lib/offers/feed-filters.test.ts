@@ -51,6 +51,14 @@ describe("parseFeedFilters", () => {
       parseFeedFilters({ format: ["SINGLES", "DOUBLES"], page: "2", x: "y" }),
     ).toEqual({ format: "SINGLES" });
   });
+
+  it("reads the court-booked checkbox only when checked", () => {
+    expect(parseFeedFilters({ courtBooked: "1" })).toEqual({
+      courtBooked: true,
+    });
+    expect(parseFeedFilters({})).toEqual({});
+    expect(parseFeedFilters({ courtBooked: "0" })).toEqual({});
+  });
 });
 
 describe("feedWhere", () => {
@@ -126,6 +134,12 @@ describe("feedWhere", () => {
     });
   });
 
+  it("filters to offers whose court is already booked", () => {
+    expect(feedWhere({ courtBooked: true }, NOW)).toEqual({
+      AND: [...BASE, { courtStatus: "BOOKED" }],
+    });
+  });
+
   it("crosses month and year ends", () => {
     const where = feedWhere({ date: "2026-12-31" }, NOW);
     expect(where.AND).toContainEqual({
@@ -167,6 +181,7 @@ describe("feedHref", () => {
       district: "PODGORZE",
       ntrp: 2.5,
       format: "SINGLES",
+      courtBooked: true,
     } as const;
     const query = new URL(feedHref(filters), "http://x").searchParams;
     expect(parseFeedFilters(Object.fromEntries(query))).toEqual(filters);

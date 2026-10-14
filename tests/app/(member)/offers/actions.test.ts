@@ -57,6 +57,7 @@ describe("createOffer", () => {
         hasPartner: false,
         startsAt: new Date("2026-10-20T16:00:00Z"),
         district: "KROWODRZA",
+        courtStatus: "WILL_BOOK",
         comment: "Evening game",
         authorId: ME,
       },

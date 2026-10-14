@@ -23,6 +23,7 @@ import {
   type OfferPlayer,
 } from "@/lib/offers/offer-details";
 import {
+  COURT_STATUS_LABELS,
   formatLabel,
   levelLabel,
   placeLabel,
@@ -58,6 +59,7 @@ export default async function OfferPage({ params }: OfferPageProps) {
     ...(offer.surface
       ? [{ label: "Surface", value: SURFACE_LABELS[offer.surface] }]
       : []),
+    { label: "Court", value: COURT_STATUS_LABELS[offer.courtStatus] },
   ];
 
   return (
