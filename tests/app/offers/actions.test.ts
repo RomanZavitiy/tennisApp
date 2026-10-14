@@ -21,6 +21,7 @@ const {
   joinFindUnique,
   joinCreateMany,
   joinUpdateMany,
+  recordLateCancellation,
   tx,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
@@ -28,6 +29,7 @@ const {
   joinFindUnique: vi.fn(),
   joinCreateMany: vi.fn(),
   joinUpdateMany: vi.fn(),
+  recordLateCancellation: vi.fn(),
   // What the status-change transaction (3.12) sees.
   tx: {
     $queryRaw: vi.fn(),
@@ -53,6 +55,12 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+// isLateCancellation is pure and cheap: keep the real one, only replace the
+// stub whose call we're asserting on.
+vi.mock("@/lib/rating/reliability", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/rating/reliability")>()),
+  recordLateCancellation,
+}));
 
 const upcoming = {
   authorId: AUTHOR,
@@ -365,6 +373,7 @@ describe("cancelOffer", () => {
     tx.sparringOffer.findFirst.mockResolvedValue({
       status: "FULL",
       startsAt: new Date(Date.now() + 86_400_000),
+      _count: { joins: 1 },
     });
   });
 
@@ -374,7 +383,11 @@ describe("cancelOffer", () => {
     expect(tx.$queryRaw).toHaveBeenCalled();
     expect(tx.sparringOffer.findFirst).toHaveBeenCalledWith({
       where: { id: OFFER, authorId: AUTHOR },
-      select: { status: true, startsAt: true },
+      select: {
+        status: true,
+        startsAt: true,
+        _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
+      },
     });
     expect(tx.sparringOffer.update).toHaveBeenCalledWith({
       where: { id: OFFER },
@@ -382,6 +395,32 @@ describe("cancelOffer", () => {
     });
     // Joins keep their status: accepted players see the game as cancelled.
     expect(tx.offerJoin.update).not.toHaveBeenCalled();
+    // More than 12h out: not a late cancellation.
+    expect(recordLateCancellation).not.toHaveBeenCalled();
+  });
+
+  it("flags a late cancellation when players are already in", async () => {
+    tx.sparringOffer.findFirst.mockResolvedValue({
+      status: "FULL",
+      startsAt: new Date(Date.now() + 3_600_000),
+      _count: { joins: 1 },
+    });
+
+    await expect(cancelOffer(OFFER)).resolves.toEqual({ ok: true });
+
+    expect(recordLateCancellation).toHaveBeenCalledWith(AUTHOR);
+  });
+
+  it("doesn't flag a late cancellation when nobody has joined yet", async () => {
+    tx.sparringOffer.findFirst.mockResolvedValue({
+      status: "OPEN",
+      startsAt: new Date(Date.now() + 3_600_000),
+      _count: { joins: 0 },
+    });
+
+    await expect(cancelOffer(OFFER)).resolves.toEqual({ ok: true });
+
+    expect(recordLateCancellation).not.toHaveBeenCalled();
   });
 
   it("treats someone else's offer as missing", async () => {
@@ -398,12 +437,20 @@ describe("cancelOffer", () => {
   it.each([
     [
       "already cancelled",
-      { status: "CANCELLED", startsAt: new Date(Date.now() + 86_400_000) },
+      {
+        status: "CANCELLED",
+        startsAt: new Date(Date.now() + 86_400_000),
+        _count: { joins: 1 },
+      },
       "This offer is already cancelled.",
     ],
     [
       "started",
-      { status: "OPEN", startsAt: new Date(Date.now() - 60_000) },
+      {
+        status: "OPEN",
+        startsAt: new Date(Date.now() - 60_000),
+        _count: { joins: 1 },
+      },
       "This game has already started.",
     ],
   ])("refuses an offer that has %s", async (_, offer, message) => {
@@ -411,6 +458,7 @@ describe("cancelOffer", () => {
 
     await expect(cancelOffer(OFFER)).resolves.toEqual({ ok: false, message });
     expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+    expect(recordLateCancellation).not.toHaveBeenCalled();
   });
 
   it("refuses a request without a session", async () => {
