@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { ExternalLink } from "@/components/external-link";
 import { buttonVariants } from "@/components/ui/button";
 import {
   formatCheckedDate,
@@ -119,28 +120,5 @@ export default async function ClubPage({ params }: ClubPageProps) {
         change — confirm with the club before you go.
       </p>
     </main>
-  );
-}
-
-// The club's own site, in a new tab. noopener: the new page gets no handle
-// on this one; noreferrer: the club doesn't learn which page sent the player.
-function ExternalLink({
-  href,
-  className,
-  children,
-}: {
-  href: string;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={className ?? "underline-offset-4 hover:underline"}
-    >
-      {children}
-    </a>
   );
 }

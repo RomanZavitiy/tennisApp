@@ -4,19 +4,21 @@ import { expect, test } from "./support/fixtures";
 import {
   completeTestProfile,
   createAdminClient,
+  createTestClub,
 } from "./support/supabase-admin";
 
 // /offers/[id] (task 3.13): what a guest, a player and the author each see,
 // and the request → accept flow end to end. Offers go away with their test
 // author.
 
-async function createOffer(authorId: string) {
+async function createOffer(authorId: string, clubId?: string) {
   const { data, error } = await createAdminClient()
     .from("sparring_offers")
     .insert({
       author_id: authorId,
       starts_at: new Date(Date.now() + 2 * 86_400_000).toISOString(),
-      district: "PODGORZE",
+      district: clubId ? null : "PODGORZE",
+      club_id: clubId ?? null,
       comment: "Bring balls, please.",
     })
     .select("id")
@@ -90,6 +92,38 @@ test("a player asks to join and the author accepts", async ({
   // The player sees they're in.
   await signIn(`/offers/${id}`, player);
   await expect(page.getByText("You're in.")).toBeVisible();
+});
+
+test("everyone sees the court status and a booking link when a club is set", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  const author = await signIn();
+  await completeTestProfile(admin, author.id, { name: "Court Status Host" });
+  const clubId = await createTestClub(admin, {
+    name: `E2E Offer Club ${randomUUID().slice(0, 8)}`,
+    address: "Testowa 1, 30-001 Kraków",
+    latitude: 50.07,
+    longitude: 19.92,
+  });
+  const { error } = await admin
+    .from("clubs")
+    .update({ booking_url: "https://example.com/book" })
+    .eq("id", clubId);
+  if (error) throw error;
+  const id = await createOffer(author.id, clubId);
+  await page.context().clearCookies();
+
+  await page.goto(`/offers/${id}`);
+
+  await expect(page.getByText("Will book once we agree")).toBeVisible();
+  const link = page.getByRole("link", { name: "Book on club's site" });
+  await expect(link).toHaveAttribute("href", "https://example.com/book");
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+
+  await admin.from("clubs").delete().eq("id", clubId);
 });
 
 test("an unknown offer is a 404", async ({ page }) => {

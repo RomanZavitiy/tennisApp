@@ -10,6 +10,7 @@ import {
   requestToJoin,
   withdrawJoin,
 } from "@/app/offers/[id]/actions";
+import { ExternalLink } from "@/components/external-link";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
@@ -93,12 +94,19 @@ export default async function OfferPage({ params }: OfferPageProps) {
         </div>
       </dl>
       {offer.club && (
-        <Link
-          href={`/clubs/${offer.club.id}`}
-          className="mt-3 inline-block text-sm hover:underline"
-        >
-          About {offer.club.name}
-        </Link>
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+          <Link href={`/clubs/${offer.club.id}`} className="hover:underline">
+            About {offer.club.name}
+          </Link>
+          {offer.club.bookingUrl && (
+            <ExternalLink
+              href={offer.club.bookingUrl}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              Book on club&apos;s site
+            </ExternalLink>
+          )}
+        </div>
       )}
       {offer.comment && (
         <p className="mt-6 whitespace-pre-line">{offer.comment}</p>
