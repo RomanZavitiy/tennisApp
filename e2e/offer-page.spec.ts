@@ -89,9 +89,35 @@ test("a player asks to join and the author accepts", async ({
   ).toBeVisible();
   await expect(page.getByText("Full")).toBeVisible();
 
-  // The player sees they're in.
+  // The player sees they're in, and their thread's welcome note (task 3.17),
+  // and sends a message (E2E flow #3, part 2: tasks 3.16-3.18).
   await signIn(`/offers/${id}`, player);
   await expect(page.getByText("You're in.")).toBeVisible();
+  await expect(
+    page.getByText("Meet at the court. Never send money in advance."),
+  ).toBeVisible();
+  await page.getByPlaceholder("Write a message…").fill("On my way!");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText("You: On my way!")).toBeVisible();
+
+  // The author opens the thread, sees it, and replies.
+  await signIn(`/offers/${id}`, author);
+  await page.getByText("Messages", { exact: true }).click();
+  await expect(page.getByText(`${playerName}: On my way!`)).toBeVisible();
+  await page.getByPlaceholder("Write a message…").fill("See you soon!");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText("You: See you soon!")).toBeVisible();
+
+  // A message is never rendered as HTML (task 3.16's DoD).
+  await page.getByPlaceholder("Write a message…").fill("<script>bad</script>");
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(page.getByText("You: <script>bad</script>")).toBeVisible();
+  await expect(page.locator("script", { hasText: "bad" })).toHaveCount(0);
+
+  // A third person, with no request of their own, sees no thread at all.
+  await signIn(`/offers/${id}`);
+  await page.reload();
+  await expect(page.getByText("Messages", { exact: true })).toHaveCount(0);
 });
 
 test("everyone sees the court status and a booking link when a club is set", async ({

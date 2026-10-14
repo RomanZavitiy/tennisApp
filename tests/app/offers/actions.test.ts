@@ -7,6 +7,7 @@ import {
   requestToJoin,
   withdrawJoin,
 } from "@/app/offers/[id]/actions";
+import { THREAD_WELCOME_MESSAGE } from "@/lib/messages/post-system-message";
 
 // Session and database are replaced: what's under test is who may change a
 // join, which writes happen, and that the answer reveals nothing else.
@@ -19,17 +20,19 @@ const {
   requireOnboardedUser,
   offerFindUnique,
   joinFindUnique,
-  joinCreateMany,
+  joinCreateManyAndReturn,
   joinUpdateMany,
   recordLateCancellation,
+  postSystemMessage,
   tx,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
   offerFindUnique: vi.fn(),
   joinFindUnique: vi.fn(),
-  joinCreateMany: vi.fn(),
+  joinCreateManyAndReturn: vi.fn(),
   joinUpdateMany: vi.fn(),
   recordLateCancellation: vi.fn(),
+  postSystemMessage: vi.fn(),
   // What the status-change transaction (3.12) sees.
   tx: {
     $queryRaw: vi.fn(),
@@ -48,7 +51,7 @@ vi.mock("@/lib/db", () => ({
     sparringOffer: { findUnique: offerFindUnique },
     offerJoin: {
       findUnique: joinFindUnique,
-      createMany: joinCreateMany,
+      createManyAndReturn: joinCreateManyAndReturn,
       updateMany: joinUpdateMany,
     },
     $transaction: (run: (client: typeof tx) => Promise<unknown>) => run(tx),
@@ -60,6 +63,13 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/rating/reliability", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/rating/reliability")>()),
   recordLateCancellation,
+}));
+// The welcome message (3.16) is its own concern, covered where
+// postSystemMessage itself is tested; here only that it fires once per new
+// thread, never on reopening a withdrawn one.
+vi.mock("@/lib/messages/post-system-message", () => ({
+  postSystemMessage,
+  THREAD_WELCOME_MESSAGE: "Meet at the court. Never send money in advance.",
 }));
 
 const upcoming = {
@@ -74,28 +84,33 @@ describe("requestToJoin", () => {
     requireOnboardedUser.mockResolvedValue({ id: ME, name: "Ola" });
     offerFindUnique.mockResolvedValue(upcoming);
     joinFindUnique.mockResolvedValue(null);
-    joinCreateMany.mockResolvedValue({ count: 1 });
+    joinCreateManyAndReturn.mockResolvedValue([{ id: JOIN }]);
     joinUpdateMany.mockResolvedValue({ count: 1 });
   });
 
-  it("files a request as the signed-in player", async () => {
+  it("files a request as the signed-in player and opens its thread", async () => {
     await expect(requestToJoin(OFFER)).resolves.toEqual({ ok: true });
 
     expect(joinFindUnique).toHaveBeenCalledWith({
       where: { offerId_userId: { offerId: OFFER, userId: ME } },
       select: { id: true, status: true },
     });
-    expect(joinCreateMany).toHaveBeenCalledWith({
+    expect(joinCreateManyAndReturn).toHaveBeenCalledWith({
       data: [{ offerId: OFFER, userId: ME }],
+      select: { id: true },
       skipDuplicates: true,
     });
+    expect(postSystemMessage).toHaveBeenCalledWith(
+      { offerJoinId: JOIN },
+      THREAD_WELCOME_MESSAGE,
+    );
   });
 
   it("refuses a request without a session or a finished profile", async () => {
     requireOnboardedUser.mockRejectedValue(new Error("NEXT_REDIRECT"));
 
     await expect(requestToJoin(OFFER)).rejects.toThrow("NEXT_REDIRECT");
-    expect(joinCreateMany).not.toHaveBeenCalled();
+    expect(joinCreateManyAndReturn).not.toHaveBeenCalled();
   });
 
   it.each([undefined, "", "not-a-uuid", 42])(
@@ -115,7 +130,7 @@ describe("requestToJoin", () => {
     const result = await requestToJoin(OFFER);
 
     expect(result).toEqual({ ok: false, message: "This offer doesn't exist." });
-    expect(joinCreateMany).not.toHaveBeenCalled();
+    expect(joinCreateManyAndReturn).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -160,12 +175,12 @@ describe("requestToJoin", () => {
         ok: false,
         message,
       });
-      expect(joinCreateMany).not.toHaveBeenCalled();
+      expect(joinCreateManyAndReturn).not.toHaveBeenCalled();
       expect(joinUpdateMany).not.toHaveBeenCalled();
     },
   );
 
-  it("reopens a withdrawn request instead of adding a second row", async () => {
+  it("reopens a withdrawn request instead of adding a second row, without a new welcome", async () => {
     joinFindUnique.mockResolvedValue({ id: JOIN, status: "WITHDRAWN" });
 
     await expect(requestToJoin(OFFER)).resolves.toEqual({ ok: true });
@@ -174,16 +189,18 @@ describe("requestToJoin", () => {
       where: { id: JOIN, status: "WITHDRAWN" },
       data: { status: "REQUESTED" },
     });
-    expect(joinCreateMany).not.toHaveBeenCalled();
+    expect(joinCreateManyAndReturn).not.toHaveBeenCalled();
+    expect(postSystemMessage).not.toHaveBeenCalled();
   });
 
   it("reports a request that another click already filed", async () => {
-    joinCreateMany.mockResolvedValue({ count: 0 });
+    joinCreateManyAndReturn.mockResolvedValue([]);
 
     await expect(requestToJoin(OFFER)).resolves.toEqual({
       ok: false,
       message: "You have already asked to join.",
     });
+    expect(postSystemMessage).not.toHaveBeenCalled();
   });
 
   it("answers without anyone's details", async () => {

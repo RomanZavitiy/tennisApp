@@ -11,6 +11,7 @@ import {
   withdrawJoin,
 } from "@/app/offers/[id]/actions";
 import { ExternalLink } from "@/components/external-link";
+import { JoinThread } from "@/components/join-thread";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
@@ -121,7 +122,11 @@ export default async function OfferPage({ params }: OfferPageProps) {
             Sign in to join
           </Link>
         ) : details.isAuthor ? (
-          <AuthorView details={details} started={started} />
+          <AuthorView
+            details={details}
+            started={started}
+            viewerId={viewer.id}
+          />
         ) : (
           <PlayerView details={details} viewerId={viewer.id} />
         )}
@@ -157,6 +162,12 @@ function PlayerView({
             variant="outline"
           />
         )}
+        <JoinThread
+          offerJoinId={viewerJoin.id}
+          viewerId={viewerId}
+          senderNames={{ [offer.author.id]: offer.author.name ?? "Author" }}
+          defaultOpen
+        />
       </div>
     );
   }
@@ -184,9 +195,11 @@ function PlayerView({
 function AuthorView({
   details,
   started,
+  viewerId,
 }: {
   details: OfferDetails;
   started: boolean;
+  viewerId: string;
 }) {
   const requested = details.joins.filter((join) => join.status === "REQUESTED");
   const accepted = details.joins.filter((join) => join.status === "ACCEPTED");
@@ -208,6 +221,11 @@ function AuthorView({
             {accepted.map((join) => (
               <li key={join.id}>
                 <PlayerLink player={join.user} />
+                <JoinThread
+                  offerJoinId={join.id}
+                  viewerId={viewerId}
+                  senderNames={{ [join.user.id]: join.user.name ?? "A player" }}
+                />
               </li>
             ))}
           </ul>
@@ -222,26 +240,30 @@ function AuthorView({
         ) : (
           <ul className="mt-2 divide-y rounded-lg border">
             {requested.map((join) => (
-              <li
-                key={join.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
-              >
-                <PlayerLink player={join.user} />
-                <div className="flex gap-2">
-                  {canAccept && (
+              <li key={join.id} className="px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <PlayerLink player={join.user} />
+                  <div className="flex gap-2">
+                    {canAccept && (
+                      <OfferActionButton
+                        action={acceptJoin.bind(null, join.id)}
+                        label="Accept"
+                        pendingLabel="Accepting…"
+                      />
+                    )}
                     <OfferActionButton
-                      action={acceptJoin.bind(null, join.id)}
-                      label="Accept"
-                      pendingLabel="Accepting…"
+                      action={declineJoin.bind(null, join.id)}
+                      label="Decline"
+                      pendingLabel="Declining…"
+                      variant="outline"
                     />
-                  )}
-                  <OfferActionButton
-                    action={declineJoin.bind(null, join.id)}
-                    label="Decline"
-                    pendingLabel="Declining…"
-                    variant="outline"
-                  />
+                  </div>
                 </div>
+                <JoinThread
+                  offerJoinId={join.id}
+                  viewerId={viewerId}
+                  senderNames={{ [join.user.id]: join.user.name ?? "A player" }}
+                />
               </li>
             ))}
           </ul>

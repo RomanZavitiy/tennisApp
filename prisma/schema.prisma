@@ -178,11 +178,14 @@ model OfferJoin {
 /// Realtime reads these directly with the user's own session (RLS below),
 /// writes go through the server action (3.16).
 model Message {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  /// SYSTEM messages (the thread's welcome note today; more from sessions
+  /// 04/06/07) have no sender — CHECK below ties the two together.
+  type      MessageType @default(TEXT)
 
-  senderId String @map("sender_id") @db.Uuid
-  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  senderId String? @map("sender_id") @db.Uuid
+  sender   User?   @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   offerJoinId String?    @map("offer_join_id") @db.Uuid
   offerJoin   OfferJoin? @relation(fields: [offerJoinId], references: [id], onDelete: Cascade)
@@ -299,6 +302,15 @@ enum OfferStatus {
   CANCELLED
 
   @@map("offer_status")
+}
+
+/// TEXT — a participant wrote it; SYSTEM — the app did (e.g. a thread's
+/// welcome note, task 3.16), and then senderId is null (CHECK on the table).
+enum MessageType {
+  TEXT
+  SYSTEM
+
+  @@map("message_type")
 }
 
 enum JoinStatus {
