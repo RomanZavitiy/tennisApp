@@ -37,7 +37,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
       surface: true,
       courtStatus: true,
       comment: true,
-      club: { select: { id: true, name: true } },
+      club: { select: { id: true, name: true, bookingUrl: true } },
       author: { select: playerSelect },
       _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
     },

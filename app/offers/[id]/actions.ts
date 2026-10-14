@@ -15,6 +15,10 @@ import {
   type JoinAction,
   type JoinChangeRefusal,
 } from "@/lib/offers/join-transitions";
+import {
+  isLateCancellation,
+  recordLateCancellation,
+} from "@/lib/rating/reliability";
 
 export type RequestToJoinResult = { ok: true } | { ok: false; message: string };
 export type JoinChangeResult = RequestToJoinResult;
@@ -197,7 +201,9 @@ async function changeJoin(
  * The author cancels their offer (3.14). Joins keep their status, so accepted
  * players still find it among their games and see it cancelled. The offer row
  * is locked like in changeJoin: an "accept" racing the cancel runs before or
- * after it, never on a half-cancelled offer.
+ * after it, never on a half-cancelled offer. Cancelling less than 12h before
+ * the start with players already in flags a late cancellation (decision
+ * 2026-10-14) — the counter itself is session 05, this just marks the moment.
  */
 export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
   const author = await requireOnboardedUser();
@@ -212,12 +218,17 @@ export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
     // The author is part of the lookup: someone else's offer looks missing.
     const offer = await tx.sparringOffer.findFirst({
       where: { id: id.data, authorId: author.id },
-      select: { status: true, startsAt: true },
+      select: {
+        status: true,
+        startsAt: true,
+        _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
+      },
     });
     if (!offer) {
       return { ok: false as const, message: NOT_FOUND };
     }
-    if (!canCancelOffer(offer, new Date())) {
+    const now = new Date();
+    if (!canCancelOffer(offer, now)) {
       return {
         ok: false as const,
         message:
@@ -230,6 +241,9 @@ export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
       where: { id: id.data },
       data: { status: "CANCELLED" },
     });
+    if (offer._count.joins > 0 && isLateCancellation(offer.startsAt, now)) {
+      recordLateCancellation(author.id);
+    }
     return { ok: true as const };
   });
 
