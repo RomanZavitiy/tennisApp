@@ -69,3 +69,46 @@
 тепер офіційно дозволяє слайс = гілка = PR і 4 чіткі умови зупинки (§10) — не питати людину про
 кожну дрібницю, як раніше. `docs/archive/PLANNING-v1.md` — повний текст v1 для довідки про DoD,
 якщо v2 посилається «як у v1».
+
+## Нотатка передачі — сесія 02 → сесія 03 (2026-10-15)
+
+**Головна несподіванка:** 3.11–3.14 (слайс C) виявились уже повністю зробленими — реалізовано й
+злито в `main` ще 2026-10-11 (комміти `#62`–`#65`, записи в `decisions.md` тієї ж дати), просто
+план v2 не позначив їх ✅ (той самий паттерн, що й 3.20 у сесії 01). Перевірено: `git log
+--oneline main` показує `3.11`…`3.14` до `3.15`; код (`app/offers/[id]/actions.ts`,
+`lib/offers/join-rules.ts`, `join-transitions.ts`, `cancel-rules.ts`, `offer-details.ts`,
+сторінка `app/offers/[id]/page.tsx`) і `e2e/offer-page.spec.ts` («a player asks to join and the
+author accepts») — усе на місці й зелене.
+
+**Що реально зроблено цієй сесією (гілка `feat/slice-C-join-flow`, базована на
+`feat/slice-AB-audit-and-offer`, яку ще не злито в `main`):**
+- Правило пізнього скасування (рішення 2026-10-14, «Надійність гравця») підключено до `cancelOffer`
+  (3.14): `lib/rating/reliability.ts` — `isLateCancellation(startsAt, now)` (межа 12 год, тест на
+  граничні значення) і заглушка `recordLateCancellation(userId)` (no-op, TODO на сесію 05). Викликає
+  автора оферти, коли скасування < 12 год до старту і є хоч один прийнятий гравець.
+- Кнопка «Book on club's site» (`target="_blank" rel="noopener noreferrer"`) додана прямо на
+  `/offers/[id]`, коли в оферти вибрано клуб із `bookingUrl` — раніше там було лише посилання
+  «About {club}» на сторінку клубу, а сама кнопка жила тільки на `/clubs/[id]`. Код винесено в
+  спільний `components/external-link.tsx` (був локальною функцією в `app/clubs/[id]/page.tsx`).
+  `getOfferDetails()` тепер читає `club.bookingUrl`.
+- `docs/PLANNING.md`: 3.11–3.14 позначено ✅ з поясненням, що саме було вже зроблено і що додала
+  ця сесія.
+- Тести: новий `tests/lib/rating/reliability.test.ts`; `tests/app/offers/actions.test.ts`
+  (`cancelOffer`) доповнено перевірками заглушки. `pnpm build/lint/typecheck/test` зелені.
+  E2E зачеплених файлів (`offer-page`, `club-page`) — 13/13 зелені (msedge, `--workers=1`,
+  запущено один раз кожен прогін).
+
+**Що треба знати сесії 03 (чат, слайс D):**
+- Де живуть заявки: `OfferJoin` (`offer_joins`), статус `ACCEPTED`/`REQUESTED` тощо — див. модель у
+  записі decisions.md 2026-10-11 «Модель оферти і чату» (3.1) і «Заявка `OfferJoin`» (3.10).
+- Учасники оферти для тредів: приватний тред — автор ↔ гравець конкретної `OfferJoin`; груповий
+  (парна, 3.21) — автор + гравці з `OfferJoin.status = ACCEPTED` на цій `SparringOffer`. Функція
+  видимості вже описана в рішенні 3.15 (`private.is_message_thread_participant`), таблиця
+  `messages` і RLS уже існують (3.15, злито). 3.16–3.18 лишаються ⬜.
+- Сторінка оферти (`app/offers/[id]/page.tsx`) має `AuthorView`/`PlayerView` з готовими списками
+  прийнятих гравців (`details.joins`, статус `ACCEPTED`) — звідти брати учасників групового треду,
+  не писати новий запит.
+- Гілку `feat/slice-AB-audit-and-offer` (слайс A+B) і цю (`feat/slice-C-join-flow`, слайс C) ще не
+  змерджено в `main` — обидва PR відкриті окремо; сесія 03 створює гілку `feat/slice-D-chat` (чи
+  як вирішить назвати) з поточного `HEAD`, а не з `main`, інакше втратить 3.22 (`courtStatus`) і
+  зміни цієй сесії.
