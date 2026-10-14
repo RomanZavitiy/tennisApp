@@ -5,6 +5,14 @@ import { z } from "zod";
 
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import {
+  postSystemMessage,
+  THREAD_WELCOME_MESSAGE,
+} from "@/lib/messages/post-system-message";
+import {
+  canWriteToThread,
+  isJoinThreadParticipant,
+} from "@/lib/messages/thread-rules";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
 import {
@@ -19,6 +27,7 @@ import {
   isLateCancellation,
   recordLateCancellation,
 } from "@/lib/rating/reliability";
+import { messageContentSchema } from "@/lib/validation/message";
 
 export type RequestToJoinResult = { ok: true } | { ok: false; message: string };
 export type JoinChangeResult = RequestToJoinResult;
@@ -64,22 +73,112 @@ export async function requestToJoin(
   // Both writes only succeed from the state checked above, so a double click
   // or two tabs can't make a second request: skipDuplicates is ON CONFLICT
   // DO NOTHING on the (offer, player) pair, and the update needs the row to
-  // still be WITHDRAWN.
-  const { count } = existing
-    ? await db.offerJoin.updateMany({
-        where: { id: existing.id, status: "WITHDRAWN" },
-        data: { status: "REQUESTED" },
-      })
-    : await db.offerJoin.createMany({
+  // still be WITHDRAWN. A truly new join also opens its private thread
+  // (decision 3.1: the thread exists from the moment of the request) with a
+  // welcome note — reopening a withdrawn one reuses the same thread, so it
+  // doesn't get a second welcome.
+  if (existing) {
+    const { count } = await db.offerJoin.updateMany({
+      where: { id: existing.id, status: "WITHDRAWN" },
+      data: { status: "REQUESTED" },
+    });
+    if (count === 0) {
+      return { ok: false, message: JOIN_REFUSAL_MESSAGES.ALREADY_REQUESTED };
+    }
+  } else {
+    const created = (
+      await db.offerJoin.createManyAndReturn({
         data: [{ offerId: id.data, userId: player.id }],
+        select: { id: true },
         skipDuplicates: true,
-      });
-  if (count === 0) {
-    return { ok: false, message: JOIN_REFUSAL_MESSAGES.ALREADY_REQUESTED };
+      })
+    ).at(0);
+    if (!created) {
+      return { ok: false, message: JOIN_REFUSAL_MESSAGES.ALREADY_REQUESTED };
+    }
+    await postSystemMessage(
+      { offerJoinId: created.id },
+      THREAD_WELCOME_MESSAGE,
+    );
   }
 
   revalidatePath(`/offers/${id.data}`);
   return { ok: true };
+}
+
+export type SendMessageResult =
+  | {
+      ok: true;
+      sentMessage: {
+        id: string;
+        type: "TEXT";
+        content: string;
+        senderId: string;
+        createdAt: string;
+      };
+    }
+  | { ok: false; message: string };
+
+const THREAD_NOT_FOUND = "This conversation doesn't exist.";
+const THREAD_READ_ONLY = "This conversation is read-only now.";
+
+// "Send" in a join's private thread (task 3.16). Only the join's player or
+// the offer's author — never an id from the request — and only while the
+// thread is still writable (lib/messages/thread-rules.ts); content is
+// server-checked again even though the UI (3.17) already limits it. Never
+// rendered as HTML: the thread (3.17) shows `content` as plain text, and
+// React escapes it like any other string.
+export async function sendMessage(
+  offerJoinId: unknown,
+  content: unknown,
+): Promise<SendMessageResult> {
+  const user = await requireOnboardedUser();
+
+  const id = z.uuid().safeParse(offerJoinId);
+  if (!id.success) {
+    return { ok: false, message: THREAD_NOT_FOUND };
+  }
+  const text = messageContentSchema.safeParse(content);
+  if (!text.success) {
+    return {
+      ok: false,
+      message: text.error.issues[0]?.message ?? THREAD_NOT_FOUND,
+    };
+  }
+
+  const join = await db.offerJoin.findUnique({
+    where: { id: id.data },
+    select: {
+      userId: true,
+      status: true,
+      offerId: true,
+      offer: { select: { authorId: true, startsAt: true } },
+    },
+  });
+  // Someone else's thread looks the same as a missing one.
+  if (!join || !isJoinThreadParticipant(join, user.id)) {
+    return { ok: false, message: THREAD_NOT_FOUND };
+  }
+  if (!canWriteToThread(join, join.offer, new Date())) {
+    return { ok: false, message: THREAD_READ_ONLY };
+  }
+
+  const message = await db.message.create({
+    data: { offerJoinId: id.data, senderId: user.id, content: text.data },
+    select: { id: true, content: true, senderId: true, createdAt: true },
+  });
+
+  revalidatePath(`/offers/${join.offerId}`);
+  return {
+    ok: true,
+    sentMessage: {
+      id: message.id,
+      type: "TEXT",
+      content: message.content,
+      senderId: message.senderId ?? user.id,
+      createdAt: message.createdAt.toISOString(),
+    },
+  };
 }
 
 const JOIN_NOT_FOUND = "This request doesn't exist.";
