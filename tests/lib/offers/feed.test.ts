@@ -26,6 +26,7 @@ function row(
     elo?: number | null;
     startsAt?: Date;
     authorId?: string;
+    courtStatus?: string;
   } = {},
 ) {
   return {
@@ -37,6 +38,7 @@ function row(
     ntrpMin: null,
     ntrpMax: null,
     surface: null,
+    courtStatus: offer.courtStatus ?? "WILL_BOOK",
     club: null,
     author: {
       id: offer.authorId ?? "a",
@@ -111,6 +113,14 @@ describe("getOfferFeed", () => {
 
     expect(feed).toMatchObject({ page: 2, hasNextPage: false });
     expect(feed.offers).toHaveLength(2);
+  });
+
+  it("carries the court status through to the feed offer", async () => {
+    findMany.mockResolvedValue([row(1, { courtStatus: "BOOKED" })]);
+
+    const feed = await getOfferFeed(1, {}, null, NOW);
+
+    expect(feed.offers[0]?.courtStatus).toBe("BOOKED");
   });
 
   it("works out the spots left for each format", async () => {

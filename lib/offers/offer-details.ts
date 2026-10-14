@@ -35,6 +35,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
       ntrpMin: true,
       ntrpMax: true,
       surface: true,
+      courtStatus: true,
       comment: true,
       club: { select: { id: true, name: true } },
       author: { select: playerSelect },

@@ -1,7 +1,19 @@
-import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import type {
+  CourtStatus,
+  District,
+  OfferFormat,
+} from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
 // How an offer's facts read on its card (3.6) and, later, its page (3.13).
+
+// Court status (task 3.22). No database import — the offer form (a client
+// component) uses this too.
+export const COURT_STATUS_LABELS: Record<CourtStatus, string> = {
+  BOOKED: "Court booked",
+  WILL_BOOK: "Will book once we agree",
+  ANY: "Whoever books first",
+};
 
 export function formatLabel(offer: {
   format: OfferFormat;

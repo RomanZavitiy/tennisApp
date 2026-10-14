@@ -69,7 +69,7 @@ describe("completeOnboarding", () => {
 
     expect(result.fieldErrors).toEqual({
       name: "Enter your name.",
-      birthDate: "You must be at least 16 to join.",
+      birthDate: "You must be at least 18 to join.",
       selfRatedNtrp: "Choose your level.",
       district: "Choose your district.",
     });

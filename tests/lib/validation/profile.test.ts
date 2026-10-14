@@ -70,13 +70,13 @@ describe("profileSchema", () => {
   });
 
   describe("age limit", () => {
-    it("accepts someone turning 16 today", () => {
-      expect(errorsFor({ birthDate: "2010-10-04" })).toEqual([]);
+    it("accepts someone turning 18 today", () => {
+      expect(errorsFor({ birthDate: "2008-10-04" })).toEqual([]);
     });
 
-    it("rejects someone turning 16 tomorrow", () => {
-      expect(errorsFor({ birthDate: "2010-10-05" })).toEqual([
-        "You must be at least 16 to join.",
+    it("rejects someone turning 18 tomorrow", () => {
+      expect(errorsFor({ birthDate: "2008-10-05" })).toEqual([
+        "You must be at least 18 to join.",
       ]);
     });
 

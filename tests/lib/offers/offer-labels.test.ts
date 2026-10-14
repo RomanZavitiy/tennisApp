@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
 import {
+  COURT_STATUS_LABELS,
   formatLabel,
   levelLabel,
   placeLabel,
@@ -35,6 +36,14 @@ describe("offer labels", () => {
     [null, null, "Any level"],
   ])("show the level %j–%j as %s", (min, max, label) => {
     expect(levelLabel(min, max)).toBe(label);
+  });
+
+  it("names every court status", () => {
+    expect(COURT_STATUS_LABELS).toEqual({
+      BOOKED: "Court booked",
+      WILL_BOOK: "Will book once we agree",
+      ANY: "Whoever books first",
+    });
   });
 
   it("show the start in Kraków time", () => {

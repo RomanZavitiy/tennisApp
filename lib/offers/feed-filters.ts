@@ -17,6 +17,8 @@ export type FeedFilters = {
   /** The player's level: offers whose NTRP range includes it. */
   ntrp?: number;
   format?: OfferFormat;
+  /** Only offers whose court is already booked (task 3.22). */
+  courtBooked?: boolean;
 };
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -41,6 +43,11 @@ export function parseFeedFilters(params: SearchParams): FeedFilters {
     if (parsed.success) {
       Object.assign(filters, { [key]: parsed.data });
     }
+  }
+  // A checkbox: present with value "1" when checked, absent otherwise.
+  const courtBooked = params.courtBooked;
+  if ((Array.isArray(courtBooked) ? courtBooked[0] : courtBooked) === "1") {
+    filters.courtBooked = true;
   }
   return filters;
 }
@@ -92,6 +99,9 @@ export function feedWhere(
   if (filters.format) {
     conditions.push({ format: filters.format });
   }
+  if (filters.courtBooked) {
+    conditions.push({ courtStatus: "BOOKED" });
+  }
 
   return { AND: conditions };
 }
@@ -103,6 +113,7 @@ export function feedHref(filters: FeedFilters, page = 1): string {
   if (filters.district) params.set("district", filters.district);
   if (filters.ntrp !== undefined) params.set("ntrp", filters.ntrp.toFixed(1));
   if (filters.format) params.set("format", filters.format);
+  if (filters.courtBooked) params.set("courtBooked", "1");
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/offers?${query}` : "/offers";

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import type {
+  CourtStatus,
   District,
   OfferFormat,
   Surface,
@@ -30,6 +31,7 @@ export type FeedOffer = {
   ntrpMin: number | null;
   ntrpMax: number | null;
   surface: Surface | null;
+  courtStatus: CourtStatus;
   author: { id: string; name: string | null };
   spotsLeft: number;
 };
@@ -78,6 +80,7 @@ export async function getOfferFeed(
       ntrpMin: true,
       ntrpMax: true,
       surface: true,
+      courtStatus: true,
       club: { select: { id: true, name: true } },
       author: { select: { id: true, name: true, elo: true } },
       _count: { select: { joins: { where: { status: "ACCEPTED" } } } },

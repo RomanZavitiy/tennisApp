@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { District, OfferFormat, Surface } from "@/lib/generated/prisma/enums";
+import {
+  CourtStatus,
+  District,
+  OfferFormat,
+  Surface,
+} from "@/lib/generated/prisma/enums";
 import { krakowLocalToDate } from "@/lib/offers/krakow-time";
 import { NTRP_LEVELS } from "@/lib/profile/options";
 
@@ -57,6 +62,11 @@ export const offerSchema = z
       emptyToUndefined,
       z.enum(Surface, "Choose a surface.").optional(),
     ),
+    // Court status (task 3.22): whether the court is already booked.
+    // Defaults to "will book once a partner is confirmed".
+    courtStatus: z
+      .enum(CourtStatus, "Choose the court status.")
+      .default("WILL_BOOK"),
     // Trimmed first, so a comment of only spaces counts as none.
     comment: z.preprocess(
       (value) =>

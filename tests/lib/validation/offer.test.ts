@@ -45,6 +45,7 @@ describe("offerSchema", () => {
       hasPartner: false,
       startsAt: new Date("2026-10-20T16:00:00Z"),
       district: "KROWODRZA",
+      courtStatus: "WILL_BOOK",
     });
   });
 
@@ -144,6 +145,19 @@ describe("offerSchema", () => {
 
   it("drops a comment of only spaces", () => {
     expect(parse({ comment: "   " }).data?.comment).toBeUndefined();
+  });
+
+  it.each(["BOOKED", "WILL_BOOK", "ANY"])(
+    "accepts the court status %s",
+    (courtStatus) => {
+      expect(parse({ courtStatus }).data?.courtStatus).toBe(courtStatus);
+    },
+  );
+
+  it("rejects an unknown court status", () => {
+    expect(errorsFor({ courtStatus: "MAYBE" })).toEqual([
+      { path: "courtStatus", message: "Choose the court status." },
+    ]);
   });
 
   it("rejects a partner in singles", () => {
