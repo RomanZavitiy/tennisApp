@@ -94,20 +94,24 @@ asked for by name.
 - New logic in `lib/` (rating calculation, validation, matching rules) needs a unit test
   in the matching `tests/` path — no exceptions, this is the part most likely to have a
   subtle bug a human reviewer won't catch by reading.
-- A new user-facing flow (register, post a sparring offer, confirm a match result) needs
-  at least one Playwright happy-path test before it's considered done.
+- E2E (Playwright) covers only 4 critical flows, end to end: (1) sign in → onboarding;
+  (2) create an offer → see it in the feed; (3) join request → acceptance → a chat
+  message; (4) result → confirmation → ELO changes. Every other flow gets a unit test,
+  not a new Playwright spec — see `docs/PLANNING.md`'s "Процес" section.
 - Don't delete or skip a failing test to make CI green — fix the code or ask the human.
 
 ## 8. Git workflow
 
 - Small commits, one logical change each; commit message says why, not just what changed.
-- Branch per task/epic-slice (`feat/sparring-board-create`, not `feat/epic-3`).
-- Open a PR rather than pushing straight to `main`; wait for the human's review on
-  anything touching auth, payments (once added), or DB migrations — see Boundaries.
+- One slice = one branch (`feat/<slice>-<short-name>`) = one PR. A slice is a vertical
+  piece of functionality — usually several task IDs from `docs/PLANNING.md` — and the
+  agent works through all of them back-to-back on that branch, without stopping between
+  tasks; the PR covers the whole slice, not one task.
+- Open a PR rather than pushing straight to `main`; human review happens once, at the end
+  of the slice, on the preview deploy (subject to the stop-and-ask conditions in §10).
 - `main` is protected: PRs land only by squash-merge with green CI, and the squash commit
-  is the PR title, which carries the task ID (`0.7: Add Prettier`). One task = one PR = one
-  commit in `main`, so `git log --oneline main` reads as the list of finished tasks — and a
-  PR whose title lacks the ID breaks that list.
+  is the PR title, which carries the slice's task IDs (e.g. `Slice B: 1.21, 3.20, 3.22`), so
+  `git log --oneline main` reads as the list of finished slices.
 - Never `git push --force` to a shared branch, never rewrite history the human has
   already pulled.
 
@@ -133,9 +137,16 @@ Only if the *same* mistake happens a second time does it get promoted into a per
 rule here. This keeps this file from bloating with one-off notes — if it's not worth
 writing twice, it's not worth a permanent rule.
 
-`.agents/decisions.md` holds short dated entries for real architectural decisions (e.g.
-"2026-09-20: MVP ships without a booking system — see planning doc") so the reasoning
-behind a choice isn't lost when the person who made it forgets why.
+`.agents/decisions.md` holds short dated entries, but only for irreversible decisions:
+DB schema, RLS, the ELO formula, privacy/data-deletion choices, and new external
+services (e.g. "2026-09-20: MVP ships without a booking system — see planning doc") so
+the reasoning behind a choice isn't lost when the person who made it forgets why. Routine
+implementation details go in the PR description instead, not here.
+
+The agent stops and asks the human only when one of these is true: a new external
+service is needed; a migration would drop or rename data; a new RLS policy would open up
+reads; or a secret is needed that it doesn't have. Everything else, the agent decides on
+its own and records the "why" in the PR — see `docs/PLANNING.md`'s "Процес" section.
 
 Keep this whole file well under 500 lines. If it's creeping up, that's a sign something
 belongs in code comments or `.agents/decisions.md` instead of here.
