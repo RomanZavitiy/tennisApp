@@ -261,3 +261,74 @@ author accepts») — усе на місці й зелене.
   `globalTeardown` щоразу після e2e-прогону — не регресія цієї сесії, не торкалась файлів слайсу G
   (`result-actions.ts`, `match_results`); лишається тією ж задачею «видалити один рядок напряму»
   для сесії, якій це заважатиме найбільше.
+
+## Нотатка передачі — сесія 07 → сесія 08 (2026-10-15)
+
+**Зроблено:** слайс H (5.1-5.3, 5.6, 5.10, 5.14-5.16; PWA і сповіщення) — гілка
+`feat/slice-H-pwa-notifications` від свіжого `main` (`2462cb6`). Нові залежності: `web-push`
+(server-side надсилання), `resend` (email-запаска), `@types/web-push` (dev); `pnpm dlx
+shadcn@4.21.0 add switch` додав лише `components/ui/switch.tsx` (без нових npm-залежностей —
+`@base-ui/react` уже був). Деталі архітектури — п'ять нових записів у `decisions.md` тієї ж дати:
+схема БД і `users.email`, тиша/ліміт/групування (інтерпретаційні рішення, текст задачі їх не
+визначав), Resend-відправка, відписка через клік (не GET), погодинний cron.
+
+**Найбільша несподіванка:** `public.users` не мала email жодного гравця (запис 0.12 — немає
+зовнішнього ключа на `auth.users`), а `SUPABASE_SECRET_KEY`, єдиний спосіб прочитати
+`auth.users` напряму, зарезервований лише під e2e-хелпер (запис 1.2) — застосунок його не
+імпортує. Email-запаска (5.1-5.6) без адреси неможлива, тож ця сесія додала `users.email`
+(nullable, унікальна) і навчила `ensureUserRow` (задача 1.9, `/auth/callback`) синхронізувати її
+на кожному вході — не лише створювати. `lib/auth/ensure-user-row.ts` і `app/auth/callback/
+route.ts` змінились, хоч і не були в списку задач слайсу H.
+
+**Де що лежить:**
+- `lib/notifications/notify.ts` — єдина точка `notify(userId, event)` (9 видів події, union
+  `NotificationEvent`). Push на всі `PushSubscription` користувача, недійсні (404/410)
+  видаляються; email лише для 3 подій (`JOIN_REQUESTED`, `JOIN_ACCEPTED`,
+  `CONFIRM_RESULT_REMINDER`) і лише якщо після спроб push не лишилось жодної активної підписки.
+- `lib/notifications/new-offer.ts` (`notifyInterestedPlayers`) і `lib/matching/offer-interest.ts`
+  (чиста функція `isInterestedIn`/`interestedCandidates`, з тестами) — «кому цікава оферта».
+  Викликається з `createOffer` (`app/(member)/offers/new/actions.ts`).
+- `lib/notifications/reminders.ts` — три функції (3 год до матчу, 2 год «як пройшло», 24 год
+  підтвердити результат), викликаються разом з `/api/cron?job=reminders`
+  (`app/api/cron/route.ts`, новий query-параметр поряд з існуючим автопідтвердженням).
+  `.github/workflows/notification-reminders.yml` — погодинний `curl` із `CRON_SECRET` як GitHub
+  Actions secret (людина ще має додати його в Settings → Secrets, інструкція в PR).
+- `lib/push/` — `send-push.ts` (сервер, `web-push`), `browser-subscribe.ts` (клієнт, Push API +
+  конвертація VAPID-ключа), `meaningful-action.ts` (localStorage-прапорець).
+- `lib/email/` — `send.ts` (dev — жоден лист не йде, лише `console.warn`), `template.ts`.
+- `app/(member)/profile/notifications/` — сторінка з трьома перемикачами
+  (`NotificationSettingsForm`) і `PushSubscribeControl` (увімкнути/вимкнути push на цьому
+  пристрої). `app/install/` — інструкція iOS/Android. `app/unsubscribe/` — токен лише вирішує, що
+  показати; сама дія — явний клік (`confirmUnsubscribe`), щоб прев'ю листа поштовим клієнтом
+  нічого не відписувало.
+- `PushSubscribePrompt` змонтований у кореневому `app/layout.tsx`, не в `(member)/layout.tsx` —
+  `/offers/[id]` (де живе «Ask to join») лежить поза групою `(member)`.
+
+**Секрети:** `UNSUBSCRIBE_SECRET` згенеровано і вже лежить у `.env.local` (сама сесія згенерувала
+— самостійний секрет, як `CRON_SECRET`, не сторонній). `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/
+`VAPID_SUBJECT`/`NEXT_PUBLIC_VAPID_PUBLIC_KEY` і `RESEND_API_KEY` — НЕ згенеровані й не задані
+локально (команда `pnpm dlx web-push generate-vapid-keys` — у PR для людини; без ключів код сам
+не падає — `lib/push/send-push.ts` і `lib/email/send.ts` тихо пропускають відправку й логують
+попередження). Доки людина не додасть реальні ключі (локально й у Vercel), push і email
+працюватимуть лише частково (підписка на UI збережеться, сама відправка — ні).
+
+**Перевірено:** `pnpm build/lint/typecheck/test` зелені (592 тести, 56 нових). E2E зачеплених
+файлів — `offer-create`, `offer-page`, `messages-rls`, `navigation`, `home`, `member-pages`,
+`profile-edit`, `session`, `rls`, `login`, `result-confirm` — усі зелені окремо (msedge,
+`--workers=1`, кожен файл один раз; конфіг на канал `msedge` відкочено перед комітом).
+`offer-create.spec.ts` довелось поправити: редірект `createOffer` тепер додає `?created=1`
+(прапорець «перша оферта» для 5.15) — регекс URL і видобування `id` з query. Той самий
+осиротілий `offer_join` (`d36f9878…`) з попередніх сесій і далі ламає `globalTeardown` — не
+регресія.
+
+**Що треба знати сесії 08 (безпека і мінімальна адмінка, слайс I):**
+- Жодна задача слайсу I не торкається файлів цієї сесії напряму (`lib/notifications/`,
+  `lib/push/`, `lib/email/`, `app/(member)/profile/notifications/` проти `app/admin/`,
+  `lib/reports/`). 3.19 (скарга на оферту/гравця/повідомлення) може захотіти використати
+  `notify()` для сповіщення адміна чи автора скарги — нову подію додати в union
+  `NotificationEvent`, не новий механізм.
+- `users.email` тепер існує — 6.x (експорт/видалення даних) чи адмінка можуть його читати напряму
+  через Prisma, без `SUPABASE_SECRET_KEY`.
+- Лічильник `offerPushSentOn`/`offerPushSentCount` на `User` — лише для «нової оферти під
+  рівень», жодна інша подія його не чіпає. Якщо 6.17/6.18 (ліміти мутацій) захочуть схожий
+  лічильник — окрема пара колонок, не перевикористання цієї.
