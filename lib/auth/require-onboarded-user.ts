@@ -21,6 +21,7 @@ export const requireOnboardedUser = cache(async () => {
       selfRatedNtrp: true,
       onboardingCompletedAt: true,
       avatarPath: true,
+      blockedAt: true,
     },
   });
 
@@ -45,5 +46,10 @@ export const requireOnboardedUser = cache(async () => {
     district: profile.district,
     selfRatedNtrp: profile.selfRatedNtrp,
     avatarPath: profile.avatarPath,
+    // Blocked (task 6.4): callers that create offers, join requests or
+    // messages check this themselves (lib/moderation/block-rules.ts) — kept
+    // here rather than queried again, since every caller already loads the
+    // row this comes from.
+    blockedAt: profile.blockedAt,
   };
 });

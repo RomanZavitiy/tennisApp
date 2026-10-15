@@ -14,6 +14,7 @@ import {
   canWriteToThread,
   isJoinThreadParticipant,
 } from "@/lib/messages/thread-rules";
+import { blockedRefusal } from "@/lib/moderation/block-rules";
 import { notify } from "@/lib/notifications/notify";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
@@ -25,6 +26,7 @@ import {
   type JoinAction,
   type JoinChangeRefusal,
 } from "@/lib/offers/join-transitions";
+import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import {
   isLateCancellation,
   recordLateCancellation,
@@ -46,9 +48,18 @@ export async function requestToJoin(
 ): Promise<RequestToJoinResult> {
   const player = await requireOnboardedUser();
 
+  const blocked = blockedRefusal(player);
+  if (blocked) {
+    return { ok: false, message: blocked };
+  }
+
   const id = z.uuid().safeParse(offerId);
   if (!id.success) {
     return { ok: false, message: NOT_FOUND };
+  }
+  const limited = await checkRateLimit(player.id, "JOIN_REQUEST");
+  if (!limited.ok) {
+    return limited;
   }
 
   const offer = await db.sparringOffer.findUnique({
@@ -141,6 +152,11 @@ export async function sendMessage(
 ): Promise<SendMessageResult> {
   const user = await requireOnboardedUser();
 
+  const blocked = blockedRefusal(user);
+  if (blocked) {
+    return { ok: false, message: blocked };
+  }
+
   const id = z.uuid().safeParse(offerJoinId);
   if (!id.success) {
     return { ok: false, message: THREAD_NOT_FOUND };
@@ -151,6 +167,10 @@ export async function sendMessage(
       ok: false,
       message: text.error.issues[0]?.message ?? THREAD_NOT_FOUND,
     };
+  }
+  const limited = await checkRateLimit(user.id, "MESSAGE");
+  if (!limited.ok) {
+    return limited;
   }
 
   const join = await db.offerJoin.findUnique({

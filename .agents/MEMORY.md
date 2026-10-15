@@ -332,3 +332,52 @@ route.ts` змінились, хоч і не були в списку задач
 - Лічильник `offerPushSentOn`/`offerPushSentCount` на `User` — лише для «нової оферти під
   рівень», жодна інша подія його не чіпає. Якщо 6.17/6.18 (ліміти мутацій) захочуть схожий
   лічильник — окрема пара колонок, не перевикористання цієї.
+
+## Нотатка передачі — сесія 08 → сесія 09 (2026-10-15)
+
+**Зроблено:** слайс I (3.19, 6.1-6.4, 6.16-6.18; безпека і мінімальна адмінка) — гілка
+`feat/slice-I-safety-admin` від свіжого `main` (`1e55354`). Міграція
+`20261015140000_add_safety_admin` (застосована напряму — той самий обхідний шлях, що кожна
+міграція з 3.15): таблиці `reports`, `admin_actions`, `rate_limit_counters`; `users.is_admin` і
+`users.blocked_at`; `MatchResultStatus.ANNULLED`. Архітектурні рішення — два записи
+2026-10-15 у `decisions.md` («Схема скарг і адмінки…» і «Rate limiting: фіксоване вікно…»).
+`pnpm build/lint/typecheck/test` зелені (665 тестів, 73 нових). E2E зачеплених файлів
+(`offer-create`, `offer-page`, `messages-rls`, `result-confirm`, `player-page`, `rls`) — усі 25
+зелені окремо (msedge, `--workers=1`, один прогін; конфіг на канал `msedge` відкочено перед
+комітом). Той самий осиротілий `offer_join` (`d36f9878…`) з попередніх сесій і далі ламає
+`globalTeardown` — не регресія.
+
+**Де що лежить:**
+- `lib/rate-limit/check-rate-limit.ts` — `checkRateLimit(subject, action, now?)` на
+  `RateLimitCounter`, фіксоване вікно. Підключено до `createOffer`, `requestToJoin`,
+  `sendMessage`, `createReport`, `sendMagicLink`. «5 активних оферт» — окремо,
+  `lib/offers/active-offers.ts`, пряма перевірка кількості, не вікно.
+- `lib/moderation/` — `block-rules.ts` (`blockedRefusal`, перевіряється в тих самих трьох діях +
+  `createOffer`), `create-report.ts` (єдине місце запису `Report`), `autoblock.ts`
+  (`maybeAutoblock`, 3 скарги від різних `reporterId` за 30 днів), `report-labels.ts`.
+- `lib/auth/require-admin.ts` — `requireAdmin()`, `notFound()` однаково для анонімного й
+  не-адміна; `/admin` у `PUBLIC_ROUTES` (`lib/auth/routes.ts`) навмисно, щоб проксі їх не
+  розрізняв. Роль призначається SQL-командою (у PR для людини) — жодної адмінської UI для цього
+  немає, і не повинно з'явитись.
+- `app/admin/` — `layout.tsx` (виклик `requireAdmin()`, навігація), `reports/page.tsx`
+  (відкриті скарги + заблоковані гравці), `results/page.tsx` (DISPUTED), `actions.ts` (6 дій,
+  кожна викликає `requireAdmin()` сама і пише `AdminAction`). `lib/admin/queue.ts` — дані для
+  обох сторінок.
+- `app/offers/[id]/report-actions.ts` (`reportOffer`, `reportMessage`),
+  `app/players/[id]/actions.ts` (`reportPlayer`) — тонкі обгортки над `createReport`.
+  `components/report-button.tsx`/`report-form.tsx` — спільний UI на трьох сторінках.
+- Дешево: `requireOnboardedUser()` тепер віддає `blockedAt` — тому `createOffer`,
+  `requestToJoin`, `sendMessage` перевіряють блокування без нового запиту до БД.
+
+**Що треба знати сесії 09 (наступна за «Порядок виконання» — дивись `docs/PLANNING.md`):**
+- `CreateOfferResult` отримав необов'язкове `message` (не лише `fieldErrors`) для відмов, що не
+  про конкретне поле (заблокований, ліміт). Якщо інша форма отримає схожу не-польову відмову —
+  той самий патерн (`setError("root", …)`), не новий.
+- `AdminActionType`/`ReportReason`/`ReportStatus` — enum-и в `schema.prisma`; додавати нове
+  значення (наприклад нову причину скарги) — звичайна адитивна міграція, той самий обхідний шлях
+  через `prisma db execute`.
+- Жодної e2e для `/admin` навмисно (AGENTS.md §7 — лише 4 критичні флоу); покрито юніт-тестами
+  (`tests/app/admin/actions.test.ts`, `tests/lib/auth/require-admin.test.ts`,
+  `tests/lib/moderation/*`, `tests/lib/rate-limit/*`).
+- Ролі `isAdmin` ще ні в кого немає в dev-БД — людина призначає собі SQL-командою з PR перед тим,
+  як відкривати `/admin` вручну.

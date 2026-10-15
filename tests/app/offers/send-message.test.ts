@@ -12,13 +12,19 @@ const OFFER = "44444444-4444-4444-8444-444444444444";
 const JOIN = "55555555-5555-4555-8555-555555555555";
 const MESSAGE = "66666666-6666-4666-8666-666666666666";
 
-const { requireOnboardedUser, joinFindUnique, messageCreate, notify } =
-  vi.hoisted(() => ({
-    requireOnboardedUser: vi.fn(),
-    joinFindUnique: vi.fn(),
-    messageCreate: vi.fn(),
-    notify: vi.fn(),
-  }));
+const {
+  requireOnboardedUser,
+  joinFindUnique,
+  messageCreate,
+  notify,
+  checkRateLimit,
+} = vi.hoisted(() => ({
+  requireOnboardedUser: vi.fn(),
+  joinFindUnique: vi.fn(),
+  messageCreate: vi.fn(),
+  notify: vi.fn(),
+  checkRateLimit: vi.fn(),
+}));
 
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
@@ -30,6 +36,10 @@ vi.mock("@/lib/db", () => ({
 // Push/email are a separate concern (lib/notifications/notify.test.ts) —
 // here only that the right recipient and thread are passed matters.
 vi.mock("@/lib/notifications/notify", () => ({ notify }));
+// Rate limiting (6.16-6.18) is its own concern
+// (lib/rate-limit/check-rate-limit.test.ts); here only that a limit refuses
+// the send matters (tested explicitly below).
+vi.mock("@/lib/rate-limit/check-rate-limit", () => ({ checkRateLimit }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 const upcomingJoin = {
@@ -52,6 +62,35 @@ describe("sendMessage", () => {
       createdAt,
     });
     notify.mockResolvedValue(undefined);
+    checkRateLimit.mockResolvedValue({ ok: true });
+  });
+
+  it("refuses a blocked player without writing", async () => {
+    requireOnboardedUser.mockResolvedValue({
+      id: ME,
+      blockedAt: new Date("2026-10-15T09:00:00Z"),
+    });
+
+    await expect(sendMessage(JOIN, "hi")).resolves.toEqual({
+      ok: false,
+      message:
+        "Your account is blocked pending a review. You can't create offers, join requests or messages until an admin makes a decision.",
+    });
+    expect(messageCreate).not.toHaveBeenCalled();
+  });
+
+  it("refuses once the message rate limit is hit", async () => {
+    checkRateLimit.mockResolvedValue({
+      ok: false,
+      message: "You're sending messages too quickly. Wait a few minutes.",
+    });
+
+    await expect(sendMessage(JOIN, "hi")).resolves.toEqual({
+      ok: false,
+      message: "You're sending messages too quickly. Wait a few minutes.",
+    });
+    expect(checkRateLimit).toHaveBeenCalledWith(ME, "MESSAGE");
+    expect(messageCreate).not.toHaveBeenCalled();
   });
 
   it("sends as the join's player, and notifies the author", async () => {

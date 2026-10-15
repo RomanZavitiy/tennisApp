@@ -12,12 +12,15 @@ const OFFER = "44444444-4444-4444-8444-444444444444";
 const {
   requireOnboardedUser,
   clubFindUnique,
+  offerCount,
   offerCreate,
   redirect,
   notifyInterestedPlayers,
+  checkRateLimit,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
   clubFindUnique: vi.fn(),
+  offerCount: vi.fn(),
   offerCreate:
     vi.fn<
       (args: {
@@ -27,17 +30,22 @@ const {
     >(),
   redirect: vi.fn(),
   notifyInterestedPlayers: vi.fn(),
+  checkRateLimit: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
   db: {
     club: { findUnique: clubFindUnique },
-    sparringOffer: { create: offerCreate },
+    sparringOffer: { count: offerCount, create: offerCreate },
   },
 }));
 // The matching push is its own concern (lib/notifications/new-offer.test.ts).
 vi.mock("@/lib/notifications/new-offer", () => ({ notifyInterestedPlayers }));
+// Rate limiting (6.16-6.18) is its own concern
+// (lib/rate-limit/check-rate-limit.test.ts); here only that a limit refuses
+// the post matters (tested explicitly below).
+vi.mock("@/lib/rate-limit/check-rate-limit", () => ({ checkRateLimit }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect }));
 
@@ -49,12 +57,62 @@ describe("createOffer", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-11T10:00:00Z"));
     requireOnboardedUser.mockResolvedValue({ id: ME });
+    offerCount.mockResolvedValue(0);
     offerCreate.mockResolvedValue({ id: OFFER });
     notifyInterestedPlayers.mockResolvedValue(undefined);
+    checkRateLimit.mockResolvedValue({ ok: true });
   });
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("refuses a blocked player without writing", async () => {
+    requireOnboardedUser.mockResolvedValue({
+      id: ME,
+      blockedAt: new Date("2026-10-11T09:00:00Z"),
+    });
+
+    const result = await createOffer(valid);
+
+    expect(result).toEqual({
+      ok: false,
+      fieldErrors: {},
+      message:
+        "Your account is blocked pending a review. You can't create offers, join requests or messages until an admin makes a decision.",
+    });
+    expect(offerCreate).not.toHaveBeenCalled();
+  });
+
+  it("refuses once the active-offer limit is reached", async () => {
+    offerCount.mockResolvedValue(5);
+
+    const result = await createOffer(valid);
+
+    expect(result).toEqual({
+      ok: false,
+      fieldErrors: {},
+      message:
+        "You already have 5 offers out there. Cancel one before posting another.",
+    });
+    expect(offerCreate).not.toHaveBeenCalled();
+  });
+
+  it("refuses once the daily new-offer limit is hit", async () => {
+    checkRateLimit.mockResolvedValue({
+      ok: false,
+      message: "You've posted a lot of offers today. Try again tomorrow.",
+    });
+
+    const result = await createOffer(valid);
+
+    expect(result).toEqual({
+      ok: false,
+      fieldErrors: {},
+      message: "You've posted a lot of offers today. Try again tomorrow.",
+    });
+    expect(checkRateLimit).toHaveBeenCalledWith(ME, "NEW_OFFER");
+    expect(offerCreate).not.toHaveBeenCalled();
   });
 
   it("saves the offer as the signed-in player's and opens it", async () => {

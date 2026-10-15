@@ -18,6 +18,11 @@ const PUBLIC_ROUTES = [
   /^\/install$/,
   // Email unsubscribe link (task 5.3): works by signed token, no session.
   /^\/unsubscribe$/,
+  // /admin (task 6.1): left out of the proxy's gate on purpose, so a
+  // signed-out visitor and a signed-in non-admin get the same 404 from
+  // requireAdmin() instead of the proxy sending only the signed-out one to
+  // /login — see require-admin.ts for why that distinction would leak.
+  /^\/admin(\/.*)?$/,
 ];
 
 export function isPublicRoute(pathname: string) {

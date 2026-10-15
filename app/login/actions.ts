@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 
 import { safeNextPath } from "@/lib/auth/routes";
+import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { magicLinkRequestSchema } from "@/lib/validation/login";
 
@@ -27,6 +28,14 @@ export async function sendMagicLink(
   const origin = (await headers()).get("origin");
   if (!origin) {
     return { ok: false, message: "Invalid request." };
+  }
+
+  // Own pre-check (task 6.16, decision 2026-10-14): 5 magic links an hour
+  // per email, ahead of Supabase's own request — friendlier, and keyed by
+  // the email the form sent rather than whatever Supabase's limit keys by.
+  const limited = await checkRateLimit(parsed.data.email, "MAGIC_LINK");
+  if (!limited.ok) {
+    return limited;
   }
 
   const redirectTo = new URL("/auth/callback", origin);

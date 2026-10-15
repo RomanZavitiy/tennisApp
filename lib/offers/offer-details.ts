@@ -62,7 +62,7 @@ const resultSelect = {
 
 export type OfferJoinResult = {
   id: string;
-  status: "PENDING" | "CONFIRMED" | "DISPUTED" | "NO_SHOW";
+  status: "PENDING" | "CONFIRMED" | "DISPUTED" | "NO_SHOW" | "ANNULLED";
   /** Null for a no-show report (4.10) — there's no score to have a winner. */
   winner: "AUTHOR" | "PLAYER" | null;
   reportedBy: "AUTHOR" | "PLAYER";

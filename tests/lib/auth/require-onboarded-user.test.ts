@@ -26,6 +26,7 @@ const complete = {
   selfRatedNtrp: 3.5,
   onboardingCompletedAt: new Date("2026-10-04T10:00:00Z"),
   avatarPath: "user-1/photo.webp",
+  blockedAt: null,
 };
 
 describe("requireOnboardedUser", () => {
@@ -44,6 +45,16 @@ describe("requireOnboardedUser", () => {
       district: "KROWODRZA",
       selfRatedNtrp: 3.5,
       avatarPath: "user-1/photo.webp",
+      blockedAt: null,
+    });
+  });
+
+  it("carries a blocked player's blockedAt through", async () => {
+    const blockedAt = new Date("2026-10-15T09:00:00Z");
+    findUnique.mockResolvedValue({ ...complete, blockedAt });
+
+    await expect(requireOnboardedUser()).resolves.toMatchObject({
+      blockedAt,
     });
   });
 
@@ -56,6 +67,7 @@ describe("requireOnboardedUser", () => {
       district: null,
       selfRatedNtrp: null,
       onboardingCompletedAt: null,
+      blockedAt: null,
     });
 
     await expect(requireOnboardedUser()).rejects.toThrow(

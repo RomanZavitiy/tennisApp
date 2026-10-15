@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { sendMessage } from "@/app/offers/[id]/actions";
+import { reportMessage } from "@/app/offers/[id]/report-actions";
+import { ReportButton } from "@/components/report-button";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MESSAGE_MAX } from "@/lib/validation/message";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { MESSAGE_MAX } from "@/lib/validation/message";
 
 export type ThreadMessage = {
   id: string;
@@ -124,6 +126,17 @@ export function MessageThread({
                 :
               </span>{" "}
               {message.content}
+              {/* Task 3.19: only beside someone else's message — reporting
+                  your own message makes no sense, and createReport refuses
+                  it anyway. */}
+              {message.senderId !== viewerId && (
+                <div className="mt-1">
+                  <ReportButton
+                    action={reportMessage.bind(null, offerJoinId, message.id)}
+                    label="Report"
+                  />
+                </div>
+              )}
             </li>
           ),
         )}

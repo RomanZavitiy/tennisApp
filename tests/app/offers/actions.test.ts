@@ -33,6 +33,7 @@ const {
   recordScheduledMatch,
   postSystemMessage,
   notify,
+  checkRateLimit,
   tx,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
@@ -47,6 +48,7 @@ const {
   recordScheduledMatch: vi.fn(),
   postSystemMessage: vi.fn(),
   notify: vi.fn(),
+  checkRateLimit: vi.fn(),
   // What the status-change transaction (3.12) sees.
   tx: {
     $queryRaw: vi.fn(),
@@ -97,6 +99,10 @@ vi.mock("@/lib/messages/post-system-message", () => ({
 // any beforeEach: vi.clearAllMocks() clears recorded calls, not this.
 vi.mock("@/lib/notifications/notify", () => ({ notify }));
 notify.mockResolvedValue(undefined);
+// Rate limiting (6.16-6.18) is its own concern
+// (lib/rate-limit/check-rate-limit.test.ts); here only that a limit refuses
+// the request matters (tested explicitly below).
+vi.mock("@/lib/rate-limit/check-rate-limit", () => ({ checkRateLimit }));
 
 const upcoming = {
   authorId: AUTHOR,
@@ -112,6 +118,35 @@ describe("requestToJoin", () => {
     joinFindUnique.mockResolvedValue(null);
     joinCreateManyAndReturn.mockResolvedValue([{ id: JOIN }]);
     joinUpdateMany.mockResolvedValue({ count: 1 });
+    checkRateLimit.mockResolvedValue({ ok: true });
+  });
+
+  it("refuses a blocked player without writing", async () => {
+    requireOnboardedUser.mockResolvedValue({
+      id: ME,
+      blockedAt: new Date("2026-10-15T09:00:00Z"),
+    });
+
+    await expect(requestToJoin(OFFER)).resolves.toEqual({
+      ok: false,
+      message:
+        "Your account is blocked pending a review. You can't create offers, join requests or messages until an admin makes a decision.",
+    });
+    expect(joinCreateManyAndReturn).not.toHaveBeenCalled();
+  });
+
+  it("refuses once the daily join-request limit is hit", async () => {
+    checkRateLimit.mockResolvedValue({
+      ok: false,
+      message: "You've sent a lot of join requests today. Try again tomorrow.",
+    });
+
+    await expect(requestToJoin(OFFER)).resolves.toEqual({
+      ok: false,
+      message: "You've sent a lot of join requests today. Try again tomorrow.",
+    });
+    expect(checkRateLimit).toHaveBeenCalledWith(ME, "JOIN_REQUEST");
+    expect(joinCreateManyAndReturn).not.toHaveBeenCalled();
   });
 
   it("files a request as the signed-in player and opens its thread", async () => {

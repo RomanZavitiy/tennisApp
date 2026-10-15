@@ -5,12 +5,20 @@ import { redirect } from "next/navigation";
 
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import { blockedRefusal } from "@/lib/moderation/block-rules";
 import { notifyInterestedPlayers } from "@/lib/notifications/new-offer";
+import {
+  activeOffersWhere,
+  MAX_ACTIVE_OFFERS,
+} from "@/lib/offers/active-offers";
+import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import {
   offerFieldErrors,
   offerSchema,
   type CreateOfferResult,
 } from "@/lib/validation/offer";
+
+const TOO_MANY_ACTIVE_OFFERS = `You already have ${String(MAX_ACTIVE_OFFERS)} offers out there. Cancel one before posting another.`;
 
 // Saves /offers/new (task 3.5). The author is always the signed-in player —
 // never a field from the request. requireOnboardedUser() refuses a request
@@ -19,9 +27,29 @@ import {
 export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   const author = await requireOnboardedUser();
 
+  const blocked = blockedRefusal(author);
+  if (blocked) {
+    return { ok: false, fieldErrors: {}, message: blocked };
+  }
+
   const parsed = offerSchema.safeParse(input);
   if (!parsed.success) {
     return offerFieldErrors(parsed.error);
+  }
+
+  // Limits (tasks 6.17, 6.16, decision 2026-10-14): the active-offer count
+  // checked before the daily rate limit, since it's the more common way to
+  // hit a limit in normal use (cancelling one frees a slot back up) and the
+  // cheaper query.
+  const activeCount = await db.sparringOffer.count({
+    where: activeOffersWhere(author.id, new Date()),
+  });
+  if (activeCount >= MAX_ACTIVE_OFFERS) {
+    return { ok: false, fieldErrors: {}, message: TOO_MANY_ACTIVE_OFFERS };
+  }
+  const limited = await checkRateLimit(author.id, "NEW_OFFER");
+  if (!limited.ok) {
+    return { ok: false, fieldErrors: {}, message: limited.message };
   }
   const { clubId, district, ...offer } = parsed.data;
 

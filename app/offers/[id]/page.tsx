@@ -10,6 +10,7 @@ import {
   requestToJoin,
   withdrawJoin,
 } from "@/app/offers/[id]/actions";
+import { reportOffer } from "@/app/offers/[id]/report-actions";
 import {
   confirmResult,
   disputeResult,
@@ -20,6 +21,7 @@ import { JoinThread } from "@/components/join-thread";
 import { MarkMeaningfulAction } from "@/components/mark-meaningful-action";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { OfferBookingSection } from "@/components/offer-booking-section";
+import { ReportButton } from "@/components/report-button";
 import { ResultForm } from "@/components/result-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
@@ -147,6 +149,14 @@ export default async function OfferPage({
           <PlayerView details={details} viewerId={viewer.id} />
         )}
       </section>
+      {viewer && !details.isAuthor && (
+        <section className="mt-6">
+          <ReportButton
+            action={reportOffer.bind(null, offer.id)}
+            label="Report this offer"
+          />
+        </section>
+      )}
     </main>
   );
 }
@@ -409,6 +419,13 @@ function ResultSection({
         </p>
       );
     }
+    if (result.status === "ANNULLED") {
+      return (
+        <p className="mt-2 text-sm text-muted-foreground">
+          An admin reviewed the dispute and annulled this no-show report.
+        </p>
+      );
+    }
     return null;
   }
 
@@ -465,6 +482,14 @@ function ResultSection({
     return (
       <p className="mt-2 text-sm text-muted-foreground">
         Result disputed ({score}). An admin will review it.
+      </p>
+    );
+  }
+
+  if (result.status === "ANNULLED") {
+    return (
+      <p className="mt-2 text-sm text-muted-foreground">
+        An admin reviewed the dispute and annulled this result ({score}).
       </p>
     );
   }
