@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { reportPlayer } from "@/app/players/[id]/actions";
@@ -20,8 +21,9 @@ type PlayerPageProps = { params: Promise<{ id: string }> };
 export async function generateMetadata({
   params,
 }: PlayerPageProps): Promise<Metadata> {
+  const t = await getTranslations("PlayerPage");
   const profile = await getPublicProfile((await params).id);
-  return { title: profile?.name ?? "Player not found" };
+  return { title: profile?.name ?? t("notFound") };
 }
 
 export default async function PlayerPage({ params }: PlayerPageProps) {
@@ -32,6 +34,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   }
   const matches = await getMatchHistory(id);
   const viewer = await getCurrentUser();
+  const t = await getTranslations("PlayerPage");
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
@@ -51,7 +54,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         />
       </div>
       <div className="mt-8">
-        <h2 className="font-semibold">Match history</h2>
+        <h2 className="font-semibold">{t("matchHistory")}</h2>
         <div className="mt-3">
           <MatchHistory matches={matches} />
         </div>
@@ -60,7 +63,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         <div className="mt-8">
           <ReportButton
             action={reportPlayer.bind(null, profile.id)}
-            label="Report this player"
+            label={t("reportThisPlayer")}
           />
         </div>
       )}

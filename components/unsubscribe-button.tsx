@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,16 +10,13 @@ export function UnsubscribeButton({
 }: {
   action: () => Promise<{ ok: true } | { ok: false; message: string }>;
 }) {
+  const t = useTranslations("UnsubscribeButton");
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<"idle" | "done" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
   if (state === "done") {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Done — you won’t get email notifications from MatchFinder.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">{t("done")}</p>;
   }
 
   return (
@@ -38,7 +36,7 @@ export function UnsubscribeButton({
           });
         }}
       >
-        {pending ? "Saving…" : "Turn off email notifications"}
+        {pending ? t("saving") : t("turnOff")}
       </Button>
       {state === "error" && message && (
         <p role="alert" className="text-sm text-destructive">

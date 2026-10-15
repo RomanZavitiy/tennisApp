@@ -1,0 +1,611 @@
+{
+  "Metadata": {
+    "siteName": "MatchFinder Kraków",
+    "description": "Znajdź partnera do sparingu i kort w Krakowie."
+  },
+  "LanguageSwitcher": {
+    "label": "Język",
+    "names": {
+      "en": "EN",
+      "pl": "PL"
+    }
+  },
+  "SiteFooter": {
+    "tagline": "MatchFinder Kraków · sparing tenisowy i korty w Krakowie"
+  },
+  "SiteHeader": {
+    "sparring": "Sparing",
+    "courts": "Korty",
+    "signIn": "Zaloguj się",
+    "profile": "Profil",
+    "mainNav": "Główna",
+    "signOut": "Wyloguj się"
+  },
+  "PushNotifications": {
+    "JOIN_REQUESTED": {
+      "title": "Nowe zgłoszenie",
+      "body": "Ktoś poprosił o udział w Twojej ofercie."
+    },
+    "JOIN_ACCEPTED": {
+      "title": "Zgłoszenie zaakceptowane",
+      "body": "Twoje zgłoszenie zostało zaakceptowane."
+    },
+    "JOIN_DECLINED": {
+      "title": "Zgłoszenie odrzucone",
+      "body": "Twoje zgłoszenie zostało odrzucone."
+    },
+    "NEW_MESSAGE": {
+      "title": "Nowa wiadomość",
+      "body": "Masz nową wiadomość."
+    },
+    "COURT_BOOKED": {
+      "title": "Kort zarezerwowany",
+      "body": "Kort na Twój mecz został zarezerwowany."
+    },
+    "MATCH_REMINDER_3H": {
+      "title": "Mecz zaczyna się wkrótce",
+      "body": "Twój mecz zaczyna się za około 3 godziny."
+    },
+    "HOW_DID_IT_GO": {
+      "title": "Jak poszedł mecz?",
+      "body": "Zgłoś wynik, aby zaktualizować ranking."
+    },
+    "CONFIRM_RESULT_REMINDER": {
+      "title": "Potwierdź wynik meczu",
+      "body": "Wynik meczu czeka na Twoje potwierdzenie."
+    },
+    "NEW_OFFER_FOR_LEVEL": {
+      "title": "Nowa oferta w Twojej okolicy",
+      "body": "Nowa oferta sparingowa odpowiada Twojemu poziomowi i dzielnicy."
+    }
+  },
+  "SystemMessages": {
+    "THREAD_WELCOME": "Umówcie się na korcie. Nigdy nie wysyłaj pieniędzy z góry.",
+    "RESULT_SUBMITTED": "Wynik meczu zgłoszony. Czekamy na potwierdzenie przez drugiego zawodnika.",
+    "RESULT_CONFIRMED": "Wynik meczu potwierdzony. ELO obu zawodników zostało zaktualizowane.",
+    "RESULT_AUTO_CONFIRMED": "Wynik meczu automatycznie potwierdzony po 72 godzinach. ELO obu zawodników zostało zaktualizowane.",
+    "RESULT_DISPUTED": "Wynik meczu zaskarżony. Administrator go sprawdzi.",
+    "RESULT_NO_SHOW_REPORTED": "Przeciwnik oznaczony jako nieobecny. Może zgłosić sprzeciw w ciągu 72 godzin.",
+    "COURT_BOOKED": "Kort został zarezerwowany."
+  },
+  "EmailTemplate": {
+    "actionLabel": "Otwórz MatchFinder",
+    "unsubscribeLabel": "Wyłącz powiadomienia e-mail"
+  },
+  "AdminLayout": {
+    "admin": "Administracja",
+    "reports": "Zgłoszenia",
+    "disputedResults": "Zaskarżone wyniki"
+  },
+  "Sheet": {
+    "close": "Zamknij"
+  },
+  "MobileNav": {
+    "openMenu": "Otwórz menu",
+    "menu": "Menu",
+    "mobileNav": "Mobilne",
+    "signOut": "Wyloguj się"
+  },
+  "HomePage": {
+    "tagline": "Znajdź partnera do sparingu i kort w Krakowie.",
+    "comingSoon": "Wkrótce"
+  },
+  "ProfilePage": {
+    "title": "Twój profil",
+    "editProfile": "Edytuj profil",
+    "notifications": "Powiadomienia",
+    "language": "Język"
+  },
+  "OfferCard": {
+    "byAuthor": "od {name}"
+  },
+  "OfferForm": {
+    "formatLabel": "Format",
+    "singles": "Singiel",
+    "doubles": "Debel",
+    "hasPartner": "Mam już partnera",
+    "startsAtLabel": "Godzina rozpoczęcia",
+    "clubLabel": "Klub",
+    "noSpecificClub": "Bez konkretnego klubu",
+    "districtLabel": "Dzielnica",
+    "districtFromClub": "Wzięta z klubu.",
+    "districtOutsideCity": "Ten klub jest poza miastem, więc nie ma dzielnicy.",
+    "choose": "Wybierz…",
+    "levelFromLabel": "Poziom od (NTRP)",
+    "levelToLabel": "Poziom do (NTRP)",
+    "anyLevel": "Każdy",
+    "surfaceLabel": "Nawierzchnia",
+    "anySurface": "Każda nawierzchnia",
+    "courtLabel": "Kort",
+    "commentLabel": "Komentarz",
+    "commentHint": "Opcjonalnie, maksymalnie {max} znaków.",
+    "posting": "Publikowanie…",
+    "submit": "Opublikuj ogłoszenie"
+  },
+  "OffersPage": {
+    "title": "Oferty sparingowe",
+    "postAnOffer": "Dodaj ogłoszenie",
+    "noMoreOffers": "Brak kolejnych ofert.",
+    "noneMatchFilters": "Żadna oferta nie spełnia tych filtrów.",
+    "noOpenOffers": "Brak otwartych ofert. Dodaj swoją, a inni zawodnicy będą mogli się zgłosić.",
+    "pagesLabel": "Strony",
+    "previous": "Poprzednia",
+    "next": "Następna"
+  },
+  "NewOfferPage": {
+    "title": "Dodaj ogłoszenie sparingowe",
+    "subtitle": "Napisz, kiedy i gdzie chcesz zagrać — inni zawodnicy się zgłoszą.",
+    "cancel": "Anuluj"
+  },
+  "OfferFilters": {
+    "formLabel": "Filtruj ogłoszenia",
+    "dateLabel": "Data",
+    "districtLabel": "Dzielnica",
+    "any": "Każdy",
+    "ntrpLabel": "Mój poziom (NTRP)",
+    "formatLabel": "Format",
+    "courtBookedLabel": "Kort już zarezerwowany",
+    "submit": "Filtruj",
+    "clear": "Wyczyść"
+  },
+  "OfferPage": {
+    "title": "Oferta sparingowa",
+    "whereLabel": "Gdzie",
+    "levelLabel": "Poziom",
+    "surfaceLabel": "Nawierzchnia",
+    "courtLabel": "Kort",
+    "statusCancelled": "Odwołane",
+    "statusStarted": "Już się zaczęło",
+    "postedBy": "Dodane przez",
+    "signInToJoin": "Zaloguj się, aby się zgłosić",
+    "reportThisOffer": "Zgłoś tę ofertę",
+    "authorCancelled": "Autor odwołał tę grę.",
+    "youAreIn": "Jesteś w grze. Do zobaczenia na korcie!",
+    "requestSent": "Zgłoszenie wysłane. Autor odpowie wkrótce.",
+    "withdraw": "Wycofaj się",
+    "withdrawing": "Wycofywanie…",
+    "defaultAuthorName": "Autor",
+    "theAuthor": "autor",
+    "askToJoin": "Zgłoś się",
+    "sending": "Wysyłanie…",
+    "playersIn": "Zawodnicy w grze ({count})",
+    "nobodyYet": "Jeszcze nikogo.",
+    "aPlayer": "Zawodnik",
+    "thePlayer": "zawodnik",
+    "requestsCount": "Zgłoszenia ({count})",
+    "noRequestsWaiting": "Brak zgłoszeń.",
+    "accept": "Zaakceptuj",
+    "accepting": "Akceptowanie…",
+    "decline": "Odrzuć",
+    "declining": "Odrzucanie…",
+    "cancelOfferLabel": "Odwołaj ofertę",
+    "confirmCancel": "Tak, odwołaj",
+    "cancelling": "Odwoływanie…"
+  },
+  "AdminActionForm": {
+    "done": "Gotowe.",
+    "reasonLabel": "Powód do dziennika (opcjonalnie)"
+  },
+  "AdminReportsPage": {
+    "blockedPlayers": "Zablokowani zawodnicy ({count})",
+    "nobodyBlocked": "Nikt nie jest zablokowany.",
+    "aPlayer": "Zawodnik",
+    "aPlayerLower": "zawodnika",
+    "blockedSince": "Zablokowany od {date}",
+    "unblock": "Odblokuj",
+    "unblocking": "Odblokowywanie…",
+    "openReports": "Otwarte zgłoszenia ({count})",
+    "nothingWaiting": "Nic nie czeka.",
+    "reported": "zgłosił",
+    "aboutTheOffer": "Dotyczy oferty:",
+    "dismiss": "Odrzuć zgłoszenie",
+    "dismissing": "Odrzucanie…",
+    "cancelTheOffer": "Odwołaj ofertę",
+    "removeTheMessage": "Usuń wiadomość",
+    "hiding": "Usuwanie…",
+    "blockPlayer": "Zablokuj zawodnika",
+    "blocking": "Blokowanie…"
+  },
+  "AdminResultsPage": {
+    "disputed": "Zaskarżone ({count})",
+    "nothingWaiting": "Nic nie czeka.",
+    "theAuthor": "autor",
+    "thePlayer": "zawodnik",
+    "vs": "vs",
+    "noShowReport": "Zgłoszenie niejawienia się: {who} się nie zjawił, zgłoszone przez: {reportedBy}.",
+    "scoreFiledBy": "Wynik: {score} (najpierw gemy autora), zgłoszony przez: {reportedBy}.",
+    "confirm": "Potwierdź",
+    "confirming": "Potwierdzanie…",
+    "annul": "Unieważnij",
+    "annulling": "Unieważnianie…"
+  },
+  "ResultSection": {
+    "submitResultSummary": "Zgłoś wynik",
+    "reportedNoShowWaiting": "Zgłoszono, że {name} się nie zjawił. Czekamy, czy padnie sprzeciw w ciągu 72 godzin.",
+    "opponentReportedNoShow": "{name} zgłosił Twoją nieobecność.",
+    "dispute": "Zgłoś sprzeciw",
+    "disputing": "Zgłaszanie sprzeciwu…",
+    "noShowConfirmed": "Niejawienie się: {who} — potwierdzone automatycznie po 72 godzinach bez sprzeciwu.",
+    "you": "Ty",
+    "noShowDisputed": "Zgłoszenie niejawienia się zostało zaskarżone. Administrator je sprawdzi.",
+    "noShowAnnulled": "Administrator rozpatrzył sprzeciw i unieważnił to zgłoszenie niejawienia się.",
+    "resultSubmittedWaiting": "Wynik zgłoszony ({score}). Czekamy na potwierdzenie od: {name}.",
+    "opponentReported": "{name} zgłosił wynik: {score}.",
+    "confirm": "Potwierdź",
+    "confirming": "Potwierdzanie…",
+    "confirmed": "Potwierdzono: {score}.",
+    "yourElo": "Twoje ELO: {change}.",
+    "resultDisputed": "Wynik zaskarżony ({score}). Administrator go sprawdzi.",
+    "resultAnnulled": "Administrator rozpatrzył sprzeciw i unieważnił ten wynik ({score})."
+  },
+  "OfferLabels": {
+    "singles": "Singiel",
+    "doubles": "Debel",
+    "doublesWithPartner": "Debel · z partnerem",
+    "full": "Brak miejsc",
+    "spotsLeft": "{count, plural, one {1 wolne miejsce} few {# wolne miejsca} many {# wolnych miejsc} other {# wolnych miejsc}}",
+    "levelExact": "NTRP {min, number, ::.0}",
+    "levelRange": "NTRP {min, number, ::.0}–{max, number, ::.0}",
+    "levelAtLeast": "NTRP {min, number, ::.0}+",
+    "levelUpTo": "NTRP do {max, number, ::.0}",
+    "anyLevel": "Każdy poziom"
+  },
+  "Surface": {
+    "CLAY": "Ziemna",
+    "ARTIFICIAL_CLAY": "Sztuczna mączka",
+    "HARD": "Twarda",
+    "ARTIFICIAL_GRASS": "Sztuczna trawa",
+    "CARPET": "Wykładzina",
+    "GRASS": "Trawa"
+  },
+  "CourtStatus": {
+    "BOOKED": "Kort zarezerwowany",
+    "WILL_BOOK": "Zarezerwujemy po ustaleniu",
+    "ANY": "Rezerwuje, kto pierwszy"
+  },
+  "ClubsPage": {
+    "title": "Korty"
+  },
+  "ClubsView": {
+    "list": "Lista",
+    "map": "Mapa"
+  },
+  "ClubList": {
+    "noClubsYet": "Brak klubów.",
+    "detailsAriaLabel": "Szczegóły: {name}",
+    "details": "Szczegóły"
+  },
+  "ClubMap": {
+    "clubDetails": "Szczegóły klubu",
+    "loadingMap": "Wczytywanie mapy…"
+  },
+  "ClubPage": {
+    "notFound": "Klub nie znaleziony",
+    "courts": "Korty",
+    "surface": "Nawierzchnia",
+    "indoor": "Pod dachem",
+    "phone": "Telefon",
+    "website": "Strona",
+    "allCourts": "← Wszystkie korty",
+    "bookACourt": "Zarezerwuj kort",
+    "callToBook": "Zadzwoń, aby zarezerwować",
+    "prices": "Ceny",
+    "checkedOn": "Dane sprawdzone {date}. Ceny i godziny się zmieniają — potwierdź w klubie przed przyjazdem.",
+    "lookingForPartnerHere": "Szukają partnera tutaj",
+    "noOffers": "Brak otwartych ogłoszeń w tym klubie.",
+    "createOfferHere": "Dodaj ogłoszenie w tym klubie"
+  },
+  "OfferBookingSection": {
+    "aboutClub": "O klubie {name}",
+    "bookOnClubSite": "Zarezerwuj na stronie klubu",
+    "callToBook": "Zadzwoń, aby zarezerwować",
+    "bookedTheCourt": "Zarezerwowano kort?",
+    "markAsBooked": "Oznacz jako zarezerwowany",
+    "marking": "Oznaczanie…"
+  },
+  "JoinThread": {
+    "messages": "Wiadomości"
+  },
+  "MessageThread": {
+    "noMessagesYet": "Brak wiadomości.",
+    "you": "Ty",
+    "aPlayer": "Zawodnik",
+    "report": "Zgłoś",
+    "writeAMessage": "Napisz wiadomość…",
+    "sending": "Wysyłanie…",
+    "send": "Wyślij",
+    "readOnly": "Ta rozmowa jest teraz tylko do odczytu."
+  },
+  "PlayerPage": {
+    "notFound": "Zawodnik nie znaleziony",
+    "matchHistory": "Historia meczów",
+    "reportThisPlayer": "Zgłoś tego zawodnika"
+  },
+  "MatchHistory": {
+    "noMatches": "Brak meczów.",
+    "won": "Wygrana",
+    "lost": "Porażka",
+    "vs": "vs",
+    "aPlayer": "Zawodnik"
+  },
+  "PlayerFacts": {
+    "age": "Wiek",
+    "district": "Dzielnica",
+    "level": "Poziom (NTRP)",
+    "elo": "ELO",
+    "reliability": "Wiarygodność"
+  },
+  "ResultForm": {
+    "you": "Ty",
+    "scoreLegend": "Wynik",
+    "setLabel": "Set {set}",
+    "gamesAriaLabel": "Gemy: {name}, set {set}",
+    "addThirdSet": "+ Dodaj trzeci set",
+    "removeThirdSet": "Usuń trzeci set",
+    "whoWon": "Kto wygrał?",
+    "opponentNoShow": "Przeciwnik się nie zjawił",
+    "reporting": "Zgłaszanie…",
+    "reportNoShow": "Zgłoś niejawienie się",
+    "submitting": "Wysyłanie…",
+    "submit": "Wyślij wynik"
+  },
+  "ReportButton": {
+    "defaultLabel": "Zgłoś"
+  },
+  "ReportForm": {
+    "done": "Zgłoszono. Administrator to sprawdzi.",
+    "reasonRequired": "Wybierz powód.",
+    "reasonFieldLabel": "Powód",
+    "chooseReason": "Wybierz powód…",
+    "detailsFieldLabel": "Szczegóły (opcjonalnie)",
+    "detailsPlaceholder": "Dodaj szczegóły (opcjonalnie)",
+    "reporting": "Zgłaszanie…",
+    "submit": "Wyślij zgłoszenie"
+  },
+  "ReportReason": {
+    "NO_SHOW": "Nie zjawił się na meczu",
+    "ABUSIVE": "Niewłaściwe zachowanie",
+    "FAKE_SPAM": "Fałszywy profil lub spam",
+    "INAPPROPRIATE": "Nieodpowiednia treść",
+    "OTHER": "Inny powód"
+  },
+  "Gender": {
+    "MALE": "Mężczyzna",
+    "FEMALE": "Kobieta"
+  },
+  "Reliability": {
+    "new": "Nowy gracz",
+    "rated": "Wiarygodność {percent}%"
+  },
+  "IndoorCourts": {
+    "NONE": "Tylko na zewnątrz",
+    "PARTIAL": "Część kortów kryta cały rok",
+    "YEAR_ROUND": "Kryte cały rok",
+    "WINTER_BUBBLE": "Balon zimowy"
+  },
+  "Errors": {
+    "invalidRequest": "Nieprawidłowe żądanie.",
+    "tooManySignInEmails": "Za dużo e-maili logowania. Poczekaj minutę i spróbuj ponownie.",
+    "couldNotSendSignInLink": "Nie udało się wysłać linku logowania. Spróbuj za minutę.",
+    "blocked": "Twoje konto jest zablokowane do czasu decyzji administratora. Nie możesz tworzyć ofert, zgłoszeń ani wiadomości, dopóki administrator nie podejmie decyzji.",
+    "tooManyActiveOffers": "Masz już {max} aktywnych ofert. Odwołaj jedną, aby dodać kolejną.",
+    "clubNotFound": "Wybierz klub z listy.",
+    "offerNotFound": "Ta oferta nie istnieje.",
+    "threadNotFound": "Ta rozmowa nie istnieje.",
+    "threadReadOnly": "Ta rozmowa jest teraz tylko do odczytu.",
+    "joinNotFound": "To zgłoszenie nie istnieje.",
+    "alreadyCancelled": "Ta oferta jest już odwołana.",
+    "alreadyStarted": "Ta gra już się zaczęła.",
+    "cantReportYourself": "Nie możesz zgłosić samego siebie.",
+    "alreadyReported": "To zostało już zgłoszone.",
+    "checkTheForm": "Sprawdź formularz.",
+    "messageNotFound": "Ta wiadomość nie istnieje.",
+    "playerNotFound": "Ten zawodnik nie istnieje.",
+    "invalidSubscription": "Nieprawidłowa subskrypcja.",
+    "invalidSetting": "Nieprawidłowe ustawienie.",
+    "matchNotFound": "Ten mecz nie istnieje.",
+    "checkTheScore": "Sprawdź wynik.",
+    "resultNotFound": "Ten wynik nie istnieje.",
+    "noShowManualConfirmRefused": "Zgłoszenia niejawienia się nie potwierdza się ręcznie — zgłoś sprzeciw albo poczekaj, aż rozstrzygnie się automatycznie po 72 godzinach."
+  },
+  "SubmitResultRefusal": {
+    "NOT_PARTICIPANT": "To nie jest Twój mecz.",
+    "NOT_SINGLES": "Wynik zapisuje się tylko dla gry singlowej.",
+    "NOT_ACCEPTED": "To zgłoszenie nigdy nie zostało zaakceptowane.",
+    "NOT_STARTED": "Ten mecz jeszcze się nie zaczął.",
+    "ALREADY_SUBMITTED": "Dla tego meczu już zgłoszono wynik."
+  },
+  "SettleResultRefusal": {
+    "NOT_OPPONENT": "Tylko przeciwnik może potwierdzić ten wynik albo zgłosić sprzeciw.",
+    "NOT_PENDING": "Ten wynik został już rozstrzygnięty."
+  },
+  "JoinRefusal": {
+    "OWN_OFFER": "To Twoja własna oferta.",
+    "STARTED": "Ta gra już się zaczęła.",
+    "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
+    "ALREADY_REQUESTED": "Zgłoszenie do tej gry zostało już wysłane.",
+    "DECLINED": "Autor odrzucił to zgłoszenie."
+  },
+  "JoinChangeRefusal": {
+    "NOT_ALLOWED": "Tego zgłoszenia nie można już zmienić.",
+    "CANCELLED": "Ta oferta została odwołana.",
+    "STARTED": "Ta gra już się zaczęła.",
+    "FULL": "Wszystkie miejsca w tej grze są zajęte."
+  },
+  "RateLimit": {
+    "NEW_OFFER": "Dodano już dziś wiele ofert. Spróbuj ponownie jutro.",
+    "JOIN_REQUEST": "Wysłano już dziś wiele zgłoszeń. Spróbuj ponownie jutro.",
+    "MESSAGE": "Wiadomości są wysyłane za szybko. Poczekaj kilka minut.",
+    "REPORT": "Zgłoszono już dziś wiele skarg. Spróbuj ponownie jutro.",
+    "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie."
+  },
+  "Validation": {
+    "login": {
+      "emailRequired": "Podaj swój adres e-mail.",
+      "emailInvalid": "Podaj prawidłowy adres e-mail."
+    },
+    "message": {
+      "required": "Napisz wiadomość.",
+      "tooLong": "Wiadomość może mieć maksymalnie {max} znaków."
+    },
+    "profile": {
+      "nameRequired": "Podaj swoje imię.",
+      "nameTooLong": "Imię może mieć maksymalnie 50 znaków.",
+      "birthDateRequired": "Podaj datę urodzenia.",
+      "futureDate": "Ta data jest w przyszłości.",
+      "tooYoung": "Musisz mieć co najmniej {min} lat, aby się zarejestrować.",
+      "genderRequired": "Wybierz swoją płeć.",
+      "districtRequired": "Wybierz swoją dzielnicę.",
+      "levelRequired": "Wybierz swój poziom."
+    },
+    "offer": {
+      "levelRequired": "Wybierz poziom.",
+      "formatRequired": "Wybierz singla albo debla.",
+      "startsAtRequired": "Wybierz godzinę rozpoczęcia.",
+      "startsAtPast": "Ten termin już minął.",
+      "clubRequired": "Wybierz klub z listy.",
+      "districtRequired": "Wybierz dzielnicę.",
+      "surfaceRequired": "Wybierz nawierzchnię.",
+      "courtStatusRequired": "Wybierz status kortu.",
+      "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków.",
+      "partnerNeedsDoubles": "Partnera można dodać tylko do gry deblowej.",
+      "clubOrDistrictRequired": "Wybierz klub albo dzielnicę.",
+      "levelRangeInverted": "Najwyższy poziom nie może być niższy od najniższego."
+    },
+    "matchResult": {
+      "gamesRequired": "Podaj liczbę wygranych gemów.",
+      "winnerRequired": "Wybierz, kto wygrał.",
+      "invalidSetScore": "Set {set} nie jest prawidłowym wynikiem.",
+      "twoSetsSameWinner": "Przy dwóch setach ta sama strona musi wygrać oba.",
+      "thirdSetNeedsSplit": "Trzeci set gra się tylko, gdy pierwsze dwa są podzielone 1:1.",
+      "winnerMismatch": "Zwycięzca nie zgadza się z wynikiem."
+    },
+    "report": {
+      "reasonRequired": "Wybierz powód.",
+      "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków."
+    }
+  },
+  "OnboardingPage": {
+    "title": "Skonfiguruj swój profil",
+    "subtitle": "Inni zawodnicy widzą to, gdy publikujesz ogłoszenie lub się do niego zgłaszasz.",
+    "submit": "Zapisz profil"
+  },
+  "EditProfilePage": {
+    "title": "Edytuj profil",
+    "submit": "Zapisz zmiany",
+    "cancel": "Anuluj"
+  },
+  "ProfileForm": {
+    "nameLabel": "Imię",
+    "birthDateLabel": "Data urodzenia",
+    "birthDateHint": "Innym zawodnikom pokazujemy tylko Twój wiek.",
+    "genderLabel": "Płeć",
+    "districtLabel": "Dzielnica",
+    "levelLabel": "Poziom (NTRP)",
+    "levelHint": "1.5 to początkujący, 4.0 solidny gracz klubowy, 7.0 zawodowiec.",
+    "choose": "Wybierz…",
+    "saving": "Zapisywanie…"
+  },
+  "AvatarUpload": {
+    "wrongType": "Wybierz zdjęcie JPEG, PNG lub WebP.",
+    "tooLarge": "Zdjęcie ma ponad 5 MB. Wybierz mniejsze.",
+    "uploadFailed": "Nie udało się wysłać zdjęcia. Spróbuj ponownie.",
+    "invalidPhoto": "Nieprawidłowe zdjęcie.",
+    "previewAlt": "Podgląd nowego zdjęcia",
+    "saving": "Zapisywanie…",
+    "savePhoto": "Zapisz zdjęcie",
+    "cancel": "Anuluj",
+    "changePhoto": "Zmień zdjęcie",
+    "hint": "JPEG, PNG lub WebP, do 5 MB."
+  },
+  "PlayerAvatar": {
+    "photoAlt": "Zdjęcie: {name}"
+  },
+  "PushSubscribePrompt": {
+    "installTheApp": "Zainstaluj aplikację",
+    "toGetNotificationsOnIphone": "aby otrzymywać powiadomienia na iPhonie.",
+    "dismiss": "Zamknij",
+    "turnOnNotifications": "Włączyć powiadomienia o nowych zgłoszeniach i wiadomościach?",
+    "enabling": "Włączanie…",
+    "enable": "Włącz",
+    "notNow": "Nie teraz"
+  },
+  "PushSubscribeControl": {
+    "notSupported": "Ta przeglądarka nie wspiera powiadomień push.",
+    "permissionDenied": "Nie udzielono zgody.",
+    "noUsableSubscription": "Przeglądarka nie zwróciła prawidłowej subskrypcji.",
+    "couldNotSave": "Nie udało się zapisać subskrypcji.",
+    "notSetUp": "Powiadomienia push nie są jeszcze skonfigurowane.",
+    "installTheApp": "Zainstaluj aplikację",
+    "toGetNotificationsOnIphone": "aby otrzymywać powiadomienia na iPhonie.",
+    "unsupported": "Ta przeglądarka nie wspiera powiadomień push.",
+    "pushNotifications": "Powiadomienia push",
+    "getNotifiedOnThisDevice": "Otrzymuj powiadomienia na tym urządzeniu."
+  },
+  "NotificationSettingsPage": {
+    "title": "Powiadomienia",
+    "backToProfile": "Wróć do profilu"
+  },
+  "NotificationSettingsForm": {
+    "notifyMatches": {
+      "label": "Mecze i wiadomości",
+      "description": "Zgłoszenia, akceptacja/odmowa, czat, rezerwacja kortu, przypomnienia o meczach."
+    },
+    "notifyNewOffers": {
+      "label": "Nowe oferty na moim poziomie",
+      "description": "Nowa oferta sparingowa w Twojej dzielnicy i na Twoim poziomie NTRP."
+    },
+    "notifyEmailFallback": {
+      "label": "Zapasowy e-mail",
+      "description": "E-mail o ważnych wydarzeniach, gdy nie masz aktywnej subskrypcji push."
+    }
+  },
+  "UnsubscribePage": {
+    "title": "Powiadomienia e-mail",
+    "confirmPrompt": "Wyłączyć powiadomienia e-mail z MatchFinder? Możesz je włączyć ponownie w każdej chwili w ustawieniach powiadomień.",
+    "invalidLink": "Ten link jest nieprawidłowy.",
+    "invalidLinkLong": "Ten link jest nieprawidłowy. Powiadomieniami e-mail możesz zarządzać w ustawieniach powiadomień po zalogowaniu."
+  },
+  "UnsubscribeButton": {
+    "done": "Zrobione — nie będziesz już otrzymywać powiadomień e-mail z MatchFinder.",
+    "saving": "Zapisywanie…",
+    "turnOff": "Wyłącz powiadomienia e-mail"
+  },
+  "InstallPage": {
+    "title": "Zainstaluj MatchFinder",
+    "intro": "Instalacja aplikacji daje ikonę na ekranie głównym, a na iPhonie — jedyny sposób, by je w ogóle otrzymywać — powiadomienia o nowych zgłoszeniach, wiadomościach i meczach.",
+    "iosHeading": "iPhone lub iPad (Safari)",
+    "iosSteps": [
+      "Otwórz tę stronę w Safari (nie w Chrome ani innej przeglądarce).",
+      "Dotknij ikony Udostępnij (kwadrat ze strzałką do góry) na pasku narzędzi.",
+      "Przewiń i dotknij „Dodaj do ekranu głównego”.",
+      "Dotknij „Dodaj” w prawym górnym rogu.",
+      "Otwórz MatchFinder z nowej ikony na ekranie głównym — powiadomienia push działają tylko stamtąd, nie z samego Safari."
+    ],
+    "iosRequires": "Wymaga iOS 16.4 lub nowszego.",
+    "androidHeading": "Android (Chrome)",
+    "androidSteps": [
+      "Otwórz tę stronę w Chrome.",
+      "Dotknij menu (trzy punkty, prawy górny róg) i wybierz „Zainstaluj aplikację” albo „Dodaj do ekranu głównego”.",
+      "Potwierdź, dotykając „Zainstaluj”."
+    ],
+    "androidBanner": "Chrome może też sam pokazać baner instalacji — wtedy to również działa."
+  },
+  "LoginPage": {
+    "title": "Zaloguj się",
+    "subtitle": "Użyj konta Google albo poproś o link e-mailem — bez hasła.",
+    "expiredLink": "Ten link logowania jest nieprawidłowy albo wygasł. Podaj e-mail, aby otrzymać nowy.",
+    "orEmail": "albo przez e-mail"
+  },
+  "GoogleSignInButton": {
+    "continueWithGoogle": "Kontynuuj z Google",
+    "error": "Nie udało się uruchomić logowania przez Google. Spróbuj za minutę."
+  },
+  "LoginForm": {
+    "emailLabel": "E-mail",
+    "sending": "Wysyłanie…",
+    "submit": "Wyślij mi link logowania",
+    "checkEmailTitle": "Sprawdź e-mail",
+    "checkEmailBody": "Wysłaliśmy link logowania na adres <strong>{email}</strong>. Otwórz go na dowolnym urządzeniu, aby się zalogować."
+  }
+}

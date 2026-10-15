@@ -32,33 +32,34 @@ export function ageOn(birthDate: string, today: string): number {
   return birthdayPassed ? years : years - 1;
 }
 
-export const profileSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Enter your name.")
-    .max(50, "Keep your name under 50 characters."),
-  // A YYYY-MM-DD string, as <input type="date"> gives it.
-  birthDate: z.iso
-    .date("Enter your date of birth.")
-    .refine((date) => date <= todayInKrakow(), "That date is in the future.")
-    // A future date already has its own message; don't add a second one.
-    .refine(
-      (date) =>
-        date > todayInKrakow() || ageOn(date, todayInKrakow()) >= MIN_AGE,
-      `You must be at least ${String(MIN_AGE)} to join.`,
-    ),
-  gender: z.enum(Gender, "Choose your gender."),
-  district: z.enum(District, "Choose your district."),
-  // One check against the list the form offers, so a bad value gets one
-  // message rather than one per broken rule (range, step).
-  selfRatedNtrp: z
-    .number("Choose your level.")
-    .refine((level) => NTRP_LEVELS.includes(level), "Choose your level."),
-});
+type ValidationT = (key: string, values?: Record<string, number>) => string;
 
-export type ProfileInput = z.input<typeof profileSchema>;
-export type ProfileValues = z.output<typeof profileSchema>;
+/** `t` is a translator for the "Validation.profile" namespace (task 1.20). */
+export function profileSchema(t: ValidationT) {
+  return z.object({
+    name: z.string().trim().min(1, t("nameRequired")).max(50, t("nameTooLong")),
+    // A YYYY-MM-DD string, as <input type="date"> gives it.
+    birthDate: z.iso
+      .date(t("birthDateRequired"))
+      .refine((date) => date <= todayInKrakow(), t("futureDate"))
+      // A future date already has its own message; don't add a second one.
+      .refine(
+        (date) =>
+          date > todayInKrakow() || ageOn(date, todayInKrakow()) >= MIN_AGE,
+        t("tooYoung", { min: MIN_AGE }),
+      ),
+    gender: z.enum(Gender, t("genderRequired")),
+    district: z.enum(District, t("districtRequired")),
+    // One check against the list the form offers, so a bad value gets one
+    // message rather than one per broken rule (range, step).
+    selfRatedNtrp: z
+      .number(t("levelRequired"))
+      .refine((level) => NTRP_LEVELS.includes(level), t("levelRequired")),
+  });
+}
+
+export type ProfileInput = z.input<ReturnType<typeof profileSchema>>;
+export type ProfileValues = z.output<ReturnType<typeof profileSchema>>;
 
 // What a profile-saving server action returns when it doesn't redirect: the
 // first message per field, for the form to show next to it.
@@ -67,13 +68,26 @@ export type SaveProfileResult = {
   fieldErrors: Partial<Record<keyof ProfileInput, string>>;
 };
 
+// The schema is now a function (it needs a translator — task 1.20), so this
+// can't read `.shape` off it any more; the field set is static anyway.
+const PROFILE_FIELDS = new Set<keyof ProfileInput>([
+  "name",
+  "birthDate",
+  "gender",
+  "district",
+  "selfRatedNtrp",
+]);
+
 export function profileFieldErrors(error: z.ZodError): SaveProfileResult {
   const fieldErrors: SaveProfileResult["fieldErrors"] = {};
   for (const issue of error.issues) {
     // A request that isn't an object at all has no field to attach to; the
     // form never sends one, so it only gets `ok: false`.
     const field = issue.path[0];
-    if (typeof field === "string" && field in profileSchema.shape) {
+    if (
+      typeof field === "string" &&
+      PROFILE_FIELDS.has(field as keyof ProfileInput)
+    ) {
       fieldErrors[field as keyof ProfileInput] ??= issue.message;
     }
   }

@@ -1,8 +1,18 @@
+import { createTranslator } from "next-intl";
+
 import { db } from "@/lib/db";
-import { renderEmailHtml, renderEmailText } from "@/lib/email/template";
 import { sendEmail } from "@/lib/email/send";
+import { renderEmailHtml, renderEmailText } from "@/lib/email/template";
+import en from "@/messages/en.json";
+import pl from "@/messages/pl.json";
 import { createUnsubscribeToken } from "@/lib/notifications/unsubscribe-token";
 import { sendPush } from "@/lib/push/send-push";
+
+// Task 1.20: push and the email fallback go out in the recipient's own
+// saved language (users.locale) — there's no request/cookie to read it
+// from here, unlike every page render — so this uses next-intl's
+// standalone createTranslator() instead of getTranslations().
+const MESSAGES = { EN: en, PL: pl } as const;
 
 // The single entry point for every notification (task 5.16): `notify(userId,
 // event)` loads that user's subscriptions and settings, sends push to every
@@ -24,42 +34,6 @@ export type NotificationEvent =
   | { kind: "NEW_OFFER_FOR_LEVEL"; offerId: string };
 
 type Kind = NotificationEvent["kind"];
-
-const CONTENT: Record<Kind, { title: string; body: string }> = {
-  JOIN_REQUESTED: {
-    title: "New request to join",
-    body: "Someone asked to join your offer.",
-  },
-  JOIN_ACCEPTED: {
-    title: "Request accepted",
-    body: "Your request to join was accepted.",
-  },
-  JOIN_DECLINED: {
-    title: "Request declined",
-    body: "Your request to join was declined.",
-  },
-  NEW_MESSAGE: { title: "New message", body: "You have a new message." },
-  COURT_BOOKED: {
-    title: "Court booked",
-    body: "The court for your match has been booked.",
-  },
-  MATCH_REMINDER_3H: {
-    title: "Match starting soon",
-    body: "Your match starts in about 3 hours.",
-  },
-  HOW_DID_IT_GO: {
-    title: "How did the match go?",
-    body: "Submit the result so ratings can update.",
-  },
-  CONFIRM_RESULT_REMINDER: {
-    title: "Confirm the match result",
-    body: "A match result is waiting for your confirmation.",
-  },
-  NEW_OFFER_FOR_LEVEL: {
-    title: "New offer near you",
-    body: "A new sparring offer matches your level and district.",
-  },
-};
 
 // "Matches & messages" vs. "New offers for my level" (task 5.3) — the two
 // gated categories the settings toggles control.
@@ -129,6 +103,7 @@ export async function notify(
     where: { id: userId },
     select: {
       email: true,
+      locale: true,
       notifyMatches: true,
       notifyNewOffers: true,
       notifyEmailFallback: true,
@@ -149,7 +124,14 @@ export async function notify(
     return;
   }
 
-  const { title, body } = CONTENT[event.kind];
+  const { locale } = user;
+  const tNotifications = createTranslator({
+    locale: locale.toLowerCase(),
+    messages: MESSAGES[locale],
+    namespace: "PushNotifications",
+  });
+  const title = tNotifications(`${event.kind}.title`);
+  const body = tNotifications(`${event.kind}.body`);
   const path = `/offers/${event.offerId}`;
 
   let expiredCount = 0;
@@ -182,14 +164,20 @@ export async function notify(
     return;
   }
 
+  const tEmail = createTranslator({
+    locale: locale.toLowerCase(),
+    messages: MESSAGES[locale],
+    namespace: "EmailTemplate",
+  });
   const actionUrl = `${appUrl()}${path}`;
   const unsubscribeUrl = `${appUrl()}/unsubscribe?token=${createUnsubscribeToken(userId)}`;
   const templateInput = {
     heading: title,
     body,
     actionUrl,
-    actionLabel: "Open MatchFinder",
+    actionLabel: tEmail("actionLabel"),
     unsubscribeUrl,
+    unsubscribeLabel: tEmail("unsubscribeLabel"),
   };
   await sendEmail({
     to: user.email,

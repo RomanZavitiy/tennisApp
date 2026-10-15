@@ -8,13 +8,9 @@ import type { JoinStatus, OfferStatus } from "@/lib/generated/prisma/enums";
 export type JoinRefusal =
   "OWN_OFFER" | "STARTED" | "NOT_OPEN" | "ALREADY_REQUESTED" | "DECLINED";
 
-export const JOIN_REFUSAL_MESSAGES: Record<JoinRefusal, string> = {
-  OWN_OFFER: "This is your own offer.",
-  STARTED: "This game has already started.",
-  NOT_OPEN: "This offer is no longer taking players.",
-  ALREADY_REQUESTED: "You have already asked to join.",
-  DECLINED: "The author has declined your request.",
-};
+// Task 1.20: the message a caller shows for one of these codes comes from
+// the "JoinRefusal" translation namespace, keyed by this same code — not
+// from a Record here.
 
 /** Why the player can't ask to join, or null when they can. */
 export function joinRefusal({

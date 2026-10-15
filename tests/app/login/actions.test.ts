@@ -37,10 +37,7 @@ describe("sendMagicLink", () => {
   });
 
   it("refuses once the hourly limit is hit, without calling Supabase", async () => {
-    checkRateLimit.mockResolvedValue({
-      ok: false,
-      message: "Too many sign-in emails. Wait a bit and try again.",
-    });
+    checkRateLimit.mockResolvedValue({ ok: false });
 
     await expect(sendMagicLink(valid)).resolves.toEqual({
       ok: false,

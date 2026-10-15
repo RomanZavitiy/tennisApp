@@ -1,18 +1,24 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AvatarUpload } from "@/components/avatar-upload";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerFacts } from "@/components/player-facts";
 import { buttonVariants } from "@/components/ui/button";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { ageOn, todayInKrakow } from "@/lib/validation/profile";
 
-export const metadata: Metadata = { title: "Your profile" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ProfilePage");
+  return { title: t("title") };
+}
 
 // The player's own profile with their photo; the other fields are edited on
 // /profile/edit. The birth date stays private: only the age is shown.
 export default async function ProfilePage() {
+  const t = await getTranslations("ProfilePage");
   const profile = await requireOnboardedUser();
   const age = ageOn(
     profile.birthDate.toISOString().slice(0, 10),
@@ -44,7 +50,7 @@ export default async function ProfilePage() {
           className: "mt-6 w-full",
         })}
       >
-        Edit profile
+        {t("editProfile")}
       </Link>
       <Link
         href="/profile/notifications"
@@ -53,8 +59,12 @@ export default async function ProfilePage() {
           className: "mt-3 w-full",
         })}
       >
-        Notifications
+        {t("notifications")}
       </Link>
+      <div className="mt-6 flex items-center justify-between border-t pt-6">
+        <span className="text-sm text-muted-foreground">{t("language")}</span>
+        <LanguageSwitcher />
+      </div>
     </main>
   );
 }

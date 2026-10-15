@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { updateNotificationSetting } from "@/app/(member)/profile/notifications/actions";
@@ -16,28 +17,10 @@ export type NotificationSettings = {
   notifyEmailFallback: boolean;
 };
 
-const ROWS: {
-  key: keyof NotificationSettings;
-  label: string;
-  description: string;
-}[] = [
-  {
-    key: "notifyMatches",
-    label: "Matches & messages",
-    description:
-      "Join requests, accept/decline, chat, court booked, match reminders.",
-  },
-  {
-    key: "notifyNewOffers",
-    label: "New offers for my level",
-    description: "A new sparring offer near your district and NTRP level.",
-  },
-  {
-    key: "notifyEmailFallback",
-    label: "Email fallback",
-    description:
-      "Email you about key events when you have no active push subscription.",
-  },
+const ROW_KEYS: (keyof NotificationSettings)[] = [
+  "notifyMatches",
+  "notifyNewOffers",
+  "notifyEmailFallback",
 ];
 
 export function NotificationSettingsForm({
@@ -45,6 +28,7 @@ export function NotificationSettingsForm({
 }: {
   settings: NotificationSettings;
 }) {
+  const t = useTranslations("NotificationSettingsForm");
   const [values, setValues] = useState(settings);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -65,20 +49,20 @@ export function NotificationSettingsForm({
 
   return (
     <div className="space-y-5">
-      {ROWS.map((row) => (
-        <div key={row.key} className="flex items-start justify-between gap-4">
+      {ROW_KEYS.map((key) => (
+        <div key={key} className="flex items-start justify-between gap-4">
           <div>
-            <Label htmlFor={row.key}>{row.label}</Label>
+            <Label htmlFor={key}>{t(`${key}.label`)}</Label>
             <p className="mt-1 text-sm text-muted-foreground">
-              {row.description}
+              {t(`${key}.description`)}
             </p>
           </div>
           <Switch
-            id={row.key}
-            checked={values[row.key]}
+            id={key}
+            checked={values[key]}
             disabled={pending}
             onCheckedChange={() => {
-              toggle(row.key);
+              toggle(key);
             }}
           />
         </div>

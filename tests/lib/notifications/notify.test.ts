@@ -36,6 +36,7 @@ const NOW = new Date("2026-11-10T12:00:00Z");
 function user(over: Partial<Record<string, unknown>> = {}) {
   return {
     email: "player@example.com",
+    locale: "EN",
     notifyMatches: true,
     notifyNewOffers: true,
     notifyEmailFallback: true,

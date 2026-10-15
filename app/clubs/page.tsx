@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 
 import { ClubList } from "@/components/club-list";
@@ -6,7 +7,10 @@ import { ClubMap } from "@/components/club-map";
 import { ClubsView } from "@/components/clubs-view";
 import { db } from "@/lib/db";
 
-export const metadata: Metadata = { title: "Courts" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ClubsPage");
+  return { title: t("title") };
+}
 
 // The club list and the map, read here and passed down as props: no client
 // fetch. ClubsView keeps the two in sync (2.7).
@@ -25,10 +29,11 @@ export default async function ClubsPage() {
     },
     orderBy: { name: "asc" },
   });
+  const t = await getTranslations("ClubsPage");
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">Courts</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <ClubsView
         list={<ClubList clubs={clubs} />}
         map={

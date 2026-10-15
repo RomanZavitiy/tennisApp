@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -31,13 +32,14 @@ export function OfferBookingSection({
   isAuthor: boolean;
   courtStatus: CourtStatus;
 }) {
+  const t = useTranslations("OfferBookingSection");
   const [clicked, setClicked] = useState(false);
 
   return (
     <div className="mt-3">
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <Link href={`/clubs/${club.id}`} className="hover:underline">
-          About {club.name}
+          {t("aboutClub", { name: club.name })}
         </Link>
         <BookingLink
           clubId={club.id}
@@ -45,8 +47,8 @@ export function OfferBookingSection({
           bookingUrl={club.bookingUrl}
           phone={club.phone}
           className={buttonVariants({ variant: "outline", size: "sm" })}
-          urlLabel="Book on club's site"
-          phoneLabel="Call to book"
+          urlLabel={t("bookOnClubSite")}
+          phoneLabel={t("callToBook")}
           onClick={() => {
             setClicked(true);
           }}
@@ -54,11 +56,11 @@ export function OfferBookingSection({
       </div>
       {isAuthor && courtStatus !== "BOOKED" && clicked && (
         <div className="mt-3 space-y-2 rounded-lg border p-3 text-sm">
-          <p>Booked the court?</p>
+          <p>{t("bookedTheCourt")}</p>
           <OfferActionButton
             action={markCourtBooked.bind(null, offerId)}
-            label="Mark it as booked"
-            pendingLabel="Marking…"
+            label={t("markAsBooked")}
+            pendingLabel={t("marking")}
           />
         </div>
       )}

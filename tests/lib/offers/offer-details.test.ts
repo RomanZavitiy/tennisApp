@@ -116,6 +116,7 @@ describe("getOfferDetails", () => {
       select: {
         id: true,
         name: true,
+        avatarPath: true,
         selfRatedNtrp: true,
         scheduledMatches: true,
         noShows: true,

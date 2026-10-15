@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import type { District } from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { reliabilityLabel, type Reliability } from "@/lib/rating/reliability";
@@ -21,13 +23,21 @@ export function PlayerFacts({
   elo?: number;
   reliability?: Reliability;
 }) {
+  const t = useTranslations("PlayerFacts");
+  const tReliability = useTranslations("Reliability");
+
   const facts = [
-    { label: "Age", value: String(age) },
-    { label: "District", value: DISTRICT_LABELS[district] },
-    { label: "Level (NTRP)", value: selfRatedNtrp.toFixed(1) },
-    ...(elo !== undefined ? [{ label: "ELO", value: String(elo) }] : []),
+    { label: t("age"), value: String(age) },
+    { label: t("district"), value: DISTRICT_LABELS[district] },
+    { label: t("level"), value: selfRatedNtrp.toFixed(1) },
+    ...(elo !== undefined ? [{ label: t("elo"), value: String(elo) }] : []),
     ...(reliability
-      ? [{ label: "Reliability", value: reliabilityLabel(reliability) }]
+      ? [
+          {
+            label: t("reliability"),
+            value: reliabilityLabel(tReliability, reliability),
+          },
+        ]
       : []),
   ];
 

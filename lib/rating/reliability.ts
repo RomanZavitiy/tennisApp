@@ -110,9 +110,16 @@ export function computeReliability(counts: ReliabilityCounts): Reliability {
   };
 }
 
-/** "Reliable 95%" or "New player" (decision 2026-10-14) — no colour, just the number. */
-export function reliabilityLabel(reliability: Reliability): string {
+/**
+ * "Reliable 95%" or "New player" (decision 2026-10-14) — no colour, just
+ * the number. `t` is a translator for the "Reliability" namespace
+ * (task 1.20).
+ */
+export function reliabilityLabel(
+  t: (key: string, values?: Record<string, number>) => string,
+  reliability: Reliability,
+): string {
   return reliability.kind === "new"
-    ? "New player"
-    : `Reliable ${String(reliability.percent)}%`;
+    ? t("new")
+    : t("rated", { percent: reliability.percent });
 }

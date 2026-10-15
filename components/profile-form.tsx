@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useForm, type FieldError } from "react-hook-form";
 
@@ -11,11 +12,8 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import {
-  DISTRICT_LABELS,
-  GENDER_LABELS,
-  NTRP_LEVELS,
-} from "@/lib/profile/options";
+import { Gender } from "@/lib/generated/prisma/enums";
+import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
 import {
   profileSchema,
   type ProfileInput,
@@ -35,13 +33,16 @@ export function ProfileForm({
   submitLabel: string;
   defaultValues?: ProfileInput;
 }) {
+  const t = useTranslations("ProfileForm");
+  const tGender = useTranslations("Gender");
+  const tValidation = useTranslations("Validation.profile");
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<ProfileInput>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(profileSchema(tValidation)),
     defaultValues,
   });
 
@@ -59,7 +60,7 @@ export function ProfileForm({
       onSubmit={(event) => void handleSubmit(onSubmit)(event)}
       className="space-y-5"
     >
-      <Field id="name" label="Name" error={errors.name}>
+      <Field id="name" label={t("nameLabel")} error={errors.name}>
         <Input
           id="name"
           autoComplete="given-name"
@@ -70,8 +71,8 @@ export function ProfileForm({
 
       <Field
         id="birthDate"
-        label="Date of birth"
-        hint="Only your age is shown to other players."
+        label={t("birthDateLabel")}
+        hint={t("birthDateHint")}
         error={errors.birthDate}
       >
         <Input
@@ -83,7 +84,7 @@ export function ProfileForm({
         />
       </Field>
 
-      <Field id="gender" label="Gender" error={errors.gender}>
+      <Field id="gender" label={t("genderLabel")} error={errors.gender}>
         <NativeSelect
           id="gender"
           className="w-full"
@@ -94,17 +95,17 @@ export function ProfileForm({
           {...register("gender")}
         >
           <NativeSelectOption value="" disabled>
-            Choose…
+            {t("choose")}
           </NativeSelectOption>
-          {Object.entries(GENDER_LABELS).map(([value, label]) => (
+          {Object.values(Gender).map((value) => (
             <NativeSelectOption key={value} value={value}>
-              {label}
+              {tGender(value)}
             </NativeSelectOption>
           ))}
         </NativeSelect>
       </Field>
 
-      <Field id="district" label="District" error={errors.district}>
+      <Field id="district" label={t("districtLabel")} error={errors.district}>
         <NativeSelect
           id="district"
           className="w-full"
@@ -113,7 +114,7 @@ export function ProfileForm({
           {...register("district")}
         >
           <NativeSelectOption value="" disabled>
-            Choose…
+            {t("choose")}
           </NativeSelectOption>
           {Object.entries(DISTRICT_LABELS).map(([value, label]) => (
             <NativeSelectOption key={value} value={value}>
@@ -125,8 +126,8 @@ export function ProfileForm({
 
       <Field
         id="selfRatedNtrp"
-        label="Level (NTRP)"
-        hint="1.5 is a beginner, 4.0 a solid club player, 7.0 a touring pro."
+        label={t("levelLabel")}
+        hint={t("levelHint")}
         error={errors.selfRatedNtrp}
       >
         <NativeSelect
@@ -137,7 +138,7 @@ export function ProfileForm({
           {...register("selfRatedNtrp", { valueAsNumber: true })}
         >
           <NativeSelectOption value="" disabled>
-            Choose…
+            {t("choose")}
           </NativeSelectOption>
           {NTRP_LEVELS.map((level) => (
             <NativeSelectOption key={level} value={level}>
@@ -148,7 +149,7 @@ export function ProfileForm({
       </Field>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Saving…" : submitLabel}
+        {isSubmitting ? t("saving") : submitLabel}
       </Button>
     </form>
   );

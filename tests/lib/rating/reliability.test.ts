@@ -9,6 +9,9 @@ import {
   recordScheduledMatch,
   reliabilityLabel,
 } from "@/lib/rating/reliability";
+import { testTranslator } from "@/tests/helpers/translator";
+
+const t = testTranslator("Reliability");
 
 const NOW = new Date("2026-10-20T10:00:00Z");
 const AUTHOR = "author-id";
@@ -164,11 +167,11 @@ describe("computeReliability", () => {
 
 describe("reliabilityLabel", () => {
   it('is "New player" below the threshold', () => {
-    expect(reliabilityLabel({ kind: "new" })).toBe("New player");
+    expect(reliabilityLabel(t, { kind: "new" })).toBe("New player");
   });
 
   it('is "Reliable N%" once rated', () => {
-    expect(reliabilityLabel({ kind: "rated", percent: 95 })).toBe(
+    expect(reliabilityLabel(t, { kind: "rated", percent: 95 })).toBe(
       "Reliable 95%",
     );
   });

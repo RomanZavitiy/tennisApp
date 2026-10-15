@@ -1,11 +1,11 @@
 "use server";
 
+import { getTranslations } from "next-intl/server";
+
 import { db } from "@/lib/db";
 import { verifyUnsubscribeToken } from "@/lib/notifications/unsubscribe-token";
 
 export type UnsubscribeResult = { ok: true } | { ok: false; message: string };
-
-const INVALID_TOKEN_MESSAGE = "This link isn't valid.";
 
 // The no-login "turn off email notifications" link from a fallback email
 // (task 5.3). A forged or expired-looking token is refused the same way a
@@ -14,13 +14,15 @@ const INVALID_TOKEN_MESSAGE = "This link isn't valid.";
 export async function confirmUnsubscribe(
   token: unknown,
 ): Promise<UnsubscribeResult> {
+  const t = await getTranslations("UnsubscribePage");
+
   if (typeof token !== "string") {
-    return { ok: false, message: INVALID_TOKEN_MESSAGE };
+    return { ok: false, message: t("invalidLink") };
   }
 
   const userId = verifyUnsubscribeToken(token);
   if (!userId) {
-    return { ok: false, message: INVALID_TOKEN_MESSAGE };
+    return { ok: false, message: t("invalidLink") };
   }
 
   // updateMany, not update: a token can outlive the account it names (6.15,

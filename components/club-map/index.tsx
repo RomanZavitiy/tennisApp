@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 
 import type { ClubMapProps } from "./club-map";
@@ -12,12 +13,17 @@ export type { ClubMapMarker, ClubMapProps } from "./club-map";
 // the club data as props.
 const ClubMapClient = dynamic(() => import("./club-map"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center bg-muted text-sm text-muted-foreground">
-      Loading map…
-    </div>
-  ),
+  loading: LoadingMap,
 });
+
+function LoadingMap() {
+  const t = useTranslations("ClubMap");
+  return (
+    <div className="flex h-full items-center justify-center bg-muted text-sm text-muted-foreground">
+      {t("loadingMap")}
+    </div>
+  );
+}
 
 // `className` sizes the map: it needs an explicit height to render at all.
 export function ClubMap({

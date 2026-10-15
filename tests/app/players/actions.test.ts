@@ -28,11 +28,13 @@ describe("reportPlayer", () => {
   it("files a direct report against the player, with no offer or message context", async () => {
     await reportPlayer(TARGET, { reason: "NO_SHOW" });
 
-    expect(createReport).toHaveBeenCalledWith({
-      reporterId: ME,
-      targetUserId: TARGET,
-      input: { reason: "NO_SHOW", comment: undefined },
-    });
+    expect(createReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reporterId: ME,
+        targetUserId: TARGET,
+        input: { reason: "NO_SHOW", comment: undefined },
+      }),
+    );
   });
 
   it("treats a player who doesn't exist as not found", async () => {

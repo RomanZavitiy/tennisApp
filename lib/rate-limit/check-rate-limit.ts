@@ -21,46 +21,29 @@ const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
+// Task 1.20: the message a refused caller shows comes from the "RateLimit"
+// translation namespace, keyed by this same RateLimitAction — not from
+// here, so this table only needs to know the English-agnostic numbers.
 const RATE_LIMITS: Record<
   RateLimitAction,
-  { windowMs: number; limit: number; message: string }
+  { windowMs: number; limit: number }
 > = {
   // 6.17: at most 10 new offers a day.
-  NEW_OFFER: {
-    windowMs: DAY_MS,
-    limit: 10,
-    message: "You've posted a lot of offers today. Try again tomorrow.",
-  },
+  NEW_OFFER: { windowMs: DAY_MS, limit: 10 },
   // 6.17: at most 20 join requests a day.
-  JOIN_REQUEST: {
-    windowMs: DAY_MS,
-    limit: 20,
-    message: "You've sent a lot of join requests today. Try again tomorrow.",
-  },
+  JOIN_REQUEST: { windowMs: DAY_MS, limit: 20 },
   // 6.16: at most 60 chat messages every 10 minutes.
-  MESSAGE: {
-    windowMs: 10 * MINUTE_MS,
-    limit: 60,
-    message: "You're sending messages too quickly. Wait a few minutes.",
-  },
+  MESSAGE: { windowMs: 10 * MINUTE_MS, limit: 60 },
   // 6.18: at most 10 reports a day.
-  REPORT: {
-    windowMs: DAY_MS,
-    limit: 10,
-    message: "You've filed a lot of reports today. Try again tomorrow.",
-  },
+  REPORT: { windowMs: DAY_MS, limit: 10 },
   // 6.16 (decision 2026-10-14): at most 5 magic links an hour per email —
   // checked here before Supabase's own request, which has a stricter,
   // less friendly limit of its own (app/login/actions.ts already handles
   // Supabase's 429 too, for whichever check a burst happens to hit first).
-  MAGIC_LINK: {
-    windowMs: HOUR_MS,
-    limit: 5,
-    message: "Too many sign-in emails. Wait a bit and try again.",
-  },
+  MAGIC_LINK: { windowMs: HOUR_MS, limit: 5 },
 };
 
-export type RateLimitResult = { ok: true } | { ok: false; message: string };
+export type RateLimitResult = { ok: true } | { ok: false };
 
 /**
  * Counts one more `action` from `subject` in the current fixed window, and
@@ -73,7 +56,7 @@ export async function checkRateLimit(
   action: RateLimitAction,
   now: Date = new Date(),
 ): Promise<RateLimitResult> {
-  const { windowMs, limit, message } = RATE_LIMITS[action];
+  const { windowMs, limit } = RATE_LIMITS[action];
   const windowStart = new Date(Math.floor(now.getTime() / windowMs) * windowMs);
 
   const row = await db.rateLimitCounter.upsert({
@@ -83,5 +66,5 @@ export async function checkRateLimit(
     select: { count: true },
   });
 
-  return row.count > limit ? { ok: false, message } : { ok: true };
+  return row.count > limit ? { ok: false } : { ok: true };
 }

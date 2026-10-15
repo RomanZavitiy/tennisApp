@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 
 import { safeNextPath } from "@/lib/auth/routes";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
@@ -17,17 +18,21 @@ export type SendMagicLinkResult = { ok: true } | { ok: false; message: string };
 export async function sendMagicLink(
   input: unknown,
 ): Promise<SendMagicLinkResult> {
-  const parsed = magicLinkRequestSchema.safeParse(input);
+  const t = await getTranslations("Validation.login");
+  const tErrors = await getTranslations("Errors");
+  const tRateLimit = await getTranslations("RateLimit");
+
+  const parsed = magicLinkRequestSchema(t).safeParse(input);
   if (!parsed.success) {
     return {
       ok: false,
-      message: parsed.error.issues[0]?.message ?? "Invalid request.",
+      message: parsed.error.issues[0]?.message ?? tErrors("invalidRequest"),
     };
   }
 
   const origin = (await headers()).get("origin");
   if (!origin) {
-    return { ok: false, message: "Invalid request." };
+    return { ok: false, message: tErrors("invalidRequest") };
   }
 
   // Own pre-check (task 6.16, decision 2026-10-14): 5 magic links an hour
@@ -35,7 +40,7 @@ export async function sendMagicLink(
   // the email the form sent rather than whatever Supabase's limit keys by.
   const limited = await checkRateLimit(parsed.data.email, "MAGIC_LINK");
   if (!limited.ok) {
-    return limited;
+    return { ok: false, message: tRateLimit("MAGIC_LINK") };
   }
 
   const redirectTo = new URL("/auth/callback", origin);
@@ -52,8 +57,8 @@ export async function sendMagicLink(
       ok: false,
       message:
         error.status === 429
-          ? "Too many sign-in emails. Wait a minute and try again."
-          : "Couldn't send the sign-in link. Try again in a minute.",
+          ? tErrors("tooManySignInEmails")
+          : tErrors("couldNotSendSignInLink"),
     };
   }
 

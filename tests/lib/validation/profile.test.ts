@@ -6,6 +6,9 @@ import {
   todayInKrakow,
   type ProfileInput,
 } from "@/lib/validation/profile";
+import { testTranslator } from "@/tests/helpers/translator";
+
+const t = testTranslator("Validation.profile");
 
 const valid: ProfileInput = {
   name: "Ola",
@@ -16,7 +19,7 @@ const valid: ProfileInput = {
 };
 
 function errorsFor(input: Partial<Record<keyof ProfileInput, unknown>>) {
-  const result = profileSchema.safeParse({ ...valid, ...input });
+  const result = profileSchema(t).safeParse({ ...valid, ...input });
   return result.success
     ? []
     : result.error.issues.map((issue) => issue.message);
@@ -56,7 +59,9 @@ describe("profileSchema", () => {
   });
 
   it("accepts a complete profile and trims the name", () => {
-    expect(profileSchema.parse({ ...valid, name: "  Ola  " })).toEqual(valid);
+    expect(profileSchema(t).parse({ ...valid, name: "  Ola  " })).toEqual(
+      valid,
+    );
   });
 
   it.each(["", "   "])("rejects the empty name %j", (name) => {

@@ -1,4 +1,4 @@
-import type { District, Gender } from "@/lib/generated/prisma/enums";
+import type { District } from "@/lib/generated/prisma/enums";
 
 // What the profile form offers and how profile values are shown. Values come
 // from the Prisma enums; `Record<District, string>` makes the compiler insist
@@ -24,11 +24,6 @@ export const DISTRICT_LABELS: Record<District, string> = {
   BIENCZYCE: "Bieńczyce",
   WZGORZA_KRZESLAWICKIE: "Wzgórza Krzesławickie",
   NOWA_HUTA: "Nowa Huta",
-};
-
-export const GENDER_LABELS: Record<Gender, string> = {
-  MALE: "Male",
-  FEMALE: "Female",
 };
 
 export const NTRP_MIN = 1.5;

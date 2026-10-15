@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 // The return address uses the current origin, so a preview deployment comes
 // back to itself (it must be in Supabase's Redirect URLs).
 export function GoogleSignInButton({ next }: { next: string }) {
+  const t = useTranslations("GoogleSignInButton");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +30,7 @@ export function GoogleSignInButton({ next }: { next: string }) {
 
     // On success the browser is already leaving for Google.
     if (error) {
-      setError("Couldn't start Google sign-in. Try again in a minute.");
+      setError(t("error"));
       setPending(false);
     }
   }
@@ -42,7 +44,7 @@ export function GoogleSignInButton({ next }: { next: string }) {
         disabled={pending}
         onClick={() => void signIn()}
       >
-        Continue with Google
+        {t("continueWithGoogle")}
       </Button>
       {error && (
         <p role="alert" className="text-sm text-destructive">

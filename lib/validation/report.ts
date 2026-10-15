@@ -8,23 +8,28 @@ import { ReportReason } from "@/lib/generated/prisma/enums";
 
 export const REPORT_COMMENT_MAX = 500;
 
+type ValidationT = (key: string, values?: Record<string, number>) => string;
+
 // A textarea sends "" when left empty; treat it as "not given".
 const emptyToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
-export const reportInputSchema = z.object({
-  reason: z.enum(ReportReason, "Choose a reason."),
-  comment: z.preprocess(
-    emptyToUndefined,
-    z
-      .string()
-      .trim()
-      .max(
-        REPORT_COMMENT_MAX,
-        `Keep the comment under ${String(REPORT_COMMENT_MAX)} characters.`,
-      )
-      .optional(),
-  ),
-});
+/** `t` is a translator for the "Validation.report" namespace (task 1.20). */
+export function reportInputSchema(t: ValidationT) {
+  return z.object({
+    reason: z.enum(ReportReason, t("reasonRequired")),
+    comment: z.preprocess(
+      emptyToUndefined,
+      z
+        .string()
+        .trim()
+        .max(
+          REPORT_COMMENT_MAX,
+          t("commentTooLong", { max: REPORT_COMMENT_MAX }),
+        )
+        .optional(),
+    ),
+  });
+}
 
-export type ReportInput = z.infer<typeof reportInputSchema>;
+export type ReportInput = z.infer<ReturnType<typeof reportInputSchema>>;

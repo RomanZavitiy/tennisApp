@@ -10,5 +10,7 @@ export default defineConfig({
     // Unit/integration tests only; Playwright specs live in e2e/ (task 0.23).
     include: ["tests/**/*.test.ts"],
     environment: "node",
+    // Stubs next-intl/server (task 1.20) — see the file for why.
+    setupFiles: ["./tests/setup/next-intl.ts"],
   },
 });

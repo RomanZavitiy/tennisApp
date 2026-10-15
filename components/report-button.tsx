@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ReportForm } from "@/components/report-form";
@@ -10,7 +11,7 @@ type ReportActionResult = { ok: true } | { ok: false; message: string };
 /** A toggle for ReportForm, same "details" convention as ResultForm. */
 export function ReportButton({
   action,
-  label = "Report",
+  label,
 }: {
   action: (input: {
     reason: ReportReason;
@@ -18,6 +19,7 @@ export function ReportButton({
   }) => Promise<ReportActionResult>;
   label?: string;
 }) {
+  const t = useTranslations("ReportButton");
   const [open, setOpen] = useState(false);
 
   if (open) {
@@ -31,7 +33,7 @@ export function ReportButton({
         setOpen(true);
       }}
     >
-      {label}
+      {label ?? t("defaultLabel")}
     </button>
   );
 }

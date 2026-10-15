@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { requireUser } from "@/lib/auth/require-user";
@@ -19,10 +20,11 @@ export async function savePushSubscription(
   input: unknown,
 ): Promise<ActionResult> {
   const user = await requireUser();
+  const t = await getTranslations("Errors");
 
   const parsed = pushSubscriptionSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, message: "Invalid subscription." };
+    return { ok: false, message: t("invalidSubscription") };
   }
 
   await db.pushSubscription.upsert({
@@ -43,10 +45,11 @@ export async function removePushSubscription(
   endpoint: unknown,
 ): Promise<ActionResult> {
   const user = await requireUser();
+  const t = await getTranslations("Errors");
 
   const parsed = z.url().max(500).safeParse(endpoint);
   if (!parsed.success) {
-    return { ok: false, message: "Invalid subscription." };
+    return { ok: false, message: t("invalidSubscription") };
   }
 
   await db.pushSubscription.deleteMany({
@@ -70,10 +73,11 @@ export async function updateNotificationSetting(
   input: unknown,
 ): Promise<ActionResult> {
   const user = await requireUser();
+  const t = await getTranslations("Errors");
 
   const parsed = notificationSettingsSchema.partial().safeParse(input);
   if (!parsed.success || Object.keys(parsed.data).length !== 1) {
-    return { ok: false, message: "Invalid setting." };
+    return { ok: false, message: t("invalidSetting") };
   }
 
   await db.user.update({ where: { id: user.id }, data: parsed.data });

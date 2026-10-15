@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { confirmUnsubscribe } from "@/app/unsubscribe/actions";
 import { UnsubscribeButton } from "@/components/unsubscribe-button";
 import { verifyUnsubscribeToken } from "@/lib/notifications/unsubscribe-token";
 
-export const metadata: Metadata = { title: "Unsubscribe" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("UnsubscribePage");
+  return { title: t("title") };
+}
 
 type UnsubscribePageProps = {
   searchParams: Promise<{ token?: string }>;
@@ -20,17 +24,15 @@ export default async function UnsubscribePage({
   const { token } = await searchParams;
   const valid =
     typeof token === "string" && verifyUnsubscribeToken(token) !== null;
+  const t = await getTranslations("UnsubscribePage");
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Email notifications
-      </h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       {valid ? (
         <>
           <p className="mt-2 text-sm text-muted-foreground">
-            Turn off email notifications for MatchFinder? You can turn them back
-            on any time from your notification settings.
+            {t("confirmPrompt")}
           </p>
           <div className="mt-6">
             <UnsubscribeButton action={confirmUnsubscribe.bind(null, token)} />
@@ -38,8 +40,7 @@ export default async function UnsubscribePage({
         </>
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">
-          This link isn’t valid. You can manage email notifications from your
-          notification settings while signed in instead.
+          {t("invalidLinkLong")}
         </p>
       )}
     </main>

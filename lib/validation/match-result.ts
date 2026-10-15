@@ -11,14 +11,24 @@ import { z } from "zod";
 // doesn't play a third. The declared winner must be whoever actually won
 // two sets.
 
-const gamesSchema = z.number("Enter the games won.").int().min(0).max(30);
+type ValidationT = (
+  key: string,
+  values?: Record<string, number | string>,
+) => string;
 
-export const setScoreSchema = z.object({
-  author: gamesSchema,
-  player: gamesSchema,
-});
+function gamesSchema(t: ValidationT) {
+  return z.number(t("gamesRequired")).int().min(0).max(30);
+}
 
-export type SetScore = z.infer<typeof setScoreSchema>;
+/** `t` is a translator for the "Validation.matchResult" namespace (task 1.20). */
+export function setScoreSchema(t: ValidationT) {
+  return z.object({
+    author: gamesSchema(t),
+    player: gamesSchema(t),
+  });
+}
+
+export type SetScore = z.infer<ReturnType<typeof setScoreSchema>>;
 
 type SetOutcome = "AUTHOR" | "PLAYER" | null;
 
@@ -46,72 +56,74 @@ function setOutcome(set: SetScore): SetOutcome {
   return set.author > set.player ? "AUTHOR" : "PLAYER";
 }
 
-export const matchScoreSchema = z
-  .object({
-    sets: z.array(setScoreSchema).min(2).max(3),
-    winner: z.enum(["AUTHOR", "PLAYER"], "Choose who won."),
-  })
-  .superRefine((value, ctx) => {
-    const { sets } = value;
-    sets.forEach((set, index) => {
-      if (!isValidSet(set, index === 2)) {
+export function matchScoreSchema(t: ValidationT) {
+  return z
+    .object({
+      sets: z.array(setScoreSchema(t)).min(2).max(3),
+      winner: z.enum(["AUTHOR", "PLAYER"], t("winnerRequired")),
+    })
+    .superRefine((value, ctx) => {
+      const { sets } = value;
+      sets.forEach((set, index) => {
+        if (!isValidSet(set, index === 2)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["sets", index],
+            message: t("invalidSetScore", { set: index + 1 }),
+          });
+        }
+      });
+      if (!sets.every((set, index) => isValidSet(set, index === 2))) {
+        return;
+      }
+
+      const outcomes = sets.map(setOutcome);
+      const authorWins = outcomes.filter(
+        (outcome) => outcome === "AUTHOR",
+      ).length;
+      const playerWins = outcomes.filter(
+        (outcome) => outcome === "PLAYER",
+      ).length;
+
+      // Reported on "winner", not "sets": these are whole-match problems, not
+      // any one set's, and "winner" is always a plain field — unlike "sets",
+      // which is itself an array, so a form (4.6) can show them in one place
+      // without juggling an error that sometimes belongs to the array and
+      // sometimes to one of its items.
+      if (sets.length === 2) {
+        if (authorWins !== 2 && playerWins !== 2) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["winner"],
+            message: t("twoSetsSameWinner"),
+          });
+          return;
+        }
+      } else {
+        const firstTwoSplit =
+          outcomes[0] !== outcomes[1] &&
+          outcomes[0] !== null &&
+          outcomes[1] !== null;
+        if (!firstTwoSplit) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["winner"],
+            message: t("thirdSetNeedsSplit"),
+          });
+          return;
+        }
+      }
+
+      const scoreWinner = authorWins > playerWins ? "AUTHOR" : "PLAYER";
+      if (scoreWinner !== value.winner) {
         ctx.addIssue({
           code: "custom",
-          path: ["sets", index],
-          message: `Set ${String(index + 1)} isn't a valid score.`,
+          path: ["winner"],
+          message: t("winnerMismatch"),
         });
       }
     });
-    if (!sets.every((set, index) => isValidSet(set, index === 2))) {
-      return;
-    }
+}
 
-    const outcomes = sets.map(setOutcome);
-    const authorWins = outcomes.filter(
-      (outcome) => outcome === "AUTHOR",
-    ).length;
-    const playerWins = outcomes.filter(
-      (outcome) => outcome === "PLAYER",
-    ).length;
-
-    // Reported on "winner", not "sets": these are whole-match problems, not
-    // any one set's, and "winner" is always a plain field — unlike "sets",
-    // which is itself an array, so a form (4.6) can show them in one place
-    // without juggling an error that sometimes belongs to the array and
-    // sometimes to one of its items.
-    if (sets.length === 2) {
-      if (authorWins !== 2 && playerWins !== 2) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["winner"],
-          message: "With two sets, the same side must win both.",
-        });
-        return;
-      }
-    } else {
-      const firstTwoSplit =
-        outcomes[0] !== outcomes[1] &&
-        outcomes[0] !== null &&
-        outcomes[1] !== null;
-      if (!firstTwoSplit) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["winner"],
-          message: "A third set is only played when the first two are split.",
-        });
-        return;
-      }
-    }
-
-    const scoreWinner = authorWins > playerWins ? "AUTHOR" : "PLAYER";
-    if (scoreWinner !== value.winner) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["winner"],
-        message: "The winner doesn't match the score.",
-      });
-    }
-  });
-
-export type MatchScoreInput = z.input<typeof matchScoreSchema>;
-export type MatchScoreValues = z.output<typeof matchScoreSchema>;
+export type MatchScoreInput = z.input<ReturnType<typeof matchScoreSchema>>;
+export type MatchScoreValues = z.output<ReturnType<typeof matchScoreSchema>>;

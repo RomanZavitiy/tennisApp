@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { requireUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
@@ -23,7 +24,8 @@ export async function completeOnboarding(
 ): Promise<SaveProfileResult> {
   const user = await requireUser();
 
-  const parsed = profileSchema.safeParse(input);
+  const t = await getTranslations("Validation.profile");
+  const parsed = profileSchema(t).safeParse(input);
   if (!parsed.success) {
     return profileFieldErrors(parsed.error);
   }

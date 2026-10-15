@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
@@ -37,6 +38,8 @@ export function ResultForm({
   viewerParty: MatchParty;
   opponentName: string;
 }) {
+  const t = useTranslations("ResultForm");
+  const tValidation = useTranslations("Validation.matchResult");
   const [noShow, setNoShow] = useState(false);
   const [noShowPending, setNoShowPending] = useState(false);
   const {
@@ -46,7 +49,7 @@ export function ResultForm({
     setError,
     formState: { errors, isSubmitting },
   } = useForm<MatchScoreInput>({
-    resolver: zodResolver(matchScoreSchema),
+    resolver: zodResolver(matchScoreSchema(tValidation)),
     defaultValues: {
       sets: [
         { author: 0, player: 0 },
@@ -56,8 +59,8 @@ export function ResultForm({
   });
   const { fields, append, remove } = useFieldArray({ control, name: "sets" });
 
-  const authorLabel = viewerParty === "AUTHOR" ? "You" : opponentName;
-  const playerLabel = viewerParty === "PLAYER" ? "You" : opponentName;
+  const authorLabel = viewerParty === "AUTHOR" ? t("you") : opponentName;
+  const playerLabel = viewerParty === "PLAYER" ? t("you") : opponentName;
 
   async function onSubmitScore(values: MatchScoreInput) {
     const result = await action(values);
@@ -89,7 +92,7 @@ export function ResultForm({
       className="space-y-4"
     >
       <fieldset disabled={noShow} className="space-y-2">
-        <legend className="text-sm font-medium">Score</legend>
+        <legend className="text-sm font-medium">{t("scoreLegend")}</legend>
         <div className="grid grid-cols-[auto_1fr_1fr] items-center gap-2 text-sm">
           <span />
           <span className="text-muted-foreground">{authorLabel}</span>
@@ -99,8 +102,15 @@ export function ResultForm({
               key={field.id}
               index={index}
               register={register}
-              authorLabel={authorLabel}
-              playerLabel={playerLabel}
+              authorGamesAriaLabel={t("gamesAriaLabel", {
+                name: authorLabel,
+                set: index + 1,
+              })}
+              playerGamesAriaLabel={t("gamesAriaLabel", {
+                name: playerLabel,
+                set: index + 1,
+              })}
+              setLabel={t("setLabel", { set: index + 1 })}
               // A set-level issue (4.5's superRefine) lands on "sets.<index>"
               // itself — not on "author"/"player" — since it's about the
               // pair, not either number on its own.
@@ -122,7 +132,7 @@ export function ResultForm({
               append({ author: 0, player: 0 });
             }}
           >
-            + Add a third set
+            {t("addThirdSet")}
           </button>
         )}
         {fields.length === MAX_SETS && (
@@ -133,13 +143,13 @@ export function ResultForm({
               remove(MAX_SETS - 1);
             }}
           >
-            Remove third set
+            {t("removeThirdSet")}
           </button>
         )}
       </fieldset>
 
       <fieldset disabled={noShow} className="space-y-2">
-        <legend className="text-sm font-medium">Who won?</legend>
+        <legend className="text-sm font-medium">{t("whoWon")}</legend>
         <div className="flex gap-6 text-sm">
           <label className="flex items-center gap-2">
             <input type="radio" value="AUTHOR" {...register("winner")} />
@@ -161,7 +171,7 @@ export function ResultForm({
             setNoShow(event.target.checked);
           }}
         />
-        Opponent didn&apos;t show up
+        {t("opponentNoShow")}
       </label>
 
       <ErrorText error={errors.root} />
@@ -173,11 +183,11 @@ export function ResultForm({
       >
         {noShow
           ? noShowPending
-            ? "Reporting…"
-            : "Report no-show"
+            ? t("reporting")
+            : t("reportNoShow")
           : isSubmitting
-            ? "Submitting…"
-            : "Submit result"}
+            ? t("submitting")
+            : t("submit")}
       </Button>
     </form>
   );
@@ -186,25 +196,26 @@ export function ResultForm({
 function GamesRow({
   index,
   register,
-  authorLabel,
-  playerLabel,
+  authorGamesAriaLabel,
+  playerGamesAriaLabel,
+  setLabel,
   error,
 }: {
   index: number;
   register: ReturnType<typeof useForm<MatchScoreInput>>["register"];
-  authorLabel: string;
-  playerLabel: string;
+  authorGamesAriaLabel: string;
+  playerGamesAriaLabel: string;
+  setLabel: string;
   error: FieldErrorLike;
 }) {
-  const setNumber = String(index + 1);
   return (
     <>
-      <span className="text-sm text-muted-foreground">Set {setNumber}</span>
+      <span className="text-sm text-muted-foreground">{setLabel}</span>
       <Input
         type="number"
         min={0}
         max={30}
-        aria-label={`${authorLabel}'s games, set ${setNumber}`}
+        aria-label={authorGamesAriaLabel}
         aria-invalid={error ? true : undefined}
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- React Hook Form's path type only accepts a literal number here, not a string
         {...register(`sets.${index}.author`, { valueAsNumber: true })}
@@ -213,7 +224,7 @@ function GamesRow({
         type="number"
         min={0}
         max={30}
-        aria-label={`${playerLabel}'s games, set ${setNumber}`}
+        aria-label={playerGamesAriaLabel}
         aria-invalid={error ? true : undefined}
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- React Hook Form's path type only accepts a literal number here, not a string
         {...register(`sets.${index}.player`, { valueAsNumber: true })}

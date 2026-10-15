@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 
@@ -62,6 +63,11 @@ function initialVisibility(): Visibility {
 }
 
 export function PushSubscribePrompt() {
+  const t = useTranslations("PushSubscribePrompt");
+  // subscribeToPush's own reason strings (task 1.20) — unused below (see
+  // the comment at the call site), but it still needs a matching
+  // translator rather than this component's own namespace.
+  const tPush = useTranslations("PushSubscribeControl");
   const [visibility, setVisibility] = useState<Visibility>(initialVisibility);
   const [pending, startTransition] = useTransition();
   const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -88,7 +94,7 @@ export function PushSubscribePrompt() {
       // Granted and saved, or denied/failed — either way there's nothing
       // more useful to say here than on the settings page itself, which
       // the player can always revisit.
-      await subscribeToPush(vapidPublicKey, savePushSubscription);
+      await subscribeToPush(vapidPublicKey, savePushSubscription, tPush);
       setVisibility("hidden");
     });
   }
@@ -110,14 +116,14 @@ export function PushSubscribePrompt() {
       >
         <p>
           <Link href="/install" className="underline underline-offset-4">
-            Install the app
+            {t("installTheApp")}
           </Link>{" "}
-          to get notifications on iPhone.
+          {t("toGetNotificationsOnIphone")}
         </p>
         <button
           type="button"
           onClick={hide}
-          aria-label="Dismiss"
+          aria-label={t("dismiss")}
           className="text-muted-foreground"
         >
           ✕
@@ -131,13 +137,13 @@ export function PushSubscribePrompt() {
       role="status"
       className="flex items-center justify-between gap-4 border-b bg-muted px-4 py-3 text-sm"
     >
-      <p>Turn on notifications for new requests and messages?</p>
+      <p>{t("turnOnNotifications")}</p>
       <div className="flex shrink-0 gap-2">
         <Button type="button" size="sm" disabled={pending} onClick={enable}>
-          {pending ? "Enabling…" : "Enable"}
+          {pending ? t("enabling") : t("enable")}
         </Button>
         <Button type="button" size="sm" variant="outline" onClick={hide}>
-          Not now
+          {t("notNow")}
         </Button>
       </div>
     </div>

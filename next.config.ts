@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // Otherwise `next dev` appends its own agent-rules block to our AGENTS.md
@@ -6,4 +9,4 @@ const nextConfig: NextConfig = {
   agentRules: false,
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -13,6 +14,8 @@ import { loginSchema, type LoginValues } from "@/lib/validation/login";
 // Email form for the magic link. Zod runs in the browser first, so an empty
 // or malformed email never reaches the server; the action re-checks anyway.
 export function LoginForm({ next }: { next: string }) {
+  const t = useTranslations("LoginForm");
+  const tValidation = useTranslations("Validation.login");
   const [sentTo, setSentTo] = useState<string | null>(null);
   const {
     register,
@@ -20,7 +23,7 @@ export function LoginForm({ next }: { next: string }) {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema(tValidation)),
     defaultValues: { email: "" },
   });
 
@@ -36,10 +39,12 @@ export function LoginForm({ next }: { next: string }) {
   if (sentTo) {
     return (
       <div role="status" className="space-y-2">
-        <h2 className="text-lg font-semibold">Check your email</h2>
+        <h2 className="text-lg font-semibold">{t("checkEmailTitle")}</h2>
         <p className="text-muted-foreground">
-          We sent a sign-in link to <strong>{sentTo}</strong>. Open it on any
-          device to sign in.
+          {t.rich("checkEmailBody", {
+            email: sentTo,
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </p>
       </div>
     );
@@ -52,7 +57,7 @@ export function LoginForm({ next }: { next: string }) {
       className="space-y-4"
     >
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("emailLabel")}</Label>
         <Input
           id="email"
           type="email"
@@ -73,7 +78,7 @@ export function LoginForm({ next }: { next: string }) {
         </p>
       )}
       <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Sending…" : "Email me a sign-in link"}
+        {isSubmitting ? t("sending") : t("submit")}
       </Button>
     </form>
   );

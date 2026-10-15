@@ -16,6 +16,13 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${String(PORT)}`,
     trace: "retain-on-failure",
+    // Task 1.20: every spec asserts English copy. `locale` sets the
+    // browser's Accept-Language, which the proxy reads on a visitor's first
+    // request (no NEXT_LOCALE cookie yet) to pick the UI language — without
+    // this, e2e would follow whatever locale the OS running the browser
+    // happens to report, not necessarily English. See AGENTS.md decision
+    // 2026-10-15 "Польська мова".
+    locale: "en-US",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {

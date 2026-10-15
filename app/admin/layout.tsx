@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -13,16 +14,17 @@ export default async function AdminLayout({
   children: ReactNode;
 }) {
   await requireAdmin();
+  const t = await getTranslations("AdminLayout");
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <h1 className="text-xl font-semibold">Admin</h1>
+      <h1 className="text-xl font-semibold">{t("admin")}</h1>
       <nav className="mt-4 flex gap-4 text-sm">
         <Link href="/admin/reports" className="underline">
-          Reports
+          {t("reports")}
         </Link>
         <Link href="/admin/results" className="underline">
-          Disputed results
+          {t("disputedResults")}
         </Link>
       </nav>
       <div className="mt-6">{children}</div>

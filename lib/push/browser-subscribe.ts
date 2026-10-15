@@ -61,19 +61,21 @@ export type SubscribeOutcome = { ok: true } | { ok: false; reason: string };
 /**
  * Asks for permission, subscribes with the service worker, and hands the
  * result to `save` (the server action) — the one place all three steps of
- * "turn on notifications" (5.15) happen together.
+ * "turn on notifications" (5.15) happen together. `t` is a translator for
+ * the "PushSubscribeControl" namespace (task 1.20).
  */
 export async function subscribeToPush(
   publicKey: string,
   save: (subscription: PushSubscriptionKeys) => Promise<{ ok: boolean }>,
+  t: (key: string) => string,
 ): Promise<SubscribeOutcome> {
   if (!pushSupported()) {
-    return { ok: false, reason: "Push isn't supported in this browser." };
+    return { ok: false, reason: t("notSupported") };
   }
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
-    return { ok: false, reason: "Permission wasn't granted." };
+    return { ok: false, reason: t("permissionDenied") };
   }
 
   const registration = await navigator.serviceWorker.ready;
@@ -83,10 +85,7 @@ export async function subscribeToPush(
   });
   const json = subscription.toJSON();
   if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
-    return {
-      ok: false,
-      reason: "The browser didn't return a usable subscription.",
-    };
+    return { ok: false, reason: t("noUsableSubscription") };
   }
 
   const saved = await save({
@@ -94,9 +93,7 @@ export async function subscribeToPush(
     p256dh: json.keys.p256dh,
     auth: json.keys.auth,
   });
-  return saved.ok
-    ? { ok: true }
-    : { ok: false, reason: "Couldn't save the subscription." };
+  return saved.ok ? { ok: true } : { ok: false, reason: t("couldNotSave") };
 }
 
 /** Unsubscribes locally and returns the endpoint that was removed, so the

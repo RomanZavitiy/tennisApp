@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 
 import {
@@ -17,6 +18,7 @@ type View = "list" | "map";
 // and come in as slots; this component decides which one a phone shows and holds the
 // selected club both of them follow (2.7).
 export function ClubsView({ list, map }: { list: ReactNode; map: ReactNode }) {
+  const t = useTranslations("ClubsView");
   const [view, setView] = useState<View>("list");
   const [selection, setSelection] = useState<ClubSelection>(null);
 
@@ -40,10 +42,10 @@ export function ClubsView({ list, map }: { list: ReactNode; map: ReactNode }) {
       <div className="mt-6">
         <div className="mb-4 flex gap-2 lg:hidden">
           <ViewButton view="list" current={view} onSelect={setView}>
-            List
+            {t("list")}
           </ViewButton>
           <ViewButton view="map" current={view} onSelect={setView}>
-            Map
+            {t("map")}
           </ViewButton>
         </div>
         <div className="grid gap-6 lg:grid-cols-[2fr_3fr]">

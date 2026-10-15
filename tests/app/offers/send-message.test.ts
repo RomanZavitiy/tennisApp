@@ -80,10 +80,7 @@ describe("sendMessage", () => {
   });
 
   it("refuses once the message rate limit is hit", async () => {
-    checkRateLimit.mockResolvedValue({
-      ok: false,
-      message: "You're sending messages too quickly. Wait a few minutes.",
-    });
+    checkRateLimit.mockResolvedValue({ ok: false });
 
     await expect(sendMessage(JOIN, "hi")).resolves.toEqual({
       ok: false,

@@ -1,12 +1,10 @@
+import { createFormatter } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  formatCheckedDate,
-  getClub,
-  INDOOR_LABELS,
-  SURFACE_LABELS,
-} from "@/lib/clubs/club-details";
+import { formatCheckedDate, getClub } from "@/lib/clubs/club-details";
 import { IndoorCourts, Surface } from "@/lib/generated/prisma/enums";
+import en from "@/messages/en.json";
+import pl from "@/messages/pl.json";
 
 const { findUnique } = vi.hoisted(() => ({ findUnique: vi.fn() }));
 
@@ -40,21 +38,24 @@ describe("getClub", () => {
   });
 });
 
-describe("labels", () => {
-  it("has a label for every surface and indoor value", () => {
-    expect(Object.keys(SURFACE_LABELS).sort()).toEqual(
-      Object.values(Surface).sort(),
-    );
-    expect(Object.keys(INDOOR_LABELS).sort()).toEqual(
-      Object.values(IndoorCourts).sort(),
-    );
+describe("labels (task 1.20)", () => {
+  it("has an EN and PL label for every surface and indoor value", () => {
+    for (const messages of [en, pl]) {
+      expect(Object.keys(messages.Surface).sort()).toEqual(
+        Object.values(Surface).sort(),
+      );
+      expect(Object.keys(messages.IndoorCourts).sort()).toEqual(
+        Object.values(IndoorCourts).sort(),
+      );
+    }
   });
 });
 
 describe("formatCheckedDate", () => {
   it("shows the stored date, whatever the server's time zone", () => {
-    expect(formatCheckedDate(new Date("2026-10-09T00:00:00Z"))).toBe(
-      "9 October 2026",
+    const format = createFormatter({ locale: "en", timeZone: "Europe/Warsaw" });
+    expect(formatCheckedDate(format, new Date("2026-10-09T00:00:00Z"))).toBe(
+      "October 9, 2026",
     );
   });
 });

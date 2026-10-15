@@ -46,12 +46,14 @@ describe("reportOffer", () => {
   it("resolves the target from the offer's author, not the request", async () => {
     await reportOffer(OFFER, input);
 
-    expect(createReport).toHaveBeenCalledWith({
-      reporterId: ME,
-      targetUserId: AUTHOR,
-      offerId: OFFER,
-      input: { reason: "ABUSIVE", comment: undefined },
-    });
+    expect(createReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reporterId: ME,
+        targetUserId: AUTHOR,
+        offerId: OFFER,
+        input: { reason: "ABUSIVE", comment: undefined },
+      }),
+    );
   });
 
   it("treats a missing offer as not found, without reporting", async () => {
@@ -99,12 +101,14 @@ describe("reportMessage", () => {
   it("resolves the target from the message's sender", async () => {
     await reportMessage(JOIN, MESSAGE, input);
 
-    expect(createReport).toHaveBeenCalledWith({
-      reporterId: ME,
-      targetUserId: AUTHOR,
-      messageId: MESSAGE,
-      input: { reason: "ABUSIVE", comment: undefined },
-    });
+    expect(createReport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reporterId: ME,
+        targetUserId: AUTHOR,
+        messageId: MESSAGE,
+        input: { reason: "ABUSIVE", comment: undefined },
+      }),
+    );
   });
 
   it("treats someone else's thread as not found", async () => {

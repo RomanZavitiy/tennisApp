@@ -19,6 +19,9 @@ export type EmailTemplateInput = {
   actionUrl: string;
   actionLabel: string;
   unsubscribeUrl: string;
+  /** "Turn off email notifications" (task 1.20) — the recipient's own
+   * language, resolved by the caller (notify.ts) from their saved locale. */
+  unsubscribeLabel: string;
 };
 
 export function renderEmailHtml({
@@ -27,6 +30,7 @@ export function renderEmailHtml({
   actionUrl,
   actionLabel,
   unsubscribeUrl,
+  unsubscribeLabel,
 }: EmailTemplateInput): string {
   return `<!doctype html>
 <html>
@@ -38,7 +42,7 @@ export function renderEmailHtml({
     </p>
     <p style="font-size: 12px; color: #666; margin-top: 32px;">
       MatchFinder Kraków —
-      <a href="${escapeHtml(unsubscribeUrl)}" style="color: #666;">Turn off email notifications</a>
+      <a href="${escapeHtml(unsubscribeUrl)}" style="color: #666;">${escapeHtml(unsubscribeLabel)}</a>
     </p>
   </body>
 </html>`;
@@ -49,6 +53,7 @@ export function renderEmailText({
   body,
   actionUrl,
   unsubscribeUrl,
+  unsubscribeLabel,
 }: EmailTemplateInput): string {
-  return `${heading}\n\n${body}\n\n${actionUrl}\n\nTurn off email notifications: ${unsubscribeUrl}`;
+  return `${heading}\n\n${body}\n\n${actionUrl}\n\n${unsubscribeLabel}: ${unsubscribeUrl}`;
 }

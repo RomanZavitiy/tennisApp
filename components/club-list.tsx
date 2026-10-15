@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
@@ -18,10 +19,11 @@ export type ClubListItem = {
 // The clubs next to the map on /clubs. Clicking a club shows it on the map
 // (2.7); "Details" leads to the club's page.
 export function ClubList({ clubs }: { clubs: ClubListItem[] }) {
+  const t = useTranslations("ClubList");
   const clubSelection = useClubSelection();
 
   if (clubs.length === 0) {
-    return <p className="text-muted-foreground">No clubs yet.</p>;
+    return <p className="text-muted-foreground">{t("noClubsYet")}</p>;
   }
 
   const selection = clubSelection?.selection;
@@ -52,6 +54,7 @@ function ClubListEntry({
   scrollIntoView: boolean;
   onSelect: () => void;
 }) {
+  const t = useTranslations("ClubList");
   const ref = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
@@ -85,10 +88,10 @@ function ClubListEntry({
       </button>
       <Link
         href={`/clubs/${club.id}`}
-        aria-label={`${club.name} details`}
+        aria-label={t("detailsAriaLabel", { name: club.name })}
         className="shrink-0 text-sm underline-offset-4 hover:underline"
       >
-        Details
+        {t("details")}
       </Link>
     </li>
   );
