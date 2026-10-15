@@ -64,8 +64,10 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   await page.getByLabel("Comment").fill("Evening doubles, balls on me.");
   await page.getByRole("button", { name: "Post offer" }).click();
 
-  await expect(page).toHaveURL(/\/offers\/[0-9a-f-]{36}$/);
-  const id = page.url().split("/").pop();
+  // ?created=1 flags "the first offer created" for the push-permission
+  // prompt (task 5.15) — present on this redirect, not part of the id.
+  await expect(page).toHaveURL(/\/offers\/[0-9a-f-]{36}(\?.*)?$/);
+  const id = page.url().split("/").pop()?.split("?")[0];
 
   const { data, error } = await admin
     .from("sparring_offers")

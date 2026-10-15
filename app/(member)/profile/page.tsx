@@ -46,6 +46,15 @@ export default async function ProfilePage() {
       >
         Edit profile
       </Link>
+      <Link
+        href="/profile/notifications"
+        className={buttonVariants({
+          variant: "outline",
+          className: "mt-3 w-full",
+        })}
+      >
+        Notifications
+      </Link>
     </main>
   );
 }

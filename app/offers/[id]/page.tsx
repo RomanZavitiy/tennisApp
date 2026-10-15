@@ -17,6 +17,7 @@ import {
   submitResult,
 } from "@/app/offers/[id]/result-actions";
 import { JoinThread } from "@/components/join-thread";
+import { MarkMeaningfulAction } from "@/components/mark-meaningful-action";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { OfferBookingSection } from "@/components/offer-booking-section";
 import { ResultForm } from "@/components/result-form";
@@ -51,14 +52,23 @@ import type { SetScore } from "@/lib/validation/match-result";
 // 3.12).
 
 // Typed by hand, like /players/[id]: generated PageProps need `next typegen`.
-type OfferPageProps = { params: Promise<{ id: string }> };
+type OfferPageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
+};
 
 export const metadata: Metadata = { title: "Sparring offer" };
 
-export default async function OfferPage({ params }: OfferPageProps) {
+export default async function OfferPage({
+  params,
+  searchParams,
+}: OfferPageProps) {
   // Requests change the page all the time; never serve a cached one.
   await connection();
   const { id } = await params;
+  // createOffer (3.4) redirects here with ?created=1 — "the first offer
+  // created" (task 5.15), flagged client-side below.
+  const { created } = await searchParams;
   const viewer = await getCurrentUser();
   const details = await getOfferDetails(id, viewer?.id ?? null);
   if (!details) {
@@ -78,6 +88,7 @@ export default async function OfferPage({ params }: OfferPageProps) {
 
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
+      {created === "1" && <MarkMeaningfulAction />}
       <p className="text-sm text-muted-foreground">{formatLabel(offer)}</p>
       <h1 className="mt-1 text-2xl font-semibold tracking-tight">
         <time dateTime={offer.startsAt.toISOString()}>
@@ -201,6 +212,7 @@ function PlayerView({
       action={requestToJoin.bind(null, offer.id)}
       label="Ask to join"
       pendingLabel="Sending…"
+      trackMeaningfulAction
     />
   );
 }
