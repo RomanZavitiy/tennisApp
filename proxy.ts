@@ -28,6 +28,9 @@ export const config = {
   matcher: [
     // Skip Next.js internals and static files: they need no session, and
     // redirecting them would break CSS, JS and images on public pages.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$).*)",
+    // js/webmanifest (task 5.14): the service worker (public/sw.js) and the
+    // generated manifest (app/manifest.ts) both have to load before anyone
+    // has signed in, to install the app at all.
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|js|webmanifest)$).*)",
   ],
 };

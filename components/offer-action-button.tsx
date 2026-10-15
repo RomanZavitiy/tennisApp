@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { markMeaningfulAction } from "@/lib/push/meaningful-action";
 
 // A button that runs one server action on /offers/[id] (ask to join,
 // withdraw, accept, decline). The action is already bound to its offer or
@@ -15,12 +16,18 @@ export function OfferActionButton({
   confirmLabel,
   pendingLabel,
   variant = "default",
+  trackMeaningfulAction = false,
 }: {
   action: () => Promise<{ ok: true } | { ok: false; message: string }>;
   label: string;
   confirmLabel?: string;
   pendingLabel: string;
   variant?: "default" | "outline";
+  /** Task 5.15: on "Ask to join" only — flags the first join request for
+   * PushSubscribePrompt. A plain boolean, not a callback: the page that
+   * renders this button is a Server Component, which can't pass a
+   * client-only function like markMeaningfulAction as a prop. */
+  trackMeaningfulAction?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -40,6 +47,9 @@ export function OfferActionButton({
           startTransition(async () => {
             const result = await action();
             setMessage(result.ok ? null : result.message);
+            if (result.ok && trackMeaningfulAction) {
+              markMeaningfulAction();
+            }
           });
         }}
       >

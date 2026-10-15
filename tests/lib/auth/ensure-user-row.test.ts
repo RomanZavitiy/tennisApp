@@ -9,31 +9,35 @@ const { upsert } = vi.hoisted(() => ({ upsert: vi.fn() }));
 
 vi.mock("@/lib/db", () => ({ db: { user: { upsert } } }));
 
+const EMAIL = "player@example.com";
+
 describe("ensureUserRow", () => {
   beforeEach(() => {
     upsert.mockReset();
   });
 
-  it("creates the row keyed by the auth user id", async () => {
-    await ensureUserRow("user-1");
+  it("creates the row keyed by the auth user id, with its email", async () => {
+    await ensureUserRow("user-1", EMAIL);
 
     expect(upsert).toHaveBeenCalledWith({
       where: { id: "user-1" },
-      create: { id: "user-1" },
-      update: {},
+      create: { id: "user-1", email: EMAIL },
+      update: { email: EMAIL },
     });
   });
 
-  it("changes nothing on an existing row", async () => {
-    await ensureUserRow("user-1");
+  it("syncs the email on an existing row, same as a fresh one", async () => {
+    await ensureUserRow("user-1", EMAIL);
 
     const [args] = upsert.mock.calls[0] as [{ update: object }];
-    expect(args.update).toEqual({});
+    expect(args.update).toEqual({ email: EMAIL });
   });
 
   it("lets a database error surface instead of hiding it", async () => {
     upsert.mockRejectedValue(new Error("connection refused"));
 
-    await expect(ensureUserRow("user-1")).rejects.toThrow("connection refused");
+    await expect(ensureUserRow("user-1", EMAIL)).rejects.toThrow(
+      "connection refused",
+    );
   });
 });

@@ -14,6 +14,7 @@ import {
   canWriteToThread,
   isJoinThreadParticipant,
 } from "@/lib/messages/thread-rules";
+import { notify } from "@/lib/notifications/notify";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
 import {
@@ -104,6 +105,10 @@ export async function requestToJoin(
     );
   }
 
+  // Task 5.16: "new join request", to the author — on a reopened request
+  // too, since it's a fresh ask either way.
+  await notify(offer.authorId, { kind: "JOIN_REQUESTED", offerId: id.data });
+
   revalidatePath(`/offers/${id.data}`);
   return { ok: true };
 }
@@ -168,6 +173,16 @@ export async function sendMessage(
   const message = await db.message.create({
     data: { offerJoinId: id.data, senderId: user.id, content: text.data },
     select: { id: true, content: true, senderId: true, createdAt: true },
+  });
+
+  // Task 5.16: "new message", to the other side of this thread — grouped
+  // to at most one push per thread per 5 minutes (lib/notifications/notify).
+  const recipientId =
+    user.id === join.offer.authorId ? join.userId : join.offer.authorId;
+  await notify(recipientId, {
+    kind: "NEW_MESSAGE",
+    offerId: join.offerId,
+    offerJoinId: id.data,
   });
 
   revalidatePath(`/offers/${join.offerId}`);
@@ -302,11 +317,19 @@ async function changeJoin(
         data: { status: offerStatus },
       });
     }
-    return { ok: true as const, offerId: join.offerId };
+    return { ok: true as const, offerId: join.offerId, playerId: join.userId };
   });
 
   if (!result.ok) {
     return result;
+  }
+  // Task 5.16: "accepted"/"declined", to the player — never on WITHDRAW,
+  // which is the player's own action and needs no notice back to them.
+  if (action === "ACCEPT" || action === "DECLINE") {
+    await notify(result.playerId, {
+      kind: action === "ACCEPT" ? "JOIN_ACCEPTED" : "JOIN_DECLINED",
+      offerId: result.offerId,
+    });
   }
   // The offer's page and the feed's free places both change.
   revalidatePath(`/offers/${result.offerId}`);
@@ -401,12 +424,19 @@ export async function markCourtBooked(
 
   const activeJoins = await db.offerJoin.findMany({
     where: { offerId: id.data, status: { in: ["REQUESTED", "ACCEPTED"] } },
-    select: { id: true },
+    select: { id: true, userId: true },
   });
   await db.sparringOffer.update({
     where: { id: id.data },
     data: { courtStatus: "BOOKED" },
   });
+  // Task 5.16: "court booked", to the same players the system message goes
+  // to — whoever has a live request or place on this offer.
+  await Promise.all(
+    activeJoins.map((join) =>
+      notify(join.userId, { kind: "COURT_BOOKED", offerId: id.data }),
+    ),
+  );
   await Promise.all(
     activeJoins.map((join) =>
       postSystemMessage({ offerJoinId: join.id }, COURT_BOOKED_MESSAGE),
