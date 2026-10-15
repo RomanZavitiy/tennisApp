@@ -23,6 +23,7 @@ const {
   joinCreateManyAndReturn,
   joinUpdateMany,
   recordLateCancellation,
+  recordScheduledMatch,
   postSystemMessage,
   tx,
 } = vi.hoisted(() => ({
@@ -32,6 +33,7 @@ const {
   joinCreateManyAndReturn: vi.fn(),
   joinUpdateMany: vi.fn(),
   recordLateCancellation: vi.fn(),
+  recordScheduledMatch: vi.fn(),
   postSystemMessage: vi.fn(),
   // What the status-change transaction (3.12) sees.
   tx: {
@@ -59,10 +61,11 @@ vi.mock("@/lib/db", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 // isLateCancellation is pure and cheap: keep the real one, only replace the
-// stub whose call we're asserting on.
+// two stubs whose calls we're asserting on.
 vi.mock("@/lib/rating/reliability", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/rating/reliability")>()),
   recordLateCancellation,
+  recordScheduledMatch,
 }));
 // The welcome message (3.16) is its own concern, covered where
 // postSystemMessage itself is tested; here only that it fires once per new
@@ -262,6 +265,8 @@ describe("accepting, declining and withdrawing", () => {
       where: { id: OFFER },
       data: { status: "FULL" },
     });
+    // The accepted singles join is a newly scheduled match (4.11-4.12).
+    expect(recordScheduledMatch).toHaveBeenCalledWith(tx, [AUTHOR, PLAYER]);
   });
 
   it("accepts into doubles without filling it until the last place", async () => {
@@ -271,6 +276,8 @@ describe("accepting, declining and withdrawing", () => {
 
     expect(tx.offerJoin.update).toHaveBeenCalled();
     expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+    // Reliability only tracks singles (decision 2026-10-14).
+    expect(recordScheduledMatch).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -354,6 +361,32 @@ describe("accepting, declining and withdrawing", () => {
       where: { id: OFFER },
       data: { status: "OPEN" },
     });
+    // More than 12h out: not a late cancellation.
+    expect(recordLateCancellation).not.toHaveBeenCalled();
+  });
+
+  it("flags a late cancellation when a player withdraws an accepted place close to the start", async () => {
+    setUp({
+      me: PLAYER,
+      joinStatus: "ACCEPTED",
+      offer: { startsAt: new Date(Date.now() + 3_600_000) },
+      accepted: 1,
+    });
+
+    await expect(withdrawJoin(JOIN)).resolves.toEqual({ ok: true });
+
+    expect(recordLateCancellation).toHaveBeenCalledWith(tx, PLAYER);
+  });
+
+  it("doesn't flag a late cancellation for withdrawing a merely requested place", async () => {
+    setUp({
+      me: PLAYER,
+      offer: { startsAt: new Date(Date.now() + 3_600_000) },
+    });
+
+    await expect(withdrawJoin(JOIN)).resolves.toEqual({ ok: true });
+
+    expect(recordLateCancellation).not.toHaveBeenCalled();
   });
 
   it("refuses a change the status no longer allows, read under the lock", async () => {
@@ -425,7 +458,7 @@ describe("cancelOffer", () => {
 
     await expect(cancelOffer(OFFER)).resolves.toEqual({ ok: true });
 
-    expect(recordLateCancellation).toHaveBeenCalledWith(AUTHOR);
+    expect(recordLateCancellation).toHaveBeenCalledWith(tx, AUTHOR);
   });
 
   it("doesn't flag a late cancellation when nobody has joined yet", async () => {

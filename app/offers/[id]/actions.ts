@@ -26,6 +26,7 @@ import {
 import {
   isLateCancellation,
   recordLateCancellation,
+  recordScheduledMatch,
 } from "@/lib/rating/reliability";
 import { messageContentSchema } from "@/lib/validation/message";
 
@@ -252,13 +253,14 @@ async function changeJoin(
     const joinStatus = offer.joins.at(0)?.status;
     const acceptedCount = offer._count.joins;
     const next = joinStatus && nextJoinStatus(action, joinStatus);
+    const now = new Date();
     const refusal = joinStatus
       ? joinChangeRefusal({
           action,
           joinStatus,
           offer,
           acceptedCount,
-          now: new Date(),
+          now,
         })
       : "NOT_ALLOWED";
     if (refusal || !next) {
@@ -272,6 +274,21 @@ async function changeJoin(
       where: { id: id.data },
       data: { status: next },
     });
+
+    // Reliability (decision 2026-10-14): a player withdrawing an already-
+    // accepted place late counts against them, same rule cancelOffer (3.14)
+    // applies to the author; a singles join reaching ACCEPTED is a newly
+    // scheduled match for both sides (4.11-4.12).
+    if (
+      action === "WITHDRAW" &&
+      joinStatus === "ACCEPTED" &&
+      isLateCancellation(offer.startsAt, now)
+    ) {
+      await recordLateCancellation(tx, join.userId);
+    }
+    if (next === "ACCEPTED" && offer.format === "SINGLES") {
+      await recordScheduledMatch(tx, [join.offer.authorId, join.userId]);
+    }
 
     const acceptedAfter =
       acceptedCount +
@@ -341,7 +358,7 @@ export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
       data: { status: "CANCELLED" },
     });
     if (offer._count.joins > 0 && isLateCancellation(offer.startsAt, now)) {
-      recordLateCancellation(author.id);
+      await recordLateCancellation(tx, author.id);
     }
     return { ok: true as const };
   });

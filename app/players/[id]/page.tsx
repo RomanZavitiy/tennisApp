@@ -43,6 +43,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           district={profile.district}
           selfRatedNtrp={profile.selfRatedNtrp}
           elo={profile.elo}
+          reliability={profile.reliability}
         />
       </div>
       <div className="mt-8">

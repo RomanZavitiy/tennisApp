@@ -44,6 +44,9 @@ function row(
       id: offer.authorId ?? "a",
       name: "Ola",
       elo: offer.elo === undefined ? 1500 : offer.elo,
+      scheduledMatches: 0,
+      noShows: 0,
+      lateCancellations: 0,
     },
     _count: { joins: offer.accepted ?? 0 },
   };
@@ -121,6 +124,24 @@ describe("getOfferFeed", () => {
     const feed = await getOfferFeed(1, {}, null, NOW);
 
     expect(feed.offers[0]?.courtStatus).toBe("BOOKED");
+  });
+
+  it("computes the author's reliability for the card (4.12)", async () => {
+    const withHistory = row(1);
+    withHistory.author = {
+      ...withHistory.author,
+      scheduledMatches: 4,
+      noShows: 1,
+      lateCancellations: 0,
+    };
+    findMany.mockResolvedValue([withHistory]);
+
+    const feed = await getOfferFeed(1, {}, null, NOW);
+
+    expect(feed.offers[0]?.author.reliability).toEqual({
+      kind: "rated",
+      percent: 75,
+    });
   });
 
   it("works out the spots left for each format", async () => {

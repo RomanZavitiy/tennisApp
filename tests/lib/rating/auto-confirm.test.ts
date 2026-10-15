@@ -29,6 +29,7 @@ vi.mock("@/lib/messages/post-system-message", async (importOriginal) => ({
 const pendingResult = {
   status: "PENDING",
   winner: "AUTHOR",
+  noShowParty: null,
   offerJoin: {
     id: "join-1",
     userId: "player-id",
@@ -38,6 +39,13 @@ const pendingResult = {
     },
     user: { elo: 1500, matchesPlayed: 20 },
   },
+};
+
+const pendingNoShowReport = {
+  status: "PENDING",
+  winner: null,
+  noShowParty: "AUTHOR",
+  offerJoin: pendingResult.offerJoin,
 };
 
 describe("autoConfirmExpiredResults", () => {
@@ -68,6 +76,26 @@ describe("autoConfirmExpiredResults", () => {
       { offerJoinId: "join-1" },
       RESULT_AUTO_CONFIRMED_MESSAGE,
     );
+  });
+
+  it("settles a due no-show report as NO_SHOW, crediting the reported party but not ELO", async () => {
+    matchResultFindMany.mockResolvedValue([{ id: "result-1" }]);
+    tx.matchResult.findUnique.mockResolvedValue(pendingNoShowReport);
+
+    await expect(autoConfirmExpiredResults()).resolves.toBe(1);
+
+    expect(tx.user.update).toHaveBeenCalledTimes(1);
+    expect(tx.user.update).toHaveBeenCalledWith({
+      where: { id: "author-id" },
+      data: { noShows: { increment: 1 } },
+    });
+    expect(tx.matchResult.update).toHaveBeenCalledWith({
+      where: { id: "result-1" },
+      data: { status: "NO_SHOW" },
+    });
+    // Decision 2026-10-14's own scope: a notice at filing and at
+    // disputing, not at this silent deadline.
+    expect(postSystemMessage).not.toHaveBeenCalled();
   });
 
   it("skips a result a human already settled in the meantime, without reapplying ELO", async () => {

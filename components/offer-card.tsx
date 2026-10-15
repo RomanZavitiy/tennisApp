@@ -10,6 +10,7 @@ import {
   placeLabel,
   spotsLabel,
 } from "@/lib/offers/offer-labels";
+import { reliabilityLabel } from "@/lib/rating/reliability";
 
 // One offer in the feed (3.6). The whole card links to the offer's page.
 export function OfferCard({ offer }: { offer: FeedOffer }) {
@@ -36,7 +37,8 @@ export function OfferCard({ offer }: { offer: FeedOffer }) {
         {offer.surface && ` · ${SURFACE_LABELS[offer.surface]}`}
         {" · "}
         {COURT_STATUS_LABELS[offer.courtStatus]}
-        {offer.author.name && ` · by ${offer.author.name}`}
+        {offer.author.name &&
+          ` · by ${offer.author.name} · ${reliabilityLabel(offer.author.reliability)}`}
       </p>
     </Link>
   );
