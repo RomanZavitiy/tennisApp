@@ -145,9 +145,96 @@ test("everyone sees the court status and a booking link when a club is set", asy
 
   await expect(page.getByText("Will book once we agree")).toBeVisible();
   const link = page.getByRole("link", { name: "Book on club's site" });
-  await expect(link).toHaveAttribute("href", "https://example.com/book");
+  await expect(link).toHaveAttribute(
+    "href",
+    "https://example.com/book?utm_source=matchfinder",
+  );
   await expect(link).toHaveAttribute("target", "_blank");
   await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+
+  await admin.from("clubs").delete().eq("id", clubId);
+});
+
+test("a club with no booking link offers a call instead", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  const author = await signIn();
+  await completeTestProfile(admin, author.id, { name: "No Booking Link" });
+  const clubId = await createTestClub(admin, {
+    name: `E2E Phone Club ${randomUUID().slice(0, 8)}`,
+    address: "Testowa 1, 30-001 Kraków",
+    latitude: 50.07,
+    longitude: 19.92,
+  });
+  const { error } = await admin
+    .from("clubs")
+    .update({ phone: "+48 12 000 00 00" })
+    .eq("id", clubId);
+  if (error) throw error;
+  const id = await createOffer(author.id, clubId);
+  await page.context().clearCookies();
+
+  await page.goto(`/offers/${id}`);
+
+  await expect(
+    page.getByRole("link", { name: "Book on club's site" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Call to book" }),
+  ).toHaveAttribute("href", "tel:+48120000000");
+
+  await admin.from("clubs").delete().eq("id", clubId);
+});
+
+test("the author marks the court booked after clicking through, and players are told", async ({
+  page,
+  signIn,
+}) => {
+  const admin = createAdminClient();
+  const author = await signIn();
+  await completeTestProfile(admin, author.id, { name: "Booking Author" });
+  const player = await signIn();
+  await completeTestProfile(admin, player.id, { name: "Booking Player" });
+  const clubId = await createTestClub(admin, {
+    name: `E2E Booked Club ${randomUUID().slice(0, 8)}`,
+    address: "Testowa 1, 30-001 Kraków",
+    latitude: 50.07,
+    longitude: 19.92,
+  });
+  const { error } = await admin
+    .from("clubs")
+    .update({ booking_url: "https://example.com/book" })
+    .eq("id", clubId);
+  if (error) throw error;
+  const id = await createOffer(author.id, clubId);
+  const { error: joinError } = await admin
+    .from("offer_joins")
+    .insert({ offer_id: id, user_id: player.id, status: "ACCEPTED" });
+  if (joinError) throw joinError;
+
+  // A guest and the player never see the banner, even after the link exists.
+  await page.context().clearCookies();
+  await page.goto(`/offers/${id}`);
+  await expect(page.getByText("Booked the court?")).toHaveCount(0);
+  await signIn(`/offers/${id}`, player);
+  await expect(page.getByText("Booked the court?")).toHaveCount(0);
+
+  // The author clicks through to book (opens a new tab; this one stays put)
+  // and the banner appears right away.
+  await signIn(`/offers/${id}`, author);
+  const popup = page.waitForEvent("popup");
+  await page.getByRole("link", { name: "Book on club's site" }).click();
+  await (await popup).close();
+  await expect(page.getByText("Booked the court?")).toBeVisible();
+  await page.getByRole("button", { name: "Mark it as booked" }).click();
+  await expect(page.getByText("Booked the court?")).toHaveCount(0);
+  await expect(page.getByText("Court booked")).toBeVisible();
+
+  // The player's thread got the system note.
+  await signIn(`/offers/${id}`, player);
+  await expect(page.getByText("The court has been booked.")).toBeVisible();
 
   await admin.from("clubs").delete().eq("id", clubId);
 });

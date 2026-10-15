@@ -97,6 +97,20 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   await expect(card).toContainText(clubName);
 });
 
+test("the club page's CTA pre-selects its club on the form (task 2.10)", async ({
+  page,
+  signIn,
+}) => {
+  const user = await signIn();
+  await completeTestProfile(admin, user.id, { district: "PODGORZE" });
+
+  await page.goto(`/offers/new?clubId=${clubId}`);
+
+  await expect(page.getByLabel("Club", { exact: true })).toHaveValue(clubId);
+  // The preset club's own district, not the player's.
+  await expect(page.getByLabel("District")).toHaveValue("STARE_MIASTO");
+});
+
 test("an incomplete offer stays on the form with messages", async ({
   page,
   signIn,

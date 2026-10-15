@@ -42,14 +42,18 @@ export function OfferForm({
   action,
   clubs,
   defaultDistrict,
+  defaultClubId,
   earliestStart,
 }: {
   action: (values: OfferInput) => Promise<CreateOfferResult>;
   clubs: ClubOption[];
   defaultDistrict: District;
+  /** Pre-selected from "Create an offer at this club" (task 2.10). */
+  defaultClubId?: string;
   /** Kraków time now, "YYYY-MM-DDTHH:mm": the picker's lower bound. */
   earliestStart: string;
 }) {
+  const presetClub = clubs.find((c) => c.id === defaultClubId);
   const {
     register,
     handleSubmit,
@@ -62,8 +66,11 @@ export function OfferForm({
     defaultValues: {
       format: "SINGLES",
       startsAt: "",
-      clubId: "",
-      district: defaultDistrict,
+      clubId: presetClub?.id ?? "",
+      // A preset club decides the district, same as picking one below.
+      district: presetClub
+        ? (presetClub.district ?? undefined)
+        : defaultDistrict,
       ntrpMin: "",
       ntrpMax: "",
       surface: "",

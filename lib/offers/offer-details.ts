@@ -95,7 +95,9 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
       surface: true,
       courtStatus: true,
       comment: true,
-      club: { select: { id: true, name: true, bookingUrl: true } },
+      club: {
+        select: { id: true, name: true, bookingUrl: true, phone: true },
+      },
       author: { select: playerSelect },
       _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
     },

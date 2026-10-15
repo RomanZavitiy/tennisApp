@@ -4,6 +4,9 @@ import { expect, test } from "@playwright/test";
 
 import { createAdminClient, createTestClub } from "./support/supabase-admin";
 
+// Tasks 2.10 and 2.13 share this file: /clubs/[id] is where both the active
+// offers section and the booking click land.
+
 // /clubs/[id] is public and shows every known field of the club.
 const name = `E2E Club Page ${randomUUID().slice(0, 8)}`;
 let admin: ReturnType<typeof createAdminClient>;
@@ -56,7 +59,10 @@ test("anyone can see a club's details and book on the club's site", async ({
   ).toBeVisible();
 
   for (const [linkName, href] of [
-    ["Book a court", "https://example.com/book"],
+    // Tagged with utm_source for the club's own analytics and our click log
+    // (task 2.13) — the "About" website link isn't a booking action, so it
+    // stays untagged.
+    ["Book a court", "https://example.com/book?utm_source=matchfinder"],
     ["example.com", "https://example.com/club"],
   ]) {
     const link = page.getByRole("link", { name: linkName, exact: true });
@@ -64,6 +70,41 @@ test("anyone can see a club's details and book on the club's site", async ({
     await expect(link).toHaveAttribute("target", "_blank");
     await expect(link).toHaveAttribute("rel", "noopener noreferrer");
   }
+
+  // No offers yet (task 2.10): the empty state's own CTA pre-selects this club.
+  await expect(
+    page.getByText("No open offers at this club right now."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Create an offer at this club" }),
+  ).toHaveAttribute("href", `/offers/new?clubId=${id}`);
+});
+
+test("an open offer at this club is listed", async ({ page }) => {
+  // No sign-in needed: users.id has no foreign key to auth.users (task 1.9),
+  // so a plain row is enough to be an offer's author for this read-only check
+  // — and it's one fewer magic-link verification (decision 2026-10-11/14).
+  const authorId = randomUUID();
+  const { error: userError } = await admin
+    .from("users")
+    .insert({ id: authorId });
+  if (userError) throw userError;
+  const { error } = await admin.from("sparring_offers").insert({
+    author_id: authorId,
+    starts_at: new Date(Date.now() + 2 * 86_400_000).toISOString(),
+    club_id: id,
+  });
+  if (error) throw error;
+
+  await page.goto(`/clubs/${id}`);
+
+  await expect(page.getByRole("link", { name: /1 spot left/ })).toBeVisible();
+  await expect(
+    page.getByText("No open offers at this club right now."),
+  ).toHaveCount(0);
+
+  await admin.from("sparring_offers").delete().eq("club_id", id);
+  await admin.from("users").delete().eq("id", authorId);
 });
 
 test("the list's Details link leads to the club page", async ({ page }) => {
