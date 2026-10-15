@@ -17,6 +17,32 @@ export type OfferPlayer = {
   selfRatedNtrp: number | null;
 };
 
+// A join's result (task 4.6), if one has been filed — just enough for the
+// page to show its own state (submit / pending / confirmed / disputed).
+const resultSelect = {
+  id: true,
+  status: true,
+  winner: true,
+  reportedBy: true,
+  score: true,
+  authorEloBefore: true,
+  authorEloAfter: true,
+  playerEloBefore: true,
+  playerEloAfter: true,
+} as const;
+
+export type OfferJoinResult = {
+  id: string;
+  status: "PENDING" | "CONFIRMED" | "DISPUTED" | "NO_SHOW";
+  winner: "AUTHOR" | "PLAYER";
+  reportedBy: "AUTHOR" | "PLAYER";
+  score: unknown;
+  authorEloBefore: number | null;
+  authorEloAfter: number | null;
+  playerEloBefore: number | null;
+  playerEloAfter: number | null;
+};
+
 export async function getOfferDetails(id: string, viewerId: string | null) {
   // The id comes from the URL; Postgres would throw on a non-UUID.
   if (!z.uuid().safeParse(id).success) {
@@ -49,19 +75,28 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
   const isAuthor = viewerId === offer.author.id;
   // The author answers open requests and sees who is in; withdrawn and
   // declined requests are history and stay off the page.
-  const joins: { id: string; status: JoinStatus; user: OfferPlayer }[] =
-    isAuthor
-      ? await db.offerJoin.findMany({
-          where: { offerId: id, status: { in: ["REQUESTED", "ACCEPTED"] } },
-          select: { id: true, status: true, user: { select: playerSelect } },
-          orderBy: { createdAt: "asc" },
-        })
-      : [];
+  const joins: {
+    id: string;
+    status: JoinStatus;
+    user: OfferPlayer;
+    result: OfferJoinResult | null;
+  }[] = isAuthor
+    ? await db.offerJoin.findMany({
+        where: { offerId: id, status: { in: ["REQUESTED", "ACCEPTED"] } },
+        select: {
+          id: true,
+          status: true,
+          user: { select: playerSelect },
+          result: { select: resultSelect },
+        },
+        orderBy: { createdAt: "asc" },
+      })
+    : [];
   const viewerJoin =
     viewerId && !isAuthor
       ? await db.offerJoin.findUnique({
           where: { offerId_userId: { offerId: id, userId: viewerId } },
-          select: { id: true, status: true },
+          select: { id: true, status: true, result: { select: resultSelect } },
         })
       : null;
 

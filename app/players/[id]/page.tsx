@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { MatchHistory } from "@/components/match-history";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerFacts } from "@/components/player-facts";
+import { getMatchHistory } from "@/lib/players/match-history";
 import { getPublicProfile } from "@/lib/players/public-profile";
 
 // A player's public page — open to everyone, signed in or not (it's in the
@@ -20,10 +22,12 @@ export async function generateMetadata({
 }
 
 export default async function PlayerPage({ params }: PlayerPageProps) {
-  const profile = await getPublicProfile((await params).id);
+  const { id } = await params;
+  const profile = await getPublicProfile(id);
   if (!profile) {
     notFound();
   }
+  const matches = await getMatchHistory(id);
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
@@ -38,7 +42,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           age={profile.age}
           district={profile.district}
           selfRatedNtrp={profile.selfRatedNtrp}
+          elo={profile.elo}
         />
+      </div>
+      <div className="mt-8">
+        <h2 className="font-semibold">Match history</h2>
+        <div className="mt-3">
+          <MatchHistory matches={matches} />
+        </div>
       </div>
     </main>
   );

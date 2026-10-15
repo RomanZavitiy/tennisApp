@@ -41,9 +41,19 @@ INSERT INTO offer_joins (id, offer_id, user_id, status) VALUES
    '00000000-0000-4000-8000-000000000b0b', 'ACCEPTED')
 ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
 
--- The result of their match, waiting for confirmation.
-INSERT INTO match_results (id, offer_join_id, status) VALUES
-  ('00000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000002', 'PENDING')
-ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
+-- The result of their match, waiting for confirmation (task 4.4): Bob filed
+-- it, Alice (the author) won in three sets. auto_confirm_at resets to a
+-- fresh 72h window (decision 2026-10-14) each time the seed runs.
+INSERT INTO match_results
+  (id, offer_join_id, status, score, winner, reported_by, auto_confirm_at) VALUES
+  ('00000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000002', 'PENDING',
+   '[{"author":6,"player":4},{"author":3,"player":6},{"author":10,"player":8}]'::jsonb,
+   'AUTHOR', 'PLAYER', now() + interval '72 hours')
+ON CONFLICT (id) DO UPDATE SET
+  status = EXCLUDED.status,
+  score = EXCLUDED.score,
+  winner = EXCLUDED.winner,
+  reported_by = EXCLUDED.reported_by,
+  auto_confirm_at = EXCLUDED.auto_confirm_at;
 
 COMMIT;

@@ -10,18 +10,26 @@ import {
   requestToJoin,
   withdrawJoin,
 } from "@/app/offers/[id]/actions";
+import {
+  confirmResult,
+  disputeResult,
+  submitResult,
+} from "@/app/offers/[id]/result-actions";
 import { ExternalLink } from "@/components/external-link";
 import { JoinThread } from "@/components/join-thread";
 import { OfferActionButton } from "@/components/offer-action-button";
+import { ResultForm } from "@/components/result-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
+import type { MatchParty, OfferFormat } from "@/lib/generated/prisma/enums";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
 import {
   getOfferDetails,
   type OfferDetails,
+  type OfferJoinResult,
   type OfferPlayer,
 } from "@/lib/offers/offer-details";
 import {
@@ -31,6 +39,8 @@ import {
   placeLabel,
   spotsLabel,
 } from "@/lib/offers/offer-labels";
+import { eloChangeLabel, formatScoreFor } from "@/lib/offers/result-labels";
+import type { SetScore } from "@/lib/validation/match-result";
 
 // An offer's page (task 3.13), public. A guest sees the details and a sign-in
 // link; a player sees their request and what they can do with it; the
@@ -168,6 +178,14 @@ function PlayerView({
           senderNames={{ [offer.author.id]: offer.author.name ?? "Author" }}
           defaultOpen
         />
+        {viewerJoin.status === "ACCEPTED" && (
+          <ResultSection
+            join={viewerJoin}
+            offer={offer}
+            party="PLAYER"
+            opponentName={offer.author.name ?? "the author"}
+          />
+        )}
       </div>
     );
   }
@@ -225,6 +243,12 @@ function AuthorView({
                   offerJoinId={join.id}
                   viewerId={viewerId}
                   senderNames={{ [join.user.id]: join.user.name ?? "A player" }}
+                />
+                <ResultSection
+                  join={join}
+                  offer={details.offer}
+                  party="AUTHOR"
+                  opponentName={join.user.name ?? "the player"}
                 />
               </li>
             ))}
@@ -290,4 +314,104 @@ function PlayerLink({ player }: { player: OfferPlayer }) {
         ` · NTRP ${player.selfRatedNtrp.toFixed(1)}`}
     </Link>
   );
+}
+
+// A join's result, from whichever side is looking (task 4.6, 4.7): nothing
+// before the match starts or for doubles (no result form there at all);
+// the submit form once it's started and nobody has filed one yet; the
+// score and a confirm/dispute choice for whoever didn't file it while it's
+// still PENDING, or just the score for whoever did; the score and this
+// viewer's own ELO change once CONFIRMED; a note once DISPUTED. NO_SHOW is
+// session 05's (4.10) — nothing produces it yet, so there's nothing to show.
+function ResultSection({
+  join,
+  offer,
+  party,
+  opponentName,
+}: {
+  join: { id: string; result: OfferJoinResult | null };
+  offer: { format: OfferFormat; startsAt: Date };
+  party: MatchParty;
+  opponentName: string;
+}) {
+  if (offer.format !== "SINGLES" || offer.startsAt > new Date()) {
+    return null;
+  }
+  const { result } = join;
+
+  if (!result) {
+    return (
+      <details className="mt-2">
+        <summary className="cursor-pointer text-sm text-muted-foreground">
+          Submit result
+        </summary>
+        <div className="mt-2">
+          <ResultForm
+            action={submitResult.bind(null, join.id)}
+            viewerParty={party}
+            opponentName={opponentName}
+          />
+        </div>
+      </details>
+    );
+  }
+
+  // The viewer's own games first — same convention as the match history
+  // (4.9), so "4-6, 3-6" always means "I lost both sets" to whoever reads it.
+  const score = formatScoreFor(result.score as SetScore[], party === "AUTHOR");
+
+  if (result.status === "PENDING") {
+    if (result.reportedBy === party) {
+      return (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Result submitted ({score}). Waiting for {opponentName} to confirm.
+        </p>
+      );
+    }
+    return (
+      <div className="mt-2 space-y-2">
+        <p className="text-sm">
+          {opponentName} reported: {score}.
+        </p>
+        <div className="flex gap-2">
+          <OfferActionButton
+            action={confirmResult.bind(null, result.id)}
+            label="Confirm"
+            pendingLabel="Confirming…"
+          />
+          <OfferActionButton
+            action={disputeResult.bind(null, result.id)}
+            label="Dispute"
+            pendingLabel="Disputing…"
+            variant="outline"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (result.status === "CONFIRMED") {
+    const before =
+      party === "AUTHOR" ? result.authorEloBefore : result.playerEloBefore;
+    const after =
+      party === "AUTHOR" ? result.authorEloAfter : result.playerEloAfter;
+    return (
+      <p className="mt-2 text-sm text-muted-foreground">
+        Confirmed: {score}.
+        {before !== null && after !== null && (
+          <> Your ELO: {eloChangeLabel(before, after)}.</>
+        )}
+      </p>
+    );
+  }
+
+  if (result.status === "DISPUTED") {
+    return (
+      <p className="mt-2 text-sm text-muted-foreground">
+        Result disputed ({score}). An admin will review it.
+      </p>
+    );
+  }
+
+  return null;
 }

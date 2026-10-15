@@ -21,3 +21,15 @@ export async function postSystemMessage(
 // reminder, since the thread is also how strangers first arrange to meet.
 export const THREAD_WELCOME_MESSAGE =
   "Meet at the court. Never send money in advance.";
+
+// Result and confirmation notices (task 4.7): filed when a result is
+// submitted, confirmed (manually or by the cron auto-confirm, 5.8) or
+// disputed. Generic text — both sides already know the score from the form.
+export const RESULT_SUBMITTED_MESSAGE =
+  "Match result submitted. Waiting for the other player to confirm.";
+export const RESULT_CONFIRMED_MESSAGE =
+  "Match result confirmed. Both players' ELO has been updated.";
+export const RESULT_AUTO_CONFIRMED_MESSAGE =
+  "Match result automatically confirmed after 72 hours. Both players' ELO has been updated.";
+export const RESULT_DISPUTED_MESSAGE =
+  "Match result disputed. An admin will review it.";

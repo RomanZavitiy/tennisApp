@@ -203,18 +203,42 @@ model Message {
   @@map("messages")
 }
 
-/// The result of a singles match played through an accepted join (Epic 4).
+/// The result of a singles match played through an accepted join (task 4.4;
+/// formula and format decided 2026-10-14). Only a CONFIRMED result moves ELO
+/// (4.8); PENDING waits for the other side, DISPUTED is frozen for an admin
+/// (session 08), NO_SHOW is session 05's (4.10) — this slice only adds the
+/// status value, nothing writes it yet.
 model MatchResult {
-  id        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  status    MatchResultStatus @default(PENDING)
-  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status     MatchResultStatus @default(PENDING)
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   /// One result per join. Restrict, not Cascade: results feed ELO history, so
   /// a join with a result — and through it the offer and both users — can't
   /// be deleted until account deletion decides what happens to them (6.15).
   offerJoinId String    @unique @map("offer_join_id") @db.Uuid
   offerJoin   OfferJoin @relation(fields: [offerJoinId], references: [id], onDelete: Restrict)
+
+  /// Sets as played, author's and the joining player's games per set (2-3
+  /// entries; shape and tennis-score rules are lib/validation/match-result.ts,
+  /// task 4.5 — this column only stores what that schema already approved).
+  score Json
+  /// Who won — the offer's author or the joining player (the same AUTHOR /
+  /// PLAYER convention join-transitions.ts uses for who may act).
+  winner MatchParty
+  /// Who filed this result; the other party confirms or disputes it (4.7).
+  reportedBy MatchParty @map("reported_by")
+  /// Set when filed: now + 72h (decision 2026-10-14). Read by the cron job
+  /// (5.8) to auto-confirm; kept afterwards only as a record of the deadline.
+  autoConfirmAt DateTime @map("auto_confirm_at") @db.Timestamptz
+
+  /// ELO snapshots (4.8): null until CONFIRMED, set together, exactly once,
+  /// in the same transaction that updates both users' rating.
+  authorEloBefore Int? @map("author_elo_before")
+  authorEloAfter  Int? @map("author_elo_after")
+  playerEloBefore Int? @map("player_elo_before")
+  playerEloAfter  Int? @map("player_elo_after")
 
   @@map("match_results")
 }
@@ -323,10 +347,23 @@ enum JoinStatus {
 }
 
 /// Only a CONFIRMED result changes ELO; PENDING waits for the opponent.
+/// NO_SHOW is session 05's (task 4.10) — added now so 4.4's status field is
+/// complete; nothing in this slice sets it.
 enum MatchResultStatus {
   PENDING
   CONFIRMED
   DISPUTED
+  NO_SHOW
 
   @@map("match_result_status")
+}
+
+/// Which side of a singles join someone is — the offer's author, or the
+/// player who asked to join (task 4.4; same meaning as join-transitions.ts's
+/// ACTION_ACTOR). Used for both a result's winner and who filed it.
+enum MatchParty {
+  AUTHOR
+  PLAYER
+
+  @@map("match_party")
 }
