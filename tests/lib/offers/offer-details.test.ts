@@ -66,9 +66,20 @@ describe("getOfferDetails", () => {
       viewerJoin: { id: "j2", status: "REQUESTED" },
       joins: [],
     });
+    const resultSelect = {
+      id: true,
+      status: true,
+      winner: true,
+      reportedBy: true,
+      score: true,
+      authorEloBefore: true,
+      authorEloAfter: true,
+      playerEloBefore: true,
+      playerEloAfter: true,
+    };
     expect(joinFindUnique).toHaveBeenCalledWith({
       where: { offerId_userId: { offerId: OFFER, userId: PLAYER } },
-      select: { id: true, status: true },
+      select: { id: true, status: true, result: { select: resultSelect } },
     });
     expect(joinFindMany).not.toHaveBeenCalled();
   });

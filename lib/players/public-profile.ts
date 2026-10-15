@@ -16,6 +16,8 @@ export type PublicProfile = {
   district: District;
   selfRatedNtrp: number;
   avatarPath: string | null;
+  /** Current ELO (task 4.9) — moves only on a confirmed result (4.8). */
+  elo: number;
 };
 
 /**
@@ -40,15 +42,18 @@ export async function getPublicProfile(
       district: true,
       selfRatedNtrp: true,
       avatarPath: true,
+      elo: true,
     },
   });
 
-  // The database CHECK from task 1.10 guarantees these once onboarded.
+  // The database CHECK from task 1.10 (and, for elo, 4.2) guarantees these
+  // once onboarded.
   if (
     !row?.name ||
     !row.birthDate ||
     !row.district ||
-    row.selfRatedNtrp === null
+    row.selfRatedNtrp === null ||
+    row.elo === null
   ) {
     return null;
   }
@@ -60,5 +65,6 @@ export async function getPublicProfile(
     district: row.district,
     selfRatedNtrp: row.selfRatedNtrp,
     avatarPath: row.avatarPath,
+    elo: row.elo,
   };
 }

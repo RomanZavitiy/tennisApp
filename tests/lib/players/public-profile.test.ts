@@ -29,6 +29,7 @@ describe("getPublicProfile", () => {
       district: "KROWODRZA",
       selfRatedNtrp: 3.5,
       avatarPath: null,
+      elo: 1400,
     });
 
     const profile = await getPublicProfile(ID);
@@ -40,8 +41,23 @@ describe("getPublicProfile", () => {
       district: "KROWODRZA",
       selfRatedNtrp: 3.5,
       avatarPath: null,
+      elo: 1400,
     });
     expect(profile).not.toHaveProperty("birthDate");
+  });
+
+  it("returns null for an onboarded row with no ELO yet (shouldn't happen, but no rating to guess)", async () => {
+    findFirst.mockResolvedValue({
+      id: ID,
+      name: "Ola",
+      birthDate: new Date("1995-04-12T00:00:00Z"),
+      district: "KROWODRZA",
+      selfRatedNtrp: 3.5,
+      avatarPath: null,
+      elo: null,
+    });
+
+    await expect(getPublicProfile(ID)).resolves.toBeNull();
   });
 
   it("asks the database only for onboarded players and public columns", async () => {
@@ -58,6 +74,7 @@ describe("getPublicProfile", () => {
         district: true,
         selfRatedNtrp: true,
         avatarPath: true,
+        elo: true,
       },
     });
   });
