@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
 import {
+  COURT_BOOKED_MESSAGE,
   postSystemMessage,
   THREAD_WELCOME_MESSAGE,
 } from "@/lib/messages/post-system-message";
@@ -368,5 +369,50 @@ export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
   }
   revalidatePath(`/offers/${id.data}`);
   revalidatePath("/offers");
+  return { ok: true };
+}
+
+/**
+ * The author marks the court as booked (task 2.13), after clicking through
+ * to the club's booking link or phone number. One click sets courtStatus and
+ * tells every player with a live request or place, the same welcome note
+ * (requestToJoin) and result notices (result-actions.ts) already do.
+ */
+export async function markCourtBooked(
+  offerId: unknown,
+): Promise<JoinChangeResult> {
+  const author = await requireOnboardedUser();
+
+  const id = z.uuid().safeParse(offerId);
+  if (!id.success) {
+    return { ok: false, message: NOT_FOUND };
+  }
+
+  const offer = await db.sparringOffer.findFirst({
+    where: { id: id.data, authorId: author.id },
+    select: { courtStatus: true },
+  });
+  if (!offer) {
+    return { ok: false, message: NOT_FOUND };
+  }
+  if (offer.courtStatus === "BOOKED") {
+    return { ok: true };
+  }
+
+  const activeJoins = await db.offerJoin.findMany({
+    where: { offerId: id.data, status: { in: ["REQUESTED", "ACCEPTED"] } },
+    select: { id: true },
+  });
+  await db.sparringOffer.update({
+    where: { id: id.data },
+    data: { courtStatus: "BOOKED" },
+  });
+  await Promise.all(
+    activeJoins.map((join) =>
+      postSystemMessage({ offerJoinId: join.id }, COURT_BOOKED_MESSAGE),
+    ),
+  );
+
+  revalidatePath(`/offers/${id.data}`);
   return { ok: true };
 }

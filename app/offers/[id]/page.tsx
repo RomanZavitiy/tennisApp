@@ -16,9 +16,9 @@ import {
   submitNoShow,
   submitResult,
 } from "@/app/offers/[id]/result-actions";
-import { ExternalLink } from "@/components/external-link";
 import { JoinThread } from "@/components/join-thread";
 import { OfferActionButton } from "@/components/offer-action-button";
+import { OfferBookingSection } from "@/components/offer-booking-section";
 import { ResultForm } from "@/components/result-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
@@ -107,19 +107,12 @@ export default async function OfferPage({ params }: OfferPageProps) {
         </div>
       </dl>
       {offer.club && (
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-          <Link href={`/clubs/${offer.club.id}`} className="hover:underline">
-            About {offer.club.name}
-          </Link>
-          {offer.club.bookingUrl && (
-            <ExternalLink
-              href={offer.club.bookingUrl}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              Book on club&apos;s site
-            </ExternalLink>
-          )}
-        </div>
+        <OfferBookingSection
+          offerId={offer.id}
+          club={offer.club}
+          isAuthor={details.isAuthor}
+          courtStatus={offer.courtStatus}
+        />
       )}
       {offer.comment && (
         <p className="mt-6 whitespace-pre-line">{offer.comment}</p>

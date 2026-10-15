@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 
+import { BookingLink } from "@/components/booking-link";
 import { ExternalLink } from "@/components/external-link";
+import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
 import {
   formatCheckedDate,
@@ -11,6 +14,7 @@ import {
   INDOOR_LABELS,
   SURFACE_LABELS,
 } from "@/lib/clubs/club-details";
+import { getClubOffers } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
 // A club's page, open to everyone (it's in the proxy's public list). Empty
@@ -28,10 +32,13 @@ export async function generateMetadata({
 }
 
 export default async function ClubPage({ params }: ClubPageProps) {
+  // Active offers (2.10) change all the time; never serve a cached page.
+  await connection();
   const club = await getClub((await params).id);
   if (!club) {
     notFound();
   }
+  const offers = await getClubOffers(club.id);
 
   const facts: { label: string; value: ReactNode }[] = [
     { label: "Courts", value: String(club.courtCount) },
@@ -90,14 +97,14 @@ export default async function ClubPage({ params }: ClubPageProps) {
         </p>
       )}
 
-      {club.bookingUrl && (
-        <ExternalLink
-          href={club.bookingUrl}
-          className={buttonVariants({ className: "mt-6" })}
-        >
-          Book a court
-        </ExternalLink>
-      )}
+      <BookingLink
+        clubId={club.id}
+        bookingUrl={club.bookingUrl}
+        phone={club.phone}
+        className={buttonVariants({ className: "mt-6" })}
+        urlLabel="Book a court"
+        phoneLabel="Call to book"
+      />
 
       <dl className="mt-6 space-y-3">
         {facts.map((fact) => (
@@ -119,6 +126,31 @@ export default async function ClubPage({ params }: ClubPageProps) {
         Info checked on {formatCheckedDate(club.verifiedAt)}. Prices and hours
         change — confirm with the club before you go.
       </p>
+
+      <section className="mt-8">
+        <h2 className="font-semibold">Looking for a partner here</h2>
+        {offers.length === 0 ? (
+          <div className="mt-2 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              No open offers at this club right now.
+            </p>
+            <Link
+              href={`/offers/new?clubId=${club.id}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              Create an offer at this club
+            </Link>
+          </div>
+        ) : (
+          <ul className="mt-2 space-y-3">
+            {offers.map((offer) => (
+              <li key={offer.id}>
+                <OfferCard offer={offer} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }

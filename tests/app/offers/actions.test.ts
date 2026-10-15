@@ -4,10 +4,14 @@ import {
   acceptJoin,
   cancelOffer,
   declineJoin,
+  markCourtBooked,
   requestToJoin,
   withdrawJoin,
 } from "@/app/offers/[id]/actions";
-import { THREAD_WELCOME_MESSAGE } from "@/lib/messages/post-system-message";
+import {
+  COURT_BOOKED_MESSAGE,
+  THREAD_WELCOME_MESSAGE,
+} from "@/lib/messages/post-system-message";
 
 // Session and database are replaced: what's under test is who may change a
 // join, which writes happen, and that the answer reveals nothing else.
@@ -19,7 +23,10 @@ const JOIN = "55555555-5555-4555-8555-555555555555";
 const {
   requireOnboardedUser,
   offerFindUnique,
+  offerFindFirst,
+  offerUpdate,
   joinFindUnique,
+  joinFindMany,
   joinCreateManyAndReturn,
   joinUpdateMany,
   recordLateCancellation,
@@ -29,7 +36,10 @@ const {
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
   offerFindUnique: vi.fn(),
+  offerFindFirst: vi.fn(),
+  offerUpdate: vi.fn(),
   joinFindUnique: vi.fn(),
+  joinFindMany: vi.fn(),
   joinCreateManyAndReturn: vi.fn(),
   joinUpdateMany: vi.fn(),
   recordLateCancellation: vi.fn(),
@@ -50,9 +60,14 @@ const {
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
   db: {
-    sparringOffer: { findUnique: offerFindUnique },
+    sparringOffer: {
+      findUnique: offerFindUnique,
+      findFirst: offerFindFirst,
+      update: offerUpdate,
+    },
     offerJoin: {
       findUnique: joinFindUnique,
+      findMany: joinFindMany,
       createManyAndReturn: joinCreateManyAndReturn,
       updateMany: joinUpdateMany,
     },
@@ -73,6 +88,7 @@ vi.mock("@/lib/rating/reliability", async (importOriginal) => ({
 vi.mock("@/lib/messages/post-system-message", () => ({
   postSystemMessage,
   THREAD_WELCOME_MESSAGE: "Meet at the court. Never send money in advance.",
+  COURT_BOOKED_MESSAGE: "The court has been booked.",
 }));
 
 const upcoming = {
@@ -524,5 +540,75 @@ describe("cancelOffer", () => {
       message: "This offer doesn't exist.",
     });
     expect(tx.$queryRaw).not.toHaveBeenCalled();
+  });
+});
+
+describe("markCourtBooked", () => {
+  const REQUESTED_JOIN = "66666666-6666-4666-8666-666666666666";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireOnboardedUser.mockResolvedValue({ id: AUTHOR });
+    offerFindFirst.mockResolvedValue({ courtStatus: "WILL_BOOK" });
+    joinFindMany.mockResolvedValue([{ id: JOIN }, { id: REQUESTED_JOIN }]);
+  });
+
+  it("books the court and tells every active thread", async () => {
+    await expect(markCourtBooked(OFFER)).resolves.toEqual({ ok: true });
+
+    expect(offerFindFirst).toHaveBeenCalledWith({
+      where: { id: OFFER, authorId: AUTHOR },
+      select: { courtStatus: true },
+    });
+    expect(joinFindMany).toHaveBeenCalledWith({
+      where: { offerId: OFFER, status: { in: ["REQUESTED", "ACCEPTED"] } },
+      select: { id: true },
+    });
+    expect(offerUpdate).toHaveBeenCalledWith({
+      where: { id: OFFER },
+      data: { courtStatus: "BOOKED" },
+    });
+    expect(postSystemMessage).toHaveBeenCalledWith(
+      { offerJoinId: JOIN },
+      COURT_BOOKED_MESSAGE,
+    );
+    expect(postSystemMessage).toHaveBeenCalledWith(
+      { offerJoinId: REQUESTED_JOIN },
+      COURT_BOOKED_MESSAGE,
+    );
+  });
+
+  it("does nothing when the court is already booked", async () => {
+    offerFindFirst.mockResolvedValue({ courtStatus: "BOOKED" });
+
+    await expect(markCourtBooked(OFFER)).resolves.toEqual({ ok: true });
+
+    expect(offerUpdate).not.toHaveBeenCalled();
+    expect(postSystemMessage).not.toHaveBeenCalled();
+  });
+
+  it("only lets the author mark their own offer", async () => {
+    offerFindFirst.mockResolvedValue(null);
+
+    await expect(markCourtBooked(OFFER)).resolves.toEqual({
+      ok: false,
+      message: "This offer doesn't exist.",
+    });
+    expect(offerUpdate).not.toHaveBeenCalled();
+  });
+
+  it("treats a bad id as a missing offer", async () => {
+    await expect(markCourtBooked("nope")).resolves.toEqual({
+      ok: false,
+      message: "This offer doesn't exist.",
+    });
+    expect(offerFindFirst).not.toHaveBeenCalled();
+  });
+
+  it("refuses a request without a session", async () => {
+    requireOnboardedUser.mockRejectedValue(new Error("NEXT_REDIRECT"));
+
+    await expect(markCourtBooked(OFFER)).rejects.toThrow("NEXT_REDIRECT");
+    expect(offerUpdate).not.toHaveBeenCalled();
   });
 });

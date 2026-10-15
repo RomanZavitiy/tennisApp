@@ -41,3 +41,7 @@ export const RESULT_DISPUTED_MESSAGE =
 // filing and at disputing, not at the silent 72h deadline).
 export const RESULT_NO_SHOW_REPORTED_MESSAGE =
   "Opponent marked as a no-show. They can dispute this within 72 hours.";
+
+// The author marking the court as booked, after clicking through to the
+// club's booking link or phone number (task 2.13).
+export const COURT_BOOKED_MESSAGE = "The court has been booked.";

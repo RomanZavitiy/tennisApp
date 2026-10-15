@@ -10,12 +10,20 @@ import { toKrakowLocal } from "@/lib/offers/krakow-time";
 export const metadata: Metadata = { title: "Post a sparring offer" };
 
 // The (member) layout has already checked the session and the profile.
-export default async function NewOfferPage() {
+export default async function NewOfferPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const player = await requireOnboardedUser();
   const clubs = await db.club.findMany({
     select: { id: true, name: true, district: true },
     orderBy: { name: "asc" },
   });
+  // "Create an offer at this club" (task 2.10): a bad or unknown id is
+  // simply ignored, same as every other optional query param in the app.
+  const rawClubId = (await searchParams).clubId;
+  const clubId = Array.isArray(rawClubId) ? rawClubId[0] : rawClubId;
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
@@ -29,6 +37,7 @@ export default async function NewOfferPage() {
         action={createOffer}
         clubs={clubs}
         defaultDistrict={player.district}
+        defaultClubId={clubId}
         earliestStart={toKrakowLocal(new Date())}
       />
       <Link

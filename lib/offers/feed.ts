@@ -52,6 +52,72 @@ export function parsePage(value: string | string[] | undefined): number {
   return Number.isSafeInteger(page) && page >= 1 ? page : 1;
 }
 
+const feedOfferSelect = {
+  id: true,
+  format: true,
+  hasPartner: true,
+  startsAt: true,
+  district: true,
+  ntrpMin: true,
+  ntrpMax: true,
+  surface: true,
+  courtStatus: true,
+  club: { select: { id: true, name: true } },
+  author: {
+    select: {
+      id: true,
+      name: true,
+      elo: true,
+      scheduledMatches: true,
+      noShows: true,
+      lateCancellations: true,
+    },
+  },
+  _count: { select: { joins: { where: { status: "ACCEPTED" as const } } } },
+} as const;
+
+function toFeedOffer({
+  _count,
+  author,
+  ...offer
+}: {
+  _count: { joins: number };
+  author: {
+    id: string;
+    name: string | null;
+    elo: number | null;
+    scheduledMatches: number;
+    noShows: number;
+    lateCancellations: number;
+  };
+} & Omit<FeedOffer, "author" | "spotsLeft">): FeedOffer {
+  return {
+    ...offer,
+    author: {
+      id: author.id,
+      name: author.name,
+      reliability: computeReliability(author),
+    },
+    spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),
+  };
+}
+
+/**
+ * Open, upcoming offers at one club (task 2.10), soonest first — no paging
+ * or ELO ranking: a single club's list stays short enough without either.
+ */
+export async function getClubOffers(
+  clubId: string,
+  now = new Date(),
+): Promise<FeedOffer[]> {
+  const rows = await db.sparringOffer.findMany({
+    where: { AND: [feedWhere({}, now), { clubId }] },
+    orderBy: [{ startsAt: "asc" }, { id: "asc" }],
+    select: feedOfferSelect,
+  });
+  return rows.map(toFeedOffer);
+}
+
 export async function getOfferFeed(
   page: number,
   filters: FeedFilters = {},
@@ -72,40 +138,10 @@ export async function getOfferFeed(
     // apart (or for a guest, who has no ELO to rank by at all); id breaks
     // ties at the same start time.
     orderBy: [{ startsAt: "asc" }, { id: "asc" }],
-    select: {
-      id: true,
-      format: true,
-      hasPartner: true,
-      startsAt: true,
-      district: true,
-      ntrpMin: true,
-      ntrpMax: true,
-      surface: true,
-      courtStatus: true,
-      club: { select: { id: true, name: true } },
-      author: {
-        select: {
-          id: true,
-          name: true,
-          elo: true,
-          scheduledMatches: true,
-          noShows: true,
-          lateCancellations: true,
-        },
-      },
-      _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
-    },
+    select: feedOfferSelect,
   });
 
-  const offers = rows.map(({ _count, author, ...offer }) => ({
-    ...offer,
-    author: {
-      id: author.id,
-      name: author.name,
-      reliability: computeReliability(author),
-    },
-    spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),
-  }));
+  const offers = rows.map(toFeedOffer);
   // Pairs each offer with its author's ELO, purely for ranking below — kept
   // out of FeedOffer itself, which only has the author's id and name.
   const ranked = rankByEloCloseness(

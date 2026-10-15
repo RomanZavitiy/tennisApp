@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { FEED_PAGE_SIZE, getOfferFeed, parsePage } from "@/lib/offers/feed";
+import {
+  FEED_PAGE_SIZE,
+  getClubOffers,
+  getOfferFeed,
+  parsePage,
+} from "@/lib/offers/feed";
 
 // The database is replaced: what's under test is which offers the query asks
 // for, how pages are cut, and how free spots and the ranking are computed.
@@ -219,5 +224,43 @@ describe("getOfferFeed", () => {
     const feed = await getOfferFeed(1, {}, null, NOW);
 
     expect(feed.offers.map((offer) => offer.id)).toEqual(["1", "2"]);
+  });
+});
+
+describe("getClubOffers", () => {
+  beforeEach(() => {
+    findMany.mockReset();
+    findMany.mockResolvedValue([]);
+  });
+
+  it("asks for open, upcoming offers at just this club, soonest first", async () => {
+    await getClubOffers("club-1", NOW);
+
+    const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(query.where).toEqual({
+      AND: [
+        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        { clubId: "club-1" },
+      ],
+    });
+    expect(query.orderBy).toEqual([{ startsAt: "asc" }, { id: "asc" }]);
+  });
+
+  it("returns every match, unranked and unpaged", async () => {
+    findMany.mockResolvedValue(
+      Array.from({ length: FEED_PAGE_SIZE + 1 }, (_, i) => row(i)),
+    );
+
+    const offers = await getClubOffers("club-1", NOW);
+
+    expect(offers).toHaveLength(FEED_PAGE_SIZE + 1);
+  });
+
+  it("works out spots left the same way the feed does", async () => {
+    findMany.mockResolvedValue([row(1, { format: "DOUBLES", accepted: 1 })]);
+
+    const offers = await getClubOffers("club-1", NOW);
+
+    expect(offers[0]?.spotsLeft).toBe(2);
   });
 });
