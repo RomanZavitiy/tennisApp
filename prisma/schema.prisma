@@ -72,9 +72,10 @@ model User {
   /// before the start (isLateCancellation, lib/rating/reliability.ts).
   lateCancellations Int @default(0) @map("late_cancellations")
 
-  offers       SparringOffer[]
-  joins        OfferJoin[]
-  sentMessages Message[]
+  offers         SparringOffer[]
+  joins          OfferJoin[]
+  sentMessages   Message[]
+  outboundClicks OutboundClick[]
 
   @@map("users")
 }
@@ -111,7 +112,8 @@ model Club {
   /// club page so players can tell how fresh the price and phone are.
   verifiedAt DateTime      @map("verified_at") @db.Date
 
-  offers SparringOffer[]
+  offers         SparringOffer[]
+  outboundClicks OutboundClick[]
 
   @@map("clubs")
 }
@@ -136,27 +138,28 @@ model SparringOffer {
   // combinations are CHECKs in the migration; the offer schema (3.3)
   // validates first. How many players an offer needs is not stored —
   // playersNeeded() in lib/offers computes it from format and hasPartner.
-  format     OfferFormat @default(SINGLES)
+  format      OfferFormat @default(SINGLES)
   /// Doubles only: the author brings their own partner (a mark, not an account).
-  hasPartner Boolean     @default(false) @map("has_partner")
+  hasPartner  Boolean     @default(false) @map("has_partner")
   /// Stored in UTC, shown in Europe/Warsaw.
-  startsAt   DateTime    @map("starts_at") @db.Timestamptz
+  startsAt    DateTime    @map("starts_at") @db.Timestamptz
   /// Set together with a club or on its own; at least one of the two is set.
   /// Empty for an offer at a club outside the city limits.
-  district   District?
+  district    District?
   /// Wanted NTRP level, 1.5–7.0 in steps of 0.5. Empty — any level.
-  ntrpMin    Float?      @map("ntrp_min")
-  ntrpMax    Float?      @map("ntrp_max")
+  ntrpMin     Float?      @map("ntrp_min")
+  ntrpMax     Float?      @map("ntrp_max")
   /// Empty — any surface.
-  surface    Surface?
-  comment    String?     @db.VarChar(500)
+  surface     Surface?
+  comment     String?     @db.VarChar(500)
   /// Whether the court is already booked (task 3.22). Default: the author
   /// books once a sparring partner is confirmed.
   courtStatus CourtStatus @default(WILL_BOOK) @map("court_status")
 
-  joins    OfferJoin[]
+  joins          OfferJoin[]
   /// The group thread for a doubles offer (task 3.21): author + accepted players.
-  messages Message[]
+  messages       Message[]
+  outboundClicks OutboundClick[]
 
   @@index([authorId])
   @@index([clubId])
@@ -224,10 +227,10 @@ model Message {
 /// (session 08), NO_SHOW (4.10) is a no-show report nobody disputed within
 /// 72h — ELO never moves for one, only the reported player's noShows counter.
 model MatchResult {
-  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  status     MatchResultStatus @default(PENDING)
-  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt  DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  id        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status    MatchResultStatus @default(PENDING)
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   /// One result per join. Restrict, not Cascade: results feed ELO history, so
   /// a join with a result — and through it the offer and both users — can't
@@ -239,23 +242,23 @@ model MatchResult {
   /// entries; shape and tennis-score rules are lib/validation/match-result.ts,
   /// task 4.5 — this column only stores what that schema already approved).
   /// Null for a no-show report (4.10, noShowParty below) — there's no score.
-  score Json?
+  score         Json?
   /// Who won — the offer's author or the joining player (the same AUTHOR /
   /// PLAYER convention join-transitions.ts uses for who may act). Null for
   /// a no-show report, same as score.
-  winner MatchParty?
+  winner        MatchParty?
   /// Who filed this result; the other party confirms or disputes it (4.7),
   /// or — for a no-show report — is the one the report is about.
-  reportedBy MatchParty @map("reported_by")
+  reportedBy    MatchParty  @map("reported_by")
   /// Set only for a no-show report (4.10): who didn't show up, the mirror
   /// of reportedBy (who showed up and filed it). The opponent may dispute
   /// it within 72h (DISPUTED); otherwise the same cron that auto-confirms
   /// scored results settles it as NO_SHOW — never CONFIRMED, since ELO
   /// doesn't move for a no-show (decision 2026-10-14).
-  noShowParty MatchParty? @map("no_show_party")
+  noShowParty   MatchParty? @map("no_show_party")
   /// Set when filed: now + 72h (decision 2026-10-14). Read by the cron job
   /// (5.8) to auto-confirm; kept afterwards only as a record of the deadline.
-  autoConfirmAt DateTime @map("auto_confirm_at") @db.Timestamptz
+  autoConfirmAt DateTime    @map("auto_confirm_at") @db.Timestamptz
 
   /// ELO snapshots (4.8): null until CONFIRMED, set together, exactly once,
   /// in the same transaction that updates both users' rating.
@@ -265,6 +268,34 @@ model MatchResult {
   playerEloAfter  Int? @map("player_elo_after")
 
   @@map("match_results")
+}
+
+/// A click on a club's booking link or phone number, from `/clubs/[id]` or an
+/// offer's page (task 2.13). Logged for the owner's own weekly query, not
+/// shown in the app; written outside RLS like every other table (1.2), so
+/// there is no SELECT policy either — nobody queries it through the client.
+model OutboundClick {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  target    ClickTarget
+
+  /// Null for a guest — the click still counts (task 2.13 works without a
+  /// session), it just isn't attributed to anyone.
+  userId String? @map("user_id") @db.Uuid
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  clubId String @map("club_id") @db.Uuid
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  /// Set when the click happened on an offer's page, null from a club's own
+  /// page — which offer it was doesn't outlive the offer itself.
+  offerId String?        @map("offer_id") @db.Uuid
+  offer   SparringOffer? @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([clubId])
+  @@index([offerId])
+  @@map("outbound_clicks")
 }
 
 enum Gender {
@@ -380,6 +411,15 @@ enum MatchResultStatus {
   NO_SHOW
 
   @@map("match_result_status")
+}
+
+/// What a tracked outbound click (task 2.13) opened: the club's own booking
+/// page, or a phone call when the club has no such page.
+enum ClickTarget {
+  URL
+  PHONE
+
+  @@map("click_target")
 }
 
 /// Which side of a singles join someone is — the offer's author, or the
