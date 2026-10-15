@@ -11,6 +11,7 @@ import { getCurrentUser } from "@/lib/auth/require-user";
 export async function SiteHeader() {
   const user = await getCurrentUser();
   const t = await getTranslations("SiteHeader");
+  const tMetadata = await getTranslations("Metadata");
 
   // Routes match the ones later tasks build: /offers (Epic 3), /clubs (2.6),
   // /login (1.6). Signed-in players also get Profile.
@@ -26,7 +27,7 @@ export async function SiteHeader() {
     <header className="border-b">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
         <Link href="/" className="font-semibold tracking-tight">
-          MatchFinder Kraków
+          {tMetadata("siteName")}
         </Link>
 
         <nav

@@ -21,6 +21,14 @@
     "mainNav": "Main",
     "signOut": "Sign out"
   },
+  "AdminLayout": {
+    "admin": "Admin",
+    "reports": "Reports",
+    "disputedResults": "Disputed results"
+  },
+  "Sheet": {
+    "close": "Close"
+  },
   "MobileNav": {
     "openMenu": "Open menu",
     "menu": "Menu",

@@ -21,6 +21,14 @@
     "mainNav": "Główna",
     "signOut": "Wyloguj się"
   },
+  "AdminLayout": {
+    "admin": "Administracja",
+    "reports": "Zgłoszenia",
+    "disputedResults": "Zaskarżone wyniki"
+  },
+  "Sheet": {
+    "close": "Zamknij"
+  },
   "MobileNav": {
     "openMenu": "Otwórz menu",
     "menu": "Menu",

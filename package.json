@@ -14,7 +14,9 @@
     "postinstall": "prisma generate",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "clubs:load": "tsx prisma/load-clubs.ts"
+    "clubs:load": "tsx prisma/load-clubs.ts",
+    "check:i18n-strings": "tsx scripts/check-hardcoded-strings.ts",
+    "check:i18n-keys": "tsx scripts/check-i18n-keys.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",
