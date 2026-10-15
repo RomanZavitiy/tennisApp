@@ -88,6 +88,11 @@ export function OfferForm({
     for (const [field, message] of Object.entries(result.fieldErrors)) {
       setError(field as keyof OfferInput, { message });
     }
+    // A refusal that isn't about one field — blocked, or over a limit (6.4,
+    // 6.16-6.18).
+    if (result.message) {
+      setError("root", { message: result.message });
+    }
   }
 
   // An empty select means "any level"; a chosen one is a number.
@@ -248,6 +253,8 @@ export function OfferForm({
           {...register("comment")}
         />
       </Field>
+
+      <ErrorText id="root" error={errors.root} />
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? "Posting…" : "Post offer"}

@@ -113,9 +113,12 @@ export type OfferValues = z.output<typeof offerSchema>;
 
 // What createOffer returns when it doesn't redirect: the first message per
 // field, for the form to show next to it (same shape as the profile form's).
+// `message` is for a refusal that isn't about any one field — blocked
+// (6.4), the active-offer limit or the daily rate limit (6.16-6.18).
 export type CreateOfferResult = {
   ok: false;
   fieldErrors: Partial<Record<keyof OfferInput, string>>;
+  message?: string;
 };
 
 export function offerFieldErrors(error: z.ZodError): CreateOfferResult {

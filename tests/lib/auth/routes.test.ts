@@ -14,6 +14,8 @@ describe("isPublicRoute", () => {
     "/players/abc",
     "/install",
     "/unsubscribe",
+    "/admin",
+    "/admin/reports",
   ])("%s is public", (path) => {
     expect(isPublicRoute(path)).toBe(true);
   });

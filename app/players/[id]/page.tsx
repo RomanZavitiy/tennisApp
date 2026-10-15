@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { reportPlayer } from "@/app/players/[id]/actions";
 import { MatchHistory } from "@/components/match-history";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { PlayerFacts } from "@/components/player-facts";
+import { ReportButton } from "@/components/report-button";
+import { getCurrentUser } from "@/lib/auth/require-user";
 import { getMatchHistory } from "@/lib/players/match-history";
 import { getPublicProfile } from "@/lib/players/public-profile";
 
@@ -28,6 +31,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     notFound();
   }
   const matches = await getMatchHistory(id);
+  const viewer = await getCurrentUser();
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
@@ -52,6 +56,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           <MatchHistory matches={matches} />
         </div>
       </div>
+      {viewer && viewer.id !== profile.id && (
+        <div className="mt-8">
+          <ReportButton
+            action={reportPlayer.bind(null, profile.id)}
+            label="Report this player"
+          />
+        </div>
+      )}
     </main>
   );
 }
