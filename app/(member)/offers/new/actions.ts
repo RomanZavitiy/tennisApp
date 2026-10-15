@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import { notifyInterestedPlayers } from "@/lib/notifications/new-offer";
 import {
   offerFieldErrors,
   offerSchema,
@@ -49,6 +50,18 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     select: { id: true },
   });
 
+  // Task 5.16: "new offer for my level", to players nearby and at a
+  // matching level — never blocks the redirect below on itself failing.
+  await notifyInterestedPlayers({
+    offerId: created.id,
+    authorId: author.id,
+    district: place.district ?? null,
+    ntrpMin: offer.ntrpMin ?? null,
+    ntrpMax: offer.ntrpMax ?? null,
+  });
+
   revalidatePath("/offers");
-  redirect(`/offers/${created.id}`);
+  // ?created=1 flags "the first offer created" (task 5.15) for
+  // PushSubscribePrompt, via MarkMeaningfulAction on the offer page.
+  redirect(`/offers/${created.id}?created=1`);
 }

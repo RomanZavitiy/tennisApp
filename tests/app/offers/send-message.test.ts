@@ -12,13 +12,13 @@ const OFFER = "44444444-4444-4444-8444-444444444444";
 const JOIN = "55555555-5555-4555-8555-555555555555";
 const MESSAGE = "66666666-6666-4666-8666-666666666666";
 
-const { requireOnboardedUser, joinFindUnique, messageCreate } = vi.hoisted(
-  () => ({
+const { requireOnboardedUser, joinFindUnique, messageCreate, notify } =
+  vi.hoisted(() => ({
     requireOnboardedUser: vi.fn(),
     joinFindUnique: vi.fn(),
     messageCreate: vi.fn(),
-  }),
-);
+    notify: vi.fn(),
+  }));
 
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
@@ -27,6 +27,9 @@ vi.mock("@/lib/db", () => ({
     message: { create: messageCreate },
   },
 }));
+// Push/email are a separate concern (lib/notifications/notify.test.ts) —
+// here only that the right recipient and thread are passed matters.
+vi.mock("@/lib/notifications/notify", () => ({ notify }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 const upcomingJoin = {
@@ -48,9 +51,10 @@ describe("sendMessage", () => {
       senderId: ME,
       createdAt,
     });
+    notify.mockResolvedValue(undefined);
   });
 
-  it("sends as the join's player", async () => {
+  it("sends as the join's player, and notifies the author", async () => {
     await expect(sendMessage(JOIN, "See you at 6?")).resolves.toEqual({
       ok: true,
       sentMessage: {
@@ -65,15 +69,25 @@ describe("sendMessage", () => {
       data: { offerJoinId: JOIN, senderId: ME, content: "See you at 6?" },
       select: { id: true, content: true, senderId: true, createdAt: true },
     });
+    expect(notify).toHaveBeenCalledWith(AUTHOR, {
+      kind: "NEW_MESSAGE",
+      offerId: OFFER,
+      offerJoinId: JOIN,
+    });
   });
 
-  it("sends as the offer's author", async () => {
+  it("sends as the offer's author, and notifies the player", async () => {
     requireOnboardedUser.mockResolvedValue({ id: AUTHOR });
 
     await expect(
       sendMessage(JOIN, "Sure, see you then"),
     ).resolves.toMatchObject({ ok: true });
     expect(messageCreate).toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith(ME, {
+      kind: "NEW_MESSAGE",
+      offerId: OFFER,
+      offerJoinId: JOIN,
+    });
   });
 
   it("trims the message before writing it", async () => {

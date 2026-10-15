@@ -32,6 +32,7 @@ const {
   recordLateCancellation,
   recordScheduledMatch,
   postSystemMessage,
+  notify,
   tx,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
@@ -45,6 +46,7 @@ const {
   recordLateCancellation: vi.fn(),
   recordScheduledMatch: vi.fn(),
   postSystemMessage: vi.fn(),
+  notify: vi.fn(),
   // What the status-change transaction (3.12) sees.
   tx: {
     $queryRaw: vi.fn(),
@@ -90,6 +92,11 @@ vi.mock("@/lib/messages/post-system-message", () => ({
   THREAD_WELCOME_MESSAGE: "Meet at the court. Never send money in advance.",
   COURT_BOOKED_MESSAGE: "The court has been booked.",
 }));
+// Push/email are their own concern (lib/notifications/notify.test.ts); here
+// only that the right recipient and event fire matters. Set once, outside
+// any beforeEach: vi.clearAllMocks() clears recorded calls, not this.
+vi.mock("@/lib/notifications/notify", () => ({ notify }));
+notify.mockResolvedValue(undefined);
 
 const upcoming = {
   authorId: AUTHOR,
@@ -123,6 +130,10 @@ describe("requestToJoin", () => {
       { offerJoinId: JOIN },
       THREAD_WELCOME_MESSAGE,
     );
+    expect(notify).toHaveBeenCalledWith(AUTHOR, {
+      kind: "JOIN_REQUESTED",
+      offerId: OFFER,
+    });
   });
 
   it("refuses a request without a session or a finished profile", async () => {
@@ -283,6 +294,10 @@ describe("accepting, declining and withdrawing", () => {
     });
     // The accepted singles join is a newly scheduled match (4.11-4.12).
     expect(recordScheduledMatch).toHaveBeenCalledWith(tx, [AUTHOR, PLAYER]);
+    expect(notify).toHaveBeenCalledWith(PLAYER, {
+      kind: "JOIN_ACCEPTED",
+      offerId: OFFER,
+    });
   });
 
   it("accepts into doubles without filling it until the last place", async () => {
@@ -357,6 +372,10 @@ describe("accepting, declining and withdrawing", () => {
       data: { status: "DECLINED" },
     });
     expect(tx.sparringOffer.update).not.toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith(PLAYER, {
+      kind: "JOIN_DECLINED",
+      offerId: OFFER,
+    });
   });
 
   it("reopens a full offer when an accepted player withdraws", async () => {
@@ -379,6 +398,8 @@ describe("accepting, declining and withdrawing", () => {
     });
     // More than 12h out: not a late cancellation.
     expect(recordLateCancellation).not.toHaveBeenCalled();
+    // Withdrawing is the player's own action — no notice back to them.
+    expect(notify).not.toHaveBeenCalled();
   });
 
   it("flags a late cancellation when a player withdraws an accepted place close to the start", async () => {
@@ -545,12 +566,17 @@ describe("cancelOffer", () => {
 
 describe("markCourtBooked", () => {
   const REQUESTED_JOIN = "66666666-6666-4666-8666-666666666666";
+  const PLAYER = "77777777-7777-4777-8777-777777777777";
+  const REQUESTER = "88888888-8888-4888-8888-888888888888";
 
   beforeEach(() => {
     vi.clearAllMocks();
     requireOnboardedUser.mockResolvedValue({ id: AUTHOR });
     offerFindFirst.mockResolvedValue({ courtStatus: "WILL_BOOK" });
-    joinFindMany.mockResolvedValue([{ id: JOIN }, { id: REQUESTED_JOIN }]);
+    joinFindMany.mockResolvedValue([
+      { id: JOIN, userId: PLAYER },
+      { id: REQUESTED_JOIN, userId: REQUESTER },
+    ]);
   });
 
   it("books the court and tells every active thread", async () => {
@@ -562,7 +588,7 @@ describe("markCourtBooked", () => {
     });
     expect(joinFindMany).toHaveBeenCalledWith({
       where: { offerId: OFFER, status: { in: ["REQUESTED", "ACCEPTED"] } },
-      select: { id: true },
+      select: { id: true, userId: true },
     });
     expect(offerUpdate).toHaveBeenCalledWith({
       where: { id: OFFER },
@@ -576,6 +602,14 @@ describe("markCourtBooked", () => {
       { offerJoinId: REQUESTED_JOIN },
       COURT_BOOKED_MESSAGE,
     );
+    expect(notify).toHaveBeenCalledWith(PLAYER, {
+      kind: "COURT_BOOKED",
+      offerId: OFFER,
+    });
+    expect(notify).toHaveBeenCalledWith(REQUESTER, {
+      kind: "COURT_BOOKED",
+      offerId: OFFER,
+    });
   });
 
   it("does nothing when the court is already booked", async () => {

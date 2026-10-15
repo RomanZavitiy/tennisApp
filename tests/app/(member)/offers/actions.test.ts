@@ -9,19 +9,25 @@ const SOMEONE_ELSE = "22222222-2222-4222-8222-222222222222";
 const CLUB = "33333333-3333-4333-8333-333333333333";
 const OFFER = "44444444-4444-4444-8444-444444444444";
 
-const { requireOnboardedUser, clubFindUnique, offerCreate, redirect } =
-  vi.hoisted(() => ({
-    requireOnboardedUser: vi.fn(),
-    clubFindUnique: vi.fn(),
-    offerCreate:
-      vi.fn<
-        (args: {
-          data: Record<string, unknown>;
-          select: { id: true };
-        }) => Promise<{ id: string }>
-      >(),
-    redirect: vi.fn(),
-  }));
+const {
+  requireOnboardedUser,
+  clubFindUnique,
+  offerCreate,
+  redirect,
+  notifyInterestedPlayers,
+} = vi.hoisted(() => ({
+  requireOnboardedUser: vi.fn(),
+  clubFindUnique: vi.fn(),
+  offerCreate:
+    vi.fn<
+      (args: {
+        data: Record<string, unknown>;
+        select: { id: true };
+      }) => Promise<{ id: string }>
+    >(),
+  redirect: vi.fn(),
+  notifyInterestedPlayers: vi.fn(),
+}));
 
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
@@ -30,6 +36,8 @@ vi.mock("@/lib/db", () => ({
     sparringOffer: { create: offerCreate },
   },
 }));
+// The matching push is its own concern (lib/notifications/new-offer.test.ts).
+vi.mock("@/lib/notifications/new-offer", () => ({ notifyInterestedPlayers }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect }));
 
@@ -42,6 +50,7 @@ describe("createOffer", () => {
     vi.setSystemTime(new Date("2026-10-11T10:00:00Z"));
     requireOnboardedUser.mockResolvedValue({ id: ME });
     offerCreate.mockResolvedValue({ id: OFFER });
+    notifyInterestedPlayers.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -63,7 +72,14 @@ describe("createOffer", () => {
       },
       select: { id: true },
     });
-    expect(redirect).toHaveBeenCalledWith(`/offers/${OFFER}`);
+    expect(redirect).toHaveBeenCalledWith(`/offers/${OFFER}?created=1`);
+    expect(notifyInterestedPlayers).toHaveBeenCalledWith({
+      offerId: OFFER,
+      authorId: ME,
+      district: "KROWODRZA",
+      ntrpMin: null,
+      ntrpMax: null,
+    });
   });
 
   it("takes the author from the session, not from the request", async () => {

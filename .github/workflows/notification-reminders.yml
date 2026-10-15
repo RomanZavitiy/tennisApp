@@ -1,0 +1,30 @@
+# Hourly reminders (tasks 5.10, 5.16): match reminders (~3h before),
+# "How did it go?" (~2h after) and confirm-result nudges (~24h pending).
+# Vercel Cron Jobs on the Hobby plan run at most once a day (decision
+# 2026-10-15, "Cron"), so this hits the same /api/cron endpoint with a
+# different query param, the way GitHub Actions already runs CI — no new
+# external service, just a second scheduled caller of code that already
+# ships. Needs CRON_SECRET as a repo secret (Settings → Secrets and
+# variables → Actions → New repository secret), same value as in Vercel.
+name: Notification reminders
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  # For a human to trigger a run by hand (Actions tab → this workflow → Run
+  # workflow) without waiting for the next hour.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/cron?job=reminders
+        run: |
+          curl --fail-with-body \
+            --request GET \
+            --header "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://spinbuddy.vercel.app/api/cron?job=reminders"
