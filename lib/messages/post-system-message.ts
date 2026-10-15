@@ -33,3 +33,11 @@ export const RESULT_AUTO_CONFIRMED_MESSAGE =
   "Match result automatically confirmed after 72 hours. Both players' ELO has been updated.";
 export const RESULT_DISPUTED_MESSAGE =
   "Match result disputed. An admin will review it.";
+
+// A no-show report (task 4.10): filed when one side marks the other as
+// having not shown up. Disputing it reuses RESULT_DISPUTED_MESSAGE above —
+// the same generic text fits either kind of report. No message for the
+// cron auto-confirming it (decision 2026-10-14's own scope: a notice at
+// filing and at disputing, not at the silent 72h deadline).
+export const RESULT_NO_SHOW_REPORTED_MESSAGE =
+  "Opponent marked as a no-show. They can dispute this within 72 hours.";

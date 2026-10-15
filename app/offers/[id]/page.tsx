@@ -13,6 +13,7 @@ import {
 import {
   confirmResult,
   disputeResult,
+  submitNoShow,
   submitResult,
 } from "@/app/offers/[id]/result-actions";
 import { ExternalLink } from "@/components/external-link";
@@ -40,6 +41,7 @@ import {
   spotsLabel,
 } from "@/lib/offers/offer-labels";
 import { eloChangeLabel, formatScoreFor } from "@/lib/offers/result-labels";
+import { reliabilityLabel } from "@/lib/rating/reliability";
 import type { SetScore } from "@/lib/validation/match-result";
 
 // An offer's page (task 3.13), public. A guest sees the details and a sign-in
@@ -266,7 +268,12 @@ function AuthorView({
             {requested.map((join) => (
               <li key={join.id} className="px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <PlayerLink player={join.user} />
+                  <div>
+                    <PlayerLink player={join.user} />
+                    <p className="text-xs text-muted-foreground">
+                      {reliabilityLabel(join.user.reliability)}
+                    </p>
+                  </div>
                   <div className="flex gap-2">
                     {canAccept && (
                       <OfferActionButton
@@ -316,13 +323,13 @@ function PlayerLink({ player }: { player: OfferPlayer }) {
   );
 }
 
-// A join's result, from whichever side is looking (task 4.6, 4.7): nothing
-// before the match starts or for doubles (no result form there at all);
-// the submit form once it's started and nobody has filed one yet; the
-// score and a confirm/dispute choice for whoever didn't file it while it's
-// still PENDING, or just the score for whoever did; the score and this
-// viewer's own ELO change once CONFIRMED; a note once DISPUTED. NO_SHOW is
-// session 05's (4.10) — nothing produces it yet, so there's nothing to show.
+// A join's result, from whichever side is looking (tasks 4.6, 4.7, 4.10):
+// nothing before the match starts or for doubles (no result form there at
+// all); the submit form once it's started and nobody has filed one yet; a
+// confirm/dispute choice, or a no-show's dispute-only choice, for whoever
+// didn't file it while it's still PENDING, and just the score (or report)
+// for whoever did; the score and this viewer's own ELO change once
+// CONFIRMED; a note once DISPUTED or NO_SHOW.
 function ResultSection({
   join,
   offer,
@@ -348,12 +355,56 @@ function ResultSection({
         <div className="mt-2">
           <ResultForm
             action={submitResult.bind(null, join.id)}
+            onNoShow={submitNoShow.bind(null, join.id)}
             viewerParty={party}
             opponentName={opponentName}
           />
         </div>
       </details>
     );
+  }
+
+  if (result.noShowParty) {
+    const viewerDidntShow = result.noShowParty === party;
+    if (result.status === "PENDING") {
+      if (result.reportedBy === party) {
+        return (
+          <p className="mt-2 text-sm text-muted-foreground">
+            You reported that {opponentName} didn&apos;t show up. Waiting to see
+            if they dispute it within 72 hours.
+          </p>
+        );
+      }
+      return (
+        <div className="mt-2 space-y-2">
+          <p className="text-sm">
+            {opponentName} reported that you didn&apos;t show up.
+          </p>
+          <OfferActionButton
+            action={disputeResult.bind(null, result.id)}
+            label="Dispute"
+            pendingLabel="Disputing…"
+            variant="outline"
+          />
+        </div>
+      );
+    }
+    if (result.status === "NO_SHOW") {
+      return (
+        <p className="mt-2 text-sm text-muted-foreground">
+          {viewerDidntShow ? "You" : opponentName} didn&apos;t show up —
+          confirmed after 72 hours with no dispute.
+        </p>
+      );
+    }
+    if (result.status === "DISPUTED") {
+      return (
+        <p className="mt-2 text-sm text-muted-foreground">
+          No-show report disputed. An admin will review it.
+        </p>
+      );
+    }
+    return null;
   }
 
   // The viewer's own games first — same convention as the match history

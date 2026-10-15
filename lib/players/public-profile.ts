@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 import type { District } from "@/lib/generated/prisma/enums";
+import { computeReliability, type Reliability } from "@/lib/rating/reliability";
 import { ageOn, todayInKrakow } from "@/lib/validation/profile";
 
 // What anyone, signed in or not, may see about a player. Prisma bypasses RLS
@@ -18,6 +19,8 @@ export type PublicProfile = {
   avatarPath: string | null;
   /** Current ELO (task 4.9) — moves only on a confirmed result (4.8). */
   elo: number;
+  /** "Reliable 95%" or "New player" below 3 scheduled matches (4.12). */
+  reliability: Reliability;
 };
 
 /**
@@ -43,6 +46,9 @@ export async function getPublicProfile(
       selfRatedNtrp: true,
       avatarPath: true,
       elo: true,
+      scheduledMatches: true,
+      noShows: true,
+      lateCancellations: true,
     },
   });
 
@@ -66,5 +72,6 @@ export async function getPublicProfile(
     selfRatedNtrp: row.selfRatedNtrp,
     avatarPath: row.avatarPath,
     elo: row.elo,
+    reliability: computeReliability(row),
   };
 }

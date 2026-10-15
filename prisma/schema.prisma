@@ -57,6 +57,21 @@ model User {
   /// Confirmed matches played; 0 means the ELO is still the starting one.
   matchesPlayed Int  @default(0) @map("matches_played")
 
+  // Reliability (tasks 4.10-4.12, decision 2026-10-14 "Надійність гравця").
+  // All three are counters, not derived from current state: an accepted
+  // join later withdrawn no longer shows ACCEPTED, and no history table
+  // records a late cancellation at all, so a query couldn't reconstruct
+  // either — same reasoning that already made matchesPlayed a counter.
+  /// A singles join reaching ACCEPTED counts as scheduled, win or not —
+  /// the reliability percentage's denominator.
+  scheduledMatches  Int @default(0) @map("scheduled_matches")
+  /// Confirmed no-shows against this player (4.10) — a disputed report
+  /// never reaches this counter.
+  noShows           Int @default(0) @map("no_shows")
+  /// Cancelling an offer, or withdrawing an accepted join, less than 12h
+  /// before the start (isLateCancellation, lib/rating/reliability.ts).
+  lateCancellations Int @default(0) @map("late_cancellations")
+
   offers       SparringOffer[]
   joins        OfferJoin[]
   sentMessages Message[]
@@ -206,8 +221,8 @@ model Message {
 /// The result of a singles match played through an accepted join (task 4.4;
 /// formula and format decided 2026-10-14). Only a CONFIRMED result moves ELO
 /// (4.8); PENDING waits for the other side, DISPUTED is frozen for an admin
-/// (session 08), NO_SHOW is session 05's (4.10) — this slice only adds the
-/// status value, nothing writes it yet.
+/// (session 08), NO_SHOW (4.10) is a no-show report nobody disputed within
+/// 72h — ELO never moves for one, only the reported player's noShows counter.
 model MatchResult {
   id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   status     MatchResultStatus @default(PENDING)
@@ -223,12 +238,21 @@ model MatchResult {
   /// Sets as played, author's and the joining player's games per set (2-3
   /// entries; shape and tennis-score rules are lib/validation/match-result.ts,
   /// task 4.5 — this column only stores what that schema already approved).
-  score Json
+  /// Null for a no-show report (4.10, noShowParty below) — there's no score.
+  score Json?
   /// Who won — the offer's author or the joining player (the same AUTHOR /
-  /// PLAYER convention join-transitions.ts uses for who may act).
-  winner MatchParty
-  /// Who filed this result; the other party confirms or disputes it (4.7).
+  /// PLAYER convention join-transitions.ts uses for who may act). Null for
+  /// a no-show report, same as score.
+  winner MatchParty?
+  /// Who filed this result; the other party confirms or disputes it (4.7),
+  /// or — for a no-show report — is the one the report is about.
   reportedBy MatchParty @map("reported_by")
+  /// Set only for a no-show report (4.10): who didn't show up, the mirror
+  /// of reportedBy (who showed up and filed it). The opponent may dispute
+  /// it within 72h (DISPUTED); otherwise the same cron that auto-confirms
+  /// scored results settles it as NO_SHOW — never CONFIRMED, since ELO
+  /// doesn't move for a no-show (decision 2026-10-14).
+  noShowParty MatchParty? @map("no_show_party")
   /// Set when filed: now + 72h (decision 2026-10-14). Read by the cron job
   /// (5.8) to auto-confirm; kept afterwards only as a record of the deadline.
   autoConfirmAt DateTime @map("auto_confirm_at") @db.Timestamptz
@@ -347,8 +371,8 @@ enum JoinStatus {
 }
 
 /// Only a CONFIRMED result changes ELO; PENDING waits for the opponent.
-/// NO_SHOW is session 05's (task 4.10) — added now so 4.4's status field is
-/// complete; nothing in this slice sets it.
+/// NO_SHOW (task 4.10) is a no-show report settled with no dispute — it
+/// never carries ELO snapshots, unlike CONFIRMED.
 enum MatchResultStatus {
   PENDING
   CONFIRMED

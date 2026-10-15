@@ -8,6 +8,7 @@ import type {
 import { rankByEloCloseness } from "@/lib/matching/elo-rank";
 import { feedWhere, type FeedFilters } from "@/lib/offers/feed-filters";
 import { playersNeeded } from "@/lib/offers/players-needed";
+import { computeReliability, type Reliability } from "@/lib/rating/reliability";
 
 // The offer feed on /offers (task 3.6): open offers that haven't started yet,
 // narrowed by the URL filters (3.7), then ranked — closest ELO first for a
@@ -32,7 +33,7 @@ export type FeedOffer = {
   ntrpMax: number | null;
   surface: Surface | null;
   courtStatus: CourtStatus;
-  author: { id: string; name: string | null };
+  author: { id: string; name: string | null; reliability: Reliability };
   spotsLeft: number;
 };
 
@@ -82,14 +83,27 @@ export async function getOfferFeed(
       surface: true,
       courtStatus: true,
       club: { select: { id: true, name: true } },
-      author: { select: { id: true, name: true, elo: true } },
+      author: {
+        select: {
+          id: true,
+          name: true,
+          elo: true,
+          scheduledMatches: true,
+          noShows: true,
+          lateCancellations: true,
+        },
+      },
       _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
     },
   });
 
   const offers = rows.map(({ _count, author, ...offer }) => ({
     ...offer,
-    author: { id: author.id, name: author.name },
+    author: {
+      id: author.id,
+      name: author.name,
+      reliability: computeReliability(author),
+    },
     spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),
   }));
   // Pairs each offer with its author's ELO, purely for ranking below — kept

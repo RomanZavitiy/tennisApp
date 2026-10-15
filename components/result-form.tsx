@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -12,25 +13,32 @@ import {
 } from "@/lib/validation/match-result";
 
 type FieldErrorLike = { message?: string | undefined } | undefined;
+type ActionResult = { ok: true } | { ok: false; message: string };
 
 const MAX_SETS = 3;
 
-// "Submit a result" on /offers/[id] (task 4.6). Two set rows are always on
-// screen; a third appears only once the first two are filled in, since a
-// third set is only legal when they're split (4.5's own rule) — the form
-// doesn't stop a player from adding one too early, the schema does, with a
-// message next to the sets.
+// "Submit a result" on /offers/[id] (task 4.6), or "opponent didn't show
+// up" (4.10) instead: the checkbox switches the form to that report —
+// score and winner stop applying (greyed out via `fieldset disabled`, not
+// removed, so re-unchecking doesn't lose anything typed) and the submit
+// button calls onNoShow instead of validating and submitting a score. Two
+// set rows are always on screen; a third appears only once the first two
+// are filled in, since a third set is only legal when they're split (4.5's
+// own rule) — the form doesn't stop a player from adding one too early,
+// the schema does, with a message next to the sets.
 export function ResultForm({
   action,
+  onNoShow,
   viewerParty,
   opponentName,
 }: {
-  action: (
-    values: MatchScoreInput,
-  ) => Promise<{ ok: true } | { ok: false; message: string }>;
+  action: (values: MatchScoreInput) => Promise<ActionResult>;
+  onNoShow: () => Promise<ActionResult>;
   viewerParty: MatchParty;
   opponentName: string;
 }) {
+  const [noShow, setNoShow] = useState(false);
+  const [noShowPending, setNoShowPending] = useState(false);
   const {
     register,
     handleSubmit,
@@ -51,8 +59,17 @@ export function ResultForm({
   const authorLabel = viewerParty === "AUTHOR" ? "You" : opponentName;
   const playerLabel = viewerParty === "PLAYER" ? "You" : opponentName;
 
-  async function onSubmit(values: MatchScoreInput) {
+  async function onSubmitScore(values: MatchScoreInput) {
     const result = await action(values);
+    if (!result.ok) {
+      setError("root", { message: result.message });
+    }
+  }
+
+  async function onSubmitNoShow() {
+    setNoShowPending(true);
+    const result = await onNoShow();
+    setNoShowPending(false);
     if (!result.ok) {
       setError("root", { message: result.message });
     }
@@ -61,10 +78,17 @@ export function ResultForm({
   return (
     <form
       noValidate
-      onSubmit={(event) => void handleSubmit(onSubmit)(event)}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (noShow) {
+          void onSubmitNoShow();
+        } else {
+          void handleSubmit(onSubmitScore)(event);
+        }
+      }}
       className="space-y-4"
     >
-      <fieldset className="space-y-2">
+      <fieldset disabled={noShow} className="space-y-2">
         <legend className="text-sm font-medium">Score</legend>
         <div className="grid grid-cols-[auto_1fr_1fr] items-center gap-2 text-sm">
           <span />
@@ -114,7 +138,7 @@ export function ResultForm({
         )}
       </fieldset>
 
-      <fieldset className="space-y-2">
+      <fieldset disabled={noShow} className="space-y-2">
         <legend className="text-sm font-medium">Who won?</legend>
         <div className="flex gap-6 text-sm">
           <label className="flex items-center gap-2">
@@ -129,18 +153,31 @@ export function ResultForm({
         <ErrorText error={errors.winner} />
       </fieldset>
 
-      {/* TODO(session 05, task 4.10): wire this up to a NO_SHOW result
-          instead of the score form. Disabled for now so the layout doesn't
-          have to change again once it works. */}
-      <label className="flex items-center gap-2 text-sm text-muted-foreground">
-        <input type="checkbox" disabled title="Coming soon" />
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={noShow}
+          onChange={(event) => {
+            setNoShow(event.target.checked);
+          }}
+        />
         Opponent didn&apos;t show up
       </label>
 
       <ErrorText error={errors.root} />
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Submitting…" : "Submit result"}
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isSubmitting || noShowPending}
+      >
+        {noShow
+          ? noShowPending
+            ? "Reporting…"
+            : "Report no-show"
+          : isSubmitting
+            ? "Submitting…"
+            : "Submit result"}
       </Button>
     </form>
   );

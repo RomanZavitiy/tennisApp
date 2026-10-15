@@ -30,6 +30,9 @@ describe("getPublicProfile", () => {
       selfRatedNtrp: 3.5,
       avatarPath: null,
       elo: 1400,
+      scheduledMatches: 5,
+      noShows: 0,
+      lateCancellations: 1,
     });
 
     const profile = await getPublicProfile(ID);
@@ -42,6 +45,7 @@ describe("getPublicProfile", () => {
       selfRatedNtrp: 3.5,
       avatarPath: null,
       elo: 1400,
+      reliability: { kind: "rated", percent: 80 },
     });
     expect(profile).not.toHaveProperty("birthDate");
   });
@@ -55,6 +59,9 @@ describe("getPublicProfile", () => {
       selfRatedNtrp: 3.5,
       avatarPath: null,
       elo: null,
+      scheduledMatches: 0,
+      noShows: 0,
+      lateCancellations: 0,
     });
 
     await expect(getPublicProfile(ID)).resolves.toBeNull();
@@ -75,6 +82,9 @@ describe("getPublicProfile", () => {
         selfRatedNtrp: true,
         avatarPath: true,
         elo: true,
+        scheduledMatches: true,
+        noShows: true,
+        lateCancellations: true,
       },
     });
   });

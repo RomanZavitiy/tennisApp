@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   confirmResult,
   disputeResult,
+  submitNoShow,
   submitResult,
 } from "@/app/offers/[id]/result-actions";
 import {
   RESULT_CONFIRMED_MESSAGE,
   RESULT_DISPUTED_MESSAGE,
+  RESULT_NO_SHOW_REPORTED_MESSAGE,
   RESULT_SUBMITTED_MESSAGE,
 } from "@/lib/messages/post-system-message";
 
@@ -146,10 +148,60 @@ describe("submitResult", () => {
   });
 });
 
+describe("submitNoShow", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireOnboardedUser.mockResolvedValue({ id: AUTHOR });
+    joinFindUnique.mockResolvedValue(acceptedSinglesJoin);
+    matchResultCreateManyAndReturn.mockResolvedValue([{ id: RESULT }]);
+  });
+
+  it("reports the opponent, not the filer, as the one who didn't show", async () => {
+    await expect(submitNoShow(JOIN)).resolves.toEqual({ ok: true });
+
+    expect(matchResultCreateManyAndReturn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({
+            offerJoinId: JOIN,
+            noShowParty: "PLAYER",
+            reportedBy: "AUTHOR",
+          }),
+        ],
+        skipDuplicates: true,
+      }),
+    );
+    expect(postSystemMessage).toHaveBeenCalledWith(
+      { offerJoinId: JOIN },
+      RESULT_NO_SHOW_REPORTED_MESSAGE,
+    );
+  });
+
+  it("refuses someone who isn't a party to the join", async () => {
+    requireOnboardedUser.mockResolvedValue({ id: STRANGER });
+
+    await expect(submitNoShow(JOIN)).resolves.toEqual({
+      ok: false,
+      message: "This isn't your match.",
+    });
+    expect(matchResultCreateManyAndReturn).not.toHaveBeenCalled();
+  });
+
+  it("refuses a second report for the same match", async () => {
+    matchResultCreateManyAndReturn.mockResolvedValue([]);
+
+    await expect(submitNoShow(JOIN)).resolves.toEqual({
+      ok: false,
+      message: "A result has already been filed for this match.",
+    });
+  });
+});
+
 const pendingResult = {
   status: "PENDING",
   winner: "AUTHOR",
   reportedBy: "PLAYER",
+  noShowParty: null,
   offerJoin: {
     id: JOIN,
     offerId: OFFER,
@@ -160,6 +212,14 @@ const pendingResult = {
     },
     user: { elo: 1500, matchesPlayed: 20 },
   },
+};
+
+const pendingNoShowReport = {
+  status: "PENDING",
+  winner: null,
+  reportedBy: "PLAYER",
+  noShowParty: "AUTHOR",
+  offerJoin: pendingResult.offerJoin,
 };
 
 describe("confirmResult", () => {
@@ -231,6 +291,19 @@ describe("confirmResult", () => {
       message: "This result doesn't exist.",
     });
   });
+
+  it("refuses to manually confirm a no-show report — only a dispute or the cron settles one", async () => {
+    tx.matchResult.findUnique.mockResolvedValue(pendingNoShowReport);
+
+    await expect(confirmResult(RESULT)).resolves.toEqual({
+      ok: false,
+      message:
+        "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours.",
+    });
+    expect(tx.user.update).not.toHaveBeenCalled();
+    expect(tx.matchResult.update).not.toHaveBeenCalled();
+    expect(postSystemMessage).not.toHaveBeenCalled();
+  });
 });
 
 describe("disputeResult", () => {
@@ -264,5 +337,21 @@ describe("disputeResult", () => {
       ok: false,
       message: "This result has already been settled.",
     });
+  });
+
+  it("disputes a no-show report the same way as a score", async () => {
+    tx.matchResult.findUnique.mockResolvedValue(pendingNoShowReport);
+
+    await expect(disputeResult(RESULT)).resolves.toEqual({ ok: true });
+
+    expect(tx.matchResult.update).toHaveBeenCalledWith({
+      where: { id: RESULT },
+      data: { status: "DISPUTED" },
+    });
+    expect(tx.user.update).not.toHaveBeenCalled();
+    expect(postSystemMessage).toHaveBeenCalledWith(
+      { offerJoinId: JOIN },
+      RESULT_DISPUTED_MESSAGE,
+    );
   });
 });

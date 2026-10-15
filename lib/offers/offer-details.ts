@@ -3,19 +3,47 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import type { JoinStatus } from "@/lib/generated/prisma/enums";
 import { playersNeeded } from "@/lib/offers/players-needed";
+import { computeReliability, type Reliability } from "@/lib/rating/reliability";
 
 // What /offers/[id] shows (task 3.13), depending on who is looking. Public
 // page, and Prisma bypasses RLS (decision for 1.2), so every select is
-// explicit: players appear with their public name and level only, and the
-// list of requests goes to the offer's author alone.
+// explicit: players appear with their public name, level and reliability
+// (4.12) only, and the list of requests goes to the offer's author alone.
 
-const playerSelect = { id: true, name: true, selfRatedNtrp: true } as const;
+const playerSelect = {
+  id: true,
+  name: true,
+  selfRatedNtrp: true,
+  scheduledMatches: true,
+  noShows: true,
+  lateCancellations: true,
+} as const;
 
 export type OfferPlayer = {
   id: string;
   name: string | null;
   selfRatedNtrp: number | null;
+  reliability: Reliability;
 };
+
+function toOfferPlayer(row: {
+  id: string;
+  name: string | null;
+  selfRatedNtrp: number | null;
+  scheduledMatches: number;
+  noShows: number;
+  lateCancellations: number;
+}): OfferPlayer {
+  const { scheduledMatches, noShows, lateCancellations, ...rest } = row;
+  return {
+    ...rest,
+    reliability: computeReliability({
+      scheduledMatches,
+      noShows,
+      lateCancellations,
+    }),
+  };
+}
 
 // A join's result (task 4.6), if one has been filed — just enough for the
 // page to show its own state (submit / pending / confirmed / disputed).
@@ -24,6 +52,7 @@ const resultSelect = {
   status: true,
   winner: true,
   reportedBy: true,
+  noShowParty: true,
   score: true,
   authorEloBefore: true,
   authorEloAfter: true,
@@ -34,8 +63,11 @@ const resultSelect = {
 export type OfferJoinResult = {
   id: string;
   status: "PENDING" | "CONFIRMED" | "DISPUTED" | "NO_SHOW";
-  winner: "AUTHOR" | "PLAYER";
+  /** Null for a no-show report (4.10) — there's no score to have a winner. */
+  winner: "AUTHOR" | "PLAYER" | null;
   reportedBy: "AUTHOR" | "PLAYER";
+  /** Set only for a no-show report: who didn't show up. */
+  noShowParty: "AUTHOR" | "PLAYER" | null;
   score: unknown;
   authorEloBefore: number | null;
   authorEloAfter: number | null;
@@ -75,12 +107,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
   const isAuthor = viewerId === offer.author.id;
   // The author answers open requests and sees who is in; withdrawn and
   // declined requests are history and stay off the page.
-  const joins: {
-    id: string;
-    status: JoinStatus;
-    user: OfferPlayer;
-    result: OfferJoinResult | null;
-  }[] = isAuthor
+  const rawJoins = isAuthor
     ? await db.offerJoin.findMany({
         where: { offerId: id, status: { in: ["REQUESTED", "ACCEPTED"] } },
         select: {
@@ -92,6 +119,12 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
         orderBy: { createdAt: "asc" },
       })
     : [];
+  const joins: {
+    id: string;
+    status: JoinStatus;
+    user: OfferPlayer;
+    result: OfferJoinResult | null;
+  }[] = rawJoins.map((join) => ({ ...join, user: toOfferPlayer(join.user) }));
   const viewerJoin =
     viewerId && !isAuthor
       ? await db.offerJoin.findUnique({
@@ -100,9 +133,9 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
         })
       : null;
 
-  const { _count, ...details } = offer;
+  const { _count, author, ...details } = offer;
   return {
-    offer: details,
+    offer: { ...details, author: toOfferPlayer(author) },
     spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),
     isAuthor,
     viewerJoin,

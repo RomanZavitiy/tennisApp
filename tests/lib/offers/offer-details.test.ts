@@ -21,16 +21,27 @@ const AUTHOR = "22222222-2222-4222-8222-222222222222";
 const PLAYER = "33333333-3333-4333-8333-333333333333";
 
 describe("getOfferDetails", () => {
+  const player = {
+    id: AUTHOR,
+    name: "Ola",
+    selfRatedNtrp: 3.5,
+    scheduledMatches: 0,
+    noShows: 0,
+    lateCancellations: 0,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     offerFindUnique.mockResolvedValue({
       id: OFFER,
       format: "DOUBLES",
       hasPartner: false,
-      author: { id: AUTHOR, name: "Ola", selfRatedNtrp: 3.5 },
+      author: player,
       _count: { joins: 1 },
     });
-    joinFindMany.mockResolvedValue([{ id: "j1", status: "REQUESTED" }]);
+    joinFindMany.mockResolvedValue([
+      { id: "j1", status: "REQUESTED", user: player },
+    ]);
     joinFindUnique.mockResolvedValue({ id: "j2", status: "REQUESTED" });
   });
 
@@ -71,6 +82,7 @@ describe("getOfferDetails", () => {
       status: true,
       winner: true,
       reportedBy: true,
+      noShowParty: true,
       score: true,
       authorEloBefore: true,
       authorEloAfter: true,
@@ -101,7 +113,14 @@ describe("getOfferDetails", () => {
     await getOfferDetails(OFFER, AUTHOR);
 
     const playerOnly = {
-      select: { id: true, name: true, selfRatedNtrp: true },
+      select: {
+        id: true,
+        name: true,
+        selfRatedNtrp: true,
+        scheduledMatches: true,
+        noShows: true,
+        lateCancellations: true,
+      },
     };
     // toEqual, not toMatchObject: an extra field must fail the test.
     const offerQuery = offerFindUnique.mock.calls[0]?.[0] as {
