@@ -12,6 +12,8 @@ describe("isPublicRoute", () => {
     "/offers",
     "/offers/44444444-4444-4444-8444-444444444444",
     "/players/abc",
+    "/install",
+    "/unsubscribe",
   ])("%s is public", (path) => {
     expect(isPublicRoute(path)).toBe(true);
   });
@@ -19,12 +21,15 @@ describe("isPublicRoute", () => {
   it.each([
     "/profile",
     "/profile/edit",
+    "/profile/notifications",
     "/onboarding",
     "/players",
     "/clubs/a/b",
     "/loginx",
     "/offers/new",
     "/offers/abc",
+    "/installer",
+    "/unsubscribed",
   ])("%s needs a session", (path) => {
     expect(isPublicRoute(path)).toBe(false);
   });
