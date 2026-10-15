@@ -13,6 +13,7 @@ import { computeReliability, type Reliability } from "@/lib/rating/reliability";
 const playerSelect = {
   id: true,
   name: true,
+  avatarPath: true,
   selfRatedNtrp: true,
   scheduledMatches: true,
   noShows: true,
@@ -22,6 +23,7 @@ const playerSelect = {
 export type OfferPlayer = {
   id: string;
   name: string | null;
+  avatarPath: string | null;
   selfRatedNtrp: number | null;
   reliability: Reliability;
 };
@@ -29,6 +31,7 @@ export type OfferPlayer = {
 function toOfferPlayer(row: {
   id: string;
   name: string | null;
+  avatarPath: string | null;
   selfRatedNtrp: number | null;
   scheduledMatches: number;
   noShows: number;

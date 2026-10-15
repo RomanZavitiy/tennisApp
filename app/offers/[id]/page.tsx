@@ -23,6 +23,7 @@ import { JoinThread } from "@/components/join-thread";
 import { MarkMeaningfulAction } from "@/components/mark-meaningful-action";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { OfferBookingSection } from "@/components/offer-booking-section";
+import { PlayerAvatar } from "@/components/player-avatar";
 import { ReportButton } from "@/components/report-button";
 import { ResultForm } from "@/components/result-form";
 import { buttonVariants } from "@/components/ui/button";
@@ -362,10 +363,20 @@ function AuthorView({
 function PlayerLink({ player }: { player: OfferPlayer }) {
   const t = useTranslations("OfferPage");
   return (
-    <Link href={`/players/${player.id}`} className="hover:underline">
-      {player.name ?? t("aPlayer")}
-      {player.selfRatedNtrp !== null &&
-        ` · NTRP ${player.selfRatedNtrp.toFixed(1)}`}
+    <Link
+      href={`/players/${player.id}`}
+      className="inline-flex items-center gap-1.5 hover:underline"
+    >
+      <PlayerAvatar
+        name={player.name ?? t("aPlayer")}
+        avatarPath={player.avatarPath}
+        size={24}
+      />
+      <span>
+        {player.name ?? t("aPlayer")}
+        {player.selfRatedNtrp !== null &&
+          ` · NTRP ${player.selfRatedNtrp.toFixed(1)}`}
+      </span>
     </Link>
   );
 }
