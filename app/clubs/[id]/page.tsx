@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -8,12 +9,7 @@ import { BookingLink } from "@/components/booking-link";
 import { ExternalLink } from "@/components/external-link";
 import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  formatCheckedDate,
-  getClub,
-  INDOOR_LABELS,
-  SURFACE_LABELS,
-} from "@/lib/clubs/club-details";
+import { formatCheckedDate, getClub } from "@/lib/clubs/club-details";
 import { getClubOffers } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
@@ -27,8 +23,9 @@ type ClubPageProps = { params: Promise<{ id: string }> };
 export async function generateMetadata({
   params,
 }: ClubPageProps): Promise<Metadata> {
+  const t = await getTranslations("ClubPage");
   const club = await getClub((await params).id);
-  return { title: club?.name ?? "Club not found" };
+  return { title: club?.name ?? t("notFound") };
 }
 
 export default async function ClubPage({ params }: ClubPageProps) {
@@ -40,21 +37,26 @@ export default async function ClubPage({ params }: ClubPageProps) {
   }
   const offers = await getClubOffers(club.id);
 
+  const t = await getTranslations("ClubPage");
+  const tSurface = await getTranslations("Surface");
+  const tIndoor = await getTranslations("IndoorCourts");
+  const format = await getFormatter();
+
   const facts: { label: string; value: ReactNode }[] = [
-    { label: "Courts", value: String(club.courtCount) },
+    { label: t("courts"), value: String(club.courtCount) },
   ];
   if (club.surfaces.length > 0) {
     facts.push({
-      label: "Surface",
-      value: club.surfaces.map((surface) => SURFACE_LABELS[surface]).join(", "),
+      label: t("surface"),
+      value: club.surfaces.map((surface) => tSurface(surface)).join(", "),
     });
   }
   if (club.indoor) {
-    facts.push({ label: "Indoor", value: INDOOR_LABELS[club.indoor] });
+    facts.push({ label: t("indoor"), value: tIndoor(club.indoor) });
   }
   if (club.phone) {
     facts.push({
-      label: "Phone",
+      label: t("phone"),
       value: (
         <a
           href={`tel:${club.phone.replaceAll(" ", "")}`}
@@ -67,7 +69,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
   }
   if (club.websiteUrl) {
     facts.push({
-      label: "Website",
+      label: t("website"),
       value: (
         <ExternalLink
           href={club.websiteUrl}
@@ -85,7 +87,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
         href="/clubs"
         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
       >
-        ← All courts
+        {t("allCourts")}
       </Link>
       <h1 className="mt-4 text-2xl font-semibold tracking-tight">
         {club.name}
@@ -102,8 +104,8 @@ export default async function ClubPage({ params }: ClubPageProps) {
         bookingUrl={club.bookingUrl}
         phone={club.phone}
         className={buttonVariants({ className: "mt-6" })}
-        urlLabel="Book a court"
-        phoneLabel="Call to book"
+        urlLabel={t("bookACourt")}
+        phoneLabel={t("callToBook")}
       />
 
       <dl className="mt-6 space-y-3">
@@ -117,28 +119,25 @@ export default async function ClubPage({ params }: ClubPageProps) {
 
       {club.priceInfo && (
         <section className="mt-6">
-          <h2 className="font-semibold">Prices</h2>
+          <h2 className="font-semibold">{t("prices")}</h2>
           <p className="mt-1 whitespace-pre-line">{club.priceInfo}</p>
         </section>
       )}
 
       <p className="mt-8 text-sm text-muted-foreground">
-        Info checked on {formatCheckedDate(club.verifiedAt)}. Prices and hours
-        change — confirm with the club before you go.
+        {t("checkedOn", { date: formatCheckedDate(format, club.verifiedAt) })}
       </p>
 
       <section className="mt-8">
-        <h2 className="font-semibold">Looking for a partner here</h2>
+        <h2 className="font-semibold">{t("lookingForPartnerHere")}</h2>
         {offers.length === 0 ? (
           <div className="mt-2 space-y-3">
-            <p className="text-sm text-muted-foreground">
-              No open offers at this club right now.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("noOffers")}</p>
             <Link
               href={`/offers/new?clubId=${club.id}`}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              Create an offer at this club
+              {t("createOfferHere")}
             </Link>
           </div>
         ) : (

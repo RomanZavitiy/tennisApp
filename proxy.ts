@@ -1,14 +1,42 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { isPublicRoute } from "@/lib/auth/routes";
+import {
+  isAppLocale,
+  LOCALE_COOKIE,
+  LOCALE_COOKIE_MAX_AGE,
+  localeFromAcceptLanguage,
+} from "@/lib/i18n/locale";
 import { updateSession } from "@/lib/supabase/proxy";
 
-// Runs before every page: keeps the session fresh and sends signed-out users
-// from protected pages to /login?next=<where they were going>.
+// Runs before every page: keeps the session fresh, picks a UI language the
+// first time a visitor arrives, and sends signed-out users from protected
+// pages to /login?next=<where they were going>.
 // This guards pages only. Server actions are separate POST endpoints and must
 // check the user themselves (requireUser, task 1.5).
 export async function proxy(request: NextRequest) {
+  // Task 1.20: no NEXT_LOCALE cookie yet means a first visit — read the
+  // browser's language once and remember it. After that, the cookie always
+  // wins; the switcher (footer/profile) is the only other writer.
+  const existingLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  const locale = isAppLocale(existingLocale)
+    ? existingLocale
+    : localeFromAcceptLanguage(request.headers.get("accept-language"));
+  if (!isAppLocale(existingLocale)) {
+    // Set on the request too, not just the response: i18n/request.ts reads
+    // cookies() during this same request's render, before the browser gets
+    // the response's Set-Cookie.
+    request.cookies.set(LOCALE_COOKIE, locale);
+  }
+
   const { response, isSignedIn } = await updateSession(request);
+  if (!isAppLocale(existingLocale)) {
+    response.cookies.set(LOCALE_COOKIE, locale, {
+      maxAge: LOCALE_COOKIE_MAX_AGE,
+      sameSite: "lax",
+      path: "/",
+    });
+  }
   const { pathname, search } = request.nextUrl;
 
   if (isSignedIn || isPublicRoute(pathname)) {

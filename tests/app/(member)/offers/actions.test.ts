@@ -99,10 +99,7 @@ describe("createOffer", () => {
   });
 
   it("refuses once the daily new-offer limit is hit", async () => {
-    checkRateLimit.mockResolvedValue({
-      ok: false,
-      message: "You've posted a lot of offers today. Try again tomorrow.",
-    });
+    checkRateLimit.mockResolvedValue({ ok: false });
 
     const result = await createOffer(valid);
 

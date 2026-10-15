@@ -30,16 +30,8 @@ export type SubmitResultRefusal =
   | "NOT_STARTED"
   | "ALREADY_SUBMITTED";
 
-export const SUBMIT_RESULT_REFUSAL_MESSAGES: Record<
-  SubmitResultRefusal,
-  string
-> = {
-  NOT_PARTICIPANT: "This isn't your match.",
-  NOT_SINGLES: "Only singles matches record a result.",
-  NOT_ACCEPTED: "This request was never accepted.",
-  NOT_STARTED: "This match hasn't started yet.",
-  ALREADY_SUBMITTED: "A result has already been filed for this match.",
-};
+// Task 1.20: the message for one of these codes comes from the
+// "SubmitResultRefusal" translation namespace, keyed by this same code.
 
 /** Why `userId` may not file a result for this join right now, or null. */
 export function submitResultRefusal({
@@ -77,13 +69,8 @@ export function submitResultRefusal({
 
 export type SettleResultRefusal = "NOT_OPPONENT" | "NOT_PENDING";
 
-export const SETTLE_RESULT_REFUSAL_MESSAGES: Record<
-  SettleResultRefusal,
-  string
-> = {
-  NOT_OPPONENT: "Only the other player can confirm or dispute this result.",
-  NOT_PENDING: "This result has already been settled.",
-};
+// Task 1.20: the message for one of these codes comes from the
+// "SettleResultRefusal" translation namespace, keyed by this same code.
 
 /**
  * Why `userId` may not confirm or dispute this result right now, or null.

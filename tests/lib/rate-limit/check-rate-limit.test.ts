@@ -26,7 +26,6 @@ describe("checkRateLimit", () => {
 
     await expect(checkRateLimit("user-1", "NEW_OFFER")).resolves.toEqual({
       ok: false,
-      message: "You've posted a lot of offers today. Try again tomorrow.",
     });
   });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
@@ -12,9 +13,8 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
-import { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
 import type { District } from "@/lib/generated/prisma/enums";
-import { COURT_STATUS_LABELS } from "@/lib/offers/offer-labels";
+import { CourtStatus, Surface } from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
 import {
   COMMENT_MAX,
@@ -53,6 +53,10 @@ export function OfferForm({
   /** Kraków time now, "YYYY-MM-DDTHH:mm": the picker's lower bound. */
   earliestStart: string;
 }) {
+  const t = useTranslations("OfferForm");
+  const tSurface = useTranslations("Surface");
+  const tCourtStatus = useTranslations("CourtStatus");
+  const tValidation = useTranslations("Validation.offer");
   const presetClub = clubs.find((c) => c.id === defaultClubId);
   const {
     register,
@@ -62,7 +66,7 @@ export function OfferForm({
     control,
     formState: { errors, isSubmitting },
   } = useForm<OfferInput>({
-    resolver: zodResolver(offerSchema, undefined, { raw: true }),
+    resolver: zodResolver(offerSchema(tValidation), undefined, { raw: true }),
     defaultValues: {
       format: "SINGLES",
       startsAt: "",
@@ -106,15 +110,15 @@ export function OfferForm({
       className="space-y-5"
     >
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">Format</legend>
+        <legend className="text-sm font-medium">{t("formatLabel")}</legend>
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-sm">
             <input type="radio" value="SINGLES" {...register("format")} />
-            Singles
+            {t("singles")}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="radio" value="DOUBLES" {...register("format")} />
-            Doubles
+            {t("doubles")}
           </label>
         </div>
         {isDoubles && (
@@ -126,13 +130,13 @@ export function OfferForm({
               // switching back to singles can't send a stale partner.
               {...register("hasPartner", { shouldUnregister: true })}
             />
-            I already have a partner
+            {t("hasPartner")}
           </label>
         )}
         <ErrorText id="hasPartner" error={errors.hasPartner} />
       </fieldset>
 
-      <Field id="startsAt" label="Start time" error={errors.startsAt}>
+      <Field id="startsAt" label={t("startsAtLabel")} error={errors.startsAt}>
         <Input
           id="startsAt"
           type="datetime-local"
@@ -142,7 +146,7 @@ export function OfferForm({
         />
       </Field>
 
-      <Field id="clubId" label="Club" error={errors.clubId}>
+      <Field id="clubId" label={t("clubLabel")} error={errors.clubId}>
         <NativeSelect
           id="clubId"
           className="w-full"
@@ -157,7 +161,9 @@ export function OfferForm({
             },
           })}
         >
-          <NativeSelectOption value="">No specific club</NativeSelectOption>
+          <NativeSelectOption value="">
+            {t("noSpecificClub")}
+          </NativeSelectOption>
           {clubs.map((club) => (
             <NativeSelectOption key={club.id} value={club.id}>
               {club.name}
@@ -168,12 +174,13 @@ export function OfferForm({
 
       <Field
         id="district"
-        label="District"
+        label={t("districtLabel")}
         hint={
-          club &&
-          (club.district
-            ? "Taken from the club."
-            : "This club is outside the city, so it has no district.")
+          club
+            ? club.district
+              ? t("districtFromClub")
+              : t("districtOutsideCity")
+            : undefined
         }
         error={errors.district}
       >
@@ -183,7 +190,7 @@ export function OfferForm({
           {...aria("district", errors.district)}
           {...register("district")}
         >
-          <NativeSelectOption value="">Choose…</NativeSelectOption>
+          <NativeSelectOption value="">{t("choose")}</NativeSelectOption>
           {Object.entries(DISTRICT_LABELS).map(([value, label]) => (
             <NativeSelectOption key={value} value={value}>
               {label}
@@ -193,48 +200,54 @@ export function OfferForm({
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
-        <Field id="ntrpMin" label="Level from (NTRP)" error={errors.ntrpMin}>
+        <Field id="ntrpMin" label={t("levelFromLabel")} error={errors.ntrpMin}>
           <NtrpSelect
             id="ntrpMin"
             error={errors.ntrpMin}
+            anyLabel={t("anyLevel")}
             {...register("ntrpMin", { setValueAs: ntrpValue })}
           />
         </Field>
-        <Field id="ntrpMax" label="Level to (NTRP)" error={errors.ntrpMax}>
+        <Field id="ntrpMax" label={t("levelToLabel")} error={errors.ntrpMax}>
           <NtrpSelect
             id="ntrpMax"
             error={errors.ntrpMax}
+            anyLabel={t("anyLevel")}
             {...register("ntrpMax", { setValueAs: ntrpValue })}
           />
         </Field>
       </div>
 
-      <Field id="surface" label="Surface" error={errors.surface}>
+      <Field id="surface" label={t("surfaceLabel")} error={errors.surface}>
         <NativeSelect
           id="surface"
           className="w-full"
           {...aria("surface", errors.surface)}
           {...register("surface")}
         >
-          <NativeSelectOption value="">Any surface</NativeSelectOption>
-          {Object.entries(SURFACE_LABELS).map(([value, label]) => (
+          <NativeSelectOption value="">{t("anySurface")}</NativeSelectOption>
+          {Object.values(Surface).map((value) => (
             <NativeSelectOption key={value} value={value}>
-              {label}
+              {tSurface(value)}
             </NativeSelectOption>
           ))}
         </NativeSelect>
       </Field>
 
-      <Field id="courtStatus" label="Court" error={errors.courtStatus}>
+      <Field
+        id="courtStatus"
+        label={t("courtLabel")}
+        error={errors.courtStatus}
+      >
         <NativeSelect
           id="courtStatus"
           className="w-full"
           {...aria("courtStatus", errors.courtStatus)}
           {...register("courtStatus")}
         >
-          {Object.entries(COURT_STATUS_LABELS).map(([value, label]) => (
+          {Object.values(CourtStatus).map((value) => (
             <NativeSelectOption key={value} value={value}>
-              {label}
+              {tCourtStatus(value)}
             </NativeSelectOption>
           ))}
         </NativeSelect>
@@ -242,8 +255,8 @@ export function OfferForm({
 
       <Field
         id="comment"
-        label="Comment"
-        hint={`Optional, up to ${String(COMMENT_MAX)} characters.`}
+        label={t("commentLabel")}
+        hint={t("commentHint", { max: COMMENT_MAX })}
         error={errors.comment}
       >
         <Textarea
@@ -257,7 +270,7 @@ export function OfferForm({
       <ErrorText id="root" error={errors.root} />
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Posting…" : "Post offer"}
+        {isSubmitting ? t("posting") : t("submit")}
       </Button>
     </form>
   );
@@ -266,13 +279,14 @@ export function OfferForm({
 function NtrpSelect({
   id,
   error,
+  anyLabel,
   ...props
-}: { id: string; error: FieldErrorLike } & ComponentProps<
+}: { id: string; error: FieldErrorLike; anyLabel: string } & ComponentProps<
   typeof NativeSelect
 >) {
   return (
     <NativeSelect id={id} className="w-full" {...aria(id, error)} {...props}>
-      <NativeSelectOption value="">Any</NativeSelectOption>
+      <NativeSelectOption value="">{anyLabel}</NativeSelectOption>
       {NTRP_LEVELS.map((level) => (
         <NativeSelectOption key={level} value={level}>
           {level.toFixed(1)}

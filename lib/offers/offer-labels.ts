@@ -1,62 +1,56 @@
-import type {
-  CourtStatus,
-  District,
-  OfferFormat,
-} from "@/lib/generated/prisma/enums";
-import { DISTRICT_LABELS } from "@/lib/profile/options";
+import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
 
 // How an offer's facts read on its card (3.6) and, later, its page (3.13).
+// Every label here comes from a translator the caller already has
+// (useTranslations/getTranslations, namespace "OfferLabels" — task 1.20);
+// these functions stay pure otherwise, so the existing unit tests just pass
+// a fake `t`.
 
-// Court status (task 3.22). No database import — the offer form (a client
-// component) uses this too.
-export const COURT_STATUS_LABELS: Record<CourtStatus, string> = {
-  BOOKED: "Court booked",
-  WILL_BOOK: "Will book once we agree",
-  ANY: "Whoever books first",
-};
+export type LabelT = (key: string, values?: Record<string, number>) => string;
 
-export function formatLabel(offer: {
-  format: OfferFormat;
-  hasPartner: boolean;
-}): string {
+export function formatLabel(
+  t: LabelT,
+  offer: { format: OfferFormat; hasPartner: boolean },
+): string {
   if (offer.format === "SINGLES") {
-    return "Singles";
+    return t("singles");
   }
-  return offer.hasPartner ? "Doubles · has a partner" : "Doubles";
+  return offer.hasPartner ? t("doublesWithPartner") : t("doubles");
 }
 
-export function spotsLabel(spotsLeft: number): string {
+export function spotsLabel(t: LabelT, spotsLeft: number): string {
   if (spotsLeft === 0) {
-    return "Full";
+    return t("full");
   }
-  return spotsLeft === 1 ? "1 spot left" : `${String(spotsLeft)} spots left`;
+  return t("spotsLeft", { count: spotsLeft });
 }
 
 /** "NTRP 3.0–4.5", "NTRP 3.0+", "NTRP up to 4.5" or "Any level". */
 export function levelLabel(
+  t: LabelT,
   ntrpMin: number | null,
   ntrpMax: number | null,
 ): string {
   if (ntrpMin !== null && ntrpMax !== null) {
     return ntrpMin === ntrpMax
-      ? `NTRP ${ntrpMin.toFixed(1)}`
-      : `NTRP ${ntrpMin.toFixed(1)}–${ntrpMax.toFixed(1)}`;
+      ? t("levelExact", { min: ntrpMin })
+      : t("levelRange", { min: ntrpMin, max: ntrpMax });
   }
   if (ntrpMin !== null) {
-    return `NTRP ${ntrpMin.toFixed(1)}+`;
+    return t("levelAtLeast", { min: ntrpMin });
   }
   if (ntrpMax !== null) {
-    return `NTRP up to ${ntrpMax.toFixed(1)}`;
+    return t("levelUpTo", { max: ntrpMax });
   }
-  return "Any level";
+  return t("anyLevel");
 }
 
 /** "Club name, District", or whichever of the two the offer has. */
-export function placeLabel(offer: {
-  club: { name: string } | null;
-  district: District | null;
-}): string {
-  return [offer.club?.name, offer.district && DISTRICT_LABELS[offer.district]]
+export function placeLabel(
+  offer: { club: { name: string } | null; district: District | null },
+  districtLabel: string | null,
+): string {
+  return [offer.club?.name, offer.district && districtLabel]
     .filter(Boolean)
     .join(", ");
 }

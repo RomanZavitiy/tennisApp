@@ -13,16 +13,21 @@ import type { ReportInput } from "@/lib/validation/report";
 
 export type CreateReportResult = { ok: true } | { ok: false; message: string };
 
-const CANT_REPORT_YOURSELF = "You can't report yourself.";
-const ALREADY_REPORTED = "You've already reported this.";
+type ErrorsT = (key: string) => string;
 
 export async function createReport({
+  t,
+  tRateLimit,
   reporterId,
   targetUserId,
   offerId,
   messageId,
   input,
 }: {
+  /** A translator for the "Errors" namespace (task 1.20). */
+  t: ErrorsT;
+  /** A translator for the "RateLimit" namespace. */
+  tRateLimit: ErrorsT;
   reporterId: string;
   targetUserId: string;
   offerId?: string;
@@ -30,12 +35,12 @@ export async function createReport({
   input: ReportInput;
 }): Promise<CreateReportResult> {
   if (targetUserId === reporterId) {
-    return { ok: false, message: CANT_REPORT_YOURSELF };
+    return { ok: false, message: t("cantReportYourself") };
   }
 
   const limited = await checkRateLimit(reporterId, "REPORT");
   if (!limited.ok) {
-    return limited;
+    return { ok: false, message: tRateLimit("REPORT") };
   }
 
   // One report per reporter per object (3.19): an unqualified ON CONFLICT
@@ -58,7 +63,7 @@ export async function createReport({
     })
   ).at(0);
   if (!created) {
-    return { ok: false, message: ALREADY_REPORTED };
+    return { ok: false, message: t("alreadyReported") };
   }
 
   await maybeAutoblock(targetUserId);

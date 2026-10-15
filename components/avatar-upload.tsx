@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -24,6 +25,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 const ACCEPT = Object.keys(AVATAR_TYPES).join(",");
 
 export function AvatarUpload({ userId }: { userId: string }) {
+  const t = useTranslations("AvatarUpload");
   const router = useRouter();
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,12 +53,12 @@ export function AvatarUpload({ userId }: { userId: string }) {
 
     if (!isAvatarType(picked.type)) {
       reset();
-      setError("Choose a JPEG, PNG or WebP image.");
+      setError(t("wrongType"));
       return;
     }
     if (picked.size > AVATAR_MAX_BYTES) {
       reset();
-      setError("The photo is over 5 MB. Choose a smaller one.");
+      setError(t("tooLarge"));
       return;
     }
 
@@ -74,7 +76,7 @@ export function AvatarUpload({ userId }: { userId: string }) {
     const upload = await storage.upload(path, file, { contentType: file.type });
 
     const result = upload.error
-      ? { ok: false as const, message: "Couldn't upload the photo. Try again." }
+      ? { ok: false as const, message: t("uploadFailed") }
       : await saveAvatar(path);
 
     if (result.ok) {
@@ -94,7 +96,7 @@ export function AvatarUpload({ userId }: { userId: string }) {
         <div className="flex items-center gap-4">
           <Image
             src={preview}
-            alt="New photo preview"
+            alt={t("previewAlt")}
             width={96}
             height={96}
             unoptimized
@@ -102,7 +104,7 @@ export function AvatarUpload({ userId }: { userId: string }) {
           />
           <div className="flex gap-2">
             <Button type="button" disabled={saving} onClick={() => void save()}>
-              {saving ? "Saving…" : "Save photo"}
+              {saving ? t("saving") : t("savePhoto")}
             </Button>
             <Button
               type="button"
@@ -110,7 +112,7 @@ export function AvatarUpload({ userId }: { userId: string }) {
               disabled={saving}
               onClick={reset}
             >
-              Cancel
+              {t("cancel")}
             </Button>
           </div>
         </div>
@@ -120,7 +122,7 @@ export function AvatarUpload({ userId }: { userId: string }) {
             htmlFor={inputId}
             className="cursor-pointer text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
-            Change photo
+            {t("changePhoto")}
           </label>
           <input
             ref={inputRef}
@@ -132,9 +134,7 @@ export function AvatarUpload({ userId }: { userId: string }) {
               choose(event.target.files?.[0]);
             }}
           />
-          <p className="mt-1 text-sm text-muted-foreground">
-            JPEG, PNG or WebP, up to 5 MB.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("hint")}</p>
         </div>
       )}
       {error && (

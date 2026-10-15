@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import {
@@ -19,12 +20,18 @@ export const metadata: Metadata = { title: "Admin · Disputed results" };
 // (neither applies — the dispute stands).
 export default async function AdminResultsPage() {
   const results = await getDisputedResults();
+  const t = await getTranslations("AdminResultsPage");
+  const format = await getFormatter();
 
   return (
     <section>
-      <h2 className="font-semibold">Disputed ({String(results.length)})</h2>
+      <h2 className="font-semibold">
+        {t("disputed", { count: results.length })}
+      </h2>
       {results.length === 0 ? (
-        <p className="mt-2 text-sm text-muted-foreground">Nothing waiting.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("nothingWaiting")}
+        </p>
       ) : (
         <ul className="mt-2 divide-y rounded-lg border">
           {results.map((result) => {
@@ -36,7 +43,7 @@ export default async function AdminResultsPage() {
                     href={`/offers/${offerJoin.offerId}`}
                     className="hover:underline"
                   >
-                    {formatKrakowTime(offerJoin.offer.startsAt)}
+                    {formatKrakowTime(format, offerJoin.offer.startsAt)}
                   </Link>
                 </p>
                 <p className="mt-1">
@@ -44,50 +51,52 @@ export default async function AdminResultsPage() {
                     href={`/players/${offerJoin.offer.author.id}`}
                     className="hover:underline"
                   >
-                    {offerJoin.offer.author.name ?? "The author"}
+                    {offerJoin.offer.author.name ?? t("theAuthor")}
                   </Link>{" "}
-                  vs{" "}
+                  {t("vs")}{" "}
                   <Link
                     href={`/players/${offerJoin.user.id}`}
                     className="hover:underline"
                   >
-                    {offerJoin.user.name ?? "the player"}
+                    {offerJoin.user.name ?? t("thePlayer")}
                   </Link>
                 </p>
                 {result.noShowParty ? (
                   <p className="mt-1 text-sm">
-                    No-show report:{" "}
-                    {result.noShowParty === "AUTHOR"
-                      ? "the author"
-                      : "the player"}{" "}
-                    didn&apos;t show up, reported by{" "}
-                    {result.reportedBy === "AUTHOR"
-                      ? "the author"
-                      : "the player"}
-                    .
+                    {t("noShowReport", {
+                      who:
+                        result.noShowParty === "AUTHOR"
+                          ? t("theAuthor")
+                          : t("thePlayer"),
+                      reportedBy:
+                        result.reportedBy === "AUTHOR"
+                          ? t("theAuthor")
+                          : t("thePlayer"),
+                    })}
                   </p>
                 ) : (
                   <p className="mt-1 text-sm">
-                    Score: {formatScore(result.score as SetScore[])}{" "}
-                    (author&apos;s games first), filed by{" "}
-                    {result.reportedBy === "AUTHOR"
-                      ? "the author"
-                      : "the player"}
-                    .
+                    {t("scoreFiledBy", {
+                      score: formatScore(result.score as SetScore[]),
+                      reportedBy:
+                        result.reportedBy === "AUTHOR"
+                          ? t("theAuthor")
+                          : t("thePlayer"),
+                    })}
                   </p>
                 )}
                 <AdminActionForm
                   actions={[
                     {
                       key: "confirm",
-                      label: "Confirm",
-                      pendingLabel: "Confirming…",
+                      label: t("confirm"),
+                      pendingLabel: t("confirming"),
                       run: confirmDisputedResult.bind(null, result.id),
                     },
                     {
                       key: "annul",
-                      label: "Annul",
-                      pendingLabel: "Annulling…",
+                      label: t("annul"),
+                      pendingLabel: t("annulling"),
                       variant: "outline",
                       run: annulDisputedResult.bind(null, result.id),
                     },

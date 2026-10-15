@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -14,6 +15,8 @@ import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
 // in the URL itself and no client JavaScript is needed. Submitting drops
 // ?page, so new filters start from the first page.
 export function OfferFilters({ filters }: { filters: FeedFilters }) {
+  const t = useTranslations("OfferFilters");
+  const tOfferLabels = useTranslations("OfferLabels");
   const active = Object.keys(filters).length > 0;
 
   return (
@@ -23,11 +26,11 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
       // Remount on every new set of filters: the fields are uncontrolled,
       // and "Clear" must empty them, not keep what was typed.
       key={feedHref(filters)}
-      aria-label="Filter offers"
+      aria-label={t("formLabel")}
       className="mt-6 grid grid-cols-2 items-end gap-3 sm:grid-cols-5"
     >
       <div className="space-y-1">
-        <Label htmlFor="filter-date">Date</Label>
+        <Label htmlFor="filter-date">{t("dateLabel")}</Label>
         <Input
           id="filter-date"
           name="date"
@@ -36,14 +39,14 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
         />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="filter-district">District</Label>
+        <Label htmlFor="filter-district">{t("districtLabel")}</Label>
         <NativeSelect
           id="filter-district"
           name="district"
           className="w-full"
           defaultValue={filters.district ?? ""}
         >
-          <NativeSelectOption value="">Any</NativeSelectOption>
+          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
           {Object.entries(DISTRICT_LABELS).map(([value, label]) => (
             <NativeSelectOption key={value} value={value}>
               {label}
@@ -52,14 +55,14 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
         </NativeSelect>
       </div>
       <div className="space-y-1">
-        <Label htmlFor="filter-ntrp">My level (NTRP)</Label>
+        <Label htmlFor="filter-ntrp">{t("ntrpLabel")}</Label>
         <NativeSelect
           id="filter-ntrp"
           name="ntrp"
           className="w-full"
           defaultValue={filters.ntrp?.toFixed(1) ?? ""}
         >
-          <NativeSelectOption value="">Any</NativeSelectOption>
+          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
           {NTRP_LEVELS.map((level) => (
             <NativeSelectOption key={level} value={level.toFixed(1)}>
               {level.toFixed(1)}
@@ -68,16 +71,20 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
         </NativeSelect>
       </div>
       <div className="space-y-1">
-        <Label htmlFor="filter-format">Format</Label>
+        <Label htmlFor="filter-format">{t("formatLabel")}</Label>
         <NativeSelect
           id="filter-format"
           name="format"
           className="w-full"
           defaultValue={filters.format ?? ""}
         >
-          <NativeSelectOption value="">Any</NativeSelectOption>
-          <NativeSelectOption value="SINGLES">Singles</NativeSelectOption>
-          <NativeSelectOption value="DOUBLES">Doubles</NativeSelectOption>
+          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
+          <NativeSelectOption value="SINGLES">
+            {tOfferLabels("singles")}
+          </NativeSelectOption>
+          <NativeSelectOption value="DOUBLES">
+            {tOfferLabels("doubles")}
+          </NativeSelectOption>
         </NativeSelect>
       </div>
       <div className="flex items-center gap-2 pb-2">
@@ -88,13 +95,13 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
           value="1"
           defaultChecked={filters.courtBooked ?? false}
         />
-        <Label htmlFor="filter-courtBooked">Court already booked</Label>
+        <Label htmlFor="filter-courtBooked">{t("courtBookedLabel")}</Label>
       </div>
       <div className="flex gap-2">
-        <Button type="submit">Filter</Button>
+        <Button type="submit">{t("submit")}</Button>
         {active && (
           <Link href="/offers" className={buttonVariants({ variant: "ghost" })}>
-            Clear
+            {t("clear")}
           </Link>
         )}
       </div>

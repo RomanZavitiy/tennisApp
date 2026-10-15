@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
@@ -18,21 +19,21 @@ import {
   type CreateOfferResult,
 } from "@/lib/validation/offer";
 
-const TOO_MANY_ACTIVE_OFFERS = `You already have ${String(MAX_ACTIVE_OFFERS)} offers out there. Cancel one before posting another.`;
-
 // Saves /offers/new (task 3.5). The author is always the signed-in player —
 // never a field from the request. requireOnboardedUser() refuses a request
 // without a session and sends a player without a finished profile to
 // /onboarding, so neither can post an offer.
 export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   const author = await requireOnboardedUser();
+  const t = await getTranslations("Validation.offer");
+  const tErrors = await getTranslations("Errors");
 
-  const blocked = blockedRefusal(author);
+  const blocked = blockedRefusal(tErrors, author);
   if (blocked) {
     return { ok: false, fieldErrors: {}, message: blocked };
   }
 
-  const parsed = offerSchema.safeParse(input);
+  const parsed = offerSchema(t).safeParse(input);
   if (!parsed.success) {
     return offerFieldErrors(parsed.error);
   }
@@ -45,11 +46,16 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     where: activeOffersWhere(author.id, new Date()),
   });
   if (activeCount >= MAX_ACTIVE_OFFERS) {
-    return { ok: false, fieldErrors: {}, message: TOO_MANY_ACTIVE_OFFERS };
+    return {
+      ok: false,
+      fieldErrors: {},
+      message: tErrors("tooManyActiveOffers", { max: MAX_ACTIVE_OFFERS }),
+    };
   }
   const limited = await checkRateLimit(author.id, "NEW_OFFER");
   if (!limited.ok) {
-    return { ok: false, fieldErrors: {}, message: limited.message };
+    const tRateLimit = await getTranslations("RateLimit");
+    return { ok: false, fieldErrors: {}, message: tRateLimit("NEW_OFFER") };
   }
   const { clubId, district, ...offer } = parsed.data;
 
@@ -67,7 +73,7 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     if (!club) {
       return {
         ok: false,
-        fieldErrors: { clubId: "Choose a club from the list." },
+        fieldErrors: { clubId: tErrors("clubNotFound") },
       };
     }
     place = { clubId, district: club.district };

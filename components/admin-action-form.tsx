@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export function AdminActionForm({
 }: {
   actions: readonly AdminAction[];
 }) {
+  const t = useTranslations("AdminActionForm");
   const [reason, setReason] = useState("");
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -31,19 +33,19 @@ export function AdminActionForm({
   const [, startTransition] = useTransition();
 
   if (done) {
-    return <p className="text-sm text-muted-foreground">Done.</p>;
+    return <p className="text-sm text-muted-foreground">{t("done")}</p>;
   }
 
   return (
     <div className="mt-2 space-y-2">
       <Textarea
-        aria-label="Reason for the log (optional)"
+        aria-label={t("reasonLabel")}
         value={reason}
         onChange={(event) => {
           setReason(event.target.value);
         }}
         rows={1}
-        placeholder="Reason for the log (optional)"
+        placeholder={t("reasonLabel")}
         className="text-sm"
       />
       <div className="flex flex-wrap gap-2">

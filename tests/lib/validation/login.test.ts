@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { loginSchema, magicLinkRequestSchema } from "@/lib/validation/login";
+import { testTranslator } from "@/tests/helpers/translator";
+
+const t = testTranslator("Validation.login");
 
 function emailError(email: string) {
-  const result = loginSchema.safeParse({ email });
+  const result = loginSchema(t).safeParse({ email });
   return result.success ? null : result.error.issues[0]?.message;
 }
 
 describe("loginSchema", () => {
   it("accepts a valid email and trims spaces", () => {
-    expect(loginSchema.parse({ email: "  player@example.com " })).toEqual({
+    expect(loginSchema(t).parse({ email: "  player@example.com " })).toEqual({
       email: "player@example.com",
     });
   });
@@ -29,15 +32,18 @@ describe("loginSchema", () => {
 describe("magicLinkRequestSchema", () => {
   it("rejects a missing next path", () => {
     expect(
-      magicLinkRequestSchema.safeParse({ email: "player@example.com" }).success,
+      magicLinkRequestSchema(t).safeParse({ email: "player@example.com" })
+        .success,
     ).toBe(false);
   });
 
   it("rejects an overlong next path", () => {
     const next = `/${"a".repeat(2048)}`;
     expect(
-      magicLinkRequestSchema.safeParse({ email: "player@example.com", next })
-        .success,
+      magicLinkRequestSchema(t).safeParse({
+        email: "player@example.com",
+        next,
+      }).success,
     ).toBe(false);
   });
 });

@@ -1,3 +1,5 @@
+import type { useFormatter } from "next-intl";
+
 // Offer times as people enter them: wall-clock time in Kraków, the
 // "YYYY-MM-DDTHH:mm" string an <input type="datetime-local"> gives. The
 // database stores the instant in UTC (task 3.2); these turn one into the
@@ -46,17 +48,21 @@ export function krakowLocalToDate(local: string): Date | null {
   return null;
 }
 
-const krakowDisplay = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "Europe/Warsaw",
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-});
+type Formatter = ReturnType<typeof useFormatter>;
 
-/** How an offer's start reads on the page, in Kraków time: "Tue 20 Oct, 18:00". */
-export function formatKrakowTime(date: Date): string {
-  return krakowDisplay.format(date);
+/**
+ * How an offer's start reads on the page, in Kraków time: "Tue 20 Oct,
+ * 18:00" in English, "wt, 20 paź, 18:00" in Polish (task 1.20) — `format`
+ * is a next-intl formatter (useFormatter/getFormatter), already scoped to
+ * Europe/Warsaw by i18n/request.ts, so only the language varies here.
+ */
+export function formatKrakowTime(format: Formatter, date: Date): string {
+  return format.dateTime(date, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
 }

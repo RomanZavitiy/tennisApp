@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { useTranslations } from "next-intl";
+import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -25,10 +27,9 @@ import { ReportButton } from "@/components/report-button";
 import { ResultForm } from "@/components/result-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
-import { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
 import type { MatchParty, OfferFormat } from "@/lib/generated/prisma/enums";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
-import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
+import { joinRefusal } from "@/lib/offers/join-rules";
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
 import {
   getOfferDetails,
@@ -37,13 +38,13 @@ import {
   type OfferPlayer,
 } from "@/lib/offers/offer-details";
 import {
-  COURT_STATUS_LABELS,
   formatLabel,
   levelLabel,
   placeLabel,
   spotsLabel,
 } from "@/lib/offers/offer-labels";
 import { eloChangeLabel, formatScoreFor } from "@/lib/offers/result-labels";
+import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { reliabilityLabel } from "@/lib/rating/reliability";
 import type { SetScore } from "@/lib/validation/match-result";
 
@@ -59,7 +60,10 @@ type OfferPageProps = {
   searchParams: Promise<{ created?: string }>;
 };
 
-export const metadata: Metadata = { title: "Sparring offer" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("OfferPage");
+  return { title: t("title") };
+}
 
 export default async function OfferPage({
   params,
@@ -79,30 +83,47 @@ export default async function OfferPage({
   const { offer } = details;
   const started = offer.startsAt <= new Date();
 
+  const t = await getTranslations("OfferPage");
+  const tOfferLabels = await getTranslations("OfferLabels");
+  const tSurface = await getTranslations("Surface");
+  const tCourtStatus = await getTranslations("CourtStatus");
+  const format = await getFormatter();
+
   const facts = [
-    { label: "Where", value: placeLabel(offer) },
-    { label: "Level", value: levelLabel(offer.ntrpMin, offer.ntrpMax) },
+    {
+      label: t("whereLabel"),
+      value: placeLabel(
+        offer,
+        offer.district ? DISTRICT_LABELS[offer.district] : null,
+      ),
+    },
+    {
+      label: t("levelLabel"),
+      value: levelLabel(tOfferLabels, offer.ntrpMin, offer.ntrpMax),
+    },
     ...(offer.surface
-      ? [{ label: "Surface", value: SURFACE_LABELS[offer.surface] }]
+      ? [{ label: t("surfaceLabel"), value: tSurface(offer.surface) }]
       : []),
-    { label: "Court", value: COURT_STATUS_LABELS[offer.courtStatus] },
+    { label: t("courtLabel"), value: tCourtStatus(offer.courtStatus) },
   ];
 
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
       {created === "1" && <MarkMeaningfulAction />}
-      <p className="text-sm text-muted-foreground">{formatLabel(offer)}</p>
+      <p className="text-sm text-muted-foreground">
+        {formatLabel(tOfferLabels, offer)}
+      </p>
       <h1 className="mt-1 text-2xl font-semibold tracking-tight">
         <time dateTime={offer.startsAt.toISOString()}>
-          {formatKrakowTime(offer.startsAt)}
+          {formatKrakowTime(format, offer.startsAt)}
         </time>
       </h1>
       <p className="mt-2 font-medium text-primary">
         {offer.status === "CANCELLED"
-          ? "Cancelled"
+          ? t("statusCancelled")
           : started
-            ? "Already started"
-            : spotsLabel(details.spotsLeft)}
+            ? t("statusStarted")
+            : spotsLabel(tOfferLabels, details.spotsLeft)}
       </p>
 
       <dl className="mt-6 space-y-3">
@@ -113,7 +134,7 @@ export default async function OfferPage({
           </div>
         ))}
         <div className="flex justify-between gap-4">
-          <dt className="text-muted-foreground">Posted by</dt>
+          <dt className="text-muted-foreground">{t("postedBy")}</dt>
           <dd className="text-right font-medium">
             <PlayerLink player={offer.author} />
           </dd>
@@ -137,7 +158,7 @@ export default async function OfferPage({
             href={`/login?next=${encodeURIComponent(`/offers/${offer.id}`)}`}
             className={buttonVariants()}
           >
-            Sign in to join
+            {t("signInToJoin")}
           </Link>
         ) : details.isAuthor ? (
           <AuthorView
@@ -153,7 +174,7 @@ export default async function OfferPage({
         <section className="mt-6">
           <ReportButton
             action={reportOffer.bind(null, offer.id)}
-            label="Report this offer"
+            label={t("reportThisOffer")}
           />
         </section>
       )}
@@ -168,6 +189,8 @@ function PlayerView({
   details: OfferDetails;
   viewerId: string;
 }) {
+  const t = useTranslations("OfferPage");
+  const tJoinRefusal = useTranslations("JoinRefusal");
   const { offer, viewerJoin } = details;
 
   if (viewerJoin?.status === "REQUESTED" || viewerJoin?.status === "ACCEPTED") {
@@ -175,23 +198,25 @@ function PlayerView({
       <div className="space-y-3">
         <p className="font-medium">
           {offer.status === "CANCELLED"
-            ? "The author has cancelled this game."
+            ? t("authorCancelled")
             : viewerJoin.status === "ACCEPTED"
-              ? "You're in. See you on court!"
-              : "Request sent. The author will answer soon."}
+              ? t("youAreIn")
+              : t("requestSent")}
         </p>
         {offer.status !== "CANCELLED" && offer.startsAt > new Date() && (
           <OfferActionButton
             action={withdrawJoin.bind(null, viewerJoin.id)}
-            label="Withdraw"
-            pendingLabel="Withdrawing…"
+            label={t("withdraw")}
+            pendingLabel={t("withdrawing")}
             variant="outline"
           />
         )}
         <JoinThread
           offerJoinId={viewerJoin.id}
           viewerId={viewerId}
-          senderNames={{ [offer.author.id]: offer.author.name ?? "Author" }}
+          senderNames={{
+            [offer.author.id]: offer.author.name ?? t("defaultAuthorName"),
+          }}
           defaultOpen
         />
         {viewerJoin.status === "ACCEPTED" && (
@@ -199,7 +224,7 @@ function PlayerView({
             join={viewerJoin}
             offer={offer}
             party="PLAYER"
-            opponentName={offer.author.name ?? "the author"}
+            opponentName={offer.author.name ?? t("theAuthor")}
           />
         )}
       </div>
@@ -213,15 +238,13 @@ function PlayerView({
     now: new Date(),
   });
   if (refusal) {
-    return (
-      <p className="text-muted-foreground">{JOIN_REFUSAL_MESSAGES[refusal]}</p>
-    );
+    return <p className="text-muted-foreground">{tJoinRefusal(refusal)}</p>;
   }
   return (
     <OfferActionButton
       action={requestToJoin.bind(null, offer.id)}
-      label="Ask to join"
-      pendingLabel="Sending…"
+      label={t("askToJoin")}
+      pendingLabel={t("sending")}
       trackMeaningfulAction
     />
   );
@@ -236,6 +259,8 @@ function AuthorView({
   started: boolean;
   viewerId: string;
 }) {
+  const t = useTranslations("OfferPage");
+  const tReliability = useTranslations("Reliability");
   const requested = details.joins.filter((join) => join.status === "REQUESTED");
   const accepted = details.joins.filter((join) => join.status === "ACCEPTED");
   // A full, cancelled or past offer takes nobody more; the author can still
@@ -247,10 +272,10 @@ function AuthorView({
     <div className="space-y-6">
       <div>
         <h2 className="font-semibold">
-          Players in ({String(accepted.length)})
+          {t("playersIn", { count: accepted.length })}
         </h2>
         {accepted.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">Nobody yet.</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("nobodyYet")}</p>
         ) : (
           <ul className="mt-2 space-y-2">
             {accepted.map((join) => (
@@ -259,13 +284,15 @@ function AuthorView({
                 <JoinThread
                   offerJoinId={join.id}
                   viewerId={viewerId}
-                  senderNames={{ [join.user.id]: join.user.name ?? "A player" }}
+                  senderNames={{
+                    [join.user.id]: join.user.name ?? t("aPlayer"),
+                  }}
                 />
                 <ResultSection
                   join={join}
                   offer={details.offer}
                   party="AUTHOR"
-                  opponentName={join.user.name ?? "the player"}
+                  opponentName={join.user.name ?? t("thePlayer")}
                 />
               </li>
             ))}
@@ -273,10 +300,12 @@ function AuthorView({
         )}
       </div>
       <div>
-        <h2 className="font-semibold">Requests ({String(requested.length)})</h2>
+        <h2 className="font-semibold">
+          {t("requestsCount", { count: requested.length })}
+        </h2>
         {requested.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">
-            No requests waiting.
+            {t("noRequestsWaiting")}
           </p>
         ) : (
           <ul className="mt-2 divide-y rounded-lg border">
@@ -286,21 +315,21 @@ function AuthorView({
                   <div>
                     <PlayerLink player={join.user} />
                     <p className="text-xs text-muted-foreground">
-                      {reliabilityLabel(join.user.reliability)}
+                      {reliabilityLabel(tReliability, join.user.reliability)}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     {canAccept && (
                       <OfferActionButton
                         action={acceptJoin.bind(null, join.id)}
-                        label="Accept"
-                        pendingLabel="Accepting…"
+                        label={t("accept")}
+                        pendingLabel={t("accepting")}
                       />
                     )}
                     <OfferActionButton
                       action={declineJoin.bind(null, join.id)}
-                      label="Decline"
-                      pendingLabel="Declining…"
+                      label={t("decline")}
+                      pendingLabel={t("declining")}
                       variant="outline"
                     />
                   </div>
@@ -308,7 +337,9 @@ function AuthorView({
                 <JoinThread
                   offerJoinId={join.id}
                   viewerId={viewerId}
-                  senderNames={{ [join.user.id]: join.user.name ?? "A player" }}
+                  senderNames={{
+                    [join.user.id]: join.user.name ?? t("aPlayer"),
+                  }}
                 />
               </li>
             ))}
@@ -318,9 +349,9 @@ function AuthorView({
       {canCancelOffer(details.offer, new Date()) && (
         <OfferActionButton
           action={cancelOffer.bind(null, details.offer.id)}
-          label="Cancel offer"
-          confirmLabel="Yes, cancel it"
-          pendingLabel="Cancelling…"
+          label={t("cancelOfferLabel")}
+          confirmLabel={t("confirmCancel")}
+          pendingLabel={t("cancelling")}
           variant="outline"
         />
       )}
@@ -329,9 +360,10 @@ function AuthorView({
 }
 
 function PlayerLink({ player }: { player: OfferPlayer }) {
+  const t = useTranslations("OfferPage");
   return (
     <Link href={`/players/${player.id}`} className="hover:underline">
-      {player.name ?? "A player"}
+      {player.name ?? t("aPlayer")}
       {player.selfRatedNtrp !== null &&
         ` · NTRP ${player.selfRatedNtrp.toFixed(1)}`}
     </Link>
@@ -356,6 +388,8 @@ function ResultSection({
   party: MatchParty;
   opponentName: string;
 }) {
+  const t = useTranslations("ResultSection");
+
   if (offer.format !== "SINGLES" || offer.startsAt > new Date()) {
     return null;
   }
@@ -365,7 +399,7 @@ function ResultSection({
     return (
       <details className="mt-2">
         <summary className="cursor-pointer text-sm text-muted-foreground">
-          Submit result
+          {t("submitResultSummary")}
         </summary>
         <div className="mt-2">
           <ResultForm
@@ -385,20 +419,19 @@ function ResultSection({
       if (result.reportedBy === party) {
         return (
           <p className="mt-2 text-sm text-muted-foreground">
-            You reported that {opponentName} didn&apos;t show up. Waiting to see
-            if they dispute it within 72 hours.
+            {t("reportedNoShowWaiting", { name: opponentName })}
           </p>
         );
       }
       return (
         <div className="mt-2 space-y-2">
           <p className="text-sm">
-            {opponentName} reported that you didn&apos;t show up.
+            {t("opponentReportedNoShow", { name: opponentName })}
           </p>
           <OfferActionButton
             action={disputeResult.bind(null, result.id)}
-            label="Dispute"
-            pendingLabel="Disputing…"
+            label={t("dispute")}
+            pendingLabel={t("disputing")}
             variant="outline"
           />
         </div>
@@ -407,22 +440,23 @@ function ResultSection({
     if (result.status === "NO_SHOW") {
       return (
         <p className="mt-2 text-sm text-muted-foreground">
-          {viewerDidntShow ? "You" : opponentName} didn&apos;t show up —
-          confirmed after 72 hours with no dispute.
+          {t("noShowConfirmed", {
+            who: viewerDidntShow ? t("you") : opponentName,
+          })}
         </p>
       );
     }
     if (result.status === "DISPUTED") {
       return (
         <p className="mt-2 text-sm text-muted-foreground">
-          No-show report disputed. An admin will review it.
+          {t("noShowDisputed")}
         </p>
       );
     }
     if (result.status === "ANNULLED") {
       return (
         <p className="mt-2 text-sm text-muted-foreground">
-          An admin reviewed the dispute and annulled this no-show report.
+          {t("noShowAnnulled")}
         </p>
       );
     }
@@ -437,25 +471,25 @@ function ResultSection({
     if (result.reportedBy === party) {
       return (
         <p className="mt-2 text-sm text-muted-foreground">
-          Result submitted ({score}). Waiting for {opponentName} to confirm.
+          {t("resultSubmittedWaiting", { score, name: opponentName })}
         </p>
       );
     }
     return (
       <div className="mt-2 space-y-2">
         <p className="text-sm">
-          {opponentName} reported: {score}.
+          {t("opponentReported", { name: opponentName, score })}
         </p>
         <div className="flex gap-2">
           <OfferActionButton
             action={confirmResult.bind(null, result.id)}
-            label="Confirm"
-            pendingLabel="Confirming…"
+            label={t("confirm")}
+            pendingLabel={t("confirming")}
           />
           <OfferActionButton
             action={disputeResult.bind(null, result.id)}
-            label="Dispute"
-            pendingLabel="Disputing…"
+            label={t("dispute")}
+            pendingLabel={t("disputing")}
             variant="outline"
           />
         </div>
@@ -470,9 +504,9 @@ function ResultSection({
       party === "AUTHOR" ? result.authorEloAfter : result.playerEloAfter;
     return (
       <p className="mt-2 text-sm text-muted-foreground">
-        Confirmed: {score}.
+        {t("confirmed", { score })}
         {before !== null && after !== null && (
-          <> Your ELO: {eloChangeLabel(before, after)}.</>
+          <> {t("yourElo", { change: eloChangeLabel(before, after) })}</>
         )}
       </p>
     );
@@ -481,7 +515,7 @@ function ResultSection({
   if (result.status === "DISPUTED") {
     return (
       <p className="mt-2 text-sm text-muted-foreground">
-        Result disputed ({score}). An admin will review it.
+        {t("resultDisputed", { score })}
       </p>
     );
   }
@@ -489,7 +523,7 @@ function ResultSection({
   if (result.status === "ANNULLED") {
     return (
       <p className="mt-2 text-sm text-muted-foreground">
-        An admin reviewed the dispute and annulled this result ({score}).
+        {t("resultAnnulled", { score })}
       </p>
     );
   }

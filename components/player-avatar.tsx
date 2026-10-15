@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 import { avatarUrl } from "@/lib/profile/avatar";
 
@@ -14,11 +15,13 @@ export function PlayerAvatar({
   avatarPath: string | null;
   size?: number;
 }) {
+  const t = useTranslations("PlayerAvatar");
+
   if (avatarPath) {
     return (
       <Image
         src={avatarUrl(avatarPath)}
-        alt={`${name}'s photo`}
+        alt={t("photoAlt", { name })}
         width={size}
         height={size}
         unoptimized

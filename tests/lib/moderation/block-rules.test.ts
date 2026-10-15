@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { BLOCKED_MESSAGE, blockedRefusal } from "@/lib/moderation/block-rules";
+import { blockedRefusal } from "@/lib/moderation/block-rules";
+import { testTranslator } from "@/tests/helpers/translator";
+
+const t = testTranslator("Errors");
 
 describe("blockedRefusal", () => {
   it("refuses a blocked player", () => {
-    expect(blockedRefusal({ blockedAt: new Date() })).toBe(BLOCKED_MESSAGE);
+    expect(blockedRefusal(t, { blockedAt: new Date() })).toBe(t("blocked"));
   });
 
   it("allows a player who isn't blocked", () => {
-    expect(blockedRefusal({ blockedAt: null })).toBeNull();
+    expect(blockedRefusal(t, { blockedAt: null })).toBeNull();
   });
 });

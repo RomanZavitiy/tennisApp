@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { requireUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
@@ -23,10 +24,11 @@ export type SaveAvatarResult = { ok: true } | { ok: false; message: string };
 // session, so the bucket policies from task 1.13 apply here too.
 export async function saveAvatar(path: unknown): Promise<SaveAvatarResult> {
   const user = await requireUser();
+  const t = await getTranslations("AvatarUpload");
 
   const parsed = avatarPathSchema(user.id).safeParse(path);
   if (!parsed.success) {
-    return { ok: false, message: "Invalid photo." };
+    return { ok: false, message: t("invalidPhoto") };
   }
 
   const storage = (await createSupabaseServerClient()).storage.from(
@@ -34,7 +36,7 @@ export async function saveAvatar(path: unknown): Promise<SaveAvatarResult> {
   );
   const { data: exists } = await storage.exists(parsed.data);
   if (!exists) {
-    return { ok: false, message: "The photo didn't upload. Try again." };
+    return { ok: false, message: t("uploadFailed") };
   }
 
   const previous = await db.user.findUnique({
@@ -65,7 +67,8 @@ export async function updateProfile(
 ): Promise<SaveProfileResult> {
   const user = await requireUser();
 
-  const parsed = profileSchema.safeParse(input);
+  const t = await getTranslations("Validation.profile");
+  const parsed = profileSchema(t).safeParse(input);
   if (!parsed.success) {
     return profileFieldErrors(parsed.error);
   }

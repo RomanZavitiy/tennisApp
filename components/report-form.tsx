@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,8 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
-import type { ReportReason } from "@/lib/generated/prisma/enums";
-import { REPORT_REASON_LABELS } from "@/lib/moderation/report-labels";
+import { ReportReason } from "@/lib/generated/prisma/enums";
+import type { ReportReason as ReportReasonType } from "@/lib/generated/prisma/enums";
 import { REPORT_COMMENT_MAX } from "@/lib/validation/report";
 
 type ReportActionResult = { ok: true } | { ok: false; message: string };
@@ -21,22 +22,20 @@ export function ReportForm({
   action,
 }: {
   action: (input: {
-    reason: ReportReason;
+    reason: ReportReasonType;
     comment?: string;
   }) => Promise<ReportActionResult>;
 }) {
-  const [reason, setReason] = useState<ReportReason | "">("");
+  const t = useTranslations("ReportForm");
+  const tReason = useTranslations("ReportReason");
+  const [reason, setReason] = useState<ReportReasonType | "">("");
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
 
   if (done) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Reported. An admin will review it.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">{t("done")}</p>;
   }
 
   return (
@@ -45,7 +44,7 @@ export function ReportForm({
       onSubmit={(event) => {
         event.preventDefault();
         if (!reason) {
-          setError("Choose a reason.");
+          setError(t("reasonRequired"));
           return;
         }
         setError(null);
@@ -63,28 +62,28 @@ export function ReportForm({
       }}
     >
       <NativeSelect
-        aria-label="Reason"
+        aria-label={t("reasonFieldLabel")}
         value={reason}
         onChange={(event) => {
-          setReason(event.target.value as ReportReason);
+          setReason(event.target.value as ReportReasonType);
         }}
       >
-        <NativeSelectOption value="">Choose a reason…</NativeSelectOption>
-        {Object.entries(REPORT_REASON_LABELS).map(([value, label]) => (
+        <NativeSelectOption value="">{t("chooseReason")}</NativeSelectOption>
+        {Object.values(ReportReason).map((value) => (
           <NativeSelectOption key={value} value={value}>
-            {label}
+            {tReason(value)}
           </NativeSelectOption>
         ))}
       </NativeSelect>
       <Textarea
-        aria-label="Details (optional)"
+        aria-label={t("detailsFieldLabel")}
         value={comment}
         onChange={(event) => {
           setComment(event.target.value);
         }}
         maxLength={REPORT_COMMENT_MAX}
         rows={2}
-        placeholder="Add details (optional)"
+        placeholder={t("detailsPlaceholder")}
       />
       {error && (
         <p role="alert" className="text-sm text-destructive">
@@ -92,7 +91,7 @@ export function ReportForm({
         </p>
       )}
       <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Reporting…" : "Submit report"}
+        {pending ? t("reporting") : t("submit")}
       </Button>
     </form>
   );

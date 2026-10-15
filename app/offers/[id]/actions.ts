@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
@@ -17,7 +18,7 @@ import {
 import { blockedRefusal } from "@/lib/moderation/block-rules";
 import { notify } from "@/lib/notifications/notify";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
-import { JOIN_REFUSAL_MESSAGES, joinRefusal } from "@/lib/offers/join-rules";
+import { joinRefusal } from "@/lib/offers/join-rules";
 import {
   ACTION_ACTOR,
   joinChangeRefusal,
@@ -37,8 +38,6 @@ import { messageContentSchema } from "@/lib/validation/message";
 export type RequestToJoinResult = { ok: true } | { ok: false; message: string };
 export type JoinChangeResult = RequestToJoinResult;
 
-const NOT_FOUND = "This offer doesn't exist.";
-
 // "Ask to join" on /offers/[id] (the page comes in 3.13). The player is the
 // signed-in one with a finished profile — never an id from the request — and
 // the answer carries no details of either side: contact happens in the
@@ -47,19 +46,21 @@ export async function requestToJoin(
   offerId: unknown,
 ): Promise<RequestToJoinResult> {
   const player = await requireOnboardedUser();
+  const tErrors = await getTranslations("Errors");
 
-  const blocked = blockedRefusal(player);
+  const blocked = blockedRefusal(tErrors, player);
   if (blocked) {
     return { ok: false, message: blocked };
   }
 
   const id = z.uuid().safeParse(offerId);
   if (!id.success) {
-    return { ok: false, message: NOT_FOUND };
+    return { ok: false, message: tErrors("offerNotFound") };
   }
   const limited = await checkRateLimit(player.id, "JOIN_REQUEST");
   if (!limited.ok) {
-    return limited;
+    const tRateLimit = await getTranslations("RateLimit");
+    return { ok: false, message: tRateLimit("JOIN_REQUEST") };
   }
 
   const offer = await db.sparringOffer.findUnique({
@@ -67,13 +68,14 @@ export async function requestToJoin(
     select: { authorId: true, status: true, startsAt: true },
   });
   if (!offer) {
-    return { ok: false, message: NOT_FOUND };
+    return { ok: false, message: tErrors("offerNotFound") };
   }
   const existing = await db.offerJoin.findUnique({
     where: { offerId_userId: { offerId: id.data, userId: player.id } },
     select: { id: true, status: true },
   });
 
+  const tJoinRefusal = await getTranslations("JoinRefusal");
   const refusal = joinRefusal({
     offer,
     playerId: player.id,
@@ -81,7 +83,7 @@ export async function requestToJoin(
     now: new Date(),
   });
   if (refusal) {
-    return { ok: false, message: JOIN_REFUSAL_MESSAGES[refusal] };
+    return { ok: false, message: tJoinRefusal(refusal) };
   }
 
   // Both writes only succeed from the state checked above, so a double click
@@ -97,7 +99,7 @@ export async function requestToJoin(
       data: { status: "REQUESTED" },
     });
     if (count === 0) {
-      return { ok: false, message: JOIN_REFUSAL_MESSAGES.ALREADY_REQUESTED };
+      return { ok: false, message: tJoinRefusal("ALREADY_REQUESTED") };
     }
   } else {
     const created = (
@@ -108,7 +110,7 @@ export async function requestToJoin(
       })
     ).at(0);
     if (!created) {
-      return { ok: false, message: JOIN_REFUSAL_MESSAGES.ALREADY_REQUESTED };
+      return { ok: false, message: tJoinRefusal("ALREADY_REQUESTED") };
     }
     await postSystemMessage(
       { offerJoinId: created.id },
@@ -137,9 +139,6 @@ export type SendMessageResult =
     }
   | { ok: false; message: string };
 
-const THREAD_NOT_FOUND = "This conversation doesn't exist.";
-const THREAD_READ_ONLY = "This conversation is read-only now.";
-
 // "Send" in a join's private thread (task 3.16). Only the join's player or
 // the offer's author — never an id from the request — and only while the
 // thread is still writable (lib/messages/thread-rules.ts); content is
@@ -151,26 +150,29 @@ export async function sendMessage(
   content: unknown,
 ): Promise<SendMessageResult> {
   const user = await requireOnboardedUser();
+  const tErrors = await getTranslations("Errors");
 
-  const blocked = blockedRefusal(user);
+  const blocked = blockedRefusal(tErrors, user);
   if (blocked) {
     return { ok: false, message: blocked };
   }
 
   const id = z.uuid().safeParse(offerJoinId);
   if (!id.success) {
-    return { ok: false, message: THREAD_NOT_FOUND };
+    return { ok: false, message: tErrors("threadNotFound") };
   }
-  const text = messageContentSchema.safeParse(content);
+  const tMessage = await getTranslations("Validation.message");
+  const text = messageContentSchema(tMessage).safeParse(content);
   if (!text.success) {
     return {
       ok: false,
-      message: text.error.issues[0]?.message ?? THREAD_NOT_FOUND,
+      message: text.error.issues[0]?.message ?? tErrors("threadNotFound"),
     };
   }
   const limited = await checkRateLimit(user.id, "MESSAGE");
   if (!limited.ok) {
-    return limited;
+    const tRateLimit = await getTranslations("RateLimit");
+    return { ok: false, message: tRateLimit("MESSAGE") };
   }
 
   const join = await db.offerJoin.findUnique({
@@ -184,10 +186,10 @@ export async function sendMessage(
   });
   // Someone else's thread looks the same as a missing one.
   if (!join || !isJoinThreadParticipant(join, user.id)) {
-    return { ok: false, message: THREAD_NOT_FOUND };
+    return { ok: false, message: tErrors("threadNotFound") };
   }
   if (!canWriteToThread(join, join.offer, new Date())) {
-    return { ok: false, message: THREAD_READ_ONLY };
+    return { ok: false, message: tErrors("threadReadOnly") };
   }
 
   const message = await db.message.create({
@@ -218,15 +220,6 @@ export async function sendMessage(
   };
 }
 
-const JOIN_NOT_FOUND = "This request doesn't exist.";
-
-const CHANGE_REFUSAL_MESSAGES: Record<JoinChangeRefusal, string> = {
-  NOT_ALLOWED: "This request can't be changed any more.",
-  CANCELLED: "This offer has been cancelled.",
-  STARTED: "This game has already started.",
-  FULL: "Every place in this game is taken.",
-};
-
 /** The author accepts a request. Fills the offer once every place is taken. */
 export async function acceptJoin(joinId: unknown): Promise<JoinChangeResult> {
   return changeJoin(joinId, "ACCEPT");
@@ -251,10 +244,12 @@ async function changeJoin(
   action: JoinAction,
 ): Promise<JoinChangeResult> {
   const user = await requireOnboardedUser();
+  const tErrors = await getTranslations("Errors");
+  const tChangeRefusal = await getTranslations("JoinChangeRefusal");
 
   const id = z.uuid().safeParse(joinId);
   if (!id.success) {
-    return { ok: false, message: JOIN_NOT_FOUND };
+    return { ok: false, message: tErrors("joinNotFound") };
   }
 
   const result = await db.$transaction(async (tx) => {
@@ -270,7 +265,7 @@ async function changeJoin(
     const actorId =
       ACTION_ACTOR[action] === "AUTHOR" ? join?.offer.authorId : join?.userId;
     if (!join || actorId !== user.id) {
-      return { ok: false as const, message: JOIN_NOT_FOUND };
+      return { ok: false as const, message: tErrors("joinNotFound") };
     }
 
     await tx.$queryRaw`SELECT 1 FROM sparring_offers WHERE id = ${join.offerId}::uuid FOR UPDATE`;
@@ -290,19 +285,13 @@ async function changeJoin(
     const acceptedCount = offer._count.joins;
     const next = joinStatus && nextJoinStatus(action, joinStatus);
     const now = new Date();
-    const refusal = joinStatus
-      ? joinChangeRefusal({
-          action,
-          joinStatus,
-          offer,
-          acceptedCount,
-          now,
-        })
+    const refusal: JoinChangeRefusal | "NOT_ALLOWED" | null = joinStatus
+      ? joinChangeRefusal({ action, joinStatus, offer, acceptedCount, now })
       : "NOT_ALLOWED";
     if (refusal || !next) {
       return {
         ok: false as const,
-        message: CHANGE_REFUSAL_MESSAGES[refusal ?? "NOT_ALLOWED"],
+        message: tChangeRefusal(refusal ?? "NOT_ALLOWED"),
       };
     }
 
@@ -367,10 +356,11 @@ async function changeJoin(
  */
 export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
   const author = await requireOnboardedUser();
+  const tErrors = await getTranslations("Errors");
 
   const id = z.uuid().safeParse(offerId);
   if (!id.success) {
-    return { ok: false, message: NOT_FOUND };
+    return { ok: false, message: tErrors("offerNotFound") };
   }
 
   const result = await db.$transaction(async (tx) => {
@@ -385,7 +375,7 @@ export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
       },
     });
     if (!offer) {
-      return { ok: false as const, message: NOT_FOUND };
+      return { ok: false as const, message: tErrors("offerNotFound") };
     }
     const now = new Date();
     if (!canCancelOffer(offer, now)) {
@@ -393,8 +383,8 @@ export async function cancelOffer(offerId: unknown): Promise<JoinChangeResult> {
         ok: false as const,
         message:
           offer.status === "CANCELLED"
-            ? "This offer is already cancelled."
-            : "This game has already started.",
+            ? tErrors("alreadyCancelled")
+            : tErrors("alreadyStarted"),
       };
     }
     await tx.sparringOffer.update({
@@ -425,10 +415,11 @@ export async function markCourtBooked(
   offerId: unknown,
 ): Promise<JoinChangeResult> {
   const author = await requireOnboardedUser();
+  const tErrors = await getTranslations("Errors");
 
   const id = z.uuid().safeParse(offerId);
   if (!id.success) {
-    return { ok: false, message: NOT_FOUND };
+    return { ok: false, message: tErrors("offerNotFound") };
   }
 
   const offer = await db.sparringOffer.findFirst({
@@ -436,7 +427,7 @@ export async function markCourtBooked(
     select: { courtStatus: true },
   });
   if (!offer) {
-    return { ok: false, message: NOT_FOUND };
+    return { ok: false, message: tErrors("offerNotFound") };
   }
   if (offer.courtStatus === "BOOKED") {
     return { ok: true };

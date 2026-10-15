@@ -33,7 +33,12 @@ export type FeedOffer = {
   ntrpMax: number | null;
   surface: Surface | null;
   courtStatus: CourtStatus;
-  author: { id: string; name: string | null; reliability: Reliability };
+  author: {
+    id: string;
+    name: string | null;
+    avatarPath: string | null;
+    reliability: Reliability;
+  };
   spotsLeft: number;
 };
 
@@ -67,6 +72,7 @@ const feedOfferSelect = {
     select: {
       id: true,
       name: true,
+      avatarPath: true,
       elo: true,
       scheduledMatches: true,
       noShows: true,
@@ -85,6 +91,7 @@ function toFeedOffer({
   author: {
     id: string;
     name: string | null;
+    avatarPath: string | null;
     elo: number | null;
     scheduledMatches: number;
     noShows: number;
@@ -96,6 +103,7 @@ function toFeedOffer({
     author: {
       id: author.id,
       name: author.name,
+      avatarPath: author.avatarPath,
       reliability: computeReliability(author),
     },
     spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),

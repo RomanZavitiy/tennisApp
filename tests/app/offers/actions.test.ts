@@ -136,10 +136,7 @@ describe("requestToJoin", () => {
   });
 
   it("refuses once the daily join-request limit is hit", async () => {
-    checkRateLimit.mockResolvedValue({
-      ok: false,
-      message: "You've sent a lot of join requests today. Try again tomorrow.",
-    });
+    checkRateLimit.mockResolvedValue({ ok: false });
 
     await expect(requestToJoin(OFFER)).resolves.toEqual({
       ok: false,

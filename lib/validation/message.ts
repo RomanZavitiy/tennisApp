@@ -7,8 +7,13 @@ import { z } from "zod";
 
 export const MESSAGE_MAX = 2000;
 
-export const messageContentSchema = z
-  .string("Write a message.")
-  .trim()
-  .min(1, "Write a message.")
-  .max(MESSAGE_MAX, `Keep messages under ${String(MESSAGE_MAX)} characters.`);
+/** `t` is a translator for the "Validation.message" namespace (task 1.20). */
+export function messageContentSchema(
+  t: (key: string, values?: Record<string, number>) => string,
+) {
+  return z
+    .string(t("required"))
+    .trim()
+    .min(1, t("required"))
+    .max(MESSAGE_MAX, t("tooLong", { max: MESSAGE_MAX }));
+}

@@ -1,0 +1,406 @@
+{
+  "Metadata": {
+    "siteName": "MatchFinder Kraków",
+    "description": "Find a sparring partner and a court in Kraków."
+  },
+  "LanguageSwitcher": {
+    "label": "Language",
+    "names": {
+      "en": "EN",
+      "pl": "PL"
+    }
+  },
+  "SiteFooter": {
+    "tagline": "MatchFinder Kraków · tennis sparring and courts in Kraków"
+  },
+  "ProfilePage": {
+    "title": "Your profile",
+    "editProfile": "Edit profile",
+    "notifications": "Notifications",
+    "language": "Language"
+  },
+  "OfferCard": {
+    "byAuthor": "by {name}"
+  },
+  "OfferForm": {
+    "formatLabel": "Format",
+    "singles": "Singles",
+    "doubles": "Doubles",
+    "hasPartner": "I already have a partner",
+    "startsAtLabel": "Start time",
+    "clubLabel": "Club",
+    "noSpecificClub": "No specific club",
+    "districtLabel": "District",
+    "districtFromClub": "Taken from the club.",
+    "districtOutsideCity": "This club is outside the city, so it has no district.",
+    "choose": "Choose…",
+    "levelFromLabel": "Level from (NTRP)",
+    "levelToLabel": "Level to (NTRP)",
+    "anyLevel": "Any",
+    "surfaceLabel": "Surface",
+    "anySurface": "Any surface",
+    "courtLabel": "Court",
+    "commentLabel": "Comment",
+    "commentHint": "Optional, up to {max} characters.",
+    "posting": "Posting…",
+    "submit": "Post offer"
+  },
+  "OfferFilters": {
+    "formLabel": "Filter offers",
+    "dateLabel": "Date",
+    "districtLabel": "District",
+    "any": "Any",
+    "ntrpLabel": "My level (NTRP)",
+    "formatLabel": "Format",
+    "courtBookedLabel": "Court already booked",
+    "submit": "Filter",
+    "clear": "Clear"
+  },
+  "OfferPage": {
+    "title": "Sparring offer",
+    "whereLabel": "Where",
+    "levelLabel": "Level",
+    "surfaceLabel": "Surface",
+    "courtLabel": "Court",
+    "statusCancelled": "Cancelled",
+    "statusStarted": "Already started",
+    "postedBy": "Posted by",
+    "signInToJoin": "Sign in to join",
+    "reportThisOffer": "Report this offer",
+    "authorCancelled": "The author has cancelled this game.",
+    "youAreIn": "You're in. See you on court!",
+    "requestSent": "Request sent. The author will answer soon.",
+    "withdraw": "Withdraw",
+    "withdrawing": "Withdrawing…",
+    "defaultAuthorName": "Author",
+    "theAuthor": "the author",
+    "askToJoin": "Ask to join",
+    "sending": "Sending…",
+    "playersIn": "Players in ({count})",
+    "nobodyYet": "Nobody yet.",
+    "aPlayer": "A player",
+    "thePlayer": "the player",
+    "requestsCount": "Requests ({count})",
+    "noRequestsWaiting": "No requests waiting.",
+    "accept": "Accept",
+    "accepting": "Accepting…",
+    "decline": "Decline",
+    "declining": "Declining…",
+    "cancelOfferLabel": "Cancel offer",
+    "confirmCancel": "Yes, cancel it",
+    "cancelling": "Cancelling…"
+  },
+  "AdminActionForm": {
+    "done": "Done.",
+    "reasonLabel": "Reason for the log (optional)"
+  },
+  "AdminReportsPage": {
+    "blockedPlayers": "Blocked players ({count})",
+    "nobodyBlocked": "Nobody is blocked.",
+    "aPlayer": "A player",
+    "aPlayerLower": "a player",
+    "blockedSince": "Blocked since {date}",
+    "unblock": "Unblock",
+    "unblocking": "Unblocking…",
+    "openReports": "Open reports ({count})",
+    "nothingWaiting": "Nothing waiting.",
+    "reported": "reported",
+    "aboutTheOffer": "About the offer:",
+    "dismiss": "Dismiss",
+    "dismissing": "Dismissing…",
+    "cancelTheOffer": "Cancel the offer",
+    "removeTheMessage": "Remove the message",
+    "hiding": "Hiding…",
+    "blockPlayer": "Block player",
+    "blocking": "Blocking…"
+  },
+  "AdminResultsPage": {
+    "disputed": "Disputed ({count})",
+    "nothingWaiting": "Nothing waiting.",
+    "theAuthor": "the author",
+    "thePlayer": "the player",
+    "vs": "vs",
+    "noShowReport": "No-show report: {who} didn't show up, reported by {reportedBy}.",
+    "scoreFiledBy": "Score: {score} (author's games first), filed by {reportedBy}.",
+    "confirm": "Confirm",
+    "confirming": "Confirming…",
+    "annul": "Annul",
+    "annulling": "Annulling…"
+  },
+  "ResultSection": {
+    "submitResultSummary": "Submit result",
+    "reportedNoShowWaiting": "You reported that {name} didn't show up. Waiting to see if they dispute it within 72 hours.",
+    "opponentReportedNoShow": "{name} reported that you didn't show up.",
+    "dispute": "Dispute",
+    "disputing": "Disputing…",
+    "noShowConfirmed": "{who} didn't show up — confirmed after 72 hours with no dispute.",
+    "you": "You",
+    "noShowDisputed": "No-show report disputed. An admin will review it.",
+    "noShowAnnulled": "An admin reviewed the dispute and annulled this no-show report.",
+    "resultSubmittedWaiting": "Result submitted ({score}). Waiting for {name} to confirm.",
+    "opponentReported": "{name} reported: {score}.",
+    "confirm": "Confirm",
+    "confirming": "Confirming…",
+    "confirmed": "Confirmed: {score}.",
+    "yourElo": "Your ELO: {change}.",
+    "resultDisputed": "Result disputed ({score}). An admin will review it.",
+    "resultAnnulled": "An admin reviewed the dispute and annulled this result ({score})."
+  },
+  "OfferLabels": {
+    "singles": "Singles",
+    "doubles": "Doubles",
+    "doublesWithPartner": "Doubles · has a partner",
+    "full": "Full",
+    "spotsLeft": "{count, plural, one {1 spot left} other {# spots left}}",
+    "levelExact": "NTRP {min, number, ::.0}",
+    "levelRange": "NTRP {min, number, ::.0}–{max, number, ::.0}",
+    "levelAtLeast": "NTRP {min, number, ::.0}+",
+    "levelUpTo": "NTRP up to {max, number, ::.0}",
+    "anyLevel": "Any level"
+  },
+  "Surface": {
+    "CLAY": "Clay",
+    "ARTIFICIAL_CLAY": "Artificial clay",
+    "HARD": "Hard",
+    "ARTIFICIAL_GRASS": "Artificial grass",
+    "CARPET": "Carpet",
+    "GRASS": "Grass"
+  },
+  "CourtStatus": {
+    "BOOKED": "Court booked",
+    "WILL_BOOK": "Will book once we agree",
+    "ANY": "Whoever books first"
+  },
+  "ClubPage": {
+    "notFound": "Club not found",
+    "courts": "Courts",
+    "surface": "Surface",
+    "indoor": "Indoor",
+    "phone": "Phone",
+    "website": "Website",
+    "allCourts": "← All courts",
+    "bookACourt": "Book a court",
+    "callToBook": "Call to book",
+    "prices": "Prices",
+    "checkedOn": "Info checked on {date}. Prices and hours change — confirm with the club before you go.",
+    "lookingForPartnerHere": "Looking for a partner here",
+    "noOffers": "No open offers at this club right now.",
+    "createOfferHere": "Create an offer at this club"
+  },
+  "OfferBookingSection": {
+    "aboutClub": "About {name}",
+    "bookOnClubSite": "Book on club's site",
+    "callToBook": "Call to book",
+    "bookedTheCourt": "Booked the court?",
+    "markAsBooked": "Mark it as booked",
+    "marking": "Marking…"
+  },
+  "PlayerFacts": {
+    "age": "Age",
+    "district": "District",
+    "level": "Level (NTRP)",
+    "elo": "ELO",
+    "reliability": "Reliability"
+  },
+  "ResultForm": {
+    "you": "You",
+    "scoreLegend": "Score",
+    "setLabel": "Set {set}",
+    "gamesAriaLabel": "{name}''s games, set {set}",
+    "addThirdSet": "+ Add a third set",
+    "removeThirdSet": "Remove third set",
+    "whoWon": "Who won?",
+    "opponentNoShow": "Opponent didn't show up",
+    "reporting": "Reporting…",
+    "reportNoShow": "Report no-show",
+    "submitting": "Submitting…",
+    "submit": "Submit result"
+  },
+  "ReportButton": {
+    "defaultLabel": "Report"
+  },
+  "ReportForm": {
+    "done": "Reported. An admin will review it.",
+    "reasonRequired": "Choose a reason.",
+    "reasonFieldLabel": "Reason",
+    "chooseReason": "Choose a reason…",
+    "detailsFieldLabel": "Details (optional)",
+    "detailsPlaceholder": "Add details (optional)",
+    "reporting": "Reporting…",
+    "submit": "Submit report"
+  },
+  "ReportReason": {
+    "NO_SHOW": "Didn't show up",
+    "ABUSIVE": "Abusive behaviour",
+    "FAKE_SPAM": "Fake profile or spam",
+    "INAPPROPRIATE": "Inappropriate content",
+    "OTHER": "Other"
+  },
+  "Gender": {
+    "MALE": "Male",
+    "FEMALE": "Female"
+  },
+  "Reliability": {
+    "new": "New player",
+    "rated": "Reliable {percent}%"
+  },
+  "IndoorCourts": {
+    "NONE": "Outdoor only",
+    "PARTIAL": "Some courts indoors all year",
+    "YEAR_ROUND": "Indoors all year",
+    "WINTER_BUBBLE": "Covered in winter (bubble)"
+  },
+  "Errors": {
+    "invalidRequest": "Invalid request.",
+    "tooManySignInEmails": "Too many sign-in emails. Wait a minute and try again.",
+    "couldNotSendSignInLink": "Couldn't send the sign-in link. Try again in a minute.",
+    "blocked": "Your account is blocked pending a review. You can't create offers, join requests or messages until an admin makes a decision.",
+    "tooManyActiveOffers": "You already have {max} offers out there. Cancel one before posting another.",
+    "clubNotFound": "Choose a club from the list.",
+    "offerNotFound": "This offer doesn't exist.",
+    "threadNotFound": "This conversation doesn't exist.",
+    "threadReadOnly": "This conversation is read-only now.",
+    "joinNotFound": "This request doesn't exist.",
+    "alreadyCancelled": "This offer is already cancelled.",
+    "alreadyStarted": "This game has already started.",
+    "cantReportYourself": "You can't report yourself.",
+    "alreadyReported": "You've already reported this.",
+    "checkTheForm": "Check the form.",
+    "messageNotFound": "This message doesn't exist.",
+    "playerNotFound": "This player doesn't exist.",
+    "matchNotFound": "This match doesn't exist.",
+    "checkTheScore": "Check the score.",
+    "resultNotFound": "This result doesn't exist.",
+    "noShowManualConfirmRefused": "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours."
+  },
+  "SubmitResultRefusal": {
+    "NOT_PARTICIPANT": "This isn't your match.",
+    "NOT_SINGLES": "Only singles matches record a result.",
+    "NOT_ACCEPTED": "This request was never accepted.",
+    "NOT_STARTED": "This match hasn't started yet.",
+    "ALREADY_SUBMITTED": "A result has already been filed for this match."
+  },
+  "SettleResultRefusal": {
+    "NOT_OPPONENT": "Only the other player can confirm or dispute this result.",
+    "NOT_PENDING": "This result has already been settled."
+  },
+  "JoinRefusal": {
+    "OWN_OFFER": "This is your own offer.",
+    "STARTED": "This game has already started.",
+    "NOT_OPEN": "This offer is no longer taking players.",
+    "ALREADY_REQUESTED": "You have already asked to join.",
+    "DECLINED": "The author has declined your request."
+  },
+  "JoinChangeRefusal": {
+    "NOT_ALLOWED": "This request can't be changed any more.",
+    "CANCELLED": "This offer has been cancelled.",
+    "STARTED": "This game has already started.",
+    "FULL": "Every place in this game is taken."
+  },
+  "RateLimit": {
+    "NEW_OFFER": "You've posted a lot of offers today. Try again tomorrow.",
+    "JOIN_REQUEST": "You've sent a lot of join requests today. Try again tomorrow.",
+    "MESSAGE": "You're sending messages too quickly. Wait a few minutes.",
+    "REPORT": "You've filed a lot of reports today. Try again tomorrow.",
+    "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again."
+  },
+  "Validation": {
+    "login": {
+      "emailRequired": "Enter your email address.",
+      "emailInvalid": "Enter a valid email address."
+    },
+    "message": {
+      "required": "Write a message.",
+      "tooLong": "Keep messages under {max} characters."
+    },
+    "profile": {
+      "nameRequired": "Enter your name.",
+      "nameTooLong": "Keep your name under 50 characters.",
+      "birthDateRequired": "Enter your date of birth.",
+      "futureDate": "That date is in the future.",
+      "tooYoung": "You must be at least {min} to join.",
+      "genderRequired": "Choose your gender.",
+      "districtRequired": "Choose your district.",
+      "levelRequired": "Choose your level."
+    },
+    "offer": {
+      "levelRequired": "Choose a level.",
+      "formatRequired": "Choose singles or doubles.",
+      "startsAtRequired": "Choose the start time.",
+      "startsAtPast": "That time has already passed.",
+      "clubRequired": "Choose a club from the list.",
+      "districtRequired": "Choose a district.",
+      "surfaceRequired": "Choose a surface.",
+      "courtStatusRequired": "Choose the court status.",
+      "commentTooLong": "Keep the comment under {max} characters.",
+      "partnerNeedsDoubles": "A partner can only be added to a doubles game.",
+      "clubOrDistrictRequired": "Choose a club or a district.",
+      "levelRangeInverted": "The highest level can't be below the lowest."
+    },
+    "matchResult": {
+      "gamesRequired": "Enter the games won.",
+      "winnerRequired": "Choose who won.",
+      "invalidSetScore": "Set {set} isn't a valid score.",
+      "twoSetsSameWinner": "With two sets, the same side must win both.",
+      "thirdSetNeedsSplit": "A third set is only played when the first two are split.",
+      "winnerMismatch": "The winner doesn't match the score."
+    },
+    "report": {
+      "reasonRequired": "Choose a reason.",
+      "commentTooLong": "Keep the comment under {max} characters."
+    }
+  },
+  "OnboardingPage": {
+    "title": "Set up your profile",
+    "subtitle": "Other players see this when you post or join a sparring offer.",
+    "submit": "Save profile"
+  },
+  "EditProfilePage": {
+    "title": "Edit profile",
+    "submit": "Save changes",
+    "cancel": "Cancel"
+  },
+  "ProfileForm": {
+    "nameLabel": "Name",
+    "birthDateLabel": "Date of birth",
+    "birthDateHint": "Only your age is shown to other players.",
+    "genderLabel": "Gender",
+    "districtLabel": "District",
+    "levelLabel": "Level (NTRP)",
+    "levelHint": "1.5 is a beginner, 4.0 a solid club player, 7.0 a touring pro.",
+    "choose": "Choose…",
+    "saving": "Saving…"
+  },
+  "AvatarUpload": {
+    "wrongType": "Choose a JPEG, PNG or WebP image.",
+    "tooLarge": "The photo is over 5 MB. Choose a smaller one.",
+    "uploadFailed": "Couldn't upload the photo. Try again.",
+    "invalidPhoto": "Invalid photo.",
+    "previewAlt": "New photo preview",
+    "saving": "Saving…",
+    "savePhoto": "Save photo",
+    "cancel": "Cancel",
+    "changePhoto": "Change photo",
+    "hint": "JPEG, PNG or WebP, up to 5 MB."
+  },
+  "PlayerAvatar": {
+    "photoAlt": "Photo of {name}"
+  },
+  "LoginPage": {
+    "title": "Sign in",
+    "subtitle": "Use your Google account or get a link by email — no password needed.",
+    "expiredLink": "That sign-in link is invalid or has expired. Enter your email to get a new one.",
+    "orEmail": "or use your email"
+  },
+  "GoogleSignInButton": {
+    "continueWithGoogle": "Continue with Google",
+    "error": "Couldn't start Google sign-in. Try again in a minute."
+  },
+  "LoginForm": {
+    "emailLabel": "Email",
+    "sending": "Sending…",
+    "submit": "Email me a sign-in link",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "We sent a sign-in link to <strong>{email}</strong>. Open it on any device to sign in."
+  }
+}

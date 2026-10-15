@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import type { JoinChangeResult } from "@/app/offers/[id]/actions";
@@ -17,24 +18,27 @@ import {
 } from "@/lib/messages/post-system-message";
 import {
   partyOf,
-  SETTLE_RESULT_REFUSAL_MESSAGES,
   settleResultRefusal,
-  SUBMIT_RESULT_REFUSAL_MESSAGES,
   submitResultRefusal,
+  type SettleResultRefusal,
+  type SubmitResultRefusal,
 } from "@/lib/offers/result-rules";
 import { applyMatchEloFromJoin } from "@/lib/rating/apply-elo";
 import { matchScoreSchema } from "@/lib/validation/match-result";
 
 const RESULT_HOURS_TO_AUTO_CONFIRM = 72;
-const JOIN_NOT_FOUND = "This match doesn't exist.";
-const RESULT_NOT_FOUND = "This result doesn't exist.";
-const NO_SHOW_MANUAL_CONFIRM_REFUSED =
-  "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours.";
+
+type ErrorsT = (key: string) => string;
 
 // What submitResult (4.6) and submitNoShow (4.10) both need before filing
 // either kind of report for a join: whether the filer is a party to a
 // singles match that's accepted, started, and doesn't have a result yet.
-async function loadSubmittableJoin(offerJoinId: string, userId: string) {
+async function loadSubmittableJoin(
+  offerJoinId: string,
+  userId: string,
+  t: ErrorsT,
+  tSubmitRefusal: (key: SubmitResultRefusal) => string,
+) {
   const join = await db.offerJoin.findUnique({
     where: { id: offerJoinId },
     select: {
@@ -46,7 +50,7 @@ async function loadSubmittableJoin(offerJoinId: string, userId: string) {
     },
   });
   if (!join) {
-    return { ok: false as const, message: JOIN_NOT_FOUND };
+    return { ok: false as const, message: t("matchNotFound") };
   }
 
   const party = partyOf(join, userId);
@@ -61,7 +65,7 @@ async function loadSubmittableJoin(offerJoinId: string, userId: string) {
   if (refusal || !party) {
     return {
       ok: false as const,
-      message: SUBMIT_RESULT_REFUSAL_MESSAGES[refusal ?? "NOT_PARTICIPANT"],
+      message: tSubmitRefusal(refusal ?? "NOT_PARTICIPANT"),
     };
   }
   return { ok: true as const, join, party };
@@ -78,20 +82,23 @@ export async function submitResult(
   input: unknown,
 ): Promise<JoinChangeResult> {
   const user = await requireOnboardedUser();
+  const t = await getTranslations("Errors");
+  const tSubmitRefusal = await getTranslations("SubmitResultRefusal");
+  const tMatchResult = await getTranslations("Validation.matchResult");
 
   const id = z.uuid().safeParse(offerJoinId);
   if (!id.success) {
-    return { ok: false, message: JOIN_NOT_FOUND };
+    return { ok: false, message: t("matchNotFound") };
   }
-  const score = matchScoreSchema.safeParse(input);
+  const score = matchScoreSchema(tMatchResult).safeParse(input);
   if (!score.success) {
     return {
       ok: false,
-      message: score.error.issues[0]?.message ?? "Check the score.",
+      message: score.error.issues[0]?.message ?? t("checkTheScore"),
     };
   }
 
-  const loaded = await loadSubmittableJoin(id.data, user.id);
+  const loaded = await loadSubmittableJoin(id.data, user.id, t, tSubmitRefusal);
   if (!loaded.ok) {
     return loaded;
   }
@@ -115,10 +122,7 @@ export async function submitResult(
     })
   ).at(0);
   if (!created) {
-    return {
-      ok: false,
-      message: SUBMIT_RESULT_REFUSAL_MESSAGES.ALREADY_SUBMITTED,
-    };
+    return { ok: false, message: tSubmitRefusal("ALREADY_SUBMITTED") };
   }
 
   await postSystemMessage({ offerJoinId: id.data }, RESULT_SUBMITTED_MESSAGE);
@@ -134,13 +138,15 @@ export async function submitNoShow(
   offerJoinId: unknown,
 ): Promise<JoinChangeResult> {
   const user = await requireOnboardedUser();
+  const t = await getTranslations("Errors");
+  const tSubmitRefusal = await getTranslations("SubmitResultRefusal");
 
   const id = z.uuid().safeParse(offerJoinId);
   if (!id.success) {
-    return { ok: false, message: JOIN_NOT_FOUND };
+    return { ok: false, message: t("matchNotFound") };
   }
 
-  const loaded = await loadSubmittableJoin(id.data, user.id);
+  const loaded = await loadSubmittableJoin(id.data, user.id, t, tSubmitRefusal);
   if (!loaded.ok) {
     return loaded;
   }
@@ -164,10 +170,7 @@ export async function submitNoShow(
     })
   ).at(0);
   if (!created) {
-    return {
-      ok: false,
-      message: SUBMIT_RESULT_REFUSAL_MESSAGES.ALREADY_SUBMITTED,
-    };
+    return { ok: false, message: tSubmitRefusal("ALREADY_SUBMITTED") };
   }
 
   await postSystemMessage(
@@ -213,11 +216,13 @@ type SettleAction = (
 async function settleResult(
   matchResultId: unknown,
   userId: string,
+  t: ErrorsT,
+  tSettleRefusal: (key: SettleResultRefusal) => string,
   onPending: SettleAction,
 ): Promise<SettleOutcome> {
   const id = z.uuid().safeParse(matchResultId);
   if (!id.success) {
-    return { ok: false, message: RESULT_NOT_FOUND };
+    return { ok: false, message: t("resultNotFound") };
   }
 
   return db.$transaction(async (tx) => {
@@ -247,7 +252,7 @@ async function settleResult(
     });
     const join = result?.offerJoin;
     if (!result || !join) {
-      return { ok: false, message: RESULT_NOT_FOUND };
+      return { ok: false, message: t("resultNotFound") };
     }
 
     const party = partyOf(join, userId);
@@ -257,7 +262,7 @@ async function settleResult(
       status: result.status,
     });
     if (refusal) {
-      return { ok: false, message: SETTLE_RESULT_REFUSAL_MESSAGES[refusal] };
+      return { ok: false, message: tSettleRefusal(refusal) };
     }
 
     const outcome = await onPending(tx, id.data, {
@@ -277,16 +282,20 @@ export async function confirmResult(
   matchResultId: unknown,
 ): Promise<JoinChangeResult> {
   const user = await requireOnboardedUser();
+  const t = await getTranslations("Errors");
+  const tSettleRefusal = await getTranslations("SettleResultRefusal");
 
   const outcome = await settleResult(
     matchResultId,
     user.id,
+    t,
+    tSettleRefusal,
     async (tx, resultId, result) => {
       // Only a dispute or the cron settles a no-show report (decision
       // 2026-10-14) — there's nothing for the other side to manually
       // confirm about one.
       if (result.noShowParty) {
-        return { ok: false, message: NO_SHOW_MANUAL_CONFIRM_REFUSED };
+        return { ok: false, message: t("noShowManualConfirmRefused") };
       }
       if (!result.winner) {
         throw new Error(
@@ -321,10 +330,14 @@ export async function disputeResult(
   matchResultId: unknown,
 ): Promise<JoinChangeResult> {
   const user = await requireOnboardedUser();
+  const t = await getTranslations("Errors");
+  const tSettleRefusal = await getTranslations("SettleResultRefusal");
 
   const outcome = await settleResult(
     matchResultId,
     user.id,
+    t,
+    tSettleRefusal,
     async (tx, resultId) => {
       await tx.matchResult.update({
         where: { id: resultId },

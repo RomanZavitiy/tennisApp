@@ -54,6 +54,11 @@ model User {
   /// the user's own folder: "{id}/{random}.{ext}" (task 1.14; CHECK in the
   /// migration). Null until a photo is uploaded.
   avatarPath            String?   @map("avatar_path") @db.VarChar(200)
+  /// Language for e-mail and push (task 1.20). The page itself always reads
+  /// the NEXT_LOCALE cookie, never this column — see decision 2026-10-15
+  /// "Польська мова" for why. Set from the language switcher; EN until a
+  /// signed-in user changes it.
+  locale                Locale    @default(EN)
 
   // Rating (task 4.2). Set from selfRatedNtrp at onboarding (startingElo,
   // 4.1) and re-set when NTRP changes, until the first confirmed match;
@@ -479,6 +484,15 @@ enum Gender {
   FEMALE
 
   @@map("gender")
+}
+
+/// UI language (task 1.20). Ukrainian comes after launch (decision
+/// 2026-10-14), so only two values exist today.
+enum Locale {
+  EN
+  PL
+
+  @@map("locale")
 }
 
 /// The 18 official districts (dzielnice) of Kraków, I–XVIII in order.

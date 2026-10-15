@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { matchScoreSchema } from "@/lib/validation/match-result";
+import { testTranslator } from "@/tests/helpers/translator";
+
+const t = testTranslator("Validation.matchResult");
+const schema = matchScoreSchema(t);
 
 // Set notation here, "6-4", means { author: 6, player: 4 } — author's games
 // first. The task's own examples (decisions.md, 2026-10-14 score format).
@@ -14,7 +18,7 @@ function score(sets: [number, number][], winner: "AUTHOR" | "PLAYER") {
 describe("matchScoreSchema", () => {
   it("accepts straight sets, 6-4 6-3", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [6, 4],
@@ -28,7 +32,7 @@ describe("matchScoreSchema", () => {
 
   it("accepts a split match decided by a super-tiebreak, 6-4 3-6 10-8", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [6, 4],
@@ -43,7 +47,7 @@ describe("matchScoreSchema", () => {
 
   it("accepts two tiebreak sets, 7-6 7-6", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [7, 6],
@@ -57,7 +61,7 @@ describe("matchScoreSchema", () => {
 
   it("rejects a set that was never decided, 6-6", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [6, 6],
@@ -71,7 +75,7 @@ describe("matchScoreSchema", () => {
 
   it("rejects a super-tiebreak decided by only one point, 6-4 3-6 10-9", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [6, 4],
@@ -86,7 +90,7 @@ describe("matchScoreSchema", () => {
 
   it("rejects a third set when the first two weren't split, 6-4 6-4 6-4", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [6, 4],
@@ -101,7 +105,7 @@ describe("matchScoreSchema", () => {
 
   it("rejects a winner that doesn't match the score", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [6, 4],
@@ -114,14 +118,12 @@ describe("matchScoreSchema", () => {
   });
 
   it("rejects fewer than two sets", () => {
-    expect(matchScoreSchema.safeParse(score([[6, 4]], "AUTHOR")).success).toBe(
-      false,
-    );
+    expect(schema.safeParse(score([[6, 4]], "AUTHOR")).success).toBe(false);
   });
 
   it("rejects more than three sets", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [6, 4],
@@ -137,7 +139,7 @@ describe("matchScoreSchema", () => {
 
   it("accepts the player winning in two sets", () => {
     expect(
-      matchScoreSchema.safeParse(
+      schema.safeParse(
         score(
           [
             [4, 6],

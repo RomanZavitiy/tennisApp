@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createReport } from "@/lib/moderation/create-report";
+import { testTranslator } from "@/tests/helpers/translator";
+
+const t = testTranslator("Errors");
+const tRateLimit = testTranslator("RateLimit");
 
 const ME = "11111111-1111-4111-8111-111111111111";
 const TARGET = "22222222-2222-4222-8222-222222222222";
@@ -32,6 +36,8 @@ describe("createReport", () => {
 
   it("refuses reporting yourself, without writing or counting towards the limit", async () => {
     const result = await createReport({
+      t,
+      tRateLimit,
       reporterId: ME,
       targetUserId: ME,
       input,
@@ -46,12 +52,11 @@ describe("createReport", () => {
   });
 
   it("refuses once the daily report limit is hit", async () => {
-    checkRateLimit.mockResolvedValue({
-      ok: false,
-      message: "You've filed a lot of reports today. Try again tomorrow.",
-    });
+    checkRateLimit.mockResolvedValue({ ok: false });
 
     const result = await createReport({
+      t,
+      tRateLimit,
       reporterId: ME,
       targetUserId: TARGET,
       input,
@@ -68,6 +73,8 @@ describe("createReport", () => {
     reportCreateManyAndReturn.mockResolvedValue([]);
 
     const result = await createReport({
+      t,
+      tRateLimit,
       reporterId: ME,
       targetUserId: TARGET,
       offerId: "offer-1",
@@ -85,6 +92,8 @@ describe("createReport", () => {
     reportCreateManyAndReturn.mockResolvedValue([{ id: REPORT }]);
 
     const result = await createReport({
+      t,
+      tRateLimit,
       reporterId: ME,
       targetUserId: TARGET,
       messageId: "message-1",

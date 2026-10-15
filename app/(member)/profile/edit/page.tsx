@@ -1,24 +1,29 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { updateProfile } from "@/app/(member)/profile/actions";
 import { ProfileForm } from "@/components/profile-form";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 
-export const metadata: Metadata = { title: "Edit profile" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("EditProfilePage");
+  return { title: t("title") };
+}
 
 // The onboarding form again, filled in with the current profile. The photo is
 // changed on /profile itself.
 export default async function EditProfilePage() {
+  const t = await getTranslations("EditProfilePage");
   const profile = await requireOnboardedUser();
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">Edit profile</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <div className="mt-6">
         <ProfileForm
           action={updateProfile}
-          submitLabel="Save changes"
+          submitLabel={t("submit")}
           defaultValues={{
             name: profile.name,
             birthDate: profile.birthDate.toISOString().slice(0, 10),
@@ -32,7 +37,7 @@ export default async function EditProfilePage() {
         href="/profile"
         className="mt-4 block text-center text-sm text-muted-foreground hover:underline"
       >
-        Cancel
+        {t("cancel")}
       </Link>
     </main>
   );

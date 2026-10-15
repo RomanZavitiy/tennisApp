@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import {
@@ -10,7 +11,6 @@ import {
 import { AdminActionForm } from "@/components/admin-action-form";
 import { getBlockedPlayers, getOpenReports } from "@/lib/admin/queue";
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
-import { REPORT_REASON_LABELS } from "@/lib/moderation/report-labels";
 
 export const metadata: Metadata = { title: "Admin · Reports" };
 
@@ -23,16 +23,19 @@ export default async function AdminReportsPage() {
     getOpenReports(),
     getBlockedPlayers(),
   ]);
+  const t = await getTranslations("AdminReportsPage");
+  const tReportReason = await getTranslations("ReportReason");
+  const format = await getFormatter();
 
   return (
     <div className="space-y-8">
       <section>
         <h2 className="font-semibold">
-          Blocked players ({String(blockedPlayers.length)})
+          {t("blockedPlayers", { count: blockedPlayers.length })}
         </h2>
         {blockedPlayers.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">
-            Nobody is blocked.
+            {t("nobodyBlocked")}
           </p>
         ) : (
           <ul className="mt-2 divide-y rounded-lg border">
@@ -44,10 +47,12 @@ export default async function AdminReportsPage() {
                       href={`/players/${player.id}`}
                       className="font-medium hover:underline"
                     >
-                      {player.name ?? "A player"}
+                      {player.name ?? t("aPlayer")}
                     </Link>
                     <p className="text-xs text-muted-foreground">
-                      Blocked since {formatKrakowTime(player.blockedAt)}
+                      {t("blockedSince", {
+                        date: formatKrakowTime(format, player.blockedAt),
+                      })}
                     </p>
                   </div>
                 </div>
@@ -55,8 +60,8 @@ export default async function AdminReportsPage() {
                   actions={[
                     {
                       key: "unblock",
-                      label: "Unblock",
-                      pendingLabel: "Unblocking…",
+                      label: t("unblock"),
+                      pendingLabel: t("unblocking"),
                       variant: "outline",
                       run: unblockPlayer.bind(null, player.id),
                     },
@@ -70,32 +75,34 @@ export default async function AdminReportsPage() {
 
       <section>
         <h2 className="font-semibold">
-          Open reports ({String(reports.length)})
+          {t("openReports", { count: reports.length })}
         </h2>
         {reports.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">Nothing waiting.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("nothingWaiting")}
+          </p>
         ) : (
           <ul className="mt-2 divide-y rounded-lg border">
             {reports.map((report) => (
               <li key={report.id} className="px-4 py-3">
                 <p className="text-sm text-muted-foreground">
-                  {formatKrakowTime(report.createdAt)} ·{" "}
+                  {formatKrakowTime(format, report.createdAt)} ·{" "}
                   <Link
                     href={`/players/${report.reporter.id}`}
                     className="hover:underline"
                   >
-                    {report.reporter.name ?? "A player"}
+                    {report.reporter.name ?? t("aPlayer")}
                   </Link>{" "}
-                  reported{" "}
+                  {t("reported")}{" "}
                   <Link
                     href={`/players/${report.targetUser.id}`}
                     className="hover:underline"
                   >
-                    {report.targetUser.name ?? "a player"}
+                    {report.targetUser.name ?? t("aPlayerLower")}
                   </Link>
                 </p>
                 <p className="mt-1 font-medium">
-                  {REPORT_REASON_LABELS[report.reason]}
+                  {tReportReason(report.reason)}
                 </p>
                 {report.comment && (
                   <p className="mt-1 text-sm whitespace-pre-line">
@@ -104,12 +111,12 @@ export default async function AdminReportsPage() {
                 )}
                 {report.offer && (
                   <p className="mt-1 text-sm text-muted-foreground">
-                    About the offer:{" "}
+                    {t("aboutTheOffer")}{" "}
                     <Link
                       href={`/offers/${report.offer.id}`}
                       className="hover:underline"
                     >
-                      {formatKrakowTime(report.offer.startsAt)}
+                      {formatKrakowTime(format, report.offer.startsAt)}
                     </Link>
                   </p>
                 )}
@@ -122,8 +129,8 @@ export default async function AdminReportsPage() {
                   actions={[
                     {
                       key: "dismiss",
-                      label: "Dismiss",
-                      pendingLabel: "Dismissing…",
+                      label: t("dismiss"),
+                      pendingLabel: t("dismissing"),
                       variant: "outline",
                       run: dismissReport.bind(null, report.id),
                     },
@@ -132,9 +139,9 @@ export default async function AdminReportsPage() {
                           {
                             key: "hide",
                             label: report.offer
-                              ? "Cancel the offer"
-                              : "Remove the message",
-                            pendingLabel: "Hiding…",
+                              ? t("cancelTheOffer")
+                              : t("removeTheMessage"),
+                            pendingLabel: t("hiding"),
                             variant: "outline" as const,
                             run: hideReport.bind(null, report.id),
                           },
@@ -142,8 +149,8 @@ export default async function AdminReportsPage() {
                       : []),
                     {
                       key: "block",
-                      label: "Block player",
-                      pendingLabel: "Blocking…",
+                      label: t("blockPlayer"),
+                      pendingLabel: t("blocking"),
                       run: blockFromReport.bind(null, report.id),
                     },
                   ]}

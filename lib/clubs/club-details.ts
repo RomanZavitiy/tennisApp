@@ -1,26 +1,21 @@
+import type { useFormatter } from "next-intl";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import type { IndoorCourts } from "@/lib/generated/prisma/enums";
 
-// What /clubs/[id] shows about a club (task 2.8), and how its enum values
-// read on the page. `Record<…, string>` makes the compiler insist on a label
-// for every enum value, so a value added to the schema can't go unlabelled.
+// What /clubs/[id] shows about a club (task 2.8). Enum values (surface,
+// indoor) are shown via a translator at the enum's own namespace ("Surface",
+// "IndoorCourts" — task 1.20), not a label map here.
 
-// Surface names also label the offer form (3.5), a client component, so they
-// live in a module that doesn't import the database.
-export { SURFACE_LABELS } from "@/lib/clubs/surface-labels";
+type Formatter = ReturnType<typeof useFormatter>;
 
-export const INDOOR_LABELS: Record<IndoorCourts, string> = {
-  NONE: "Outdoor only",
-  PARTIAL: "Some courts indoors all year",
-  YEAR_ROUND: "Indoors all year",
-  WINTER_BUBBLE: "Covered in winter (bubble)",
-};
-
-/** "9 October 2026". The column is a plain date, stored as UTC midnight. */
-export function formatCheckedDate(date: Date): string {
-  return date.toLocaleDateString("en-GB", {
+/**
+ * "9 October 2026". The column is a plain date, stored as UTC midnight;
+ * `format` is a next-intl formatter (useFormatter/getFormatter) so the
+ * month name follows the active language, the calendar day doesn't.
+ */
+export function formatCheckedDate(format: Formatter, date: Date): string {
+  return format.dateTime(date, {
     day: "numeric",
     month: "long",
     year: "numeric",

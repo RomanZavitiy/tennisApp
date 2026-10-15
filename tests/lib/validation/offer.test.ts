@@ -5,6 +5,9 @@ import {
   offerSchema,
   type OfferInput,
 } from "@/lib/validation/offer";
+import { testTranslator } from "@/tests/helpers/translator";
+
+const t = testTranslator("Validation.offer");
 
 const CLUB = "33333333-3333-4333-8333-333333333333";
 
@@ -14,7 +17,7 @@ const valid: OfferInput = {
 };
 
 function parse(input: Record<string, unknown>) {
-  return offerSchema.safeParse({ ...valid, ...input });
+  return offerSchema(t).safeParse({ ...valid, ...input });
 }
 
 function errorsFor(input: Record<string, unknown>) {
@@ -39,7 +42,7 @@ describe("offerSchema", () => {
   });
 
   it("accepts a minimal offer and defaults to singles without a partner", () => {
-    const result = offerSchema.parse(valid);
+    const result = offerSchema(t).parse(valid);
     expect(result).toEqual({
       format: "SINGLES",
       hasPartner: false,
