@@ -55,7 +55,9 @@ test("anyone can see a club's details and book on the club's site", async ({
     page.getByRole("link", { name: "+48 12 000 00 00" }),
   ).toHaveAttribute("href", "tel:+48120000000");
   await expect(
-    page.getByText(/^Info checked on \d{1,2} \w+ \d{4}\./),
+    // "October 9, 2026" — next-intl's en locale formatting (task 1.20), not
+    // the day-first "9 October 2026" the old hand-rolled en-GB formatter gave.
+    page.getByText(/^Info checked on \w+ \d{1,2}, \d{4}\./),
   ).toBeVisible();
 
   for (const [linkName, href] of [

@@ -50,7 +50,7 @@ test("a new photo is previewed, saved, and replaces the old one", async ({
   expect(await storedPhotos(user.id)).toEqual([]);
 
   await page.getByRole("button", { name: "Save photo" }).click();
-  await expect(page.getByAltText("Ola's photo")).toBeVisible();
+  await expect(page.getByAltText("Photo of Ola")).toBeVisible();
   const first = await savedPath(user.id);
   expect(await storedPhotos(user.id)).toEqual([first]);
 
@@ -63,14 +63,14 @@ test("a new photo is previewed, saved, and replaces the old one", async ({
   await page.getByRole("button", { name: "Save photo" }).click();
   // The page refreshes only after saveAvatar has finished, old-file delete
   // included; the database alone changes before that.
-  await expect(page.getByAltText("Ola's photo")).not.toHaveAttribute(
+  await expect(page.getByAltText("Photo of Ola")).not.toHaveAttribute(
     "src",
     new RegExp(`${String(first)}$`),
   );
   const second = await savedPath(user.id);
   expect(second).not.toBe(first);
   expect(await storedPhotos(user.id)).toEqual([second]);
-  await expect(page.getByAltText("Ola's photo")).toHaveAttribute(
+  await expect(page.getByAltText("Photo of Ola")).toHaveAttribute(
     "src",
     new RegExp(`${String(second)}$`),
   );
