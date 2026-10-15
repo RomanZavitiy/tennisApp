@@ -13,6 +13,24 @@
   "SiteFooter": {
     "tagline": "MatchFinder Kraków · tennis sparring and courts in Kraków"
   },
+  "SiteHeader": {
+    "sparring": "Sparring",
+    "courts": "Courts",
+    "signIn": "Sign in",
+    "profile": "Profile",
+    "mainNav": "Main",
+    "signOut": "Sign out"
+  },
+  "MobileNav": {
+    "openMenu": "Open menu",
+    "menu": "Menu",
+    "mobileNav": "Mobile",
+    "signOut": "Sign out"
+  },
+  "HomePage": {
+    "tagline": "Find a sparring partner and a court in Kraków.",
+    "comingSoon": "Coming soon"
+  },
   "ProfilePage": {
     "title": "Your profile",
     "editProfile": "Edit profile",
@@ -44,6 +62,21 @@
     "commentHint": "Optional, up to {max} characters.",
     "posting": "Posting…",
     "submit": "Post offer"
+  },
+  "OffersPage": {
+    "title": "Sparring offers",
+    "postAnOffer": "Post an offer",
+    "noMoreOffers": "No more offers.",
+    "noneMatchFilters": "No offers match these filters.",
+    "noOpenOffers": "No open offers right now. Post one and other players can join you.",
+    "pagesLabel": "Pages",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "NewOfferPage": {
+    "title": "Post a sparring offer",
+    "subtitle": "Say when and where you want to play; other players ask to join.",
+    "cancel": "Cancel"
   },
   "OfferFilters": {
     "formLabel": "Filter offers",
@@ -171,6 +204,22 @@
     "WILL_BOOK": "Will book once we agree",
     "ANY": "Whoever books first"
   },
+  "ClubsPage": {
+    "title": "Courts"
+  },
+  "ClubsView": {
+    "list": "List",
+    "map": "Map"
+  },
+  "ClubList": {
+    "noClubsYet": "No clubs yet.",
+    "detailsAriaLabel": "{name} details",
+    "details": "Details"
+  },
+  "ClubMap": {
+    "clubDetails": "Club details",
+    "loadingMap": "Loading map…"
+  },
   "ClubPage": {
     "notFound": "Club not found",
     "courts": "Courts",
@@ -194,6 +243,31 @@
     "bookedTheCourt": "Booked the court?",
     "markAsBooked": "Mark it as booked",
     "marking": "Marking…"
+  },
+  "JoinThread": {
+    "messages": "Messages"
+  },
+  "MessageThread": {
+    "noMessagesYet": "No messages yet.",
+    "you": "You",
+    "aPlayer": "A player",
+    "report": "Report",
+    "writeAMessage": "Write a message…",
+    "sending": "Sending…",
+    "send": "Send",
+    "readOnly": "This conversation is read-only now."
+  },
+  "PlayerPage": {
+    "notFound": "Player not found",
+    "matchHistory": "Match history",
+    "reportThisPlayer": "Report this player"
+  },
+  "MatchHistory": {
+    "noMatches": "No matches yet.",
+    "won": "Won",
+    "lost": "Lost",
+    "vs": "vs",
+    "aPlayer": "A player"
   },
   "PlayerFacts": {
     "age": "Age",
@@ -268,6 +342,8 @@
     "checkTheForm": "Check the form.",
     "messageNotFound": "This message doesn't exist.",
     "playerNotFound": "This player doesn't exist.",
+    "invalidSubscription": "Invalid subscription.",
+    "invalidSetting": "Invalid setting.",
     "matchNotFound": "This match doesn't exist.",
     "checkTheScore": "Check the score.",
     "resultNotFound": "This result doesn't exist.",
@@ -385,6 +461,76 @@
   },
   "PlayerAvatar": {
     "photoAlt": "Photo of {name}"
+  },
+  "PushSubscribePrompt": {
+    "installTheApp": "Install the app",
+    "toGetNotificationsOnIphone": "to get notifications on iPhone.",
+    "dismiss": "Dismiss",
+    "turnOnNotifications": "Turn on notifications for new requests and messages?",
+    "enabling": "Enabling…",
+    "enable": "Enable",
+    "notNow": "Not now"
+  },
+  "PushSubscribeControl": {
+    "notSupported": "Push isn't supported in this browser.",
+    "permissionDenied": "Permission wasn't granted.",
+    "noUsableSubscription": "The browser didn't return a usable subscription.",
+    "couldNotSave": "Couldn't save the subscription.",
+    "notSetUp": "Push notifications aren't set up yet.",
+    "installTheApp": "Install the app",
+    "toGetNotificationsOnIphone": "to get notifications on iPhone.",
+    "unsupported": "This browser doesn’t support push notifications.",
+    "pushNotifications": "Push notifications",
+    "getNotifiedOnThisDevice": "Get notified on this device."
+  },
+  "NotificationSettingsPage": {
+    "title": "Notifications",
+    "backToProfile": "Back to profile"
+  },
+  "NotificationSettingsForm": {
+    "notifyMatches": {
+      "label": "Matches & messages",
+      "description": "Join requests, accept/decline, chat, court booked, match reminders."
+    },
+    "notifyNewOffers": {
+      "label": "New offers for my level",
+      "description": "A new sparring offer near your district and NTRP level."
+    },
+    "notifyEmailFallback": {
+      "label": "Email fallback",
+      "description": "Email you about key events when you have no active push subscription."
+    }
+  },
+  "UnsubscribePage": {
+    "title": "Email notifications",
+    "confirmPrompt": "Turn off email notifications for MatchFinder? You can turn them back on any time from your notification settings.",
+    "invalidLink": "This link isn't valid.",
+    "invalidLinkLong": "This link isn’t valid. You can manage email notifications from your notification settings while signed in instead."
+  },
+  "UnsubscribeButton": {
+    "done": "Done — you won’t get email notifications from MatchFinder.",
+    "saving": "Saving…",
+    "turnOff": "Turn off email notifications"
+  },
+  "InstallPage": {
+    "title": "Install MatchFinder",
+    "intro": "Installing the app gets you a home screen icon and — on iPhone, the only way to get them at all — notifications for new requests, messages and matches.",
+    "iosHeading": "iPhone or iPad (Safari)",
+    "iosSteps": [
+      "Open this site in Safari (not Chrome or another browser).",
+      "Tap the Share icon (a square with an arrow pointing up) in the toolbar.",
+      "Scroll down and tap “Add to Home Screen”.",
+      "Tap “Add” in the top-right corner.",
+      "Open MatchFinder from the new icon on your home screen — push notifications only work from there, not from Safari itself."
+    ],
+    "iosRequires": "Requires iOS 16.4 or later.",
+    "androidHeading": "Android (Chrome)",
+    "androidSteps": [
+      "Open this site in Chrome.",
+      "Tap the menu (three dots, top-right) and choose “Install app” or “Add to Home screen”.",
+      "Confirm by tapping “Install”."
+    ],
+    "androidBanner": "Chrome may also show an install banner on its own — if so, that works too."
   },
   "LoginPage": {
     "title": "Sign in",

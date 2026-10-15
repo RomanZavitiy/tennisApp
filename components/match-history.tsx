@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { eloChangeLabel, formatScoreFor } from "@/lib/offers/result-labels";
@@ -8,8 +9,10 @@ import type { MatchHistoryEntry } from "@/lib/players/match-history";
 // CONFIRMED results, so there's no "hidden while unconfirmed" branch to
 // get wrong here.
 export function MatchHistory({ matches }: { matches: MatchHistoryEntry[] }) {
+  const t = useTranslations("MatchHistory");
+
   if (matches.length === 0) {
-    return <p className="text-sm text-muted-foreground">No matches yet.</p>;
+    return <p className="text-sm text-muted-foreground">{t("noMatches")}</p>;
   }
 
   return (
@@ -21,12 +24,12 @@ export function MatchHistory({ matches }: { matches: MatchHistoryEntry[] }) {
         >
           <div>
             <p className="font-medium">
-              {match.won ? "Won" : "Lost"} vs{" "}
+              {match.won ? t("won") : t("lost")} {t("vs")}{" "}
               <Link
                 href={`/players/${match.opponentId}`}
                 className="hover:underline"
               >
-                {match.opponentName ?? "A player"}
+                {match.opponentName ?? t("aPlayer")}
               </Link>
             </p>
             <p className="text-muted-foreground">

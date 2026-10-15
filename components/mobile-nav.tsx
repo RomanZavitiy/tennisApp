@@ -1,6 +1,7 @@
 "use client";
 
 import { MenuIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -24,6 +25,7 @@ export function MobileNav({
   links: NavLink[];
   signedIn: boolean;
 }) {
+  const t = useTranslations("MobileNav");
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,11 +38,11 @@ export function MobileNav({
         })}
       >
         <MenuIcon />
-        <span className="sr-only">Open menu</span>
+        <span className="sr-only">{t("openMenu")}</span>
       </SheetTrigger>
       <SheetContent side="right" className="p-4 pt-12">
-        <SheetTitle className="sr-only">Menu</SheetTitle>
-        <nav aria-label="Mobile" className="flex flex-col gap-1">
+        <SheetTitle className="sr-only">{t("menu")}</SheetTitle>
+        <nav aria-label={t("mobileNav")} className="flex flex-col gap-1">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -68,7 +70,7 @@ export function MobileNav({
                 variant="ghost"
                 className="w-full justify-start"
               >
-                Sign out
+                {t("signOut")}
               </Button>
             </form>
           )}

@@ -7,7 +7,7 @@ import enJson from "@/messages/en.json";
 // Widened on purpose: a literal import's type would make next-intl narrow
 // every t() call in production code to this one namespace's exact keys
 // (see the decision 2026-10-15 for why that's wrong here).
-const en = enJson as AbstractIntlMessages;
+const en = enJson as unknown as AbstractIntlMessages;
 
 // Server actions call getTranslations()/getFormatter() (next-intl/server),
 // which normally read the NEXT_LOCALE cookie through next/headers — not

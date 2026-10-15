@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { signOut } from "@/app/auth/actions";
@@ -5,21 +6,21 @@ import { MobileNav } from "@/components/mobile-nav";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 
-// Routes match the ones later tasks build: /offers (Epic 3), /clubs (2.6),
-// /login (1.6). Signed-in players also get Profile.
-const NAV_LINKS = [
-  { href: "/offers", label: "Sparring" },
-  { href: "/clubs", label: "Courts" },
-];
-
-const SIGN_IN = { href: "/login", label: "Sign in" };
-const PROFILE = { href: "/profile", label: "Profile" };
-
 // Reading the session here makes every page render per request instead of
 // being prerendered: the header differs for signed-in users on every page.
 export async function SiteHeader() {
   const user = await getCurrentUser();
-  const links = user ? [...NAV_LINKS, PROFILE] : NAV_LINKS;
+  const t = await getTranslations("SiteHeader");
+
+  // Routes match the ones later tasks build: /offers (Epic 3), /clubs (2.6),
+  // /login (1.6). Signed-in players also get Profile.
+  const navLinks = [
+    { href: "/offers", label: t("sparring") },
+    { href: "/clubs", label: t("courts") },
+  ];
+  const signIn = { href: "/login", label: t("signIn") };
+  const profile = { href: "/profile", label: t("profile") };
+  const links = user ? [...navLinks, profile] : navLinks;
 
   return (
     <header className="border-b">
@@ -28,7 +29,10 @@ export async function SiteHeader() {
           MatchFinder Kraków
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 sm:flex">
+        <nav
+          aria-label={t("mainNav")}
+          className="hidden items-center gap-1 sm:flex"
+        >
           {links.map((link) => (
             <Link
               key={link.href}
@@ -41,18 +45,18 @@ export async function SiteHeader() {
           {user ? (
             <form action={signOut}>
               <Button type="submit" variant="outline">
-                Sign out
+                {t("signOut")}
               </Button>
             </form>
           ) : (
-            <Link href={SIGN_IN.href} className={buttonVariants()}>
-              {SIGN_IN.label}
+            <Link href={signIn.href} className={buttonVariants()}>
+              {signIn.label}
             </Link>
           )}
         </nav>
 
         <MobileNav
-          links={user ? links : [...links, SIGN_IN]}
+          links={user ? links : [...links, signIn]}
           signedIn={Boolean(user)}
         />
       </div>

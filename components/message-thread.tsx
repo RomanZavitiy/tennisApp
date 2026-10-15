@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { sendMessage } from "@/app/offers/[id]/actions";
@@ -47,6 +48,7 @@ export function MessageThread({
   initialMessages: ThreadMessage[];
   writable: boolean;
 }) {
+  const t = useTranslations("MessageThread");
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +109,9 @@ export function MessageThread({
     <div className="space-y-3 rounded-lg border p-3">
       <ul className="max-h-64 space-y-2 overflow-y-auto">
         {messages.length === 0 && (
-          <li className="text-sm text-muted-foreground">No messages yet.</li>
+          <li className="text-sm text-muted-foreground">
+            {t("noMessagesYet")}
+          </li>
         )}
         {messages.map((message) =>
           message.type === "SYSTEM" ? (
@@ -121,8 +125,8 @@ export function MessageThread({
             <li key={message.id} className="text-sm">
               <span className="font-medium">
                 {message.senderId === viewerId
-                  ? "You"
-                  : (senderNames[message.senderId ?? ""] ?? "A player")}
+                  ? t("you")
+                  : (senderNames[message.senderId ?? ""] ?? t("aPlayer"))}
                 :
               </span>{" "}
               {message.content}
@@ -133,7 +137,7 @@ export function MessageThread({
                 <div className="mt-1">
                   <ReportButton
                     action={reportMessage.bind(null, offerJoinId, message.id)}
-                    label="Report"
+                    label={t("report")}
                   />
                 </div>
               )}
@@ -150,7 +154,7 @@ export function MessageThread({
             }}
             maxLength={MESSAGE_MAX}
             rows={2}
-            placeholder="Write a message…"
+            placeholder={t("writeAMessage")}
             disabled={pending}
           />
           <div className="flex items-center justify-between gap-2">
@@ -165,14 +169,12 @@ export function MessageThread({
               disabled={pending || text.trim().length === 0}
               onClick={submit}
             >
-              {pending ? "Sending…" : "Send"}
+              {pending ? t("sending") : t("send")}
             </Button>
           </div>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          This conversation is read-only now.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("readOnly")}</p>
       )}
     </div>
   );

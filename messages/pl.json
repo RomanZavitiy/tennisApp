@@ -13,6 +13,24 @@
   "SiteFooter": {
     "tagline": "MatchFinder Kraków · sparing tenisowy i korty w Krakowie"
   },
+  "SiteHeader": {
+    "sparring": "Sparing",
+    "courts": "Korty",
+    "signIn": "Zaloguj się",
+    "profile": "Profil",
+    "mainNav": "Główna",
+    "signOut": "Wyloguj się"
+  },
+  "MobileNav": {
+    "openMenu": "Otwórz menu",
+    "menu": "Menu",
+    "mobileNav": "Mobilne",
+    "signOut": "Wyloguj się"
+  },
+  "HomePage": {
+    "tagline": "Znajdź partnera do sparingu i kort w Krakowie.",
+    "comingSoon": "Wkrótce"
+  },
   "ProfilePage": {
     "title": "Twój profil",
     "editProfile": "Edytuj profil",
@@ -44,6 +62,21 @@
     "commentHint": "Opcjonalnie, maksymalnie {max} znaków.",
     "posting": "Publikowanie…",
     "submit": "Opublikuj ogłoszenie"
+  },
+  "OffersPage": {
+    "title": "Oferty sparingowe",
+    "postAnOffer": "Dodaj ogłoszenie",
+    "noMoreOffers": "Brak kolejnych ofert.",
+    "noneMatchFilters": "Żadna oferta nie spełnia tych filtrów.",
+    "noOpenOffers": "Brak otwartych ofert. Dodaj swoją, a inni zawodnicy będą mogli się zgłosić.",
+    "pagesLabel": "Strony",
+    "previous": "Poprzednia",
+    "next": "Następna"
+  },
+  "NewOfferPage": {
+    "title": "Dodaj ogłoszenie sparingowe",
+    "subtitle": "Napisz, kiedy i gdzie chcesz zagrać — inni zawodnicy się zgłoszą.",
+    "cancel": "Anuluj"
   },
   "OfferFilters": {
     "formLabel": "Filtruj ogłoszenia",
@@ -171,6 +204,22 @@
     "WILL_BOOK": "Zarezerwujemy po ustaleniu",
     "ANY": "Rezerwuje, kto pierwszy"
   },
+  "ClubsPage": {
+    "title": "Korty"
+  },
+  "ClubsView": {
+    "list": "Lista",
+    "map": "Mapa"
+  },
+  "ClubList": {
+    "noClubsYet": "Brak klubów.",
+    "detailsAriaLabel": "Szczegóły: {name}",
+    "details": "Szczegóły"
+  },
+  "ClubMap": {
+    "clubDetails": "Szczegóły klubu",
+    "loadingMap": "Wczytywanie mapy…"
+  },
   "ClubPage": {
     "notFound": "Klub nie znaleziony",
     "courts": "Korty",
@@ -194,6 +243,31 @@
     "bookedTheCourt": "Zarezerwowano kort?",
     "markAsBooked": "Oznacz jako zarezerwowany",
     "marking": "Oznaczanie…"
+  },
+  "JoinThread": {
+    "messages": "Wiadomości"
+  },
+  "MessageThread": {
+    "noMessagesYet": "Brak wiadomości.",
+    "you": "Ty",
+    "aPlayer": "Zawodnik",
+    "report": "Zgłoś",
+    "writeAMessage": "Napisz wiadomość…",
+    "sending": "Wysyłanie…",
+    "send": "Wyślij",
+    "readOnly": "Ta rozmowa jest teraz tylko do odczytu."
+  },
+  "PlayerPage": {
+    "notFound": "Zawodnik nie znaleziony",
+    "matchHistory": "Historia meczów",
+    "reportThisPlayer": "Zgłoś tego zawodnika"
+  },
+  "MatchHistory": {
+    "noMatches": "Brak meczów.",
+    "won": "Wygrana",
+    "lost": "Porażka",
+    "vs": "vs",
+    "aPlayer": "Zawodnik"
   },
   "PlayerFacts": {
     "age": "Wiek",
@@ -268,6 +342,8 @@
     "checkTheForm": "Sprawdź formularz.",
     "messageNotFound": "Ta wiadomość nie istnieje.",
     "playerNotFound": "Ten zawodnik nie istnieje.",
+    "invalidSubscription": "Nieprawidłowa subskrypcja.",
+    "invalidSetting": "Nieprawidłowe ustawienie.",
     "matchNotFound": "Ten mecz nie istnieje.",
     "checkTheScore": "Sprawdź wynik.",
     "resultNotFound": "Ten wynik nie istnieje.",
@@ -385,6 +461,76 @@
   },
   "PlayerAvatar": {
     "photoAlt": "Zdjęcie: {name}"
+  },
+  "PushSubscribePrompt": {
+    "installTheApp": "Zainstaluj aplikację",
+    "toGetNotificationsOnIphone": "aby otrzymywać powiadomienia na iPhonie.",
+    "dismiss": "Zamknij",
+    "turnOnNotifications": "Włączyć powiadomienia o nowych zgłoszeniach i wiadomościach?",
+    "enabling": "Włączanie…",
+    "enable": "Włącz",
+    "notNow": "Nie teraz"
+  },
+  "PushSubscribeControl": {
+    "notSupported": "Ta przeglądarka nie wspiera powiadomień push.",
+    "permissionDenied": "Nie udzielono zgody.",
+    "noUsableSubscription": "Przeglądarka nie zwróciła prawidłowej subskrypcji.",
+    "couldNotSave": "Nie udało się zapisać subskrypcji.",
+    "notSetUp": "Powiadomienia push nie są jeszcze skonfigurowane.",
+    "installTheApp": "Zainstaluj aplikację",
+    "toGetNotificationsOnIphone": "aby otrzymywać powiadomienia na iPhonie.",
+    "unsupported": "Ta przeglądarka nie wspiera powiadomień push.",
+    "pushNotifications": "Powiadomienia push",
+    "getNotifiedOnThisDevice": "Otrzymuj powiadomienia na tym urządzeniu."
+  },
+  "NotificationSettingsPage": {
+    "title": "Powiadomienia",
+    "backToProfile": "Wróć do profilu"
+  },
+  "NotificationSettingsForm": {
+    "notifyMatches": {
+      "label": "Mecze i wiadomości",
+      "description": "Zgłoszenia, akceptacja/odmowa, czat, rezerwacja kortu, przypomnienia o meczach."
+    },
+    "notifyNewOffers": {
+      "label": "Nowe oferty na moim poziomie",
+      "description": "Nowa oferta sparingowa w Twojej dzielnicy i na Twoim poziomie NTRP."
+    },
+    "notifyEmailFallback": {
+      "label": "Zapasowy e-mail",
+      "description": "E-mail o ważnych wydarzeniach, gdy nie masz aktywnej subskrypcji push."
+    }
+  },
+  "UnsubscribePage": {
+    "title": "Powiadomienia e-mail",
+    "confirmPrompt": "Wyłączyć powiadomienia e-mail z MatchFinder? Możesz je włączyć ponownie w każdej chwili w ustawieniach powiadomień.",
+    "invalidLink": "Ten link jest nieprawidłowy.",
+    "invalidLinkLong": "Ten link jest nieprawidłowy. Powiadomieniami e-mail możesz zarządzać w ustawieniach powiadomień po zalogowaniu."
+  },
+  "UnsubscribeButton": {
+    "done": "Zrobione — nie będziesz już otrzymywać powiadomień e-mail z MatchFinder.",
+    "saving": "Zapisywanie…",
+    "turnOff": "Wyłącz powiadomienia e-mail"
+  },
+  "InstallPage": {
+    "title": "Zainstaluj MatchFinder",
+    "intro": "Instalacja aplikacji daje ikonę na ekranie głównym, a na iPhonie — jedyny sposób, by je w ogóle otrzymywać — powiadomienia o nowych zgłoszeniach, wiadomościach i meczach.",
+    "iosHeading": "iPhone lub iPad (Safari)",
+    "iosSteps": [
+      "Otwórz tę stronę w Safari (nie w Chrome ani innej przeglądarce).",
+      "Dotknij ikony Udostępnij (kwadrat ze strzałką do góry) na pasku narzędzi.",
+      "Przewiń i dotknij „Dodaj do ekranu głównego”.",
+      "Dotknij „Dodaj” w prawym górnym rogu.",
+      "Otwórz MatchFinder z nowej ikony na ekranie głównym — powiadomienia push działają tylko stamtąd, nie z samego Safari."
+    ],
+    "iosRequires": "Wymaga iOS 16.4 lub nowszego.",
+    "androidHeading": "Android (Chrome)",
+    "androidSteps": [
+      "Otwórz tę stronę w Chrome.",
+      "Dotknij menu (trzy punkty, prawy górny róg) i wybierz „Zainstaluj aplikację” albo „Dodaj do ekranu głównego”.",
+      "Potwierdź, dotykając „Zainstaluj”."
+    ],
+    "androidBanner": "Chrome może też sam pokazać baner instalacji — wtedy to również działa."
   },
   "LoginPage": {
     "title": "Zaloguj się",

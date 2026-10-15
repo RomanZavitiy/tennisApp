@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 
@@ -43,6 +44,7 @@ function initialStatus(): Status {
 }
 
 export function PushSubscribeControl() {
+  const t = useTranslations("PushSubscribeControl");
   const [status, setStatus] = useState<Status>(initialStatus);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +64,7 @@ export function PushSubscribeControl() {
 
   function enable() {
     if (!VAPID_PUBLIC_KEY) {
-      setError("Push notifications aren't set up yet.");
+      setError(t("notSetUp"));
       return;
     }
     setError(null);
@@ -70,6 +72,7 @@ export function PushSubscribeControl() {
       const result = await subscribeToPush(
         VAPID_PUBLIC_KEY,
         savePushSubscription,
+        t,
       );
       if (result.ok) {
         setStatus("on");
@@ -98,28 +101,24 @@ export function PushSubscribeControl() {
     return (
       <p className="text-sm text-muted-foreground">
         <Link href="/install" className="underline underline-offset-4">
-          Install the app
+          {t("installTheApp")}
         </Link>{" "}
-        to get notifications on iPhone.
+        {t("toGetNotificationsOnIphone")}
       </p>
     );
   }
 
   if (status === "unsupported") {
-    return (
-      <p className="text-sm text-muted-foreground">
-        This browser doesn’t support push notifications.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">{t("unsupported")}</p>;
   }
 
   return (
     <div className="space-y-1">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <Label htmlFor="push-toggle">Push notifications</Label>
+          <Label htmlFor="push-toggle">{t("pushNotifications")}</Label>
           <p className="mt-1 text-sm text-muted-foreground">
-            Get notified on this device.
+            {t("getNotifiedOnThisDevice")}
           </p>
         </div>
         <Switch

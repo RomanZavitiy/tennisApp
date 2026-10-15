@@ -1,14 +1,16 @@
 import type { MetadataRoute } from "next";
+import { getTranslations } from "next-intl/server";
 
 // Task 5.14: installable on Android (Chrome) and iOS 16.4+ ("Add to Home
 // Screen", Safari only — see /install for the instruction). standalone hides
 // the browser chrome once installed; theme_color matches the near-black
 // primary the site already uses (no brand color yet, decision 0.19).
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const t = await getTranslations("Metadata");
   return {
-    name: "MatchFinder Kraków",
+    name: t("siteName"),
     short_name: "MatchFinder",
-    description: "Find a sparring partner and a court in Kraków.",
+    description: t("description"),
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

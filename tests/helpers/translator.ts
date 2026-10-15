@@ -7,7 +7,7 @@ import enJson from "@/messages/en.json";
 // t()'s key parameter to this one namespace's exact keys, which the lib/
 // helpers under test (formatLabel, reliabilityLabel, the Zod schema
 // factories…) type generically as `(key: string, …) => string` — task 1.20.
-const en = enJson as AbstractIntlMessages;
+const en = enJson as unknown as AbstractIntlMessages;
 
 /**
  * A translator over the real messages/en.json catalog, for a lib/ unit

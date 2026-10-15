@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 import { MessageThread } from "@/components/message-thread";
 import { getJoinThread } from "@/lib/messages/thread-data";
 
@@ -21,11 +23,12 @@ export async function JoinThread({
   if (!thread) {
     return null;
   }
+  const t = await getTranslations("JoinThread");
 
   return (
     <details open={defaultOpen} className="mt-2">
       <summary className="cursor-pointer text-sm text-muted-foreground">
-        Messages
+        {t("messages")}
       </summary>
       <div className="mt-2">
         <MessageThread

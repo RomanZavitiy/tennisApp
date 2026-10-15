@@ -3,6 +3,7 @@
 import "leaflet/dist/leaflet.css";
 
 import { latLngBounds, type Marker as LeafletMarker } from "leaflet";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { type RefObject, useEffect, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
@@ -37,6 +38,7 @@ export type ClubMapProps = {
 // The map fills its parent; the wrapper in ./index.tsx sets the size.
 // Inside ClubsView it follows the club selection shared with the list (2.7).
 export default function ClubMap({ markers }: ClubMapProps) {
+  const t = useTranslations("ClubMap");
   const clubSelection = useClubSelection();
   const leafletMarkers = useRef(new Map<string, LeafletMarker>());
   // Whether the map has its first view: all clubs fitted (2.12), or a club
@@ -84,7 +86,7 @@ export default function ClubMap({ markers }: ClubMapProps) {
           <Popup>
             <div className="font-semibold">{marker.name}</div>
             <div>{marker.address}</div>
-            <Link href={`/clubs/${marker.id}`}>Club details</Link>
+            <Link href={`/clubs/${marker.id}`}>{t("clubDetails")}</Link>
           </Popup>
         </Marker>
       ))}
