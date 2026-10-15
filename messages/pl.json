@@ -21,6 +21,57 @@
     "mainNav": "Główna",
     "signOut": "Wyloguj się"
   },
+  "PushNotifications": {
+    "JOIN_REQUESTED": {
+      "title": "Nowe zgłoszenie",
+      "body": "Ktoś poprosił o udział w Twojej ofercie."
+    },
+    "JOIN_ACCEPTED": {
+      "title": "Zgłoszenie zaakceptowane",
+      "body": "Twoje zgłoszenie zostało zaakceptowane."
+    },
+    "JOIN_DECLINED": {
+      "title": "Zgłoszenie odrzucone",
+      "body": "Twoje zgłoszenie zostało odrzucone."
+    },
+    "NEW_MESSAGE": {
+      "title": "Nowa wiadomość",
+      "body": "Masz nową wiadomość."
+    },
+    "COURT_BOOKED": {
+      "title": "Kort zarezerwowany",
+      "body": "Kort na Twój mecz został zarezerwowany."
+    },
+    "MATCH_REMINDER_3H": {
+      "title": "Mecz zaczyna się wkrótce",
+      "body": "Twój mecz zaczyna się za około 3 godziny."
+    },
+    "HOW_DID_IT_GO": {
+      "title": "Jak poszedł mecz?",
+      "body": "Zgłoś wynik, aby zaktualizować ranking."
+    },
+    "CONFIRM_RESULT_REMINDER": {
+      "title": "Potwierdź wynik meczu",
+      "body": "Wynik meczu czeka na Twoje potwierdzenie."
+    },
+    "NEW_OFFER_FOR_LEVEL": {
+      "title": "Nowa oferta w Twojej okolicy",
+      "body": "Nowa oferta sparingowa odpowiada Twojemu poziomowi i dzielnicy."
+    }
+  },
+  "SystemMessages": {
+    "THREAD_WELCOME": "Umówcie się na korcie. Nigdy nie wysyłaj pieniędzy z góry.",
+    "RESULT_SUBMITTED": "Wynik meczu zgłoszony. Czekamy na potwierdzenie przez drugiego zawodnika.",
+    "RESULT_CONFIRMED": "Wynik meczu potwierdzony. ELO obu zawodników zostało zaktualizowane.",
+    "RESULT_AUTO_CONFIRMED": "Wynik meczu automatycznie potwierdzony po 72 godzinach. ELO obu zawodników zostało zaktualizowane.",
+    "RESULT_DISPUTED": "Wynik meczu zaskarżony. Administrator go sprawdzi.",
+    "RESULT_NO_SHOW_REPORTED": "Przeciwnik oznaczony jako nieobecny. Może zgłosić sprzeciw w ciągu 72 godzin.",
+    "COURT_BOOKED": "Kort został zarezerwowany."
+  },
+  "EmailTemplate": {
+    "actionLabel": "Otwórz MatchFinder",
+    "unsubscribeLabel": "Wyłącz powiadomienia e-mail"
+  },
   "AdminLayout": {
     "admin": "Administracja",
     "reports": "Zgłoszenia",

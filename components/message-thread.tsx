@@ -8,6 +8,7 @@ import { reportMessage } from "@/app/offers/[id]/report-actions";
 import { ReportButton } from "@/components/report-button";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { isSystemMessageKey } from "@/lib/messages/system-message-keys";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { MESSAGE_MAX } from "@/lib/validation/message";
 
@@ -49,6 +50,7 @@ export function MessageThread({
   writable: boolean;
 }) {
   const t = useTranslations("MessageThread");
+  const tSystem = useTranslations("SystemMessages");
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -119,7 +121,13 @@ export function MessageThread({
               key={message.id}
               className="text-center text-xs text-muted-foreground italic"
             >
-              {message.content}
+              {/* A message from before task 1.20 stored the English
+                  sentence itself (never rewritten) — only a recognized key
+                  (isSystemMessageKey) goes through the viewer's own
+                  language. */}
+              {isSystemMessageKey(message.content)
+                ? tSystem(message.content)
+                : message.content}
             </li>
           ) : (
             <li key={message.id} className="text-sm">

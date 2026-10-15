@@ -21,6 +21,57 @@
     "mainNav": "Main",
     "signOut": "Sign out"
   },
+  "PushNotifications": {
+    "JOIN_REQUESTED": {
+      "title": "New request to join",
+      "body": "Someone asked to join your offer."
+    },
+    "JOIN_ACCEPTED": {
+      "title": "Request accepted",
+      "body": "Your request to join was accepted."
+    },
+    "JOIN_DECLINED": {
+      "title": "Request declined",
+      "body": "Your request to join was declined."
+    },
+    "NEW_MESSAGE": {
+      "title": "New message",
+      "body": "You have a new message."
+    },
+    "COURT_BOOKED": {
+      "title": "Court booked",
+      "body": "The court for your match has been booked."
+    },
+    "MATCH_REMINDER_3H": {
+      "title": "Match starting soon",
+      "body": "Your match starts in about 3 hours."
+    },
+    "HOW_DID_IT_GO": {
+      "title": "How did the match go?",
+      "body": "Submit the result so ratings can update."
+    },
+    "CONFIRM_RESULT_REMINDER": {
+      "title": "Confirm the match result",
+      "body": "A match result is waiting for your confirmation."
+    },
+    "NEW_OFFER_FOR_LEVEL": {
+      "title": "New offer near you",
+      "body": "A new sparring offer matches your level and district."
+    }
+  },
+  "SystemMessages": {
+    "THREAD_WELCOME": "Meet at the court. Never send money in advance.",
+    "RESULT_SUBMITTED": "Match result submitted. Waiting for the other player to confirm.",
+    "RESULT_CONFIRMED": "Match result confirmed. Both players' ELO has been updated.",
+    "RESULT_AUTO_CONFIRMED": "Match result automatically confirmed after 72 hours. Both players' ELO has been updated.",
+    "RESULT_DISPUTED": "Match result disputed. An admin will review it.",
+    "RESULT_NO_SHOW_REPORTED": "Opponent marked as a no-show. They can dispute this within 72 hours.",
+    "COURT_BOOKED": "The court has been booked."
+  },
+  "EmailTemplate": {
+    "actionLabel": "Open MatchFinder",
+    "unsubscribeLabel": "Turn off email notifications"
+  },
   "AdminLayout": {
     "admin": "Admin",
     "reports": "Reports",
