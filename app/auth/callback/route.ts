@@ -21,10 +21,14 @@ export async function GET(request: NextRequest) {
             token_hash: params.tokenHash,
           });
 
-    if (!error && data.user) {
+    // Both providers (magic link, Google) always give a verified email; a
+    // session without one is treated the same as an invalid link below —
+    // email fallback (5.1-5.6) needs it, and this is the only place it's
+    // ever written.
+    if (!error && data.user?.email) {
       // A database failure here surfaces as an error page rather than a
       // signed-in user without a row.
-      await ensureUserRow(data.user.id);
+      await ensureUserRow(data.user.id, data.user.email);
       return NextResponse.redirect(new URL(params.next, origin));
     }
   }

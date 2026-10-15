@@ -34,6 +34,12 @@ model User {
   // onboarding, so every field is nullable here; the profile schema (1.11)
   // makes them required. A CHECK in the migration guarantees that a user with
   // onboardingCompletedAt set has all of them.
+  /// Mirrors auth.users.email (task 1.9's ensureUserRow sets it on every
+  /// sign-in): email fallback (5.1-5.6) needs an address, and app code never
+  /// reads auth.users directly — the secret key that could is reserved for
+  /// the e2e helper (decision 1.2). Null until the first sign-in after this
+  /// column existed.
+  email                 String?   @unique @db.VarChar(320)
   name                  String?   @db.VarChar(50)
   /// Private: only the age derived from it is ever shown.
   birthDate             DateTime? @map("birth_date") @db.Date
@@ -72,12 +78,57 @@ model User {
   /// before the start (isLateCancellation, lib/rating/reliability.ts).
   lateCancellations Int @default(0) @map("late_cancellations")
 
-  offers         SparringOffer[]
-  joins          OfferJoin[]
-  sentMessages   Message[]
-  outboundClicks OutboundClick[]
+  // Notification settings (task 5.3, slice H). All default on: push is the
+  // main channel (decision 2026-10-14) and starts silent until 5.15 asks for
+  // permission, so defaulting off would mean asking players to find a
+  // switch before they ever see a notification.
+  /// "Matches & messages": join requests, accept/decline, chat, court
+  /// booked, match reminders, result-confirmation nudges.
+  notifyMatches Boolean @default(true) @map("notify_matches")
+  /// "New offers for my level": the matching push from lib/matching (5.16).
+  notifyNewOffers Boolean @default(true) @map("notify_new_offers")
+  /// Whether a missing push subscription falls back to email, for the three
+  /// events decision 2026-10-14 names (join request, accepted, confirm
+  /// result). Off means those events simply aren't sent without push.
+  notifyEmailFallback Boolean @default(true) @map("notify_email_fallback")
+  /// The daily cap on "new offer for my level" pushes (5.16): at most 3,
+  /// reset when the Warsaw calendar date changes — a counter like
+  /// matchesPlayed, not a query, since nothing else records when a push was
+  /// sent (lib/matching/offer-interest.ts).
+  offerPushSentOn    DateTime? @map("offer_push_sent_on") @db.Date
+  offerPushSentCount Int       @default(0) @map("offer_push_sent_count")
+
+  offers            SparringOffer[]
+  joins             OfferJoin[]
+  sentMessages      Message[]
+  outboundClicks    OutboundClick[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
+}
+
+/// A browser's web push endpoint for one user (task 5.15). One row per
+/// browser/device — a player can have several. Deleted on sign-out (5.15)
+/// or when the push service reports it gone (410/404, lib/push).
+model PushSubscription {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// The push service URL the browser gave `pushManager.subscribe()` —
+  /// unique by nature (one endpoint is one browser installation), so a
+  /// second subscribe from the same browser updates this row instead of
+  /// adding a duplicate.
+  endpoint String @unique @db.VarChar(500)
+  /// The subscription's two keys (RFC 8291), both base64url — stored as the
+  /// browser gives them, read back verbatim for `web-push`.
+  p256dh String @db.VarChar(200)
+  auth   String @db.VarChar(200)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 /// A tennis club with courts. Filled from hand-checked data (tasks 2.1–2.3).
@@ -156,6 +207,14 @@ model SparringOffer {
   /// books once a sparring partner is confirmed.
   courtStatus CourtStatus @default(WILL_BOOK) @map("court_status")
 
+  // Reminder pushes (task 5.10/5.16, hourly cron): each sent at most once,
+  // so an hourly run that catches an offer two hours in a row doesn't
+  // double-notify. Null until sent.
+  /// ~3h before startsAt, to the author and accepted players.
+  matchReminderSentAt DateTime? @map("match_reminder_sent_at") @db.Timestamptz
+  /// ~2h after startsAt, "How did the match go?" to the same players.
+  howDidItGoSentAt    DateTime? @map("how_did_it_go_sent_at") @db.Timestamptz
+
   joins          OfferJoin[]
   /// The group thread for a doubles offer (task 3.21): author + accepted players.
   messages       Message[]
@@ -184,6 +243,11 @@ model OfferJoin {
   result   MatchResult?
   /// The private thread for this join (task 3.15): author <-> this player.
   messages Message[]
+
+  /// Last time a chat message in this thread triggered a push (task 5.16):
+  /// grouped to at most one push per thread per 5 minutes. Null until the
+  /// first push.
+  lastMessagePushAt DateTime? @map("last_message_push_at") @db.Timestamptz
 
   @@unique([offerId, userId])
   @@index([userId])
@@ -259,6 +323,10 @@ model MatchResult {
   /// Set when filed: now + 72h (decision 2026-10-14). Read by the cron job
   /// (5.8) to auto-confirm; kept afterwards only as a record of the deadline.
   autoConfirmAt DateTime    @map("auto_confirm_at") @db.Timestamptz
+  /// Task 5.10: a single "confirm the result" nudge sent ~24h after filing,
+  /// to whichever side hasn't settled it yet, while still PENDING. Null
+  /// until sent; set by the same hourly cron as the match reminders above.
+  resultReminderSentAt DateTime? @map("result_reminder_sent_at") @db.Timestamptz
 
   /// ELO snapshots (4.8): null until CONFIRMED, set together, exactly once,
   /// in the same transaction that updates both users' rating.
