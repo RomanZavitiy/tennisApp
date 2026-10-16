@@ -111,6 +111,14 @@ model User {
   isAdmin   Boolean   @default(false) @map("is_admin")
   blockedAt DateTime? @map("blocked_at") @db.Timestamptz
 
+  // Legal consent (tasks 6.11, 6.12). Set together at onboarding (the
+  // checkbox there); an existing user whose consentVersion doesn't match
+  // lib/legal/consent.ts's CURRENT_CONSENT_VERSION — including every user
+  // who onboarded before this column existed, consentVersion null — sees
+  // /consent on their next page load (requireOnboardedUser).
+  consentedAt    DateTime? @map("consented_at") @db.Timestamptz
+  consentVersion String?   @map("consent_version") @db.VarChar(20)
+
   offers              SparringOffer[]
   joins               OfferJoin[]
   sentMessages        Message[]

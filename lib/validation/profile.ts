@@ -62,10 +62,12 @@ export type ProfileInput = z.input<ReturnType<typeof profileSchema>>;
 export type ProfileValues = z.output<ReturnType<typeof profileSchema>>;
 
 // What a profile-saving server action returns when it doesn't redirect: the
-// first message per field, for the form to show next to it.
+// first message per field, for the form to show next to it. "agreeToTerms"
+// isn't a ProfileInput field (it's onboarding-only, task 6.11/6.12,
+// profile-form.tsx) but needs the same per-field slot when missing.
 export type SaveProfileResult = {
   ok: false;
-  fieldErrors: Partial<Record<keyof ProfileInput, string>>;
+  fieldErrors: Partial<Record<keyof ProfileInput | "agreeToTerms", string>>;
 };
 
 // The schema is now a function (it needs a translator — task 1.20), so this

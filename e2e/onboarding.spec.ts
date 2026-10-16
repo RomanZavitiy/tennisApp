@@ -12,6 +12,7 @@ test("a new player fills in the profile", async ({ page, signIn }) => {
   await page.getByLabel("Gender").selectOption("Female");
   await page.getByLabel("District").selectOption("Łagiewniki-Borek Fałęcki");
   await page.getByLabel("Level (NTRP)").selectOption("3.5");
+  await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Save profile" }).click();
 
   await expect(page).toHaveURL("/");
@@ -56,6 +57,7 @@ test("an empty form shows a message for every field without saving", async ({
     "Choose your gender.",
     "Choose your district.",
     "Choose your level.",
+    "You must agree to continue.",
   ]);
   expect(posts).toEqual([]);
 });

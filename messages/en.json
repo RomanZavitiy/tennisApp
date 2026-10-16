@@ -11,7 +11,9 @@
     }
   },
   "SiteFooter": {
-    "tagline": "MatchFinder Kraków · tennis sparring and courts in Kraków"
+    "tagline": "MatchFinder Kraków · tennis sparring and courts in Kraków",
+    "terms": "Terms",
+    "privacy": "Privacy"
   },
   "SiteHeader": {
     "sparring": "Sparring",
@@ -457,7 +459,8 @@
       "tooYoung": "You must be at least {min} to join.",
       "genderRequired": "Choose your gender.",
       "districtRequired": "Choose your district.",
-      "levelRequired": "Choose your level."
+      "levelRequired": "Choose your level.",
+      "agreeRequired": "You must agree to continue."
     },
     "offer": {
       "levelRequired": "Choose a level.",
@@ -505,6 +508,7 @@
     "levelLabel": "Level (NTRP)",
     "levelHint": "1.5 is a beginner, 4.0 a solid club player, 7.0 a touring pro.",
     "choose": "Choose…",
+    "agreeToTerms": "I agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
     "saving": "Saving…"
   },
   "AvatarUpload": {
@@ -615,5 +619,22 @@
     "downloadButton": "Download as JSON",
     "downloading": "Preparing your file…",
     "error": "Couldn't prepare your data. Try again in a minute."
+  },
+  "ConsentPage": {
+    "title": "Updated Terms and Privacy Policy",
+    "body": "We've updated our <terms>Terms</terms> and <privacy>Privacy Policy</privacy>. Please review them and agree to keep using MatchFinder Kraków.",
+    "agree": "I agree"
+  },
+  "TermsPage": {
+    "title": "Terms",
+    "draftNotice": "Draft — pending legal review. This page is a placeholder until the final text is ready.",
+    "revisedOn": "Draft dated {date}",
+    "placeholder": "The Terms of Service will describe who runs MatchFinder Kraków, what the service offers, account rules, acceptable use, and liability. Real text will replace this paragraph before the app accepts outside users."
+  },
+  "PrivacyPage": {
+    "title": "Privacy Policy",
+    "draftNotice": "Draft — pending legal review. This page is a placeholder until the final text is ready.",
+    "revisedOn": "Draft dated {date}",
+    "placeholder": "The Privacy Policy will describe what personal data MatchFinder Kraków collects, why, how long it's kept, and how to export or delete it. Real text will replace this paragraph before the app accepts outside users."
   }
 }

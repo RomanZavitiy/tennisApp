@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { completeOnboarding } from "@/app/onboarding/actions";
 import { AuthRequiredError } from "@/lib/auth/require-user";
+import { CURRENT_CONSENT_VERSION } from "@/lib/legal/consent";
 
 // The server must reject what the browser would have caught, because a
 // request can skip the form. Session, database and redirect are replaced.
@@ -26,6 +27,7 @@ const valid = {
   gender: "FEMALE",
   district: "KROWODRZA",
   selfRatedNtrp: 3.5,
+  agreeToTerms: true,
 };
 
 describe("completeOnboarding", () => {
@@ -57,10 +59,25 @@ describe("completeOnboarding", () => {
         selfRatedNtrp: 3.5,
         elo: 1400,
         onboardingCompletedAt: new Date("2026-10-04T10:00:00Z"),
+        consentedAt: new Date("2026-10-04T10:00:00Z"),
+        consentVersion: CURRENT_CONSENT_VERSION,
       },
     });
     expect(redirect).toHaveBeenCalledWith("/");
     expect(captureEvent).toHaveBeenCalledWith("signup_completed", "user-1", {});
+  });
+
+  it("rejects a submission that didn't agree to the terms, without saving", async () => {
+    const result = await completeOnboarding({
+      ...valid,
+      agreeToTerms: false,
+    });
+
+    expect(result.fieldErrors).toEqual({
+      agreeToTerms: "You must agree to continue.",
+    });
+    expect(update).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("doesn't fire signup_completed on a repeat call (count 0, already onboarded)", async () => {

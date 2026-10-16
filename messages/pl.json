@@ -11,7 +11,9 @@
     }
   },
   "SiteFooter": {
-    "tagline": "MatchFinder Kraków · sparing tenisowy i korty w Krakowie"
+    "tagline": "MatchFinder Kraków · sparing tenisowy i korty w Krakowie",
+    "terms": "Regulamin",
+    "privacy": "Prywatność"
   },
   "SiteHeader": {
     "sparring": "Sparing",
@@ -457,7 +459,8 @@
       "tooYoung": "Musisz mieć co najmniej {min} lat, aby się zarejestrować.",
       "genderRequired": "Wybierz swoją płeć.",
       "districtRequired": "Wybierz swoją dzielnicę.",
-      "levelRequired": "Wybierz swój poziom."
+      "levelRequired": "Wybierz swój poziom.",
+      "agreeRequired": "Musisz się zgodzić, aby kontynuować."
     },
     "offer": {
       "levelRequired": "Wybierz poziom.",
@@ -505,6 +508,7 @@
     "levelLabel": "Poziom (NTRP)",
     "levelHint": "1.5 to początkujący, 4.0 solidny gracz klubowy, 7.0 zawodowiec.",
     "choose": "Wybierz…",
+    "agreeToTerms": "Zgadzam się z <terms>Regulaminem</terms> i <privacy>Polityką prywatności</privacy>.",
     "saving": "Zapisywanie…"
   },
   "AvatarUpload": {
@@ -615,5 +619,22 @@
     "downloadButton": "Pobierz jako JSON",
     "downloading": "Przygotowywanie pliku…",
     "error": "Nie udało się przygotować danych. Spróbuj ponownie za chwilę."
+  },
+  "ConsentPage": {
+    "title": "Zaktualizowany Regulamin i Polityka prywatności",
+    "body": "Zaktualizowaliśmy nasz <terms>Regulamin</terms> i <privacy>Politykę prywatności</privacy>. Zapoznaj się z nimi i zaakceptuj, aby dalej korzystać z MatchFinder Kraków.",
+    "agree": "Zgadzam się"
+  },
+  "TermsPage": {
+    "title": "Regulamin",
+    "draftNotice": "Wersja robocza — czeka na przegląd prawny. Ta strona jest zastępnikiem do czasu gotowości ostatecznego tekstu.",
+    "revisedOn": "Wersja robocza z {date}",
+    "placeholder": "Regulamin będzie opisywał, kto prowadzi MatchFinder Kraków, co obejmuje usługa, zasady konta, dopuszczalne korzystanie i odpowiedzialność. Przed udostępnieniem aplikacji osobom z zewnątrz ten akapit zastąpi prawdziwy tekst."
+  },
+  "PrivacyPage": {
+    "title": "Polityka prywatności",
+    "draftNotice": "Wersja robocza — czeka na przegląd prawny. Ta strona jest zastępnikiem do czasu gotowości ostatecznego tekstu.",
+    "revisedOn": "Wersja robocza z {date}",
+    "placeholder": "Polityka prywatności będzie opisywać, jakie dane osobowe zbiera MatchFinder Kraków, dlaczego, jak długo są przechowywane i jak je wyeksportować lub usunąć. Przed udostępnieniem aplikacji osobom z zewnątrz ten akapit zastąpi prawdziwy tekst."
   }
 }
