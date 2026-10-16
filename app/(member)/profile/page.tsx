@@ -61,6 +61,15 @@ export default async function ProfilePage() {
       >
         {t("notifications")}
       </Link>
+      <Link
+        href="/profile/export"
+        className={buttonVariants({
+          variant: "outline",
+          className: "mt-3 w-full",
+        })}
+      >
+        {t("exportData")}
+      </Link>
       <div className="mt-6 flex items-center justify-between border-t pt-6">
         <span className="text-sm text-muted-foreground">{t("language")}</span>
         <LanguageSwitcher />

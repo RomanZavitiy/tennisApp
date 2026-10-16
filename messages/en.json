@@ -94,6 +94,7 @@
     "title": "Your profile",
     "editProfile": "Edit profile",
     "notifications": "Notifications",
+    "exportData": "Download my data",
     "language": "Language"
   },
   "OfferCard": {
@@ -607,5 +608,12 @@
     "submit": "Email me a sign-in link",
     "checkEmailTitle": "Check your email",
     "checkEmailBody": "We sent a sign-in link to <strong>{email}</strong>. Open it on any device to sign in."
+  },
+  "ExportDataPage": {
+    "title": "Download my data",
+    "intro": "Get a copy of your profile, offers, join requests, your own chat messages and your matches as a single file. Opponents in your matches are shown only by first name and last initial.",
+    "downloadButton": "Download as JSON",
+    "downloading": "Preparing your file…",
+    "error": "Couldn't prepare your data. Try again in a minute."
   }
 }

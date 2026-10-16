@@ -94,6 +94,7 @@
     "title": "Twój profil",
     "editProfile": "Edytuj profil",
     "notifications": "Powiadomienia",
+    "exportData": "Pobierz moje dane",
     "language": "Język"
   },
   "OfferCard": {
@@ -607,5 +608,12 @@
     "submit": "Wyślij mi link logowania",
     "checkEmailTitle": "Sprawdź e-mail",
     "checkEmailBody": "Wysłaliśmy link logowania na adres <strong>{email}</strong>. Otwórz go na dowolnym urządzeniu, aby się zalogować."
+  },
+  "ExportDataPage": {
+    "title": "Pobierz moje dane",
+    "intro": "Pobierz kopię swojego profilu, ofert, zgłoszeń do gry, własnych wiadomości na czacie i rozegranych meczów w jednym pliku. Przeciwnicy w meczach są widoczni tylko jako imię i pierwsza litera nazwiska.",
+    "downloadButton": "Pobierz jako JSON",
+    "downloading": "Przygotowywanie pliku…",
+    "error": "Nie udało się przygotować danych. Spróbuj ponownie za chwilę."
   }
 }
