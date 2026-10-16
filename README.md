@@ -37,6 +37,32 @@ Epic 0 (репозиторій та інфраструктура) заверше
 та Epic 2 (корти на карті). Усі задачі з описом і критеріями готовності — у
 [docs/PLANNING.md](./docs/PLANNING.md).
 
+## Середовища: Preview (staging) і Production (prod)
+
+До задачі 6.9/6.10 Preview і Production у Vercel ділили один проєкт Supabase (рішення
+2026-10-01, «Env-змінні у Vercel») — прийнятний компроміс, поки тестував лише власник. Перед
+запрошенням сторонніх користувачів кожне середовище отримує свій проєкт Supabase, тож і свій
+набір БД-змінних. Перенесення значень у дашборд Vercel (Project Settings → Environment
+Variables) робить людина — ось точний список, що куди:
+
+| Змінна | Preview (staging) | Production (prod) |
+|---|---|---|
+| `DATABASE_URL` | pooled URL **staging**-проєкту Supabase | pooled URL **prod**-проєкту Supabase |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL staging-проєкту | URL prod-проєкту |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | публічний ключ staging-проєкту | публічний ключ prod-проєкту |
+
+Решта змінних (`RESEND_API_KEY`, `CRON_SECRET`, `UNSUBSCRIBE_SECRET`, `VAPID_*`,
+`NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `POSTHOG_KEY`, `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`,
+`SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN`) не прив'язані до конкретної БД — те саме
+значення для Preview і Production, як і зараз. `SUPABASE_SECRET_KEY` і `DIRECT_URL` — локальні
+(e2e, CLI-міграції); у Vercel жодного з двох не додаємо (рішення 2026-10-01, те саме
+обґрунтування: секрет, якого застосунку в проді не треба, там не лежить).
+
+`prisma migrate deploy` ніколи не запускається самим деплоєм Vercel (той самий запис
+2026-10-01) — лише `prisma generate` через `postinstall`. Застосування міграцій до prod —
+окремий ручний крок людини, зроблений навмисно: детальний процес і чому саме так — запис
+2026-10-16 «Застосування міграцій до prod» у `.agents/decisions.md`.
+
 ## Getting started
 
 Від `git clone` до запущеного застосунку з базою даних. Команди однакові для Windows (Git
