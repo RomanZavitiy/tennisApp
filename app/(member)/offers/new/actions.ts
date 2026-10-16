@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
@@ -92,6 +93,11 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     district: place.district ?? null,
     ntrpMin: offer.ntrpMin ?? null,
     ntrpMax: offer.ntrpMax ?? null,
+  });
+
+  await captureEvent("offer_created", author.id, {
+    format: offer.format,
+    hasClub: place.clubId != null,
   });
 
   revalidatePath("/offers");

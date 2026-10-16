@@ -5,10 +5,11 @@ import { AuthRequiredError } from "@/lib/auth/require-user";
 
 // The server must reject what the browser would have caught, because a
 // request can skip the form. Session, database and redirect are replaced.
-const { requireUser, update, redirect } = vi.hoisted(() => ({
+const { requireUser, update, redirect, captureEvent } = vi.hoisted(() => ({
   requireUser: vi.fn(),
   update: vi.fn(),
   redirect: vi.fn(),
+  captureEvent: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/require-user", async (importOriginal) => ({
@@ -16,6 +17,7 @@ vi.mock("@/lib/auth/require-user", async (importOriginal) => ({
   requireUser,
 }));
 vi.mock("@/lib/db", () => ({ db: { user: { updateMany: update } } }));
+vi.mock("@/lib/analytics/posthog", () => ({ captureEvent }));
 vi.mock("next/navigation", () => ({ redirect }));
 
 const valid = {
@@ -32,7 +34,9 @@ describe("completeOnboarding", () => {
     vi.setSystemTime(new Date("2026-10-04T10:00:00Z"));
     requireUser.mockResolvedValue({ id: "user-1", email: "ola@example.com" });
     update.mockReset();
+    update.mockResolvedValue({ count: 1 });
     redirect.mockReset();
+    captureEvent.mockReset();
   });
 
   afterEach(() => {
@@ -55,6 +59,16 @@ describe("completeOnboarding", () => {
         onboardingCompletedAt: new Date("2026-10-04T10:00:00Z"),
       },
     });
+    expect(redirect).toHaveBeenCalledWith("/");
+    expect(captureEvent).toHaveBeenCalledWith("signup_completed", "user-1", {});
+  });
+
+  it("doesn't fire signup_completed on a repeat call (count 0, already onboarded)", async () => {
+    update.mockResolvedValue({ count: 0 });
+
+    await completeOnboarding(valid);
+
+    expect(captureEvent).not.toHaveBeenCalled();
     expect(redirect).toHaveBeenCalledWith("/");
   });
 

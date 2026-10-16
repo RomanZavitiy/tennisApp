@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
+import { captureEvent } from "@/lib/analytics/posthog";
 import { requireUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
 import { pushSubscriptionSchema } from "@/lib/validation/push-subscription";
@@ -27,11 +28,21 @@ export async function savePushSubscription(
     return { ok: false, message: t("invalidSubscription") };
   }
 
+  // Checked before the upsert so "push_enabled" fires once per new
+  // subscription, not again every time the browser silently re-registers
+  // the same endpoint (e.g. after a service-worker update).
+  const existed = await db.pushSubscription.findUnique({
+    where: { endpoint: parsed.data.endpoint },
+    select: { endpoint: true },
+  });
   await db.pushSubscription.upsert({
     where: { endpoint: parsed.data.endpoint },
     create: { ...parsed.data, userId: user.id },
     update: { ...parsed.data, userId: user.id },
   });
+  if (!existed) {
+    await captureEvent("push_enabled", user.id, {});
+  }
 
   revalidatePath("/profile/notifications");
   return { ok: true };

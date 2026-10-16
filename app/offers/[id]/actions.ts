@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
+import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
 import {
@@ -65,7 +66,7 @@ export async function requestToJoin(
 
   const offer = await db.sparringOffer.findUnique({
     where: { id: id.data },
-    select: { authorId: true, status: true, startsAt: true },
+    select: { authorId: true, status: true, startsAt: true, format: true },
   });
   if (!offer) {
     return { ok: false, message: tErrors("offerNotFound") };
@@ -121,6 +122,7 @@ export async function requestToJoin(
   // Task 5.16: "new join request", to the author — on a reopened request
   // too, since it's a fresh ask either way.
   await notify(offer.authorId, { kind: "JOIN_REQUESTED", offerId: id.data });
+  await captureEvent("join_requested", player.id, { format: offer.format });
 
   revalidatePath(`/offers/${id.data}`);
   return { ok: true };
@@ -206,6 +208,7 @@ export async function sendMessage(
     offerId: join.offerId,
     offerJoinId: id.data,
   });
+  await captureEvent("message_sent", user.id, {});
 
   revalidatePath(`/offers/${join.offerId}`);
   return {
@@ -326,7 +329,12 @@ async function changeJoin(
         data: { status: offerStatus },
       });
     }
-    return { ok: true as const, offerId: join.offerId, playerId: join.userId };
+    return {
+      ok: true as const,
+      offerId: join.offerId,
+      playerId: join.userId,
+      format: offer.format,
+    };
   });
 
   if (!result.ok) {
@@ -338,6 +346,11 @@ async function changeJoin(
     await notify(result.playerId, {
       kind: action === "ACCEPT" ? "JOIN_ACCEPTED" : "JOIN_DECLINED",
       offerId: result.offerId,
+    });
+  }
+  if (action === "ACCEPT") {
+    await captureEvent("join_accepted", result.playerId, {
+      format: result.format,
     });
   }
   // The offer's page and the feed's free places both change.
@@ -453,6 +466,7 @@ export async function markCourtBooked(
       postSystemMessage({ offerJoinId: join.id }, COURT_BOOKED_MESSAGE),
     ),
   );
+  await captureEvent("court_marked_booked", author.id, {});
 
   revalidatePath(`/offers/${id.data}`);
   return { ok: true };

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { captureEvent } from "@/lib/analytics/posthog";
 import { requireUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
 import { startingElo } from "@/lib/rating/starting-elo";
@@ -30,7 +31,7 @@ export async function completeOnboarding(
     return profileFieldErrors(parsed.error);
   }
 
-  await db.user.updateMany({
+  const { count } = await db.user.updateMany({
     where: { id: user.id, onboardingCompletedAt: null },
     data: {
       ...profileToUserData(parsed.data),
@@ -38,6 +39,11 @@ export async function completeOnboarding(
       onboardingCompletedAt: new Date(),
     },
   });
+  // Only a first-time completion is a signup, not a no-op resubmit (the
+  // comment above: calling this again writes nothing).
+  if (count > 0) {
+    await captureEvent("signup_completed", user.id, {});
+  }
 
   redirect("/");
 }

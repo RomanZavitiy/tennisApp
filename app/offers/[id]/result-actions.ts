@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import type { JoinChangeResult } from "@/app/offers/[id]/actions";
+import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
 import type { Prisma } from "@/lib/generated/prisma/client";
@@ -177,6 +178,7 @@ export async function submitNoShow(
     { offerJoinId: id.data },
     RESULT_NO_SHOW_REPORTED_MESSAGE,
   );
+  await captureEvent("no_show_reported", user.id, {});
   revalidatePath(`/offers/${join.offerId}`);
   return { ok: true };
 }
@@ -317,6 +319,7 @@ export async function confirmResult(
     { offerJoinId: outcome.offerJoinId },
     RESULT_CONFIRMED_MESSAGE,
   );
+  await captureEvent("result_confirmed", user.id, {});
   revalidatePath(`/offers/${outcome.offerId}`);
   return { ok: true };
 }
