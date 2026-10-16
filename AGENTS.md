@@ -19,7 +19,8 @@ this may change).
 Next.js 16 (App Router) + TypeScript · Supabase (Postgres + Auth + Storage + Realtime) ·
 Prisma ORM · Tailwind CSS + shadcn/ui · react-leaflet + OpenStreetMap · React Hook Form +
 Zod · Resend (email) · Vercel (hosting) · GitHub Actions (CI) · Vitest + Playwright ·
-pnpm.
+pnpm · PostHog EU (product analytics, `posthog-node`, server-only — decision 2026-10-14) ·
+Sentry (error monitoring, `@sentry/nextjs`, free plan — decision 2026-10-14).
 
 Don't introduce a new library, framework, or service outside this list without flagging
 it to the human first — even a small one. Two competing form libraries or two ORMs in

@@ -3,11 +3,14 @@ import { cache } from "react";
 
 import { requireUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
+import { needsConsent } from "@/lib/legal/consent";
 
 // The signed-in user's profile, or a redirect to /onboarding if they haven't
-// filled it in. The (member) layout calls this for every page in the group,
-// and pages call it again for the data; cache() makes that one query per
-// request.
+// filled it in — or to /consent if they have, but haven't agreed to the
+// current Terms/Privacy version yet (tasks 6.11, 6.12: every existing user
+// sees this once, on their next page load after the version changes). The
+// (member) layout calls this for every page in the group, and pages call it
+// again for the data; cache() makes that one query per request.
 export const requireOnboardedUser = cache(async () => {
   const user = await requireUser();
   const profile = await db.user.findUnique({
@@ -22,6 +25,7 @@ export const requireOnboardedUser = cache(async () => {
       onboardingCompletedAt: true,
       avatarPath: true,
       blockedAt: true,
+      consentVersion: true,
     },
   });
 
@@ -36,6 +40,9 @@ export const requireOnboardedUser = cache(async () => {
     profile.selfRatedNtrp === null
   ) {
     redirect("/onboarding");
+  }
+  if (needsConsent(profile.consentVersion)) {
+    redirect("/consent");
   }
 
   return {

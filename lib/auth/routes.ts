@@ -18,6 +18,10 @@ const PUBLIC_ROUTES = [
   /^\/install$/,
   // Email unsubscribe link (task 5.3): works by signed token, no session.
   /^\/unsubscribe$/,
+  // Terms and Privacy Policy (tasks 6.11, 6.12): read before signing in, not
+  // just linked from inside the app.
+  /^\/terms$/,
+  /^\/privacy$/,
   // /admin (task 6.1): left out of the proxy's gate on purpose, so a
   // signed-out visitor and a signed-in non-admin get the same 404 from
   // requireAdmin() instead of the proxy sending only the signed-out one to

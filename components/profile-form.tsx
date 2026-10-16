@@ -2,8 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { useForm, type FieldError } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +22,12 @@ import {
   type SaveProfileResult,
 } from "@/lib/validation/profile";
 
+// agreeToTerms only exists when `withConsent` renders it (onboarding, task
+// 6.11/6.12) — kept out of ProfileInput/profileSchema itself so /profile/edit
+// never has to carry a field it has no use for; `updateProfile`'s plain
+// profileSchema silently ignores it if present (Zod's default "strip" mode).
+type ProfileFormValues = ProfileInput & { agreeToTerms?: boolean };
+
 // The player profile form, shared by onboarding (empty) and /profile/edit
 // (filled in from `defaultValues`).
 // Zod checks everything in the browser first; whatever the server action
@@ -28,25 +36,33 @@ export function ProfileForm({
   action,
   submitLabel,
   defaultValues,
+  withConsent = false,
 }: {
   action: (values: ProfileInput) => Promise<SaveProfileResult>;
   submitLabel: string;
   defaultValues?: ProfileInput;
+  /** Onboarding only: adds the required "I agree to Terms/Privacy" checkbox. */
+  withConsent?: boolean;
 }) {
   const t = useTranslations("ProfileForm");
   const tGender = useTranslations("Gender");
   const tValidation = useTranslations("Validation.profile");
+  const schema = withConsent
+    ? profileSchema(tValidation).extend({
+        agreeToTerms: z.literal(true, tValidation("agreeRequired")),
+      })
+    : profileSchema(tValidation);
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<ProfileInput>({
-    resolver: zodResolver(profileSchema(tValidation)),
+  } = useForm<ProfileFormValues>({
+    resolver: zodResolver(schema),
     defaultValues,
   });
 
-  async function onSubmit(values: ProfileInput) {
+  async function onSubmit(values: ProfileFormValues) {
     // On success the action redirects, so only failures come back.
     const result = await action(values);
     for (const [field, message] of Object.entries(result.fieldErrors)) {
@@ -147,6 +163,53 @@ export function ProfileForm({
           ))}
         </NativeSelect>
       </Field>
+
+      {withConsent && (
+        <div className="space-y-2">
+          <div className="flex items-start gap-2">
+            <input
+              id="agreeToTerms"
+              type="checkbox"
+              className="mt-1"
+              {...aria("agreeToTerms", errors.agreeToTerms)}
+              {...register("agreeToTerms")}
+            />
+            <Label htmlFor="agreeToTerms" className="font-normal">
+              {t.rich("agreeToTerms", {
+                terms: (chunks) => (
+                  <Link
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+                privacy: (chunks) => (
+                  <Link
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </Label>
+          </div>
+          {errors.agreeToTerms && (
+            <p
+              id="agreeToTerms-error"
+              role="alert"
+              className="text-sm text-destructive"
+            >
+              {errors.agreeToTerms.message}
+            </p>
+          )}
+        </div>
+      )}
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? t("saving") : submitLabel}

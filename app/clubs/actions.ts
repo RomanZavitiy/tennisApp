@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import { captureEvent } from "@/lib/analytics/posthog";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { db } from "@/lib/db";
 
@@ -26,6 +27,14 @@ export async function recordOutboundClick(input: unknown): Promise<void> {
     await db.outboundClick.create({
       data: { ...parsed.data, userId: user?.id ?? null },
     });
+    // Guest clicks still count for the owner's own query (2.13) but have no
+    // id to attach an event to — anonymous, so skipped here, not sent with
+    // a made-up distinctId.
+    if (user) {
+      await captureEvent("booking_outbound_clicked", user.id, {
+        target: parsed.data.target,
+      });
+    }
   } catch {
     // A log write failing is never the player's problem to see.
   }

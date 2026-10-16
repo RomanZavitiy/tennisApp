@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 
-// Regulamin and privacy policy links join here in task 6.11.
 export function SiteFooter() {
   const t = useTranslations("SiteFooter");
 
@@ -10,7 +10,15 @@ export function SiteFooter() {
     <footer className="border-t">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground">
         <span>{t("tagline")}</span>
-        <LanguageSwitcher />
+        <nav className="flex items-center gap-4">
+          <Link href="/terms" className="hover:underline">
+            {t("terms")}
+          </Link>
+          <Link href="/privacy" className="hover:underline">
+            {t("privacy")}
+          </Link>
+          <LanguageSwitcher />
+        </nav>
       </div>
     </footer>
   );

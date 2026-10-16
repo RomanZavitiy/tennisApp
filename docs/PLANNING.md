@@ -397,16 +397,46 @@
   старого файла, помилка на розмір/формат) уже існував (задача 1.14b); цього разу додано фото
   в картку оферти (`OfferCard`) і список заявок (`PlayerLink`, сторінка оферти) — `OfferPlayer`
   і `FeedOffer.author` отримали `avatarPath`.
-- ⬜ **6.11, 6.12 Regulamin, політика приватності, згода** 🧑 (тексти — людина/юрист)
-- ⬜ **6.14, 6.15 Експорт даних і видалення акаунта** · Залежить від: 4.9
-  DoD: політика видалення — з таблиці рішень.
-- ⬜ **6.5, 6.6 PostHog EU без cookie + ключові події** · Залежить від: —
-  Події: `signup_completed`, `offer_created`, `join_requested`, `join_accepted`,
-  `message_sent`, `booking_outbound_clicked`, `court_marked_booked`, `result_confirmed`,
-  `no_show_reported`, `push_enabled`. Без email, імен і текстів повідомлень.
-- ⬜ **6.13 Cookie-банер** — закривається записом у `decisions.md` (PostHog без cookie).
-- ⬜ **6.19 Моніторинг помилок (Sentry, безкоштовний план)** 🧑-погоджено
+- ✅ **6.5, 6.6 PostHog EU без cookie + ключові події** · Залежить від: —
+  `lib/analytics/posthog.ts` (`posthog-node`, не `posthog-js` — усі 10 подій починаються в
+  server actions, тож клієнтського SDK й cookie немає взагалі; деталі — `decisions.md`,
+  2026-10-16). Події підключено: `signup_completed`, `offer_created`, `join_requested`,
+  `join_accepted`, `message_sent`, `booking_outbound_clicked`, `court_marked_booked`,
+  `result_confirmed`, `no_show_reported`, `push_enabled`. Властивості — типізований allowlist
+  плюс рантайм-санітайзер, що викидає будь-яке поле схоже на email/ім'я/текст. **Залишок:**
+  `POSTHOG_KEY` не задано (людина ще не створила проєкт) — події мовчки не шлються, доки не
+  з'явиться; чекліст — `docs/LAUNCH-CHECKLIST.md`.
+- ✅ **6.13 Cookie-банер** — закрито записом у `decisions.md` 2026-10-14 (PostHog без cookie),
+  без коду.
+- ✅ **6.19 Моніторинг помилок (Sentry, безкоштовний план)** 🧑-погоджено
+  `@sentry/nextjs`: `instrumentation-client.ts`/`instrumentation.ts` + `sentry.server.config.ts`/
+  `sentry.edge.config.ts`, спільний `beforeSend`-санітайзер (`lib/monitoring/scrub-event.ts`) —
+  деталі й чому не `sendDefaultPii` — `decisions.md`, 2026-10-16. **Залишок:** `SENTRY_DSN` і
+  решта Sentry-змінних не задані — помилки мовчки не шлються, доки людина не створить проєкт і
+  не зробить навмисну тестову помилку на preview (чекліст, `docs/LAUNCH-CHECKLIST.md` розділ 3).
+- ✅ **6.14 Експорт даних** · Залежить від: 4.9
+  `/profile/export`: JSON з профілем, офертами, заявками, своїми повідомленнями й матчами;
+  суперник у матчі — лише `firstNameAndInitial()` (`lib/privacy/opponent-name.ts`), ніколи повне
+  ім'я. Тест: `tests/lib/privacy/export-user-data.test.ts`.
+- ✅ **6.15 Видалення акаунта** · Залежить від: 4.9
+  Рішення власника (2026-10-16, після показу плану): без self-service кнопки — ручний процес,
+  `docs/ACCOUNT-DELETION.md` (SQL-кроки + дії в Supabase Dashboard). Жодного коду не додано:
+  наявні запасні тексти на порожнє ім'я (`"A player"` тощо) і `getPublicProfile()`'s перевірка
+  обов'язкових полів (→ 404 на `/players/[id]`) уже дають потрібний результат самі.
+- ✅ **6.11, 6.12 Regulamin, політика приватності, згода** (тексти — людина/юрист)
+  `/terms`, `/privacy` — публічні Draft-сторінки (EN/PL, банер + абзац-заповнювач), посилання у
+  футері. Чекбокс згоди в онбордингу (`ProfileForm`'s `withConsent`), `users.consentedAt`/
+  `consentVersion` (міграція `20261016090000_add_user_consent`). Наявний користувач бачить
+  `/consent` на наступному `requireOnboardedUser()`. **Залишок:** реальний текст Regulamin і
+  Privacy Policy — людина/юрист; чекліст — `docs/LAUNCH-CHECKLIST.md` розділ 5.
 - ⬜ **6.9, 6.10 Окремі staging і production** 🧑 · перед запрошенням перших користувачів
+  Документація зроблена: мапінг env Preview→staging/Production→prod у `README.md`, ручний
+  процес `prisma migrate deploy` для prod — `decisions.md` 2026-10-16. **Залишок:** другий
+  проєкт Supabase ще не існує (перевірено `.env.local` на старті сесії) — сам проєкт, перенос
+  Storage-policies і env-змінних у Vercel — людина, чекліст `docs/LAUNCH-CHECKLIST.md` розділ 4.
+- ⬜ **5.13 Домен і верифікація в Resend** 🧑 → **1.19 Auth-листи через Resend**
+  **Залишок:** домен ще не готовий (перевірено `.env.local` — `RESEND_API_KEY` відсутній) —
+  повний процес у `docs/LAUNCH-CHECKLIST.md` розділ 1.
 
 ---
 

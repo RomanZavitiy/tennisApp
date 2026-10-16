@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import { CURRENT_CONSENT_VERSION } from "../../lib/legal/consent";
 import { startingElo } from "../../lib/rating/starting-elo";
 
 // Supabase admin client for e2e tests only (see the sign-in decision for task
@@ -56,7 +57,10 @@ export async function deleteTestUser(
 
 // Fills in a test user's profile as if they had finished onboarding, for
 // tests of member pages that aren't about onboarding itself. The ELO is the
-// starting one for the NTRP, as onboarding sets it (4.2).
+// starting one for the NTRP, as onboarding sets it (4.2). Also agrees to the
+// current Terms/Privacy (tasks 6.11, 6.12) — onboarding itself sets both
+// together, and without this a test user would be sent to /consent instead
+// of whatever member page the test actually wants.
 export async function completeTestProfile(
   admin: ReturnType<typeof createAdminClient>,
   id: string,
@@ -74,6 +78,8 @@ export async function completeTestProfile(
       self_rated_ntrp: ntrp,
       elo: startingElo(ntrp),
       onboarding_completed_at: new Date().toISOString(),
+      consented_at: new Date().toISOString(),
+      consent_version: CURRENT_CONSENT_VERSION,
       ...profile,
     })
     .eq("id", id);

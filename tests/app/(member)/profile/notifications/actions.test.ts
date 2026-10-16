@@ -8,21 +8,29 @@ import {
 
 const ME = "11111111-1111-4111-8111-111111111111";
 
-const { pushUpsert, pushDeleteMany, userUpdate } = vi.hoisted(() => ({
-  pushUpsert: vi.fn(),
-  pushDeleteMany: vi.fn(),
-  userUpdate: vi.fn(),
-}));
+const { pushUpsert, pushFindUnique, pushDeleteMany, userUpdate, captureEvent } =
+  vi.hoisted(() => ({
+    pushUpsert: vi.fn(),
+    pushFindUnique: vi.fn(),
+    pushDeleteMany: vi.fn(),
+    userUpdate: vi.fn(),
+    captureEvent: vi.fn(),
+  }));
 
 vi.mock("@/lib/auth/require-user", () => ({
   requireUser: () => Promise.resolve({ id: ME, email: undefined }),
 }));
 vi.mock("@/lib/db", () => ({
   db: {
-    pushSubscription: { upsert: pushUpsert, deleteMany: pushDeleteMany },
+    pushSubscription: {
+      upsert: pushUpsert,
+      findUnique: pushFindUnique,
+      deleteMany: pushDeleteMany,
+    },
     user: { update: userUpdate },
   },
 }));
+vi.mock("@/lib/analytics/posthog", () => ({ captureEvent }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 const subscription = {
@@ -35,6 +43,7 @@ describe("savePushSubscription", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     pushUpsert.mockResolvedValue(undefined);
+    pushFindUnique.mockResolvedValue(null);
   });
 
   it("upserts by endpoint, scoped to the signed-in user", async () => {
@@ -47,6 +56,22 @@ describe("savePushSubscription", () => {
       create: { ...subscription, userId: ME },
       update: { ...subscription, userId: ME },
     });
+  });
+
+  it("fires push_enabled for a brand-new subscription", async () => {
+    pushFindUnique.mockResolvedValue(null);
+
+    await savePushSubscription(subscription);
+
+    expect(captureEvent).toHaveBeenCalledWith("push_enabled", ME, {});
+  });
+
+  it("doesn't re-fire push_enabled when the endpoint already existed", async () => {
+    pushFindUnique.mockResolvedValue({ endpoint: subscription.endpoint });
+
+    await savePushSubscription(subscription);
+
+    expect(captureEvent).not.toHaveBeenCalled();
   });
 
   it("refuses an invalid subscription without writing", async () => {

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
+import { CURRENT_CONSENT_VERSION } from "@/lib/legal/consent";
 
 // Session and database are replaced. redirect() is made to throw, as the real
 // one does, so the code after it never runs.
@@ -27,6 +28,7 @@ const complete = {
   onboardingCompletedAt: new Date("2026-10-04T10:00:00Z"),
   avatarPath: "user-1/photo.webp",
   blockedAt: null,
+  consentVersion: CURRENT_CONSENT_VERSION,
 };
 
 describe("requireOnboardedUser", () => {
@@ -81,5 +83,17 @@ describe("requireOnboardedUser", () => {
     await expect(requireOnboardedUser()).rejects.toThrow(
       "redirect:/onboarding",
     );
+  });
+
+  it("sends an onboarded player who hasn't agreed to the current terms to /consent", async () => {
+    findUnique.mockResolvedValue({ ...complete, consentVersion: null });
+
+    await expect(requireOnboardedUser()).rejects.toThrow("redirect:/consent");
+  });
+
+  it("sends a player who agreed to an older version to /consent", async () => {
+    findUnique.mockResolvedValue({ ...complete, consentVersion: "2025-01-01" });
+
+    await expect(requireOnboardedUser()).rejects.toThrow("redirect:/consent");
   });
 });

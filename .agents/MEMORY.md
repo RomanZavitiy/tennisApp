@@ -479,3 +479,72 @@ AGENTS.md §8 за один слайс): інфраструктура next-intl 
 - Будь-яка нова сторінка чи компонент у `app/`/`components/` відтепер мусить пройти
   `pnpm check:i18n-strings` (CI це вже ловить) — писати `useTranslations`/`getTranslations`
   одразу, не рядки, і додавати ключ в обидва `messages/*.json` одразу.
+
+## Нотатка передачі — сесія 10 → сесія 11 (2026-10-16)
+
+**Зроблено:** слайс J2 (6.5, 6.6, 6.13, 6.19, 6.14, 6.11, 6.12, 6.15; документація для 6.9/6.10
+і 5.13/1.19) — гілка `feat/slice-J2-launch-readiness` від свіжого `main` (`42eda3f`), п'ять
+коммітів. Перевірено `.env.local` на старті: жодного з підготовлених людиною ресурсів
+(домен, ключі PostHog/Sentry, другий проєкт Supabase) не було — код написано в режимі «мовчки
+нічого не шле без ключа» (той самий патерн, що й `lib/push/send-push.ts`), чекліст для людини —
+новий `docs/LAUNCH-CHECKLIST.md`. Архітектурні рішення й компроміси реалізації — чотири записи
+2026-10-16 у `decisions.md` («Аналітика і Sentry: деталі реалізації», «Легал: Draft-сторінки…»,
+«Застосування міграцій до prod», «Видалення акаунта: ручний процес»). `pnpm build/lint/
+typecheck/test` зелені (687 тестів, 22 нові). `check:i18n-strings`/`check:i18n-keys` зелені.
+E2E зачеплених файлів (`onboarding`, `profile-edit`, `member-pages`, `offer-create`,
+`offer-page`, `result-confirm`) — усі 19 зелені окремо (msedge, `--workers` за замовчуванням,
+кожен прогін один раз; конфіг на канал `msedge` відкочено перед кожним комітом).
+
+**6.15 (видалення акаунта) — зупинились, показали план, людина обрала інший шлях:** AGENTS.md
+§9 і текст задачі сесії 10 вимагали зупинитись і показати план перед кодом, що торкається
+масового видалення даних. Показаний план (анонімізація через `users.deletedAt`, UI-фолбек
+«Deleted player» по всьому коду) людина відхилила — замість self-service кнопки обрала ручний
+процес, що власник виконує сам за запитом: `docs/ACCOUNT-DELETION.md` (SQL-кроки +
+Supabase Dashboard). **Несподіванка, яка все спростила:** жодного коду не знадобилось —
+`getPublicProfile()` уже повертає `null` (→ 404 на `/players/[id]`) щойно `name`/`birthDate`
+порожні, а `offer.author.name && (...)`/`match.opponentName ?? t("aPlayer")`/
+`?? t("defaultAuthorName")` (картка оферти, історія матчів, сторінка оферти) уже мають запасний
+текст на порожнє ім'я — ці перевірки існували задовго до цієї сесії, не додані заради неї.
+Просте SQL-нулювання `name`/`email`/`birth_date`/`avatar_path` дає весь потрібний результат
+через уже наявний код. Якщо сесія 11 чи людина захочуть колись self-service UI — рішення
+2026-10-16 «Видалення акаунта: ручний процес» не забороняє це, лише фіксує поточний вибір.
+
+**Де що лежить:**
+- `lib/analytics/posthog.ts` (`captureEvent`) — `posthog-node`, НЕ `posthog-js`: усі 10 подій
+  (6.5) викликаються з server actions (`requestToJoin`, `createOffer`, `changeJoin`'s ACCEPT-
+  гілка, `sendMessage`, `markCourtBooked`, `recordOutboundClick`, `confirmResult`,
+  `submitNoShow`, `savePushSubscription`, `completeOnboarding`), жодна — з браузера, тому
+  клієнтського SDK й cookie нема взагалі — простіше й надійніше, ніж `persistence: 'memory'` із
+  рішення 2026-10-14. `lib/analytics/events.ts` — типізований allowlist властивостей на подію;
+  `sanitize()` у `posthog.ts` — рантайм-бекстоп (список заборонених ключів: email/name/content/…).
+- Sentry: `instrumentation-client.ts` (клієнт), `instrumentation.ts` + `sentry.server.config.ts`/
+  `sentry.edge.config.ts` (сервер/edge за `NEXT_RUNTIME`), `next.config.ts`'s `withSentryConfig`
+  — імпорт з `@sentry/nextjs/config`, НЕ з кореня пакета (інший шлях експорту в 11.x).
+  `sendDefaultPii`/`disableLogger` з офіційних прикладів **не існують** у типах 11.7.0 —
+  перевірено прямо в `node_modules`, не припущено з пам'яті; замінено спільним `beforeSend`
+  (`lib/monitoring/scrub-event.ts`), що видаляє `event.user` і `cookie`/`authorization`.
+- `lib/privacy/export-user-data.ts`/`opponent-name.ts` — `/profile/export`
+  (`app/(member)/profile/export/`), `components/export-data-button.tsx` (Blob + `<a download>`,
+  єдиний спосіб віддати файл із server action).
+- `lib/legal/consent.ts` (`CURRENT_CONSENT_VERSION`, рядок-дата, не семвер) — читається і в
+  `requireOnboardedUser()` (друга перевірка після онбордингу, шле на `/consent`), і в
+  `completeOnboarding` (пише разом з `onboardingCompletedAt`). `ProfileForm`'s новий
+  `withConsent`-пропс рендерить чекбокс лише в онбордингу — НЕ додано в спільний `profileSchema`
+  (щоб `/profile/edit` лишився без нього); перевіряється окремим Zod-парсом прямо в
+  `completeOnboarding`. `/consent` (`app/consent/`) — для наявних користувачів, plain `<form
+  action>` без клієнтського JS. `/terms`, `/privacy` (`app/terms/`, `app/privacy/`) — публічні
+  Draft-сторінки, додані в `PUBLIC_ROUTES`.
+- `e2e/support/supabase-admin.ts`'s `completeTestProfile()` тепер пише `consented_at`/
+  `consent_version` теж — без цього кожен e2e-тест, що готує вже-онбордженого користувача
+  напряму в БД, упирався б у `/consent`. Якщо сесія 11 додає ще один тест-фікстура з
+  онбордингом напряму в БД (не через форму), той самий патерн.
+- Міграція `20261016090000_add_user_consent` (застосована напряму — той самий обхідний шлях, що
+  кожна міграція з 3.15: shadow-БД не знає про `auth.uid()` з 3.15).
+
+**Несподіване:**
+- `@sentry/nextjs` 11.x переставив build-конфіг (`withSentryConfig`) на окремий шлях експорту
+  `@sentry/nextjs/config` — імпорт з кореня пакета падає `TypeError: ... is not a function`.
+  Якщо майбутня сесія ще раз торкнеться Sentry-конфіг і бачить цю помилку після оновлення
+  пакета — дивись актуальний `package.json`'s `exports` самого пакета, не документацію з пам'яті.
+- Той самий осиротілий `offer_join` (`d36f9878…`) з усіх попередніх сесій і далі ламає
+  `globalTeardown` — не регресія, не торкались файлів цієї сесії.
