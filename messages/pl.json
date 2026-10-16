@@ -97,7 +97,8 @@
     "editProfile": "Edytuj profil",
     "notifications": "Powiadomienia",
     "exportData": "Pobierz moje dane",
-    "language": "Język"
+    "language": "Język",
+    "deleteAccount": "Usuń moje konto"
   },
   "OfferCard": {
     "byAuthor": "od {name}"
@@ -624,6 +625,17 @@
     "title": "Zaktualizowany Regulamin i Polityka prywatności",
     "body": "Zaktualizowaliśmy nasz <terms>Regulamin</terms> i <privacy>Politykę prywatności</privacy>. Zapoznaj się z nimi i zaakceptuj, aby dalej korzystać z MatchFinder Kraków.",
     "agree": "Zgadzam się"
+  },
+  "DeleteAccountPage": {
+    "title": "Usuń moje konto",
+    "intro": "To trwale usuwa Twoje zdjęcie profilowe, imię, e-mail i datę urodzenia, anuluje Twoje otwarte oferty i wycofuje oczekujące prośby o dołączenie. Twoje wiadomości na czacie zostaną zastąpione tekstem \"[deleted]\". Potwierdzone mecze i ELO Twoich przeciwników nigdy nie są zmieniane.",
+    "warning": "Tej operacji nie można cofnąć.",
+    "confirmButton": "Usuń moje konto"
+  },
+  "AccountDeletedPage": {
+    "title": "Konto usunięte",
+    "body": "Twoje konto i dane osobowe zostały usunięte. Dziękujemy za korzystanie z MatchFinder Kraków.",
+    "home": "Wróć na stronę główną"
   },
   "TermsPage": {
     "title": "Regulamin",

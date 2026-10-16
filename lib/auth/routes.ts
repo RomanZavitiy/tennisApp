@@ -22,6 +22,9 @@ const PUBLIC_ROUTES = [
   // just linked from inside the app.
   /^\/terms$/,
   /^\/privacy$/,
+  // Landing page after /profile/delete (task 6.15): the session is already
+  // gone by the time a player is redirected here.
+  /^\/account-deleted$/,
   // /admin (task 6.1): left out of the proxy's gate on purpose, so a
   // signed-out visitor and a signed-in non-admin get the same 404 from
   // requireAdmin() instead of the proxy sending only the signed-out one to

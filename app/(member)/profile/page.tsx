@@ -74,6 +74,17 @@ export default async function ProfilePage() {
         <span className="text-sm text-muted-foreground">{t("language")}</span>
         <LanguageSwitcher />
       </div>
+      <div className="mt-6 border-t pt-6">
+        <Link
+          href="/profile/delete"
+          className={buttonVariants({
+            variant: "destructive",
+            className: "w-full",
+          })}
+        >
+          {t("deleteAccount")}
+        </Link>
+      </div>
     </main>
   );
 }

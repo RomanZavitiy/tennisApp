@@ -37,8 +37,10 @@ model User {
   /// Mirrors auth.users.email (task 1.9's ensureUserRow sets it on every
   /// sign-in): email fallback (5.1-5.6) needs an address, and app code never
   /// reads auth.users directly — the secret key that could is reserved for
-  /// the e2e helper (decision 1.2). Null until the first sign-in after this
-  /// column existed.
+  /// the e2e helper (decision 1.2), plus one narrow exception:
+  /// lib/privacy/delete-account.ts calls auth.admin.deleteUser() for a
+  /// player deleting their own account (task 6.15, decision 2026-10-16).
+  /// Null until the first sign-in after this column existed.
   email                 String?   @unique @db.VarChar(320)
   name                  String?   @db.VarChar(50)
   /// Private: only the age derived from it is ever shown.
