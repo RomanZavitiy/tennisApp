@@ -419,10 +419,15 @@
   суперник у матчі — лише `firstNameAndInitial()` (`lib/privacy/opponent-name.ts`), ніколи повне
   ім'я. Тест: `tests/lib/privacy/export-user-data.test.ts`.
 - ✅ **6.15 Видалення акаунта** · Залежить від: 4.9
-  Рішення власника (2026-10-16, після показу плану): без self-service кнопки — ручний процес,
-  `docs/ACCOUNT-DELETION.md` (SQL-кроки + дії в Supabase Dashboard). Жодного коду не додано:
-  наявні запасні тексти на порожнє ім'я (`"A player"` тощо) і `getPublicProfile()`'s перевірка
-  обов'язкових полів (→ 404 на `/players/[id]`) уже дають потрібний результат самі.
+  `/profile/delete`: гравець видаляє свій акаунт сам. `redactAccountData` (одна Prisma-
+  транзакція: скасовує відкриті оферти, відкликає неозіграні заявки, замінює повідомлення на
+  `"[deleted]"`, нулює особисті поля) і `deleteAccountStorageAndAuth` (фото з Storage +
+  `auth.admin.deleteUser`) — обидва в `lib/privacy/delete-account.ts`. Рядок `users` не
+  видаляється (Restrict на `match_results`, рішення 2026-09-28). Перший app-код, що читає
+  `SUPABASE_SECRET_KEY` — `lib/supabase/admin.ts` — амендмент рішення 1.2, деталі в
+  `decisions.md` (2026-10-16, «self-service кнопка замінює ручний процес»).
+  `docs/ACCOUNT-DELETION.md` лишається як резервний ручний шлях. Тести:
+  `tests/lib/privacy/delete-account.test.ts`, `tests/app/(member)/profile/delete/actions.test.ts`.
 - ✅ **6.11, 6.12 Regulamin, політика приватності, згода** (тексти — людина/юрист)
   `/terms`, `/privacy` — публічні Draft-сторінки (EN/PL, банер + абзац-заповнювач), посилання у
   футері. Чекбокс згоди в онбордингу (`ProfileForm`'s `withConsent`), `users.consentedAt`/

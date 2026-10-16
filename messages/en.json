@@ -97,7 +97,8 @@
     "editProfile": "Edit profile",
     "notifications": "Notifications",
     "exportData": "Download my data",
-    "language": "Language"
+    "language": "Language",
+    "deleteAccount": "Delete my account"
   },
   "OfferCard": {
     "byAuthor": "by {name}"
@@ -624,6 +625,17 @@
     "title": "Updated Terms and Privacy Policy",
     "body": "We've updated our <terms>Terms</terms> and <privacy>Privacy Policy</privacy>. Please review them and agree to keep using MatchFinder Kraków.",
     "agree": "I agree"
+  },
+  "DeleteAccountPage": {
+    "title": "Delete my account",
+    "intro": "This permanently removes your profile photo, name, email and birth date, cancels your open offers, and withdraws your pending join requests. Your chat messages are replaced with \"[deleted]\". Confirmed matches and your opponents' ELO are never affected.",
+    "warning": "This cannot be undone.",
+    "confirmButton": "Delete my account"
+  },
+  "AccountDeletedPage": {
+    "title": "Account deleted",
+    "body": "Your account and personal data have been removed. Thanks for using MatchFinder Kraków.",
+    "home": "Back to home"
   },
   "TermsPage": {
     "title": "Terms",
