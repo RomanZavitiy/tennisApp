@@ -4,11 +4,10 @@ import { notFound } from "next/navigation";
 
 import { reportPlayer } from "@/app/players/[id]/actions";
 import { MatchHistory } from "@/components/match-history";
-import { PlayerAvatar } from "@/components/player-avatar";
-import { PlayerFacts } from "@/components/player-facts";
+import { ProfileHero } from "@/components/profile-hero";
 import { ReportButton } from "@/components/report-button";
 import { getCurrentUser } from "@/lib/auth/require-user";
-import { getMatchHistory } from "@/lib/players/match-history";
+import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
 import { getPublicProfile } from "@/lib/players/public-profile";
 
 // A player's public page — open to everyone, signed in or not (it's in the
@@ -37,30 +36,15 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const t = await getTranslations("PlayerPage");
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
-      <div className="flex items-center gap-4">
-        <PlayerAvatar name={profile.name} avatarPath={profile.avatarPath} />
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {profile.name}
-        </h1>
-      </div>
-      <div className="mt-6">
-        <PlayerFacts
-          age={profile.age}
-          district={profile.district}
-          selfRatedNtrp={profile.selfRatedNtrp}
-          elo={profile.elo}
-          reliability={profile.reliability}
-        />
-      </div>
-      <div className="mt-8">
-        <h2 className="font-semibold">{t("matchHistory")}</h2>
-        <div className="mt-3">
-          <MatchHistory matches={matches} />
-        </div>
-      </div>
+    <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 px-4 py-8">
+      {/* The same hero as the player's own /profile (slice K6). */}
+      <ProfileHero profile={profile} summary={summarizeMatches(matches)} />
+      <section className="rounded-2xl border bg-card px-5 py-4 shadow-sm">
+        <h2 className="mb-2 text-lg font-semibold">{t("matchHistory")}</h2>
+        <MatchHistory matches={matches} />
+      </section>
       {viewer && viewer.id !== profile.id && (
-        <div className="mt-8">
+        <div>
           <ReportButton
             action={reportPlayer.bind(null, profile.id)}
             label={t("reportThisPlayer")}

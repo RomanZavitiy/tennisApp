@@ -1,90 +1,113 @@
-import { getTranslations } from "next-intl/server";
+import { ChevronRightIcon } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { AvatarUpload } from "@/components/avatar-upload";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { PlayerAvatar } from "@/components/player-avatar";
-import { PlayerFacts } from "@/components/player-facts";
-import { buttonVariants } from "@/components/ui/button";
+import { MatchHistory } from "@/components/match-history";
+import { MyGames } from "@/components/my-games";
+import { ProfileHero } from "@/components/profile-hero";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
-import { ageOn, todayInKrakow } from "@/lib/validation/profile";
+import { getMyUpcomingGames } from "@/lib/offers/my-games";
+import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
+import { getPublicProfile } from "@/lib/players/public-profile";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ProfilePage");
   return { title: t("title") };
 }
 
-// The player's own profile with their photo; the other fields are edited on
-// /profile/edit. The birth date stays private: only the age is shown.
+// The player's own profile (slice K6): the same hero other players see on
+// /players/[id], then what only they need — their upcoming games, their
+// match history, and account settings in one list. Built from
+// getPublicProfile, so nothing private (the birth date) can slip into the
+// shared hero.
 export default async function ProfilePage() {
   const t = await getTranslations("ProfilePage");
-  const profile = await requireOnboardedUser();
-  const age = ageOn(
-    profile.birthDate.toISOString().slice(0, 10),
-    todayInKrakow(),
-  );
+  const player = await requireOnboardedUser();
+  const [profile, matches, games] = await Promise.all([
+    getPublicProfile(player.id),
+    getMatchHistory(player.id),
+    getMyUpcomingGames(player.id),
+  ]);
+  // requireOnboardedUser has just checked the profile is complete.
+  if (!profile) {
+    notFound();
+  }
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
-      <div className="flex items-center gap-4">
-        <PlayerAvatar name={profile.name} avatarPath={profile.avatarPath} />
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {profile.name}
-        </h1>
-      </div>
-      <div className="mt-4">
-        <AvatarUpload userId={profile.id} />
-      </div>
-      <div className="mt-6">
-        <PlayerFacts
-          age={age}
-          district={profile.district}
-          selfRatedNtrp={profile.selfRatedNtrp}
-        />
-      </div>
-      <Link
-        href="/profile/edit"
-        className={buttonVariants({
-          variant: "outline",
-          className: "mt-6 w-full",
-        })}
-      >
-        {t("editProfile")}
-      </Link>
-      <Link
-        href="/profile/notifications"
-        className={buttonVariants({
-          variant: "outline",
-          className: "mt-3 w-full",
-        })}
-      >
-        {t("notifications")}
-      </Link>
-      <Link
-        href="/profile/export"
-        className={buttonVariants({
-          variant: "outline",
-          className: "mt-3 w-full",
-        })}
-      >
-        {t("exportData")}
-      </Link>
-      <div className="mt-6 flex items-center justify-between border-t pt-6">
-        <span className="text-sm text-muted-foreground">{t("language")}</span>
-        <LanguageSwitcher />
-      </div>
-      <div className="mt-6 border-t pt-6">
-        <Link
-          href="/profile/delete"
-          className={buttonVariants({
-            variant: "destructive",
-            className: "w-full",
-          })}
-        >
-          {t("deleteAccount")}
-        </Link>
-      </div>
+    <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 px-4 py-8">
+      <ProfileHero profile={profile} summary={summarizeMatches(matches)} />
+
+      <Card title={t("myGames")}>
+        <MyGames games={games} />
+      </Card>
+
+      <Card title={t("matchHistory")}>
+        <MatchHistory matches={matches} />
+      </Card>
+
+      <Card title={t("account")}>
+        <div className="pb-4">
+          <p className="mb-2 text-sm font-medium">{t("photo")}</p>
+          <AvatarUpload userId={profile.id} />
+        </div>
+        <ul className="divide-y border-t">
+          <SettingsLink href="/profile/edit">{t("editProfile")}</SettingsLink>
+          <SettingsLink href="/profile/notifications">
+            {t("notifications")}
+          </SettingsLink>
+          <SettingsLink href="/profile/export">{t("exportData")}</SettingsLink>
+          <li className="flex items-center justify-between py-3">
+            <span>{t("language")}</span>
+            <LanguageSwitcher />
+          </li>
+          <SettingsLink href="/profile/delete" destructive>
+            {t("deleteAccount")}
+          </SettingsLink>
+        </ul>
+      </Card>
     </main>
+  );
+}
+
+function Card({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="rounded-2xl border bg-card px-5 py-4 shadow-sm">
+      <h2 className="mb-2 text-lg font-semibold">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function SettingsLink({
+  href,
+  destructive = false,
+  children,
+}: {
+  href: string;
+  destructive?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className={cn(
+          "flex items-center justify-between py-3 outline-none hover:text-primary focus-visible:ring-2 focus-visible:ring-ring",
+          destructive && "text-destructive hover:text-destructive",
+        )}
+      >
+        {children}
+        <ChevronRightIcon
+          aria-hidden
+          className="size-4 text-muted-foreground"
+        />
+      </Link>
+    </li>
   );
 }
