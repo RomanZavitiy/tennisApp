@@ -111,8 +111,28 @@
     "submit": "Szukaj",
     "clear": "Wyczyść"
   },
+  "ProfileHero": {
+    "age": "{age, plural, one {# rok} few {# lata} many {# lat} other {# lat}}",
+    "elo": "ELO",
+    "level": "Poziom (NTRP)",
+    "reliability": "Rzetelność",
+    "record": "Wygrane–przegrane",
+    "played": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}"
+  },
+  "MyGames": {
+    "none": "Brak nadchodzących gier. Znajdź grę na tablicy albo dodaj własną ofertę.",
+    "findAGame": "Znajdź grę",
+    "postAnOffer": "Dodaj ofertę",
+    "yourOffer": "{count, plural, =0 {Twoja oferta} one {Twoja oferta · # prośba} few {Twoja oferta · # prośby} many {Twoja oferta · # próśb} other {Twoja oferta · # próśb}}",
+    "youAreIn": "Grasz",
+    "requestSent": "Prośba wysłana"
+  },
   "ProfilePage": {
     "title": "Twój profil",
+    "myGames": "Moje gry",
+    "matchHistory": "Historia meczów",
+    "account": "Konto",
+    "photo": "Zdjęcie profilowe",
     "editProfile": "Edytuj profil",
     "notifications": "Powiadomienia",
     "exportData": "Pobierz moje dane",
@@ -365,13 +385,6 @@
     "lost": "Porażka",
     "vs": "vs",
     "aPlayer": "Zawodnik"
-  },
-  "PlayerFacts": {
-    "age": "Wiek",
-    "district": "Dzielnica",
-    "level": "Poziom (NTRP)",
-    "elo": "ELO",
-    "reliability": "Wiarygodność"
   },
   "ResultForm": {
     "you": "Ty",

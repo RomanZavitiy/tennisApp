@@ -82,3 +82,12 @@ export async function getMatchHistory(
     };
   });
 }
+
+export type MatchSummary = { played: number; won: number; lost: number };
+
+/** The win/loss line on a profile (slice K6), from the same confirmed
+ * matches the history lists — the two can never disagree. */
+export function summarizeMatches(matches: MatchHistoryEntry[]): MatchSummary {
+  const won = matches.filter((match) => match.won).length;
+  return { played: matches.length, won, lost: matches.length - won };
+}

@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { getMatchHistory } from "@/lib/players/match-history";
+import {
+  getMatchHistory,
+  type MatchHistoryEntry,
+  summarizeMatches,
+} from "@/lib/players/match-history";
 
 const { matchResultFindMany } = vi.hoisted(() => ({
   matchResultFindMany: vi.fn(),
@@ -102,5 +106,30 @@ describe("getMatchHistory", () => {
         eloAfter: 1490,
       },
     ]);
+  });
+});
+
+describe("summarizeMatches", () => {
+  const entry = (won: boolean): MatchHistoryEntry => ({
+    id: String(Math.random()),
+    opponentId: "o",
+    opponentName: "Opponent",
+    sets: [],
+    wasAuthor: true,
+    won,
+    eloBefore: 1500,
+    eloAfter: won ? 1516 : 1484,
+  });
+
+  it("counts played, won and lost", () => {
+    expect(summarizeMatches([entry(true), entry(false), entry(true)])).toEqual({
+      played: 3,
+      won: 2,
+      lost: 1,
+    });
+  });
+
+  it("is all zeros with no matches", () => {
+    expect(summarizeMatches([])).toEqual({ played: 0, won: 0, lost: 0 });
   });
 });
