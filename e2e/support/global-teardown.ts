@@ -1,5 +1,6 @@
 import {
   createAdminClient,
+  deleteTestClub,
   deleteTestUser,
   TEST_CLUB_SLUG_PREFIX,
   TEST_EMAIL_DOMAIN,
@@ -31,15 +32,31 @@ export default async function globalTeardown() {
       Date.parse(user.created_at) < cutoff,
   );
 
+  // One leftover that can't be deleted mustn't keep the rest — or the clubs
+  // below — around, so failures are logged and the cleanup goes on.
   for (const user of stale) {
-    await deleteTestUser(admin, user.id);
+    try {
+      await deleteTestUser(admin, user.id);
+    } catch (cause) {
+      console.warn(`Teardown: couldn't delete test user ${user.id}:`, cause);
+    }
   }
 
-  // Test clubs would show on the real map, so leftovers go the same way.
-  const { error: clubsError } = await admin
+  // Test clubs would show on the real map, so leftovers go the same way,
+  // together with any offers still pointing at them.
+  const { data: clubs, error: clubsError } = await admin
     .from("clubs")
-    .delete()
+    .select("id")
     .like("slug", `${TEST_CLUB_SLUG_PREFIX}%`)
-    .lt("created_at", new Date(cutoff).toISOString());
+    .lt("created_at", new Date(cutoff).toISOString())
+    .overrideTypes<{ id: string }[], { merge: false }>();
   if (clubsError) throw clubsError;
+
+  for (const club of clubs) {
+    try {
+      await deleteTestClub(admin, club.id);
+    } catch (cause) {
+      console.warn(`Teardown: couldn't delete test club ${club.id}:`, cause);
+    }
+  }
 }

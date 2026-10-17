@@ -40,6 +40,8 @@ export const TEST_EMAIL_DOMAIN = "@example.com";
 // key to auth.users, so deleting the auth user alone would leave it behind.
 // The secret key bypasses RLS, which lets the Data API delete it.
 // Their photos (task 1.13) go too, so the bucket doesn't fill with test files.
+// Everything else of theirs cascades with the row, except match results:
+// those hold their join with Restrict (see the schema), so they go first.
 export async function deleteTestUser(
   admin: ReturnType<typeof createAdminClient>,
   id: string,
@@ -50,9 +52,80 @@ export async function deleteTestUser(
     await avatars.remove(files.map((file) => `${id}/${file.name}`));
   }
 
+  const { data: joins, error: joinsError } = await admin
+    .from("offer_joins")
+    .select("id")
+    .eq("user_id", id)
+    .overrideTypes<{ id: string }[], { merge: false }>();
+  if (joinsError) throw joinsError;
+  await deleteMatchResults(
+    admin,
+    joins.map((join) => join.id),
+  );
+  await deleteOfferMatchResults(admin, "author_id", id);
+
   const { error } = await admin.from("users").delete().eq("id", id);
   if (error) throw error;
-  await admin.auth.admin.deleteUser(id);
+  const { error: authError } = await admin.auth.admin.deleteUser(id);
+  if (authError) throw authError;
+}
+
+// A club can't be deleted while offers point at it (Restrict), and those
+// offers can't be deleted while their joins have match results.
+export async function deleteTestClub(
+  admin: ReturnType<typeof createAdminClient>,
+  id: string,
+) {
+  await deleteOfferMatchResults(admin, "club_id", id);
+  const { error: offersError } = await admin
+    .from("sparring_offers")
+    .delete()
+    .eq("club_id", id);
+  if (offersError) throw offersError;
+
+  const { error } = await admin.from("clubs").delete().eq("id", id);
+  if (error) throw error;
+}
+
+// Match results on joins to the offers matching column = value.
+async function deleteOfferMatchResults(
+  admin: ReturnType<typeof createAdminClient>,
+  column: "author_id" | "club_id",
+  value: string,
+) {
+  const { data: offers, error: offersError } = await admin
+    .from("sparring_offers")
+    .select("id")
+    .eq(column, value)
+    .overrideTypes<{ id: string }[], { merge: false }>();
+  if (offersError) throw offersError;
+  if (!offers.length) return;
+
+  const { data: joins, error: joinsError } = await admin
+    .from("offer_joins")
+    .select("id")
+    .in(
+      "offer_id",
+      offers.map((offer) => offer.id),
+    )
+    .overrideTypes<{ id: string }[], { merge: false }>();
+  if (joinsError) throw joinsError;
+  await deleteMatchResults(
+    admin,
+    joins.map((join) => join.id),
+  );
+}
+
+async function deleteMatchResults(
+  admin: ReturnType<typeof createAdminClient>,
+  joinIds: string[],
+) {
+  if (!joinIds.length) return;
+  const { error } = await admin
+    .from("match_results")
+    .delete()
+    .in("offer_join_id", joinIds);
+  if (error) throw error;
 }
 
 // Fills in a test user's profile as if they had finished onboarding, for

@@ -5,6 +5,7 @@ import {
   completeTestProfile,
   createAdminClient,
   createTestClub,
+  deleteTestClub,
 } from "./support/supabase-admin";
 
 // /offers/[id] (task 3.13): what a guest, a player and the author each see,
@@ -165,7 +166,7 @@ test("everyone sees the court status and a booking link when a club is set", asy
   await expect(link).toHaveAttribute("target", "_blank");
   await expect(link).toHaveAttribute("rel", "noopener noreferrer");
 
-  await admin.from("clubs").delete().eq("id", clubId);
+  await deleteTestClub(admin, clubId);
 });
 
 test("a club with no booking link offers a call instead", async ({
@@ -198,7 +199,7 @@ test("a club with no booking link offers a call instead", async ({
     page.getByRole("link", { name: "Call to book" }),
   ).toHaveAttribute("href", "tel:+48120000000");
 
-  await admin.from("clubs").delete().eq("id", clubId);
+  await deleteTestClub(admin, clubId);
 });
 
 test("the author marks the court booked after clicking through, and players are told", async ({
@@ -249,7 +250,7 @@ test("the author marks the court booked after clicking through, and players are 
   await signIn(`/offers/${id}`, player);
   await expect(page.getByText("The court has been booked.")).toBeVisible();
 
-  await admin.from("clubs").delete().eq("id", clubId);
+  await deleteTestClub(admin, clubId);
 });
 
 test("an unknown offer is a 404", async ({ page }) => {
