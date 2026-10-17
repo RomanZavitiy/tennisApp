@@ -23,6 +23,15 @@
     "mainNav": "Main",
     "signOut": "Sign out"
   },
+  "NotificationBell": {
+    "label": "Notifications",
+    "labelUnread": "Notifications, {count} unread"
+  },
+  "NotificationsPage": {
+    "title": "Notifications",
+    "empty": "Nothing yet. Requests, replies and messages about your matches will show up here.",
+    "unread": "unread"
+  },
   "PushNotifications": {
     "JOIN_REQUESTED": {
       "title": "New request to join",

@@ -89,9 +89,19 @@ test("a player asks to join and the author accepts", async ({
   ).toBeVisible();
   await expect(page.getByText("Full")).toBeVisible();
 
+  // The player hears about it from the header bell, even without push
+  // (slice K2b), and the list links to the offer.
+  await signIn("/", player);
+  await page.getByRole("link", { name: "Notifications, 1 unread" }).click();
+  await expect(page).toHaveURL("/notifications");
+  await expect(
+    page.getByRole("link", { name: /^Request accepted/ }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: /Request accepted/ }).click();
+  await expect(page).toHaveURL(`/offers/${id}`);
+
   // The player sees they're in, and their thread's welcome note (task 3.17),
   // and sends a message (E2E flow #3, part 2: tasks 3.16-3.18).
-  await signIn(`/offers/${id}`, player);
   await expect(page.getByText("You're in.")).toBeVisible();
   await expect(
     page.getByText("Meet at the court. Never send money in advance."),
@@ -100,8 +110,11 @@ test("a player asks to join and the author accepts", async ({
   await page.getByRole("button", { name: "Send" }).click();
   await expect(page.getByText("You: On my way!")).toBeVisible();
 
-  // The author opens the thread, sees it, and replies.
-  await signIn(`/offers/${id}`, author);
+  // The author finds the message in their notifications, opens the thread,
+  // sees it, and replies.
+  await signIn("/notifications", author);
+  await expect(page.getByRole("link", { name: /^New message/ })).toBeVisible();
+  await page.goto(`/offers/${id}`);
   await page.getByText("Messages", { exact: true }).click();
   await expect(page.getByText(`${playerName}: On my way!`)).toBeVisible();
   await page.getByPlaceholder("Write a message…").fill("See you soon!");

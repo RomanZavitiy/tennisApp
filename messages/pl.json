@@ -23,6 +23,15 @@
     "mainNav": "Główna",
     "signOut": "Wyloguj się"
   },
+  "NotificationBell": {
+    "label": "Powiadomienia",
+    "labelUnread": "Powiadomienia, nieprzeczytane: {count}"
+  },
+  "NotificationsPage": {
+    "title": "Powiadomienia",
+    "empty": "Na razie nic. Tutaj pojawią się prośby, odpowiedzi i wiadomości dotyczące Twoich meczów.",
+    "unread": "nieprzeczytane"
+  },
   "PushNotifications": {
     "JOIN_REQUESTED": {
       "title": "Nowe zgłoszenie",
