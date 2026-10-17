@@ -32,7 +32,7 @@ import { getCurrentUser } from "@/lib/auth/require-user";
 import type { MatchParty, OfferFormat } from "@/lib/generated/prisma/enums";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { joinRefusal } from "@/lib/offers/join-rules";
-import { formatKrakowTime } from "@/lib/offers/krakow-time";
+import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
 import {
   getOfferDetails,
   type OfferDetails,
@@ -119,7 +119,7 @@ export default async function OfferPage({
       </p>
       <h1 className="mt-1 text-2xl font-semibold tracking-tight">
         <time dateTime={offer.startsAt.toISOString()}>
-          {formatKrakowTime(format, offer.startsAt)}
+          {formatKrakowTimeRange(format, offer.startsAt, offer.durationMinutes)}
         </time>
       </h1>
       <p className="mt-2 font-medium text-primary">

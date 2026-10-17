@@ -53,6 +53,9 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   await page.getByLabel("Doubles").check();
   await page.getByLabel("I already have a partner").check();
   await page.getByLabel("Start time").fill(startsAt);
+  // 90 minutes unless changed (slice K5).
+  await expect(page.getByLabel("How long")).toHaveValue("90");
+  await page.getByLabel("How long").selectOption({ label: "2 h" });
   await page
     .getByLabel("Club", { exact: true })
     .selectOption({ label: clubName });
@@ -86,14 +89,16 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
     ntrp_max: 4.5,
     surface: "CLAY",
     comment: "Evening doubles, balls on me.",
+    duration_minutes: 120,
   });
   expect(toKrakowLocal(new Date(String(data.starts_at)))).toBe(startsAt);
 
-  // A signed-in viewer's own offers don't show as "matches" (task 3.9); view
-  // the feed as a guest to check how the new offer itself is displayed.
+  // View the feed as a guest, as other players see the new offer (the
+  // author's own view adds a "Your offer" badge, slice K1).
   await page.context().clearCookies();
   await page.goto("/offers");
   const card = page.getByRole("listitem").filter({ hasText: `by ${name}` });
+  await expect(card).toContainText("18:00–20:00");
   await expect(card).toContainText("Doubles · has a partner");
   await expect(card).toContainText("2 spots left");
   await expect(card).toContainText(clubName);

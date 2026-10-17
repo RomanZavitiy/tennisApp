@@ -129,6 +129,7 @@
     "doubles": "Doubles",
     "hasPartner": "I already have a partner",
     "startsAtLabel": "Start time",
+    "durationLabel": "How long",
     "clubLabel": "Club",
     "noSpecificClub": "No specific club",
     "districtLabel": "District",
@@ -168,6 +169,13 @@
     "any": "Any",
     "ntrpLabel": "My level (NTRP)",
     "formatLabel": "Format",
+    "timeLabel": "Time of day",
+    "time": {
+      "morning": "Morning (before 12:00)",
+      "afternoon": "Afternoon (12:00–17:00)",
+      "evening": "Evening (from 17:00)"
+    },
+    "durationLabel": "How long",
     "courtBookedLabel": "Court already booked",
     "submit": "Filter",
     "clear": "Clear"
@@ -263,6 +271,7 @@
     "resultAnnulled": "An admin reviewed the dispute and annulled this result ({score})."
   },
   "OfferLabels": {
+    "duration": "{hours, number} h",
     "singles": "Singles",
     "doubles": "Doubles",
     "doublesWithPartner": "Doubles · has a partner",
@@ -493,6 +502,7 @@
       "formatRequired": "Choose singles or doubles.",
       "startsAtRequired": "Choose the start time.",
       "startsAtPast": "That time has already passed.",
+      "durationRequired": "Choose how long you want to play.",
       "clubRequired": "Choose a club from the list.",
       "districtRequired": "Choose a district.",
       "surfaceRequired": "Choose a surface.",

@@ -1,5 +1,7 @@
 import type { useFormatter } from "next-intl";
 
+import { offerEndsAt } from "@/lib/offers/duration";
+
 // Offer times as people enter them: wall-clock time in Kraków, the
 // "YYYY-MM-DDTHH:mm" string an <input type="datetime-local"> gives. The
 // database stores the instant in UTC (task 3.2); these turn one into the
@@ -22,6 +24,11 @@ export function toKrakowLocal(date: Date): string {
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     krakowParts.formatToParts(date).find((p) => p.type === type)?.value ?? "";
   return `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
+}
+
+/** The hour (0-23) an instant falls in, on the clock in Kraków. */
+export function krakowHour(date: Date): number {
+  return Number(toKrakowLocal(date).slice(11, 13));
 }
 
 /**
@@ -65,4 +72,22 @@ export function formatKrakowTime(format: Formatter, date: Date): string {
     minute: "2-digit",
     hourCycle: "h23",
   });
+}
+
+/**
+ * An offer's start and end (slice K5): "Tue 20 Oct, 18:00–19:30". The end
+ * shows only its time; a game that runs past midnight still reads correctly
+ * from the start's date.
+ */
+export function formatKrakowTimeRange(
+  format: Formatter,
+  startsAt: Date,
+  durationMinutes: number,
+): string {
+  const end = format.dateTime(offerEndsAt(startsAt, durationMinutes), {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+  return `${formatKrakowTime(format, startsAt)}–${end}`;
 }

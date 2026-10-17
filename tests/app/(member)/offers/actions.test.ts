@@ -120,6 +120,7 @@ describe("createOffer", () => {
         format: "SINGLES",
         hasPartner: false,
         startsAt: new Date("2026-10-20T16:00:00Z"),
+        durationMinutes: 90,
         district: "KROWODRZA",
         courtStatus: "WILL_BOOK",
         comment: "Evening game",

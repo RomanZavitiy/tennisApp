@@ -217,23 +217,26 @@ model SparringOffer {
   // combinations are CHECKs in the migration; the offer schema (3.3)
   // validates first. How many players an offer needs is not stored —
   // playersNeeded() in lib/offers computes it from format and hasPartner.
-  format      OfferFormat @default(SINGLES)
+  format          OfferFormat @default(SINGLES)
   /// Doubles only: the author brings their own partner (a mark, not an account).
-  hasPartner  Boolean     @default(false) @map("has_partner")
+  hasPartner      Boolean     @default(false) @map("has_partner")
   /// Stored in UTC, shown in Europe/Warsaw.
-  startsAt    DateTime    @map("starts_at") @db.Timestamptz
+  startsAt        DateTime    @map("starts_at") @db.Timestamptz
+  /// How long the court is wanted for (slice K5): 60, 90, 120 or 180
+  /// minutes (CHECK in the migration). Rows from before K5 get the default.
+  durationMinutes Int         @default(90) @map("duration_minutes")
   /// Set together with a club or on its own; at least one of the two is set.
   /// Empty for an offer at a club outside the city limits.
-  district    District?
+  district        District?
   /// Wanted NTRP level, 1.5–7.0 in steps of 0.5. Empty — any level.
-  ntrpMin     Float?      @map("ntrp_min")
-  ntrpMax     Float?      @map("ntrp_max")
+  ntrpMin         Float?      @map("ntrp_min")
+  ntrpMax         Float?      @map("ntrp_max")
   /// Empty — any surface.
-  surface     Surface?
-  comment     String?     @db.VarChar(500)
+  surface         Surface?
+  comment         String?     @db.VarChar(500)
   /// Whether the court is already booked (task 3.22). Default: the author
   /// books once a sparring partner is confirmed.
-  courtStatus CourtStatus @default(WILL_BOOK) @map("court_status")
+  courtStatus     CourtStatus @default(WILL_BOOK) @map("court_status")
 
   // Reminder pushes (task 5.10/5.16, hourly cron): each sent at most once,
   // so an hourly run that catches an offer two hours in a row doesn't

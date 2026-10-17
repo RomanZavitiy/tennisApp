@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   feedHref,
   feedWhere,
+  matchesTimeOfDay,
   parseFeedFilters,
 } from "@/lib/offers/feed-filters";
 
@@ -24,6 +25,14 @@ describe("parseFeedFilters", () => {
       ntrp: 3.5,
       format: "DOUBLES",
     });
+  });
+
+  it("reads duration and time of day, ignoring values not on offer (K5)", () => {
+    expect(parseFeedFilters({ duration: "90", time: "morning" })).toEqual({
+      duration: 90,
+      time: "morning",
+    });
+    expect(parseFeedFilters({ duration: "45", time: "night" })).toEqual({});
   });
 
   it("treats a missing or empty value as no filter", () => {
@@ -134,6 +143,12 @@ describe("feedWhere", () => {
     });
   });
 
+  it("filters by duration; time of day is left to matchesTimeOfDay (K5)", () => {
+    expect(feedWhere({ duration: 120, time: "evening" }, NOW)).toEqual({
+      AND: [...BASE, { durationMinutes: 120 }],
+    });
+  });
+
   it("filters to offers whose court is already booked", () => {
     expect(feedWhere({ courtBooked: true }, NOW)).toEqual({
       AND: [...BASE, { courtStatus: "BOOKED" }],
@@ -171,8 +186,30 @@ describe("feedHref", () => {
       ntrp: 2.5,
       format: "SINGLES",
       courtBooked: true,
+      duration: 180,
+      time: "afternoon",
     } as const;
     const query = new URL(feedHref(filters), "http://x").searchParams;
     expect(parseFeedFilters(Object.fromEntries(query))).toEqual(filters);
+  });
+});
+
+describe("matchesTimeOfDay", () => {
+  // Summer time, UTC+2: 09:59 / 12:00 / 16:59 / 17:00 in Kraków.
+  const at = (utc: string) => new Date(`2026-07-15T${utc}:00Z`);
+
+  it.each([
+    ["07:59", "morning"],
+    ["10:00", "afternoon"],
+    ["14:59", "afternoon"],
+    ["15:00", "evening"],
+    ["21:30", "evening"], // 23:30 in Kraków
+  ] as const)("puts %s UTC in the %s", (utc, time) => {
+    expect(matchesTimeOfDay(at(utc), time)).toBe(true);
+    for (const other of ["morning", "afternoon", "evening"] as const) {
+      if (other !== time) {
+        expect(matchesTimeOfDay(at(utc), other)).toBe(false);
+      }
+    }
   });
 });

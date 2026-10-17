@@ -129,6 +129,7 @@
     "doubles": "Debel",
     "hasPartner": "Mam już partnera",
     "startsAtLabel": "Godzina rozpoczęcia",
+    "durationLabel": "Jak długo",
     "clubLabel": "Klub",
     "noSpecificClub": "Bez konkretnego klubu",
     "districtLabel": "Dzielnica",
@@ -168,6 +169,13 @@
     "any": "Każdy",
     "ntrpLabel": "Mój poziom (NTRP)",
     "formatLabel": "Format",
+    "timeLabel": "Pora dnia",
+    "time": {
+      "morning": "Rano (przed 12:00)",
+      "afternoon": "Po południu (12:00–17:00)",
+      "evening": "Wieczorem (od 17:00)"
+    },
+    "durationLabel": "Jak długo",
     "courtBookedLabel": "Kort już zarezerwowany",
     "submit": "Filtruj",
     "clear": "Wyczyść"
@@ -263,6 +271,7 @@
     "resultAnnulled": "Administrator rozpatrzył sprzeciw i unieważnił ten wynik ({score})."
   },
   "OfferLabels": {
+    "duration": "{hours, number} godz.",
     "singles": "Singiel",
     "doubles": "Debel",
     "doublesWithPartner": "Debel · z partnerem",
@@ -493,6 +502,7 @@
       "formatRequired": "Wybierz singla albo debla.",
       "startsAtRequired": "Wybierz godzinę rozpoczęcia.",
       "startsAtPast": "Ten termin już minął.",
+      "durationRequired": "Wybierz, jak długo chcesz grać.",
       "clubRequired": "Wybierz klub z listy.",
       "districtRequired": "Wybierz dzielnicę.",
       "surfaceRequired": "Wybierz nawierzchnię.",
