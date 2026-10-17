@@ -3,13 +3,16 @@ import Link from "next/link";
 
 import { signOut } from "@/app/auth/actions";
 import { MobileNav } from "@/components/mobile-nav";
+import { NotificationBell } from "@/components/notification-bell";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { countUnreadNotifications } from "@/lib/notifications/inbox";
 
 // Reading the session here makes every page render per request instead of
 // being prerendered: the header differs for signed-in users on every page.
 export async function SiteHeader() {
   const user = await getCurrentUser();
+  const unread = user ? await countUnreadNotifications(user.id) : 0;
   const t = await getTranslations("SiteHeader");
   const tMetadata = await getTranslations("Metadata");
 
@@ -30,36 +33,41 @@ export async function SiteHeader() {
           {tMetadata("siteName")}
         </Link>
 
-        <nav
-          aria-label={t("mainNav")}
-          className="hidden items-center gap-1 sm:flex"
-        >
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={buttonVariants({ variant: "ghost" })}
-            >
-              {link.label}
-            </Link>
-          ))}
-          {user ? (
-            <form action={signOut}>
-              <Button type="submit" variant="outline">
-                {t("signOut")}
-              </Button>
-            </form>
-          ) : (
-            <Link href={signIn.href} className={buttonVariants()}>
-              {signIn.label}
-            </Link>
-          )}
-        </nav>
+        <div className="flex items-center gap-1">
+          <nav
+            aria-label={t("mainNav")}
+            className="hidden items-center gap-1 sm:flex"
+          >
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={buttonVariants({ variant: "ghost" })}
+              >
+                {link.label}
+              </Link>
+            ))}
+            {user ? (
+              <form action={signOut}>
+                <Button type="submit" variant="outline">
+                  {t("signOut")}
+                </Button>
+              </form>
+            ) : (
+              <Link href={signIn.href} className={buttonVariants()}>
+                {signIn.label}
+              </Link>
+            )}
+          </nav>
 
-        <MobileNav
-          links={user ? links : [...links, signIn]}
-          signedIn={Boolean(user)}
-        />
+          {/* One bell for both layouts, so only one copy polls. */}
+          {user && <NotificationBell initialCount={unread} />}
+
+          <MobileNav
+            links={user ? links : [...links, signIn]}
+            signedIn={Boolean(user)}
+          />
+        </div>
       </div>
     </header>
   );

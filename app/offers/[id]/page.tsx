@@ -21,6 +21,7 @@ import {
 } from "@/app/offers/[id]/result-actions";
 import { JoinThread } from "@/components/join-thread";
 import { MarkMeaningfulAction } from "@/components/mark-meaningful-action";
+import { MarkNotificationsRead } from "@/components/mark-notifications-read";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { OfferBookingSection } from "@/components/offer-booking-section";
 import { PlayerAvatar } from "@/components/player-avatar";
@@ -111,6 +112,8 @@ export default async function OfferPage({
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
       {created === "1" && <MarkMeaningfulAction />}
+      {/* Opening the offer is reading what its notifications said (K2b). */}
+      {viewer && <MarkNotificationsRead offerId={offer.id} />}
       <p className="text-sm text-muted-foreground">
         {formatLabel(tOfferLabels, offer)}
       </p>
