@@ -9,6 +9,7 @@ import { BookingLink } from "@/components/booking-link";
 import { ExternalLink } from "@/components/external-link";
 import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/auth/require-user";
 import { formatCheckedDate, getClub } from "@/lib/clubs/club-details";
 import { getClubOffers } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
@@ -36,6 +37,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
     notFound();
   }
   const offers = await getClubOffers(club.id);
+  const viewer = await getCurrentUser();
 
   const t = await getTranslations("ClubPage");
   const tSurface = await getTranslations("Surface");
@@ -144,7 +146,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
           <ul className="mt-2 space-y-3">
             {offers.map((offer) => (
               <li key={offer.id}>
-                <OfferCard offer={offer} />
+                <OfferCard offer={offer} viewerId={viewer?.id ?? null} />
               </li>
             ))}
           </ul>

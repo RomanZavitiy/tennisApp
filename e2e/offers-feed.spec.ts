@@ -9,8 +9,8 @@ import {
 } from "./support/supabase-admin";
 
 // /offers lists open offers that haven't started yet (task 3.6), ranked by
-// ELO closeness for a signed-in viewer and excluding that viewer's own
-// offers (task 3.9); a guest sees them by date, nothing excluded. The
+// ELO closeness for a signed-in viewer (task 3.9), whose own offers stay in
+// and are marked (slice K1); a guest sees them by date. The
 // database is shared, so the test finds its own offers by the author's
 // unique name rather than counting cards.
 
@@ -155,7 +155,7 @@ test("filters narrow the feed, live in the URL and work with back", async ({
   await expect(mine).toHaveCount(2);
 });
 
-test("a signed-in viewer sees others' offers ranked by ELO, not their own", async ({
+test("a signed-in viewer sees others' offers and their own, marked as theirs", async ({
   page,
   signIn,
 }) => {
@@ -187,7 +187,9 @@ test("a signed-in viewer sees others' offers ranked by ELO, not their own", asyn
   await expect(
     page.getByRole("listitem").filter({ hasText: `by ${otherName}` }),
   ).toHaveCount(1);
-  await expect(
-    page.getByRole("listitem").filter({ hasText: `by ${viewerName}` }),
-  ).toHaveCount(0);
+  const own = page.getByRole("listitem").filter({
+    hasText: `by ${viewerName}`,
+  });
+  await expect(own).toHaveCount(1);
+  await expect(own).toContainText("Your offer");
 });
