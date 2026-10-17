@@ -92,6 +92,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
       format: true,
       hasPartner: true,
       startsAt: true,
+      durationMinutes: true,
       district: true,
       ntrpMin: true,
       ntrpMax: true,

@@ -6,6 +6,7 @@ import {
   OfferFormat,
   Surface,
 } from "@/lib/generated/prisma/enums";
+import { DEFAULT_OFFER_DURATION, isOfferDuration } from "@/lib/offers/duration";
 import { krakowLocalToDate } from "@/lib/offers/krakow-time";
 import { NTRP_LEVELS } from "@/lib/profile/options";
 
@@ -50,6 +51,15 @@ export function offerSchema(t: ValidationT) {
           return date;
         })
         .refine((date) => date > new Date(), t("startsAtPast")),
+      // Slice K5. A select sends the minutes as a string; a missing value is
+      // the usual 90 minutes.
+      durationMinutes: z.preprocess(
+        (value) => (value === "" || value == null ? undefined : Number(value)),
+        z
+          .number(t("durationRequired"))
+          .refine(isOfferDuration, t("durationRequired"))
+          .default(DEFAULT_OFFER_DURATION),
+      ),
       clubId: z.preprocess(
         emptyToUndefined,
         z.uuid(t("clubRequired")).optional(),
@@ -127,6 +137,7 @@ const OFFER_FIELDS = new Set<keyof OfferInput>([
   "format",
   "hasPartner",
   "startsAt",
+  "durationMinutes",
   "clubId",
   "district",
   "ntrpMin",

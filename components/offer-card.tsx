@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { PlayerAvatar } from "@/components/player-avatar";
 import type { FeedOffer } from "@/lib/offers/feed";
-import { formatKrakowTime } from "@/lib/offers/krakow-time";
+import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
 import {
   formatLabel,
   levelLabel,
@@ -53,7 +53,11 @@ export function OfferCard({
           <div className="flex items-baseline justify-between gap-3">
             <span className="font-medium">
               <time dateTime={offer.startsAt.toISOString()}>
-                {formatKrakowTime(format, offer.startsAt)}
+                {formatKrakowTimeRange(
+                  format,
+                  offer.startsAt,
+                  offer.durationMinutes,
+                )}
               </time>
               {" · "}
               {formatLabel(t, offer)}

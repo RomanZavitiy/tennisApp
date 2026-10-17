@@ -1,6 +1,12 @@
+import { createFormatter } from "next-intl";
 import { describe, expect, it } from "vitest";
 
-import { krakowLocalToDate, toKrakowLocal } from "@/lib/offers/krakow-time";
+import {
+  formatKrakowTimeRange,
+  krakowHour,
+  krakowLocalToDate,
+  toKrakowLocal,
+} from "@/lib/offers/krakow-time";
 
 describe("krakowLocalToDate", () => {
   it.each([
@@ -33,5 +39,28 @@ describe("toKrakowLocal", () => {
     expect(toKrakowLocal(new Date("2026-01-15T23:00:00Z"))).toBe(
       "2026-01-16T00:00",
     );
+  });
+});
+
+describe("krakowHour", () => {
+  it("reads the hour on the clock in Kraków, not in UTC", () => {
+    expect(krakowHour(new Date("2026-07-15T16:00:00Z"))).toBe(18);
+    expect(krakowHour(new Date("2026-01-15T23:30:00Z"))).toBe(0);
+  });
+});
+
+describe("formatKrakowTimeRange", () => {
+  const format = createFormatter({ locale: "en", timeZone: "Europe/Warsaw" });
+
+  it("shows the start and the end time", () => {
+    expect(
+      formatKrakowTimeRange(format, new Date("2026-10-20T16:00:00Z"), 90),
+    ).toBe("Tue, Oct 20, 18:00–19:30");
+  });
+
+  it("shows only the end's time for a game past midnight", () => {
+    expect(
+      formatKrakowTimeRange(format, new Date("2026-10-20T21:30:00Z"), 60),
+    ).toBe("Tue, Oct 20, 23:30–00:30");
   });
 });
