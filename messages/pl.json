@@ -98,8 +98,18 @@
     "signOut": "Wyloguj się"
   },
   "HomePage": {
-    "tagline": "Znajdź partnera do sparingu i kort w Krakowie.",
-    "comingSoon": "Wkrótce"
+    "title": "Znajdź kort w Krakowie",
+    "subtitle": "Wybierz klub, zarezerwuj kort u niego i znajdź partnera do gry.",
+    "browseOffers": "Przeglądaj oferty sparingów"
+  },
+  "ClubFilters": {
+    "formLabel": "Filtruj korty",
+    "districtLabel": "Dzielnica",
+    "surfaceLabel": "Nawierzchnia",
+    "indoorLabel": "Korty kryte",
+    "any": "Dowolna",
+    "submit": "Szukaj",
+    "clear": "Wyczyść"
   },
   "ProfilePage": {
     "title": "Twój profil",
@@ -286,6 +296,11 @@
   },
   "ClubList": {
     "noClubsYet": "Brak klubów.",
+    "noneMatchFilters": "Żaden klub nie pasuje do tych filtrów.",
+    "bookACourt": "Zarezerwuj kort",
+    "callToBook": "Zadzwoń, aby zarezerwować",
+    "findAPartner": "Znajdź tu partnera",
+    "playersLooking": "{count, plural, one {# gracz szuka} few {# gracze szukają} many {# graczy szuka} other {# graczy szuka}}",
     "detailsAriaLabel": "Szczegóły: {name}",
     "details": "Szczegóły"
   },

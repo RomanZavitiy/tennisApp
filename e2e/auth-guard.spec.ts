@@ -12,7 +12,7 @@ test("a protected page redirects to login and remembers where to return", async 
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 });
 
-for (const path of ["/", "/clubs", "/offers", "/players/some-id", "/login"]) {
+for (const path of ["/", "/offers", "/players/some-id", "/login"]) {
   test(`public page ${path} opens without signing in`, async ({ page }) => {
     await page.goto(path);
 

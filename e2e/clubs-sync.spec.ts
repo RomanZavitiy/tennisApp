@@ -46,7 +46,7 @@ function listEntry(page: Page, name: string) {
 test("a club clicked in the list is shown on the map with its popup", async ({
   page,
 }) => {
-  await page.goto("/clubs");
+  await page.goto("/");
   const map = page.locator(".leaflet-container");
   const marker = page.getByAltText(far.name);
   await expect(map).toBeVisible();
@@ -67,7 +67,7 @@ test("a club clicked in the list is shown on the map with its popup", async ({
 test("a marker click highlights its club in the list and scrolls to it", async ({
   page,
 }) => {
-  await page.goto("/clubs");
+  await page.goto("/");
   const entry = listEntry(page, near.name);
   await expect(entry).toHaveAttribute("aria-pressed", "false");
 
@@ -85,7 +85,7 @@ test.describe("on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("a club clicked in the list switches to the map", async ({ page }) => {
-    await page.goto("/clubs");
+    await page.goto("/");
     const entry = listEntry(page, far.name);
 
     await entry.click();
