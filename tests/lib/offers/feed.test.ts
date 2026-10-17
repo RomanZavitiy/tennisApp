@@ -39,6 +39,7 @@ function row(
     format: offer.format ?? "SINGLES",
     hasPartner: offer.hasPartner ?? false,
     startsAt: offer.startsAt ?? new Date("2026-10-20T16:00:00Z"),
+    durationMinutes: 90,
     district: "KROWODRZA",
     ntrpMin: null,
     ntrpMax: null,
@@ -88,6 +89,19 @@ describe("getOfferFeed", () => {
       AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
     });
     expect(query.orderBy).toEqual([{ startsAt: "asc" }, { id: "asc" }]);
+  });
+
+  it("keeps only offers in the chosen part of the day, before paging (K5)", async () => {
+    findMany.mockResolvedValue([
+      // 18:00 and 09:00 in Kraków (UTC+2 in October before the 25th).
+      row(1, { startsAt: new Date("2026-10-20T16:00:00Z") }),
+      row(2, { startsAt: new Date("2026-10-20T07:00:00Z") }),
+    ]);
+
+    const feed = await getOfferFeed(1, { time: "evening" }, null, NOW);
+
+    expect(feed.offers.map((offer) => offer.id)).toEqual(["1"]);
+    expect(feed.offers[0]?.durationMinutes).toBe(90);
   });
 
   it("counts only accepted joins against the free spots", async () => {

@@ -8,7 +8,12 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import { feedHref, type FeedFilters } from "@/lib/offers/feed-filters";
+import { OFFER_DURATIONS } from "@/lib/offers/duration";
+import {
+  feedHref,
+  TIMES_OF_DAY,
+  type FeedFilters,
+} from "@/lib/offers/feed-filters";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
 
 // The feed's filters (task 3.7): a plain GET form, so the browser puts them
@@ -27,7 +32,7 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
       // and "Clear" must empty them, not keep what was typed.
       key={feedHref(filters)}
       aria-label={t("formLabel")}
-      className="mt-6 grid grid-cols-2 items-end gap-3 sm:grid-cols-5"
+      className="mt-6 grid grid-cols-2 items-end gap-3 sm:grid-cols-4"
     >
       <div className="space-y-1">
         <Label htmlFor="filter-date">{t("dateLabel")}</Label>
@@ -85,6 +90,38 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
           <NativeSelectOption value="DOUBLES">
             {tOfferLabels("doubles")}
           </NativeSelectOption>
+        </NativeSelect>
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="filter-time">{t("timeLabel")}</Label>
+        <NativeSelect
+          id="filter-time"
+          name="time"
+          className="w-full"
+          defaultValue={filters.time ?? ""}
+        >
+          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
+          {TIMES_OF_DAY.map((time) => (
+            <NativeSelectOption key={time} value={time}>
+              {t(`time.${time}`)}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </div>
+      <div className="space-y-1">
+        <Label htmlFor="filter-duration">{t("durationLabel")}</Label>
+        <NativeSelect
+          id="filter-duration"
+          name="duration"
+          className="w-full"
+          defaultValue={filters.duration?.toString() ?? ""}
+        >
+          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
+          {OFFER_DURATIONS.map((minutes) => (
+            <NativeSelectOption key={minutes} value={String(minutes)}>
+              {tOfferLabels("duration", { hours: minutes / 60 })}
+            </NativeSelectOption>
+          ))}
         </NativeSelect>
       </div>
       <div className="flex items-center gap-2 pb-2">

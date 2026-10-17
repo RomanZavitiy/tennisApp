@@ -47,9 +47,21 @@ describe("offerSchema", () => {
       format: "SINGLES",
       hasPartner: false,
       startsAt: new Date("2026-10-20T16:00:00Z"),
+      durationMinutes: 90,
       district: "KROWODRZA",
       courtStatus: "WILL_BOOK",
     });
+  });
+
+  it("takes the duration from a select's string, and only the offered ones", () => {
+    expect(parse({ durationMinutes: "120" }).data?.durationMinutes).toBe(120);
+    expect(parse({ durationMinutes: "" }).data?.durationMinutes).toBe(90);
+    expect(errorsFor({ durationMinutes: "45" })).toEqual([
+      { path: "durationMinutes", message: "Choose how long you want to play." },
+    ]);
+    expect(errorsFor({ durationMinutes: "abc" })).toEqual([
+      { path: "durationMinutes", message: "Choose how long you want to play." },
+    ]);
   });
 
   it("accepts a full doubles offer with a partner", () => {

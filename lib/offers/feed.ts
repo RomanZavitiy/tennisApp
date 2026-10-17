@@ -6,7 +6,11 @@ import type {
   Surface,
 } from "@/lib/generated/prisma/enums";
 import { rankByEloCloseness } from "@/lib/matching/elo-rank";
-import { feedWhere, type FeedFilters } from "@/lib/offers/feed-filters";
+import {
+  feedWhere,
+  matchesTimeOfDay,
+  type FeedFilters,
+} from "@/lib/offers/feed-filters";
 import { playersNeeded } from "@/lib/offers/players-needed";
 import { computeReliability, type Reliability } from "@/lib/rating/reliability";
 
@@ -27,6 +31,7 @@ export type FeedOffer = {
   format: OfferFormat;
   hasPartner: boolean;
   startsAt: Date;
+  durationMinutes: number;
   district: District | null;
   club: { id: string; name: string } | null;
   ntrpMin: number | null;
@@ -62,6 +67,7 @@ const feedOfferSelect = {
   format: true,
   hasPartner: true,
   startsAt: true,
+  durationMinutes: true,
   district: true,
   ntrpMin: true,
   ntrpMax: true,
@@ -149,14 +155,21 @@ export async function getOfferFeed(
     select: feedOfferSelect,
   });
 
-  const offers = rows.map(toFeedOffer);
+  // Time of day (slice K5) is the one filter the query can't apply: it
+  // depends on the Kraków clock, not a column. Filtered here, before
+  // ranking and paging, so pages still hold FEED_PAGE_SIZE matches each.
+  const { time } = filters;
+  const matching = time
+    ? rows.filter((row) => matchesTimeOfDay(row.startsAt, time))
+    : rows;
+
   // Pairs each offer with its author's ELO, purely for ranking below — kept
   // out of FeedOffer itself, which only has the author's id and name.
   const ranked = rankByEloCloseness(
-    offers.map((offer, i) => ({
-      offer,
-      elo: rows[i].author.elo,
-      startsAt: offer.startsAt,
+    matching.map((row) => ({
+      offer: toFeedOffer(row),
+      elo: row.author.elo,
+      startsAt: row.startsAt,
     })),
     viewer?.elo ?? null,
   ).map((entry) => entry.offer);

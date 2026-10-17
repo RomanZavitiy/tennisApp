@@ -15,6 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { District } from "@/lib/generated/prisma/enums";
 import { CourtStatus, Surface } from "@/lib/generated/prisma/enums";
+import { DEFAULT_OFFER_DURATION, OFFER_DURATIONS } from "@/lib/offers/duration";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
 import {
   COMMENT_MAX,
@@ -54,6 +55,7 @@ export function OfferForm({
   earliestStart: string;
 }) {
   const t = useTranslations("OfferForm");
+  const tOfferLabels = useTranslations("OfferLabels");
   const tSurface = useTranslations("Surface");
   const tCourtStatus = useTranslations("CourtStatus");
   const tValidation = useTranslations("Validation.offer");
@@ -70,6 +72,7 @@ export function OfferForm({
     defaultValues: {
       format: "SINGLES",
       startsAt: "",
+      durationMinutes: String(DEFAULT_OFFER_DURATION),
       clubId: presetClub?.id ?? "",
       // A preset club decides the district, same as picking one below.
       district: presetClub
@@ -144,6 +147,25 @@ export function OfferForm({
           {...aria("startsAt", errors.startsAt)}
           {...register("startsAt")}
         />
+      </Field>
+
+      <Field
+        id="durationMinutes"
+        label={t("durationLabel")}
+        error={errors.durationMinutes}
+      >
+        <NativeSelect
+          id="durationMinutes"
+          className="w-full"
+          {...aria("durationMinutes", errors.durationMinutes)}
+          {...register("durationMinutes")}
+        >
+          {OFFER_DURATIONS.map((minutes) => (
+            <NativeSelectOption key={minutes} value={String(minutes)}>
+              {tOfferLabels("duration", { hours: minutes / 60 })}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
       </Field>
 
       <Field id="clubId" label={t("clubLabel")} error={errors.clubId}>
