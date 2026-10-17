@@ -3,8 +3,8 @@ import { getTranslations } from "next-intl/server";
 
 // Task 5.14: installable on Android (Chrome) and iOS 16.4+ ("Add to Home
 // Screen", Safari only — see /install for the instruction). standalone hides
-// the browser chrome once installed; theme_color matches the near-black
-// primary the site already uses (no brand color yet, decision 0.19).
+// the browser chrome once installed; theme_color is the tennis-green primary
+// from app/globals.css (slice K3), as a hex value.
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const t = await getTranslations("Metadata");
   return {
@@ -14,7 +14,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#121212",
+    theme_color: "#0a693c",
     icons: [
       {
         src: "/icons/icon-192.png",
