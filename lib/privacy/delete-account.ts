@@ -31,6 +31,9 @@ export async function redactAccountData(userId: string): Promise<void> {
       where: { senderId: userId },
       data: { content: "[deleted]" },
     });
+    // The bell's list (slice K2a) is only ever the user's own — nothing to
+    // keep for anyone else, and the nulled User row means no cascade.
+    await tx.notification.deleteMany({ where: { userId } });
     await tx.user.update({
       where: { id: userId },
       data: { name: null, email: null, birthDate: null, avatarPath: null },
