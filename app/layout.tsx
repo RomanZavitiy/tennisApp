@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Separate from `metadata` since Next.js 16 (themeColor moved out of the
 // metadata object in Next 14+).
-export const viewport: Viewport = { themeColor: "#121212" };
+export const viewport: Viewport = { themeColor: "#0a693c" };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Task 1.20: the active language always comes from the NEXT_LOCALE cookie

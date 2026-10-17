@@ -7,7 +7,7 @@ export function SiteFooter() {
   const t = useTranslations("SiteFooter");
 
   return (
-    <footer className="border-t">
+    <footer className="mt-10 border-t bg-card">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground">
         <span>{t("tagline")}</span>
         <nav className="flex items-center gap-4">

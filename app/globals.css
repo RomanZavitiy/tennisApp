@@ -39,6 +39,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,39 +50,43 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Tennis green (slice K3, owner's pick over a clay-orange candidate on
+   2026-10-17): deep court green, with tennis-ball yellow as the highlight. */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.985 0.006 150);
+  --foreground: oklch(0.22 0.03 160);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.22 0.03 160);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.22 0.03 160);
+  --primary: oklch(0.46 0.11 155);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.95 0.03 150);
+  --secondary-foreground: oklch(0.3 0.07 155);
+  --muted: oklch(0.955 0.015 150);
+  --muted-foreground: oklch(0.48 0.03 155);
+  --accent: oklch(0.955 0.015 150);
+  --accent-foreground: oklch(0.3 0.07 155);
+  --highlight: oklch(0.92 0.19 118);
+  --highlight-foreground: oklch(0.28 0.07 140);
+  --border: oklch(0.91 0.02 150);
+  --input: oklch(0.88 0.025 150);
+  --ring: oklch(0.6 0.12 155);
+  --sidebar: oklch(0.975 0.01 150);
+  --sidebar-foreground: oklch(0.22 0.03 160);
+  --sidebar-primary: oklch(0.46 0.11 155);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.955 0.015 150);
+  --sidebar-accent-foreground: oklch(0.3 0.07 155);
+  --sidebar-border: oklch(0.91 0.02 150);
+  --sidebar-ring: oklch(0.6 0.12 155);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
 }
 
 .dark {
@@ -115,6 +121,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --highlight: oklch(0.92 0.19 118);
+  --highlight-foreground: oklch(0.28 0.07 140);
 }
 
 @layer base {
