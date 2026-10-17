@@ -61,21 +61,17 @@ function nextDay(date: string): string {
 
 /**
  * The feed's query: open offers that haven't started, narrowed by the
- * filters. `excludeAuthorId` leaves out a signed-in viewer's own offers —
- * they can't be a match for themselves (task 3.9).
+ * filters. A signed-in viewer's own offers stay in (slice K1): an author
+ * who can't find the offer they just posted assumes it was lost.
  */
 export function feedWhere(
   filters: FeedFilters,
   now: Date,
-  excludeAuthorId?: string | null,
 ): Prisma.SparringOfferWhereInput {
   const conditions: Prisma.SparringOfferWhereInput[] = [
     { status: "OPEN" },
     { startsAt: { gt: now } },
   ];
-  if (excludeAuthorId) {
-    conditions.push({ authorId: { not: excludeAuthorId } });
-  }
 
   if (filters.date) {
     // Midnight always exists in Kraków (clocks change at 2–3 a.m.), so

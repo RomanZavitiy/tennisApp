@@ -61,7 +61,7 @@ export default async function OffersPage({
         <ul className="mt-6 space-y-3">
           {feed.offers.map((offer) => (
             <li key={offer.id}>
-              <OfferCard offer={offer} />
+              <OfferCard offer={offer} viewerId={viewer?.id ?? null} />
             </li>
           ))}
         </ul>

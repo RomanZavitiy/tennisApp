@@ -177,18 +177,14 @@ describe("getOfferFeed", () => {
     });
   });
 
-  it("excludes the viewer's own offers", async () => {
+  it("keeps the viewer's own offers in the feed (slice K1)", async () => {
     findUnique.mockResolvedValue({ elo: 1500 });
 
     await getOfferFeed(1, {}, "viewer-1", NOW);
 
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
-      AND: [
-        { status: "OPEN" },
-        { startsAt: { gt: NOW } },
-        { authorId: { not: "viewer-1" } },
-      ],
+      AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
     });
   });
 

@@ -141,7 +141,7 @@ export async function getOfferFeed(
 
   const rows = await db.sparringOffer.findMany({
     // Served by the (status, starts_at) index from task 3.2.
-    where: feedWhere(filters, now, viewerId),
+    where: feedWhere(filters, now),
     // The base order, kept for offers that end up an equal ELO distance
     // apart (or for a guest, who has no ELO to rank by at all); id breaks
     // ties at the same start time.

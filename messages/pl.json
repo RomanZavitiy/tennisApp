@@ -101,7 +101,8 @@
     "deleteAccount": "Usuń moje konto"
   },
   "OfferCard": {
-    "byAuthor": "od {name}"
+    "byAuthor": "od {name}",
+    "yourOffer": "Twoja oferta"
   },
   "OfferForm": {
     "formatLabel": "Format",

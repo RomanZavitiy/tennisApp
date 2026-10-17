@@ -149,17 +149,6 @@ describe("feedWhere", () => {
       },
     });
   });
-
-  it("leaves out a signed-in viewer's own offers when asked", () => {
-    expect(feedWhere({}, NOW, "author-1")).toEqual({
-      AND: [...BASE, { authorId: { not: "author-1" } }],
-    });
-  });
-
-  it("does not exclude anyone for a guest", () => {
-    expect(feedWhere({}, NOW, null)).toEqual({ AND: BASE });
-    expect(feedWhere({}, NOW)).toEqual({ AND: BASE });
-  });
 });
 
 describe("feedHref", () => {
