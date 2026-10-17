@@ -111,8 +111,28 @@
     "submit": "Search",
     "clear": "Clear"
   },
+  "ProfileHero": {
+    "age": "{age} years",
+    "elo": "ELO",
+    "level": "Level (NTRP)",
+    "reliability": "Reliability",
+    "record": "Won–lost",
+    "played": "{count, plural, one {# match} other {# matches}} played"
+  },
+  "MyGames": {
+    "none": "No upcoming games. Find one on the board, or post your own.",
+    "findAGame": "Find a game",
+    "postAnOffer": "Post an offer",
+    "yourOffer": "{count, plural, =0 {Your offer} one {Your offer · # request} other {Your offer · # requests}}",
+    "youAreIn": "You're in",
+    "requestSent": "Request sent"
+  },
   "ProfilePage": {
     "title": "Your profile",
+    "myGames": "My games",
+    "matchHistory": "Match history",
+    "account": "Account",
+    "photo": "Profile photo",
     "editProfile": "Edit profile",
     "notifications": "Notifications",
     "exportData": "Download my data",
@@ -365,13 +385,6 @@
     "lost": "Lost",
     "vs": "vs",
     "aPlayer": "A player"
-  },
-  "PlayerFacts": {
-    "age": "Age",
-    "district": "District",
-    "level": "Level (NTRP)",
-    "elo": "ELO",
-    "reliability": "Reliability"
   },
   "ResultForm": {
     "you": "You",
