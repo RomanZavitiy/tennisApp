@@ -18,6 +18,7 @@ const {
     sparringOffer: { updateMany: vi.fn() },
     offerJoin: { updateMany: vi.fn() },
     message: { updateMany: vi.fn() },
+    notification: { deleteMany: vi.fn() },
     user: { update: vi.fn() },
   },
   createSupabaseAdminClient: vi.fn(),
@@ -39,10 +40,11 @@ describe("redactAccountData", () => {
     tx.sparringOffer.updateMany.mockResolvedValue({ count: 0 });
     tx.offerJoin.updateMany.mockResolvedValue({ count: 0 });
     tx.message.updateMany.mockResolvedValue({ count: 0 });
+    tx.notification.deleteMany.mockResolvedValue({ count: 0 });
     tx.user.update.mockResolvedValue(undefined);
   });
 
-  it("cancels open/full offers, withdraws unplayed joins, redacts messages, and nulls profile fields", async () => {
+  it("cancels open/full offers, withdraws unplayed joins, redacts messages, deletes notifications, and nulls profile fields", async () => {
     await redactAccountData(ME);
 
     expect(tx.sparringOffer.updateMany).toHaveBeenCalledWith({
@@ -60,6 +62,9 @@ describe("redactAccountData", () => {
     expect(tx.message.updateMany).toHaveBeenCalledWith({
       where: { senderId: ME },
       data: { content: "[deleted]" },
+    });
+    expect(tx.notification.deleteMany).toHaveBeenCalledWith({
+      where: { userId: ME },
     });
     expect(tx.user.update).toHaveBeenCalledWith({
       where: { id: ME },

@@ -22,6 +22,11 @@ vi.mock("@/lib/push/send-push", () => ({ sendPush }));
 const { sendEmail } = vi.hoisted(() => ({ sendEmail: vi.fn() }));
 vi.mock("@/lib/email/send", () => ({ sendEmail }));
 
+const { recordNotification } = vi.hoisted(() => ({
+  recordNotification: vi.fn(),
+}));
+vi.mock("@/lib/notifications/inbox", () => ({ recordNotification }));
+
 const { createUnsubscribeToken } = vi.hoisted(() => ({
   createUnsubscribeToken: vi.fn().mockReturnValue("token"),
 }));
@@ -198,5 +203,29 @@ describe("notify", () => {
       data: { lastMessagePushAt: NOW },
     });
     expect(sendPush).toHaveBeenCalled();
+  });
+
+  it("records every event for the bell, even with notifications switched off", async () => {
+    userFindUnique.mockResolvedValue(user({ notifyMatches: false }));
+    const event = { kind: "JOIN_ACCEPTED", offerId: "offer-1" } as const;
+
+    await notify(USER, event, NOW);
+
+    expect(recordNotification).toHaveBeenCalledWith(USER, event, NOW);
+    expect(sendPush).not.toHaveBeenCalled();
+  });
+
+  it("records a message for the bell even when the push throttle is taken", async () => {
+    offerJoinUpdateMany.mockResolvedValue({ count: 0 });
+    const event = {
+      kind: "NEW_MESSAGE",
+      offerId: "offer-1",
+      offerJoinId: "join-1",
+    } as const;
+
+    await notify(USER, event, NOW);
+
+    expect(recordNotification).toHaveBeenCalledWith(USER, event, NOW);
+    expect(sendPush).not.toHaveBeenCalled();
   });
 });

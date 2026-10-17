@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/email/send";
 import { renderEmailHtml, renderEmailText } from "@/lib/email/template";
 import en from "@/messages/en.json";
 import pl from "@/messages/pl.json";
+import { recordNotification } from "@/lib/notifications/inbox";
 import { createUnsubscribeToken } from "@/lib/notifications/unsubscribe-token";
 import { sendPush } from "@/lib/push/send-push";
 
@@ -20,7 +21,10 @@ const MESSAGES = { EN: en, PL: pl } as const;
 // only for the three events decision 2026-10-14 names, and only when there's
 // no active subscription left — falls back to email (5.6). A send failure
 // is logged (lib/push, lib/email) and never thrown, so the action that
-// triggered it (join, message, cron) always finishes.
+// triggered it (join, message, cron) always finishes. Before any of that,
+// every event lands in the in-app list behind the header bell (slice K2a):
+// push and email both miss players who never subscribed or whose address
+// Resend won't deliver to yet, and the bell is what still reaches them.
 
 export type NotificationEvent =
   | { kind: "JOIN_REQUESTED"; offerId: string }
@@ -92,6 +96,10 @@ export async function notify(
   event: NotificationEvent,
   now: Date = new Date(),
 ): Promise<void> {
+  // Not behind the settings toggles or the message throttle below: those
+  // decide what interrupts the player, the bell only lists what happened.
+  await recordNotification(userId, event, now);
+
   if (event.kind === "NEW_MESSAGE") {
     const claimed = await claimMessagePushSlot(event.offerJoinId, now);
     if (!claimed) {
