@@ -110,7 +110,7 @@ test("an open offer at this club is listed", async ({ page }) => {
 });
 
 test("the list's Details link leads to the club page", async ({ page }) => {
-  await page.goto("/clubs");
+  await page.goto("/");
 
   await page.getByRole("link", { name: `${name} details` }).click();
 

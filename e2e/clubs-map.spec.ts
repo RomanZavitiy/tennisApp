@@ -4,12 +4,12 @@ import { expect, test } from "@playwright/test";
 
 import { createAdminClient, createTestClub } from "./support/supabase-admin";
 
-test("courts page shows the OSM map without errors", async ({ page }) => {
+test("the court search shows the OSM map without errors", async ({ page }) => {
   // A broken Leaflet setup shows up as an uncaught error in the browser.
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
 
-  await page.goto("/clubs");
+  await page.goto("/");
 
   await expect(page.locator(".leaflet-container")).toBeVisible();
   // Checks the tile URL, not the image itself, so the test doesn't depend on
@@ -41,7 +41,7 @@ test("a club shows as a marker with its details in a popup", async ({
   });
 
   try {
-    await page.goto("/clubs");
+    await page.goto("/");
     await page.getByAltText(name).click();
 
     const popup = page.locator(".leaflet-popup");

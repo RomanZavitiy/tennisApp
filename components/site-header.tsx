@@ -17,11 +17,12 @@ export async function SiteHeader() {
   const t = await getTranslations("SiteHeader");
   const tMetadata = await getTranslations("Metadata");
 
-  // Routes match the ones later tasks build: /offers (Epic 3), /clubs (2.6),
-  // /login (1.6). Signed-in players also get Profile.
+  // Courts first (slice K4): the court search is the home page now, and a
+  // club's own page (/clubs/[id]) still counts as that section.
+  // Signed-in players also get Profile.
   const navLinks = [
+    { href: "/", label: t("courts"), section: "/clubs" },
     { href: "/offers", label: t("sparring") },
-    { href: "/clubs", label: t("courts") },
   ];
   const signIn = { href: "/login", label: t("signIn") };
   const profile = { href: "/profile", label: t("profile") };
