@@ -51,3 +51,10 @@ next-env.d.ts
 
 # local docs prompts
 docs/prompts/
+# graphify: the graph and its report are committed; the extraction cache,
+# dated backups of older graphs, the local cost log and the machine-specific
+# interpreter/root pointers are not
+/graphify-out/*/
+/graphify-out/cost.json
+/graphify-out/.graphify_python
+/graphify-out/.graphify_root
