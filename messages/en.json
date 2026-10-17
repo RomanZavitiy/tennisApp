@@ -98,8 +98,18 @@
     "signOut": "Sign out"
   },
   "HomePage": {
-    "tagline": "Find a sparring partner and a court in Kraków.",
-    "comingSoon": "Coming soon"
+    "title": "Find a court in Kraków",
+    "subtitle": "Pick a club, book it there, and find someone to play with.",
+    "browseOffers": "Browse sparring offers"
+  },
+  "ClubFilters": {
+    "formLabel": "Filter courts",
+    "districtLabel": "District",
+    "surfaceLabel": "Surface",
+    "indoorLabel": "Indoor courts",
+    "any": "Any",
+    "submit": "Search",
+    "clear": "Clear"
   },
   "ProfilePage": {
     "title": "Your profile",
@@ -286,6 +296,11 @@
   },
   "ClubList": {
     "noClubsYet": "No clubs yet.",
+    "noneMatchFilters": "No clubs match these filters.",
+    "bookACourt": "Book a court",
+    "callToBook": "Call to book",
+    "findAPartner": "Find a partner here",
+    "playersLooking": "{count, plural, one {# player looking} other {# players looking}}",
     "detailsAriaLabel": "{name} details",
     "details": "Details"
   },

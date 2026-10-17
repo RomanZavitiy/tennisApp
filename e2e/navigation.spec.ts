@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const LINKS = [
   { label: "Sparring", path: "/offers" },
-  { label: "Courts", path: "/clubs" },
+  { label: "Courts", path: "/" },
   { label: "Sign in", path: "/login" },
 ];
 
@@ -40,7 +40,7 @@ test.describe("mobile, 375px wide", () => {
     });
   }
 
-  for (const path of ["/", ...LINKS.map((link) => link.path)]) {
+  for (const path of new Set(["/", ...LINKS.map((link) => link.path)])) {
     test(`${path} has no horizontal scroll`, async ({ page }) => {
       await page.goto(path);
       const overflow = await page.evaluate(
