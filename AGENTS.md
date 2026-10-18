@@ -1,4 +1,4 @@
-# AGENTS.md — MatchFinder Kraków
+# AGENTS.md — SpinBuddy
 
 Rules for any AI coding agent (Claude Code, Cursor, Codex, etc.) working in this repo.
 Human owner reviews every change — the agent writes faster than the human can read, so

@@ -41,7 +41,7 @@ export function renderEmailHtml({
       <a href="${escapeHtml(actionUrl)}" style="background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 6px; text-decoration: none;">${escapeHtml(actionLabel)}</a>
     </p>
     <p style="font-size: 12px; color: #666; margin-top: 32px;">
-      MatchFinder Kraków —
+      SpinBuddy —
       <a href="${escapeHtml(unsubscribeUrl)}" style="color: #666;">${escapeHtml(unsubscribeLabel)}</a>
     </p>
   </body>

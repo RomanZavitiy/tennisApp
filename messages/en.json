@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "siteName": "MatchFinder Kraków",
+    "siteName": "SpinBuddy",
     "description": "Find a sparring partner and a court in Kraków."
   },
   "LanguageSwitcher": {
@@ -11,7 +11,7 @@
     }
   },
   "SiteFooter": {
-    "tagline": "MatchFinder Kraków · tennis sparring and courts in Kraków",
+    "tagline": "SpinBuddy · tennis sparring and courts in Kraków",
     "terms": "Terms",
     "privacy": "Privacy"
   },
@@ -80,7 +80,7 @@
     "COURT_BOOKED": "The court has been booked."
   },
   "EmailTemplate": {
-    "actionLabel": "Open MatchFinder",
+    "actionLabel": "Open SpinBuddy",
     "unsubscribeLabel": "Turn off email notifications"
   },
   "AdminLayout": {
@@ -616,17 +616,17 @@
   },
   "UnsubscribePage": {
     "title": "Email notifications",
-    "confirmPrompt": "Turn off email notifications for MatchFinder? You can turn them back on any time from your notification settings.",
+    "confirmPrompt": "Turn off email notifications for SpinBuddy? You can turn them back on any time from your notification settings.",
     "invalidLink": "This link isn't valid.",
     "invalidLinkLong": "This link isn’t valid. You can manage email notifications from your notification settings while signed in instead."
   },
   "UnsubscribeButton": {
-    "done": "Done — you won’t get email notifications from MatchFinder.",
+    "done": "Done — you won’t get email notifications from SpinBuddy.",
     "saving": "Saving…",
     "turnOff": "Turn off email notifications"
   },
   "InstallPage": {
-    "title": "Install MatchFinder",
+    "title": "Install SpinBuddy",
     "intro": "Installing the app gets you a home screen icon and — on iPhone, the only way to get them at all — notifications for new requests, messages and matches.",
     "iosHeading": "iPhone or iPad (Safari)",
     "iosSteps": [
@@ -634,7 +634,7 @@
       "Tap the Share icon (a square with an arrow pointing up) in the toolbar.",
       "Scroll down and tap “Add to Home Screen”.",
       "Tap “Add” in the top-right corner.",
-      "Open MatchFinder from the new icon on your home screen — push notifications only work from there, not from Safari itself."
+      "Open SpinBuddy from the new icon on your home screen — push notifications only work from there, not from Safari itself."
     ],
     "iosRequires": "Requires iOS 16.4 or later.",
     "androidHeading": "Android (Chrome)",
@@ -671,7 +671,7 @@
   },
   "ConsentPage": {
     "title": "Updated Terms and Privacy Policy",
-    "body": "We've updated our <terms>Terms</terms> and <privacy>Privacy Policy</privacy>. Please review them and agree to keep using MatchFinder Kraków.",
+    "body": "We've updated our <terms>Terms</terms> and <privacy>Privacy Policy</privacy>. Please review them and agree to keep using SpinBuddy.",
     "agree": "I agree"
   },
   "DeleteAccountPage": {
@@ -682,7 +682,7 @@
   },
   "AccountDeletedPage": {
     "title": "Account deleted",
-    "body": "Your account and personal data have been removed. Thanks for using MatchFinder Kraków.",
+    "body": "Your account and personal data have been removed. Thanks for using SpinBuddy.",
     "home": "Back to home"
   },
   "ErrorPage": {
@@ -696,12 +696,12 @@
     "title": "Terms",
     "draftNotice": "Draft — pending legal review. This page is a placeholder until the final text is ready.",
     "revisedOn": "Draft dated {date}",
-    "placeholder": "The Terms of Service will describe who runs MatchFinder Kraków, what the service offers, account rules, acceptable use, and liability. Real text will replace this paragraph before the app accepts outside users."
+    "placeholder": "The Terms of Service will describe who runs SpinBuddy, what the service offers, account rules, acceptable use, and liability. Real text will replace this paragraph before the app accepts outside users."
   },
   "PrivacyPage": {
     "title": "Privacy Policy",
     "draftNotice": "Draft — pending legal review. This page is a placeholder until the final text is ready.",
     "revisedOn": "Draft dated {date}",
-    "placeholder": "The Privacy Policy will describe what personal data MatchFinder Kraków collects, why, how long it's kept, and how to export or delete it. Real text will replace this paragraph before the app accepts outside users."
+    "placeholder": "The Privacy Policy will describe what personal data SpinBuddy collects, why, how long it's kept, and how to export or delete it. Real text will replace this paragraph before the app accepts outside users."
   }
 }
