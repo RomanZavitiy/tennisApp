@@ -91,6 +91,32 @@ describe("notify", () => {
     );
   });
 
+  it("never throws when the email fallback can't be built", async () => {
+    // The real bug: UNSUBSCRIBE_SECRET unset made "Ask to join"/"Accept"
+    // show an error page after the join had already been saved.
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    userFindUnique.mockResolvedValue(user({ pushSubscriptions: [] }));
+    createUnsubscribeToken.mockImplementationOnce(() => {
+      throw new Error("UNSUBSCRIBE_SECRET isn't set.");
+    });
+
+    await expect(
+      notify(USER, { kind: "JOIN_ACCEPTED", offerId: "offer-1" }, NOW),
+    ).resolves.toBeUndefined();
+
+    expect(recordNotification).toHaveBeenCalled();
+    expect(sendEmail).not.toHaveBeenCalled();
+  });
+
+  it("never throws when loading the recipient fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    userFindUnique.mockRejectedValue(new Error("connection lost"));
+
+    await expect(
+      notify(USER, { kind: "JOIN_REQUESTED", offerId: "offer-1" }, NOW),
+    ).resolves.toBeUndefined();
+  });
+
   it("skips email for an event that isn't fallback-eligible", async () => {
     userFindUnique.mockResolvedValue(user({ pushSubscriptions: [] }));
 

@@ -18,6 +18,10 @@
    Це замінює листи Supabase (magic link тощо) на відправку через Resend з верифікованого
    домену — зараз вони йдуть зі стандартної Supabase-адреси.
 
+6. Vercel (Preview **і** Production) → `UNSUBSCRIBE_SECRET` = довгий випадковий рядок
+   (`openssl rand -base64 32`). Без нього лист-фолбек (заявка/прийняття гравцю без push) не
+   будується — дія вже не падає (`lib/notifications/notify.ts`), але лист не йде.
+
 **Як перевірити:** надісланий лист (magic link на `/login`) приходить з адреси на твоєму
 домені, не з `resend.dev` чи `supabase.io`.
 
