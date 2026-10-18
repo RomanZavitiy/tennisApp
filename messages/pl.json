@@ -685,6 +685,13 @@
     "body": "Twoje konto i dane osobowe zostały usunięte. Dziękujemy za korzystanie z MatchFinder Kraków.",
     "home": "Wróć na stronę główną"
   },
+  "ErrorPage": {
+    "title": "Coś poszło nie tak",
+    "body": "Nie udało się tego wczytać. Jeśli przed chwilą coś zrobiłeś (wysłałeś prośbę, zaakceptowałeś gracza), najpierw odśwież stronę — mogło się już zapisać.",
+    "retry": "Spróbuj ponownie",
+    "home": "Wróć na stronę główną",
+    "reference": "Numer błędu: {digest}"
+  },
   "TermsPage": {
     "title": "Regulamin",
     "draftNotice": "Wersja robocza — czeka na przegląd prawny. Ta strona jest zastępnikiem do czasu gotowości ostatecznego tekstu.",

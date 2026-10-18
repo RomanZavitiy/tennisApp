@@ -100,6 +100,22 @@ export async function notify(
   // decide what interrupts the player, the bell only lists what happened.
   await recordNotification(userId, event, now);
 
+  // Callers notify after their own write has already succeeded, so a throw
+  // here (a missing env var like UNSUBSCRIBE_SECRET, a DB hiccup) would show
+  // the player an error page for an action that actually went through.
+  try {
+    await deliver(userId, event, now);
+  } catch (error) {
+    console.error(`Notification ${event.kind} delivery failed:`, error);
+  }
+}
+
+// Push, then the email fallback — everything after the in-app record.
+async function deliver(
+  userId: string,
+  event: NotificationEvent,
+  now: Date,
+): Promise<void> {
   if (event.kind === "NEW_MESSAGE") {
     const claimed = await claimMessagePushSlot(event.offerJoinId, now);
     if (!claimed) {

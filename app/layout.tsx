@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
-import { PushSubscribePrompt } from "@/components/push-subscribe-prompt";
 import { RegisterServiceWorker } from "@/components/register-service-worker";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -51,9 +50,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RegisterServiceWorker />
-          {/* Site-wide, not just (member) pages: /offers/[id] (where "Ask to
-              join" lives) is public, outside that route group. */}
-          <PushSubscribePrompt />
           <SiteHeader />
           {children}
           <SiteFooter />

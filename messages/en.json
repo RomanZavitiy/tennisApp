@@ -685,6 +685,13 @@
     "body": "Your account and personal data have been removed. Thanks for using MatchFinder Kraków.",
     "home": "Back to home"
   },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "body": "This didn't load. If you just did something (sent a request, accepted a player), reload the page first — it may already be saved.",
+    "retry": "Try again",
+    "home": "Back to home",
+    "reference": "Error reference: {digest}"
+  },
   "TermsPage": {
     "title": "Terms",
     "draftNotice": "Draft — pending legal review. This page is a placeholder until the final text is ready.",
