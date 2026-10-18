@@ -16,10 +16,11 @@ import {
 import { hasMeaningfulAction } from "@/lib/push/meaningful-action";
 
 // "Ask for notification permission only after a meaningful action, never on
-// first load" (task 5.15). Mounted on every member page (the (member)
-// layout); hasMeaningfulAction() — set by MarkMeaningfulAction (the first
-// offer) or OfferActionButton's trackMeaningfulAction (the first join
-// request) — is what actually decides whether it shows anything at all.
+// first load" (task 5.15). Mounted by SiteHeader on every page, for
+// signed-in players only; hasMeaningfulAction() — set by
+// MarkMeaningfulAction (the first offer) or OfferActionButton's
+// trackMeaningfulAction (the first join request) — is what actually decides
+// whether it shows anything at all.
 
 const DISMISSED_KEY = "mf:push-prompt-dismissed";
 

@@ -5,6 +5,7 @@ import { signOut } from "@/app/auth/actions";
 import { HeaderNavLinks } from "@/components/header-nav-links";
 import { MobileNav } from "@/components/mobile-nav";
 import { NotificationBell } from "@/components/notification-bell";
+import { PushSubscribePrompt } from "@/components/push-subscribe-prompt";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { countUnreadNotifications } from "@/lib/notifications/inbox";
@@ -29,45 +30,52 @@ export async function SiteHeader() {
   const links = user ? [...navLinks, profile] : navLinks;
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-card/90 shadow-sm backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-lg font-bold tracking-tight text-primary"
-        >
-          <BallMark />
-          {tMetadata("siteName")}
-        </Link>
-
-        <div className="flex items-center gap-1">
-          <nav
-            aria-label={t("mainNav")}
-            className="hidden items-center gap-1 sm:flex"
+    <>
+      {/* Above the header on every page, not just (member) ones: /offers/[id]
+          (where "Ask to join" lives) is public. Signed-in only — its trigger
+          is a localStorage flag that outlives sign-out, and a visitor has no
+          account to save a subscription to. */}
+      {user && <PushSubscribePrompt />}
+      <header className="sticky top-0 z-40 border-b bg-card/90 shadow-sm backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-lg font-bold tracking-tight text-primary"
           >
-            <HeaderNavLinks links={links} />
-            {user ? (
-              <form action={signOut}>
-                <Button type="submit" variant="outline">
-                  {t("signOut")}
-                </Button>
-              </form>
-            ) : (
-              <Link href={signIn.href} className={buttonVariants()}>
-                {signIn.label}
-              </Link>
-            )}
-          </nav>
+            <BallMark />
+            {tMetadata("siteName")}
+          </Link>
 
-          {/* One bell for both layouts, so only one copy polls. */}
-          {user && <NotificationBell initialCount={unread} />}
+          <div className="flex items-center gap-1">
+            <nav
+              aria-label={t("mainNav")}
+              className="hidden items-center gap-1 sm:flex"
+            >
+              <HeaderNavLinks links={links} />
+              {user ? (
+                <form action={signOut}>
+                  <Button type="submit" variant="outline">
+                    {t("signOut")}
+                  </Button>
+                </form>
+              ) : (
+                <Link href={signIn.href} className={buttonVariants()}>
+                  {signIn.label}
+                </Link>
+              )}
+            </nav>
 
-          <MobileNav
-            links={user ? links : [...links, signIn]}
-            signedIn={Boolean(user)}
-          />
+            {/* One bell for both layouts, so only one copy polls. */}
+            {user && <NotificationBell initialCount={unread} />}
+
+            <MobileNav
+              links={user ? links : [...links, signIn]}
+              signedIn={Boolean(user)}
+            />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 
