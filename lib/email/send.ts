@@ -8,7 +8,7 @@ import { Resend } from "resend";
 // every test request. Preview and production both have NODE_ENV=production
 // (Next.js sets it for any `next build`/`next start`), so this only
 // suppresses local development, not Vercel's preview deploys.
-const FROM_ADDRESS = "MatchFinder Kraków <onboarding@resend.dev>";
+const FROM_ADDRESS = "SpinBuddy <onboarding@resend.dev>";
 
 export type SendEmailInput = {
   to: string;

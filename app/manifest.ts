@@ -9,7 +9,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const t = await getTranslations("Metadata");
   return {
     name: t("siteName"),
-    short_name: "MatchFinder",
+    short_name: "SpinBuddy",
     description: t("description"),
     start_url: "/",
     display: "standalone",
