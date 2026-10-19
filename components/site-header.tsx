@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import Image from "next/image";
 import Link from "next/link";
 
 import { signOut } from "@/app/auth/actions";
@@ -38,12 +39,17 @@ export async function SiteHeader() {
       {user && <PushSubscribePrompt />}
       <header className="sticky top-0 z-40 border-b bg-card/90 shadow-sm backdrop-blur">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-lg font-bold tracking-tight text-primary"
-          >
-            <BallMark />
-            {tMetadata("siteName")}
+          <Link href="/" className="flex shrink-0 items-center">
+            {/* The wordmark is part of the image, so the site name is its alt
+                text: the link keeps the same accessible name as before. */}
+            <Image
+              src="/brand/spinbuddy-logo.webp"
+              alt={tMetadata("siteName")}
+              width={1661}
+              height={445}
+              priority
+              className="h-10 w-auto"
+            />
           </Link>
 
           <div className="flex items-center gap-1">
@@ -76,25 +82,5 @@ export async function SiteHeader() {
         </div>
       </header>
     </>
-  );
-}
-
-/** The logo mark (slice K3): a tennis ball in the palette's highlight colour. */
-function BallMark() {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      aria-hidden
-      className="size-8 shrink-0 rounded-full bg-highlight text-highlight-foreground"
-    >
-      <path
-        d="M6 6.5c4.5 4 4.5 15 0 19M26 6.5c-4.5 4-4.5 15 0 19"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
-    </svg>
   );
 }
