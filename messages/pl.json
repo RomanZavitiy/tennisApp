@@ -536,6 +536,16 @@
     "report": {
       "reasonRequired": "Wybierz powód.",
       "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków."
+    },
+    "booking": {
+      "courtRequired": "Wybierz kort.",
+      "startsAtRequired": "Wybierz godzinę rozpoczęcia.",
+      "startsAtNotAligned": "Wybierz godzinę pełną albo w połowie godziny.",
+      "startsAtPast": "Ten termin już minął.",
+      "startsAtTooFarAhead": "Wybierz termin w ciągu najbliższych 14 dni.",
+      "durationRequired": "Wybierz, na jak długo chcesz kort.",
+      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków.",
+      "offerInvalid": "Nie znaleziono tej oferty."
     }
   },
   "OnboardingPage": {

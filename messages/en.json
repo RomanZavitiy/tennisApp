@@ -536,6 +536,16 @@
     "report": {
       "reasonRequired": "Choose a reason.",
       "commentTooLong": "Keep the comment under {max} characters."
+    },
+    "booking": {
+      "courtRequired": "Choose a court.",
+      "startsAtRequired": "Choose the start time.",
+      "startsAtNotAligned": "Choose a time on the hour or half hour.",
+      "startsAtPast": "That time has already passed.",
+      "startsAtTooFarAhead": "Choose a time within the next 14 days.",
+      "durationRequired": "Choose how long you want the court for.",
+      "noteTooLong": "Keep the note under {max} characters.",
+      "offerInvalid": "That offer could not be found."
     }
   },
   "OnboardingPage": {
