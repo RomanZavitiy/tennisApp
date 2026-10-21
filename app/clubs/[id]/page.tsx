@@ -101,14 +101,23 @@ export default async function ClubPage({ params }: ClubPageProps) {
         </p>
       )}
 
-      <BookingLink
-        clubId={club.id}
-        bookingUrl={club.bookingUrl}
-        phone={club.phone}
-        className={buttonVariants({ className: "mt-6" })}
-        urlLabel={t("bookACourt")}
-        phoneLabel={t("callToBook")}
-      />
+      {club.bookingMode === "SPINBUDDY" ? (
+        <Link
+          href={`/clubs/${club.id}/book`}
+          className={buttonVariants({ className: "mt-6" })}
+        >
+          {t("bookACourt")}
+        </Link>
+      ) : (
+        <BookingLink
+          clubId={club.id}
+          bookingUrl={club.bookingUrl}
+          phone={club.phone}
+          className={buttonVariants({ className: "mt-6" })}
+          urlLabel={t("bookACourt")}
+          phoneLabel={t("callToBook")}
+        />
+      )}
 
       <dl className="mt-6 space-y-3">
         {facts.map((fact) => (

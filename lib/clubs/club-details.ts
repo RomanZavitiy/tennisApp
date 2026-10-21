@@ -47,6 +47,7 @@ export async function getClub(id: string) {
       phone: true,
       websiteUrl: true,
       bookingUrl: true,
+      bookingMode: true,
       verifiedAt: true,
     },
   });

@@ -10,6 +10,9 @@ const PUBLIC_ROUTES = [
   /^\/login$/,
   /^\/auth\/.+$/,
   /^\/clubs(\/[^/]+)?$/,
+  // The read-only booking grid (slice K, K.8): public, same as the club
+  // page itself — sending a request (K.10) is the part that needs a session.
+  /^\/clubs\/[^/]+\/book$/,
   /^\/offers$/,
   // Only a UUID, so /offers/new (members only) never matches.
   /^\/offers\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
