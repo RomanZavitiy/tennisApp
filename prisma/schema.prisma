@@ -131,6 +131,14 @@ model User {
   reportsAgainst      Report[]           @relation("ReportsAgainst")
   adminActionsTaken   AdminAction[]      @relation("AdminActionsTaken")
   adminActionsAgainst AdminAction[]      @relation("AdminActionsAgainst")
+  /// Partner clubs this player is OWNER/STAFF for (slice K).
+  clubStaffRoles      ClubStaff[]
+  /// Court bookings this player requested.
+  bookings            Booking[]          @relation("BookingPlayer")
+  /// Bookings this player confirmed or declined, as club staff.
+  bookingDecisions    Booking[]          @relation("BookingDecidedBy")
+  /// Court blocks this player created, as club staff.
+  courtBlocksCreated  CourtBlock[]
 
   @@map("users")
 }
@@ -169,32 +177,177 @@ model Club {
   // the club schema (2.3) validates the data file first.
   /// Stable key from the data file: loading the file again updates the same
   /// row instead of adding a copy (2.3). Lowercase words joined by hyphens.
-  slug       String        @unique @db.VarChar(60)
-  name       String        @db.VarChar(100)
-  address    String        @db.VarChar(200)
+  slug        String        @unique @db.VarChar(60)
+  name        String        @db.VarChar(100)
+  address     String        @db.VarChar(200)
   /// Empty for clubs just outside the city limits (Liszki, Giebułtów).
-  district   District?
-  latitude   Float
-  longitude  Float
-  courtCount Int           @map("court_count")
+  district    District?
+  latitude    Float
+  longitude   Float
+  courtCount  Int           @map("court_count")
   /// Every surface the club has; empty while unknown (2.11).
-  surfaces   Surface[]
+  surfaces    Surface[]
   /// Empty while unknown (2.11).
-  indoor     IndoorCourts?
+  indoor      IndoorCourts?
   /// Free text: prices differ by hour, season and membership.
-  priceInfo  String?       @map("price_info") @db.VarChar(300)
-  phone      String?       @db.VarChar(30)
-  websiteUrl String?       @map("website_url") @db.VarChar(500)
-  /// The club's own booking page — the app has no booking (decision 2026-09-20).
-  bookingUrl String?       @map("booking_url") @db.VarChar(500)
+  priceInfo   String?       @map("price_info") @db.VarChar(300)
+  phone       String?       @db.VarChar(30)
+  websiteUrl  String?       @map("website_url") @db.VarChar(500)
+  /// The club's own booking page, used while `bookingMode` is EXTERNAL_LINK
+  /// (every club until it's onboarded as a booking partner — decision
+  /// 2026-10-21).
+  bookingUrl  String?       @map("booking_url") @db.VarChar(500)
+  /// EXTERNAL_LINK (default): `bookingUrl` is the only way to book, same as
+  /// before this epic. SPINBUDDY: the club is a booking partner — courts,
+  /// hours and requests (below) are live, and `bookingUrl` stops being shown
+  /// (decision 2026-10-21, slice K).
+  bookingMode BookingMode   @default(EXTERNAL_LINK) @map("booking_mode")
   /// When the owner last checked these details at the source. Shown on the
   /// club page so players can tell how fresh the price and phone are.
-  verifiedAt DateTime      @map("verified_at") @db.Date
+  verifiedAt  DateTime      @map("verified_at") @db.Date
 
   offers         SparringOffer[]
   outboundClicks OutboundClick[]
+  courts         Court[]
+  courtHours     CourtHours[]
+  staff          ClubStaff[]
 
   @@map("clubs")
+}
+
+/// A bookable court at a partner club (`bookingMode = SPINBUDDY`, slice K).
+/// Exists for every club regardless of `bookingMode` — courts can be entered
+/// ahead of a club going live — but only read by the booking UI once the
+/// club is a partner.
+model Court {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  clubId String @map("club_id") @db.Uuid
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  /// "Court 1", "Kort A" — whatever the club itself calls it.
+  name            String  @db.VarChar(60)
+  surface         Surface
+  indoor          Boolean @default(false)
+  /// Null means unknown — never invented; shown as "price unknown" rather
+  /// than guessed from the club's free-text `priceInfo`.
+  pricePerHourPln Int?    @map("price_per_hour_pln")
+  /// A court taken out of rotation (renovation, decommissioned) stops
+  /// appearing in the booking grid without losing its booking history.
+  active          Boolean @default(true)
+  /// Display order within the club; ties broken by `name`.
+  sortOrder       Int     @default(0) @map("sort_order")
+
+  bookings Booking[]
+  blocks   CourtBlock[]
+
+  @@unique([clubId, name])
+  @@index([clubId])
+  @@map("courts")
+}
+
+/// A club's opening hours for one weekday (slice K), shared by all its
+/// courts — this app doesn't model a court open on different hours than its
+/// siblings. One row per weekday the club is open; a missing weekday is
+/// closed that day. `opensAt`/`closesAt` are minutes from midnight on the
+/// club's own clock (Europe/Warsaw), e.g. 8:00 = 480.
+model CourtHours {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  clubId String @map("club_id") @db.Uuid
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  /// 0 = Sunday … 6 = Saturday (JS `Date#getUTCDay()` convention).
+  weekday  Int
+  opensAt  Int @map("opens_at")
+  closesAt Int @map("closes_at")
+
+  @@unique([clubId, weekday])
+  @@index([clubId])
+  @@map("court_hours")
+}
+
+/// A player who can act on a partner club's behalf (slice K): confirm or
+/// decline booking requests, place blocks. OWNER vs STAFF isn't checked
+/// differently anywhere yet — kept apart because a club will eventually
+/// manage its own staff list, and only an OWNER should be able to.
+model ClubStaff {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  clubId String        @map("club_id") @db.Uuid
+  club   Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId String        @map("user_id") @db.Uuid
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   ClubStaffRole @default(STAFF)
+
+  @@unique([clubId, userId])
+  @@index([userId])
+  @@map("club_staff")
+}
+
+/// A player's request to book a court (slice K, v1 — decision 2026-10-21):
+/// request-based, no payments. PENDING until a club staff member confirms
+/// or declines it; the Postgres EXCLUDE constraint below (added by hand in
+/// the migration — Prisma has no syntax for it) is what actually stops two
+/// PENDING/CONFIRMED bookings on the same court from overlapping, not
+/// application code.
+model Booking {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  courtId String @map("court_id") @db.Uuid
+  court   Court  @relation(fields: [courtId], references: [id], onDelete: Cascade)
+  userId  String @map("user_id") @db.Uuid
+  user    User   @relation("BookingPlayer", fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Set when the booking was made from an offer's page, so a confirmed
+  /// court shows up there too. Null for a booking made on its own.
+  offerId String?        @map("offer_id") @db.Uuid
+  offer   SparringOffer? @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  startsAt DateTime      @map("starts_at") @db.Timestamptz
+  endsAt   DateTime      @map("ends_at") @db.Timestamptz
+  status   BookingStatus @default(PENDING)
+
+  /// From the player, to the club staff deciding the request.
+  note          String? @db.VarChar(300)
+  /// From club staff, shown to the player when declined.
+  declineReason String? @map("decline_reason") @db.VarChar(300)
+
+  decidedById String?   @map("decided_by_id") @db.Uuid
+  decidedBy   User?     @relation("BookingDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt   DateTime? @map("decided_at") @db.Timestamptz
+
+  @@index([courtId])
+  @@index([userId])
+  @@index([offerId])
+  @@map("bookings")
+}
+
+/// A court taken out of booking for a stretch of time by club staff
+/// (maintenance, a private lesson, a tournament) — slice K. Unlike
+/// `Booking`, there's no status: a block always blocks, which is also why
+/// its EXCLUDE constraint (migration) has no `WHERE`.
+model CourtBlock {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  courtId String @map("court_id") @db.Uuid
+  court   Court  @relation(fields: [courtId], references: [id], onDelete: Cascade)
+
+  startsAt DateTime @map("starts_at") @db.Timestamptz
+  endsAt   DateTime @map("ends_at") @db.Timestamptz
+  reason   String?  @db.VarChar(300)
+
+  createdById String @map("created_by_id") @db.Uuid
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([courtId])
+  @@map("court_blocks")
 }
 
 /// "Looking for a sparring partner" — a post on the board (Epic 3).
@@ -253,6 +406,8 @@ model SparringOffer {
   /// Reports filed against this offer (task 3.19).
   reports        Report[]
   notifications  Notification[]
+  /// A SpinBuddy court booking made for this offer, if any (slice K).
+  bookings       Booking[]
 
   @@index([authorId])
   @@index([clubId])
@@ -476,7 +631,7 @@ model AdminAction {
   @@map("admin_actions")
 }
 
-/// One in-app notification (slice K2a): what the bell in the header lists.
+/// One in-app notification: what the bell in the header lists.
 /// notify() writes one for every event, before any push/email gating, so a
 /// player without push or a real email address still sees what happened.
 /// Messages in one thread collapse into a single unread row (refreshed, not
@@ -589,6 +744,36 @@ enum IndoorCourts {
   WINTER_BUBBLE
 
   @@map("indoor_courts")
+}
+
+/// Whether a club's courts can be booked through SpinBuddy, or only
+/// externally (decision 2026-10-21, slice K). EXTERNAL_LINK is the default
+/// for every club until it's onboarded as a booking partner.
+enum BookingMode {
+  EXTERNAL_LINK
+  SPINBUDDY
+
+  @@map("booking_mode")
+}
+
+/// A club staff member's role (slice K). Not yet checked differently
+/// anywhere in code — see the ClubStaff model comment.
+enum ClubStaffRole {
+  OWNER
+  STAFF
+
+  @@map("club_staff_role")
+}
+
+/// A court booking request's state (slice K). PENDING until club staff
+/// decide; CANCELLED is the player's own withdrawal, DECLINED is staff's.
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+  CANCELLED
+
+  @@map("booking_status")
 }
 
 enum OfferFormat {
