@@ -1,4 +1,4 @@
-// The 10 product events task 6.5/6.6 asks for. Each event's property type
+// The product events task 6.5/6.6 and K.14 ask for. Each event's property type
 // is the allowlist: no field here may carry an email, a name, or message/
 // report text (decision 2026-10-14, "Аналітика: PostHog EU без cookie") —
 // posthog.ts's sanitize() is a runtime backstop for the same rule, not the
@@ -18,6 +18,7 @@ type EventProperties = {
   result_confirmed: Record<string, never>;
   no_show_reported: Record<string, never>;
   push_enabled: Record<string, never>;
+  booking_requested: Record<string, never>;
 };
 
 export type AnalyticsEvent = keyof EventProperties;

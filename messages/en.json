@@ -68,6 +68,10 @@
     "NEW_OFFER_FOR_LEVEL": {
       "title": "New offer near you",
       "body": "A new sparring offer matches your level and district."
+    },
+    "BOOKING_REQUESTED": {
+      "title": "New booking request",
+      "body": "{court}, {timeRange}"
     }
   },
   "SystemMessages": {
@@ -374,7 +378,7 @@
     "summaryPrice": "Price",
     "pricePerHour": "{price} zł/h",
     "sendRequest": "Send request",
-    "comingSoon": "Sending booking requests is coming soon.",
+    "sending": "Sending…",
     "doesntFit": "This start doesn't fit a {duration}-minute booking. Pick another time."
   },
   "OfferBookingSection": {
@@ -481,7 +485,10 @@
     "matchNotFound": "This match doesn't exist.",
     "checkTheScore": "Check the score.",
     "resultNotFound": "This result doesn't exist.",
-    "noShowManualConfirmRefused": "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours."
+    "noShowManualConfirmRefused": "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours.",
+    "courtNotFound": "This court doesn't exist.",
+    "slotTaken": "That slot was just taken. Pick another time.",
+    "tooManyPendingBookings": "You already have {max} requests waiting on a decision. Wait for one to be confirmed or declined before sending another."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "This isn't your match.",
@@ -512,7 +519,8 @@
     "JOIN_REQUEST": "You've sent a lot of join requests today. Try again tomorrow.",
     "MESSAGE": "You're sending messages too quickly. Wait a few minutes.",
     "REPORT": "You've filed a lot of reports today. Try again tomorrow.",
-    "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again."
+    "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again.",
+    "BOOKING_REQUEST": "You've sent a lot of booking requests today. Try again tomorrow."
   },
   "Validation": {
     "login": {

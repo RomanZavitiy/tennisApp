@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
+import { BookingSummaryCard } from "@/components/booking-summary-card";
 import {
   canFit,
   type CourtDayGrid,
@@ -19,10 +20,10 @@ import {
 } from "@/lib/validation/booking";
 import { todayInKrakow } from "@/lib/validation/profile";
 
-// The read-only court × time grid (K.8, slice K): twojtenis-style, entirely
+// The court × time grid (K.8, slice K): twojtenis-style, entirely
 // server-rendered — every choice (date, duration, court, start) lives in the
-// URL, so there's no client fetching and the page works with JS off. Sending
-// a request isn't wired up yet (K.10); the button here is a placeholder.
+// URL, so there's no client fetching and the page works with JS off except
+// for the "Send request" button itself (BookingSummaryCard, K.11).
 
 type BookPageProps = {
   params: Promise<{ id: string }>;
@@ -369,77 +370,13 @@ export default async function BookPage({
       )}
 
       {selectedCourt && selectedStart && (
-        <section className="mt-6 rounded-lg border p-4">
-          <h2 className="font-semibold">{t("summaryTitle")}</h2>
-          {fits ? (
-            <>
-              <dl className="mt-2 space-y-1.5 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">{t("summaryClub")}</dt>
-                  <dd className="text-right font-medium">{day.club.name}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">{t("summaryCourt")}</dt>
-                  <dd className="text-right font-medium">
-                    {selectedCourt.name}
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">{t("summaryDate")}</dt>
-                  <dd className="text-right font-medium">
-                    {format.dateTime(new Date(`${date}T00:00:00Z`), {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      timeZone: "UTC",
-                    })}
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">{t("summaryTime")}</dt>
-                  <dd className="text-right font-medium">
-                    {format.dateTime(selectedStart, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hourCycle: "h23",
-                    })}
-                    –
-                    {format.dateTime(
-                      new Date(selectedStart.getTime() + duration * 60_000),
-                      { hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
-                    )}
-                  </dd>
-                </div>
-                {selectedCourt.pricePerHourPln != null && (
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-muted-foreground">
-                      {t("summaryPrice")}
-                    </dt>
-                    <dd className="text-right font-medium">
-                      {t("pricePerHour", {
-                        price: selectedCourt.pricePerHourPln,
-                      })}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-              <button
-                type="button"
-                disabled
-                className="mt-4 w-full cursor-not-allowed rounded-lg border border-transparent bg-primary/50 px-2.5 py-2 text-sm font-medium text-primary-foreground"
-              >
-                {t("sendRequest")}
-              </button>
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                {t("comingSoon")}
-              </p>
-            </>
-          ) : (
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("doesntFit", { duration })}
-            </p>
-          )}
-        </section>
+        <BookingSummaryCard
+          clubName={day.club.name}
+          court={selectedCourt}
+          startsAt={selectedStart}
+          duration={duration}
+          fits={fits}
+        />
       )}
     </main>
   );

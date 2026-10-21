@@ -68,6 +68,10 @@
     "NEW_OFFER_FOR_LEVEL": {
       "title": "Nowa oferta w Twojej okolicy",
       "body": "Nowa oferta sparingowa odpowiada Twojemu poziomowi i dzielnicy."
+    },
+    "BOOKING_REQUESTED": {
+      "title": "Nowa prośba o rezerwację",
+      "body": "{court}, {timeRange}"
     }
   },
   "SystemMessages": {
@@ -374,7 +378,7 @@
     "summaryPrice": "Cena",
     "pricePerHour": "{price} zł/h",
     "sendRequest": "Wyślij prośbę",
-    "comingSoon": "Wysyłanie prośby o rezerwację będzie możliwe wkrótce.",
+    "sending": "Wysyłanie…",
     "doesntFit": "Ten termin nie pomieści rezerwacji na {duration} minut. Wybierz inną godzinę."
   },
   "OfferBookingSection": {
@@ -481,7 +485,10 @@
     "matchNotFound": "Ten mecz nie istnieje.",
     "checkTheScore": "Sprawdź wynik.",
     "resultNotFound": "Ten wynik nie istnieje.",
-    "noShowManualConfirmRefused": "Zgłoszenia niejawienia się nie potwierdza się ręcznie — zgłoś sprzeciw albo poczekaj, aż rozstrzygnie się automatycznie po 72 godzinach."
+    "noShowManualConfirmRefused": "Zgłoszenia niejawienia się nie potwierdza się ręcznie — zgłoś sprzeciw albo poczekaj, aż rozstrzygnie się automatycznie po 72 godzinach.",
+    "courtNotFound": "Ten kort nie istnieje.",
+    "slotTaken": "Ten termin właśnie został zajęty. Wybierz inną godzinę.",
+    "tooManyPendingBookings": "Masz już {max} prośby czekające na decyzję. Poczekaj, aż któraś zostanie potwierdzona albo odrzucona, zanim wyślesz kolejną."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "To nie jest Twój mecz.",
@@ -512,7 +519,8 @@
     "JOIN_REQUEST": "Wysłano już dziś wiele zgłoszeń. Spróbuj ponownie jutro.",
     "MESSAGE": "Wiadomości są wysyłane za szybko. Poczekaj kilka minut.",
     "REPORT": "Zgłoszono już dziś wiele skarg. Spróbuj ponownie jutro.",
-    "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie."
+    "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie.",
+    "BOOKING_REQUEST": "Wysłano już dziś wiele prośb o rezerwację. Spróbuj ponownie jutro."
   },
   "Validation": {
     "login": {
