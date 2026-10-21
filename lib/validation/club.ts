@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { District, IndoorCourts, Surface } from "@/lib/generated/prisma/enums";
+import {
+  BookingMode,
+  District,
+  IndoorCourts,
+  Surface,
+} from "@/lib/generated/prisma/enums";
 import { todayInKrakow } from "@/lib/validation/profile";
 
 // One club record in prisma/data/clubs.json. The loader (prisma/load-clubs.ts)
@@ -19,6 +24,40 @@ export const KRAKOW_BOUNDS = {
 };
 
 const httpUrl = z.url({ protocol: /^https?$/ });
+
+const TIME_HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+/** "08:00" → 480, matching CourtHours' opensAt/closesAt (minutes from midnight). */
+export function minutesFromHHMM(time: string): number {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+// One court a SPINBUDDY club declares (K.6). `pricePerHourPln` omitted or
+// null both mean "unknown" — never invented, same convention as the club's
+// own `priceInfo`.
+export const courtRecordSchema = z.strictObject({
+  name: z.string().trim().min(1).max(60),
+  surface: z.enum(Surface),
+  indoor: z.boolean(),
+  pricePerHourPln: z.int().positive().nullable().optional(),
+});
+export type CourtRecord = z.output<typeof courtRecordSchema>;
+
+// One weekday's opening hours for a SPINBUDDY club (K.6), mirroring
+// CourtHours. Kept as "HH:MM" strings here — the file's own shape; the
+// loader converts to opensAt/closesAt minutes.
+export const courtHoursRecordSchema = z
+  .strictObject({
+    weekday: z.int().min(0).max(6),
+    opens: z.string().regex(TIME_HHMM, "Use HH:MM."),
+    closes: z.string().regex(TIME_HHMM, "Use HH:MM."),
+  })
+  .refine(
+    (hours) => minutesFromHHMM(hours.opens) < minutesFromHHMM(hours.closes),
+    { message: "opens must be before closes.", path: ["closes"] },
+  );
+export type CourtHoursRecord = z.output<typeof courtHoursRecordSchema>;
 
 // Strict, so a misspelt key ("phnoe") fails instead of quietly dropping data.
 export const clubSchema = z.strictObject({
@@ -52,6 +91,28 @@ export const clubSchema = z.strictObject({
   phone: z.string().trim().min(1).max(30).nullable(),
   websiteUrl: httpUrl.max(500).nullable(),
   bookingUrl: httpUrl.max(500).nullable(),
+  // Slice K (decision 2026-10-21): a club may switch itself into
+  // SpinBuddy-run booking here and declare its courts/hours. All three are
+  // optional so every club already in the file keeps validating as-is;
+  // omitted means EXTERNAL_LINK with no courts yet, the same as the Club
+  // table's own defaults.
+  bookingMode: z.enum(BookingMode).optional().default("EXTERNAL_LINK"),
+  courts: z
+    .array(courtRecordSchema)
+    .optional()
+    .default([])
+    .refine(
+      (courts) => new Set(courts.map((c) => c.name)).size === courts.length,
+      "List each court name once.",
+    ),
+  hours: z
+    .array(courtHoursRecordSchema)
+    .optional()
+    .default([])
+    .refine(
+      (hours) => new Set(hours.map((h) => h.weekday)).size === hours.length,
+      "List each weekday once.",
+    ),
   verifiedAt: z.iso
     .date()
     .refine((date) => date <= todayInKrakow(), "That date is in the future."),
