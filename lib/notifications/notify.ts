@@ -210,3 +210,85 @@ async function deliver(
     text: renderEmailText(templateInput),
   });
 }
+
+/**
+ * K.12: tells one club staff member a request came in — push (if
+ * subscribed) and always an email too, never only a fallback: staff have
+ * no in-app queue to check yet (that's K.16's page), so email is the one
+ * channel guaranteed to reach them. Deliberately outside `notify()`/
+ * `NotificationEvent`: the in-app bell those record to (lib/notifications/
+ * inbox.ts) is shaped around an offer (every row has one), and a booking
+ * request has none. Never throws, same contract as `notify()`.
+ */
+export async function notifyBookingRequested(
+  userId: string,
+  event: { clubId: string; court: string; timeRange: string },
+): Promise<void> {
+  try {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: {
+        email: true,
+        locale: true,
+        pushSubscriptions: {
+          select: { id: true, endpoint: true, p256dh: true, auth: true },
+        },
+      },
+    });
+    if (!user) {
+      return;
+    }
+
+    const { locale } = user;
+    const tNotifications = createTranslator({
+      locale: locale.toLowerCase(),
+      messages: MESSAGES[locale],
+      namespace: "PushNotifications",
+    });
+    const title = tNotifications("BOOKING_REQUESTED.title");
+    const body = tNotifications("BOOKING_REQUESTED.body", {
+      court: event.court,
+      timeRange: event.timeRange,
+    });
+    // /club/[clubId] is built in K.16 — a 404 until then.
+    const path = `/club/${event.clubId}`;
+
+    for (const subscription of user.pushSubscriptions) {
+      const outcome = await sendPush(subscription, { title, body, url: path });
+      if (!outcome.ok && outcome.expired) {
+        await db.pushSubscription
+          .delete({ where: { id: subscription.id } })
+          .catch(() => {
+            // Already gone — nothing left to clean up.
+          });
+      }
+    }
+
+    if (!user.email) {
+      return;
+    }
+    const tEmail = createTranslator({
+      locale: locale.toLowerCase(),
+      messages: MESSAGES[locale],
+      namespace: "EmailTemplate",
+    });
+    const actionUrl = `${appUrl()}${path}`;
+    const unsubscribeUrl = `${appUrl()}/unsubscribe?token=${createUnsubscribeToken(userId)}`;
+    const templateInput = {
+      heading: title,
+      body,
+      actionUrl,
+      actionLabel: tEmail("actionLabel"),
+      unsubscribeUrl,
+      unsubscribeLabel: tEmail("unsubscribeLabel"),
+    };
+    await sendEmail({
+      to: user.email,
+      subject: title,
+      html: renderEmailHtml(templateInput),
+      text: renderEmailText(templateInput),
+    });
+  } catch (error) {
+    console.error("Booking-request notification failed:", error);
+  }
+}

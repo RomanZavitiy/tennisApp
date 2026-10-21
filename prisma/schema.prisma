@@ -916,6 +916,7 @@ enum RateLimitAction {
   MESSAGE
   REPORT
   MAGIC_LINK
+  BOOKING_REQUEST
 
   @@map("rate_limit_action")
 }

@@ -41,6 +41,9 @@ const RATE_LIMITS: Record<
   // less friendly limit of its own (app/login/actions.ts already handles
   // Supabase's 429 too, for whichever check a burst happens to hit first).
   MAGIC_LINK: { windowMs: HOUR_MS, limit: 5 },
+  // K.10 (slice K): at most 10 booking requests a day — same order of
+  // magnitude as NEW_OFFER, since both create a row club staff act on.
+  BOOKING_REQUEST: { windowMs: DAY_MS, limit: 10 },
 };
 
 export type RateLimitResult = { ok: true } | { ok: false };
