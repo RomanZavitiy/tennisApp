@@ -11,8 +11,10 @@ A tennis matchFinder web app for Kraków: players find a court on a map, post/br
 "looking for a sparring partner" offers, and keep a profile with a self-declared level
 that turns into an ELO-style rating as real matches get logged. Inspired by
 twojtenis.pl's sparring board, court map and profile — nothing else from that product is
-in scope. No booking/payment system in the MVP (see Open Questions in the planning doc —
-this may change).
+in scope. V1 adds request-based court booking for partner clubs (SpinBuddy-owned
+availability, no payments, no sync with third-party booking sites — decision 2026-10-21,
+see `docs/BOOKING-EPIC.md`); clubs not yet onboarded as partners keep the external-link
+booking flow.
 
 ## 2. Stack
 
