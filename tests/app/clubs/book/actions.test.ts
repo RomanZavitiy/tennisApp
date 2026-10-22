@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { requestBooking } from "@/app/clubs/[id]/book/actions";
+import { cancelBooking, requestBooking } from "@/app/clubs/[id]/book/actions";
 
 // Session and database are replaced: what's under test is who may request a
 // slot, that it's re-checked right before the write, and that a race lost to
@@ -12,16 +12,21 @@ const CLUB = "33333333-3333-4333-8333-333333333333";
 const STAFF_A = "44444444-4444-4444-8444-444444444444";
 const STAFF_B = "55555555-5555-4555-8555-555555555555";
 const BOOKING = "66666666-6666-4666-8666-666666666666";
+const OFFER = "77777777-7777-4777-8777-777777777777";
 
 const {
   requireOnboardedUser,
   courtFindUnique,
   bookingCount,
   bookingCreate,
+  bookingFindUnique,
+  bookingUpdate,
+  offerFindUnique,
   clubStaffFindMany,
   getDayGrid,
   checkRateLimit,
   notifyBookingRequested,
+  notifyBookingCancelled,
   captureEvent,
   redirect,
 } = vi.hoisted(() => ({
@@ -32,10 +37,14 @@ const {
     vi.fn<
       (args: { data: Record<string, unknown> }) => Promise<{ id: string }>
     >(),
+  bookingFindUnique: vi.fn(),
+  bookingUpdate: vi.fn(),
+  offerFindUnique: vi.fn(),
   clubStaffFindMany: vi.fn(),
   getDayGrid: vi.fn(),
   checkRateLimit: vi.fn(),
   notifyBookingRequested: vi.fn(),
+  notifyBookingCancelled: vi.fn(),
   captureEvent: vi.fn(),
   redirect: vi.fn(),
 }));
@@ -44,7 +53,13 @@ vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
   db: {
     court: { findUnique: courtFindUnique },
-    booking: { count: bookingCount, create: bookingCreate },
+    booking: {
+      count: bookingCount,
+      create: bookingCreate,
+      findUnique: bookingFindUnique,
+      update: bookingUpdate,
+    },
+    sparringOffer: { findUnique: offerFindUnique },
     clubStaff: { findMany: clubStaffFindMany },
   },
 }));
@@ -52,7 +67,10 @@ vi.mock("@/lib/db", () => ({
 // canFit stays real here (pure), only the DB-backed loader is replaced.
 vi.mock("@/lib/booking/get-day-grid", () => ({ getDayGrid }));
 vi.mock("@/lib/rate-limit/check-rate-limit", () => ({ checkRateLimit }));
-vi.mock("@/lib/notifications/notify", () => ({ notifyBookingRequested }));
+vi.mock("@/lib/notifications/notify", () => ({
+  notifyBookingRequested,
+  notifyBookingCancelled,
+}));
 vi.mock("@/lib/analytics/posthog", () => ({ captureEvent }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect }));
@@ -144,6 +162,44 @@ describe("requestBooking", () => {
     expect(redirect).toHaveBeenCalledWith("/profile");
   });
 
+  it("stores offerId when the requester is that offer's author", async () => {
+    offerFindUnique.mockResolvedValue({ authorId: ME });
+
+    await requestBooking({ ...validInput, offerId: OFFER });
+
+    expect(offerFindUnique).toHaveBeenCalledWith({
+      where: { id: OFFER },
+      select: { authorId: true },
+    });
+    expect(bookingCreate).toHaveBeenCalledWith({
+      data: {
+        courtId: COURT,
+        userId: ME,
+        startsAt: STARTS_AT,
+        endsAt: new Date(STARTS_AT.getTime() + DURATION * 60_000),
+        note: undefined,
+        offerId: OFFER,
+      },
+    });
+  });
+
+  it("drops offerId when the requester isn't that offer's author", async () => {
+    offerFindUnique.mockResolvedValue({ authorId: "someone-else" });
+
+    await requestBooking({ ...validInput, offerId: OFFER });
+
+    expect(bookingCreate).toHaveBeenCalledWith({
+      data: {
+        courtId: COURT,
+        userId: ME,
+        startsAt: STARTS_AT,
+        endsAt: new Date(STARTS_AT.getTime() + DURATION * 60_000),
+        note: undefined,
+        offerId: undefined,
+      },
+    });
+  });
+
   it("refuses a blocked player without writing", async () => {
     requireOnboardedUser.mockResolvedValue({
       id: ME,
@@ -223,5 +279,109 @@ describe("requestBooking", () => {
     bookingCreate.mockRejectedValue(new Error("connection lost"));
 
     await expect(requestBooking(validInput)).rejects.toThrow("connection lost");
+  });
+});
+
+const PENDING_BOOKING = {
+  id: BOOKING,
+  status: "PENDING" as const,
+  startsAt: new Date("2026-11-05T17:00:00.000Z"),
+  endsAt: new Date("2026-11-05T18:00:00.000Z"),
+  userId: ME,
+  offerId: null as string | null,
+  court: { id: COURT, name: "Court 1", clubId: CLUB },
+};
+
+describe("cancelBooking", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    // Well outside the 12h cancel window (lib/booking/cancel-rules.ts).
+    vi.setSystemTime(new Date("2026-11-04T10:00:00Z"));
+    requireOnboardedUser.mockResolvedValue({ id: ME, blockedAt: null });
+    bookingFindUnique.mockResolvedValue(PENDING_BOOKING);
+    bookingUpdate.mockResolvedValue(undefined);
+    clubStaffFindMany.mockResolvedValue([{ userId: STAFF_A }]);
+    notifyBookingCancelled.mockResolvedValue(undefined);
+    captureEvent.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("cancels the owner's own PENDING booking without notifying staff", async () => {
+    const result = await cancelBooking(BOOKING);
+
+    expect(result).toEqual({ ok: true });
+    expect(bookingUpdate).toHaveBeenCalledWith({
+      where: { id: BOOKING },
+      data: { status: "CANCELLED" },
+    });
+    expect(notifyBookingCancelled).not.toHaveBeenCalled();
+    expect(captureEvent).toHaveBeenCalledWith("booking_cancelled", ME, {});
+  });
+
+  it("notifies club staff when a CONFIRMED booking is cancelled", async () => {
+    bookingFindUnique.mockResolvedValue({
+      ...PENDING_BOOKING,
+      status: "CONFIRMED",
+    });
+
+    await cancelBooking(BOOKING);
+
+    expect(notifyBookingCancelled).toHaveBeenCalledWith(
+      STAFF_A,
+      expect.objectContaining({ clubId: CLUB, court: "Court 1" }),
+    );
+  });
+
+  it("refuses someone else's booking as not found", async () => {
+    bookingFindUnique.mockResolvedValue({ ...PENDING_BOOKING, userId: "nope" });
+
+    const result = await cancelBooking(BOOKING);
+
+    expect(result).toEqual({
+      ok: false,
+      message: "This booking request doesn't exist.",
+    });
+    expect(bookingUpdate).not.toHaveBeenCalled();
+  });
+
+  it("refuses a booking that's already been declined or cancelled", async () => {
+    bookingFindUnique.mockResolvedValue({
+      ...PENDING_BOOKING,
+      status: "DECLINED",
+    });
+
+    const result = await cancelBooking(BOOKING);
+
+    expect(result).toEqual({
+      ok: false,
+      message: "This booking is no longer active.",
+    });
+    expect(bookingUpdate).not.toHaveBeenCalled();
+  });
+
+  it("refuses to cancel within the window right before the start", async () => {
+    vi.setSystemTime(new Date("2026-11-05T10:00:00Z")); // 7h out
+
+    const result = await cancelBooking(BOOKING);
+
+    expect(result).toEqual({
+      ok: false,
+      message: "Too close to the start time to cancel.",
+    });
+    expect(bookingUpdate).not.toHaveBeenCalled();
+  });
+
+  it("treats a bad id as a missing booking", async () => {
+    const result = await cancelBooking("nope");
+
+    expect(result).toEqual({
+      ok: false,
+      message: "This booking request doesn't exist.",
+    });
+    expect(bookingFindUnique).not.toHaveBeenCalled();
   });
 });

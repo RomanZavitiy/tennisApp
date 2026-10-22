@@ -318,6 +318,48 @@ export async function notifyBookingRequested(
 }
 
 /**
+ * K.22: tells one club staff member a CONFIRMED request fell through —
+ * the player cancelled it from the offer it was made for. Same "no in-app
+ * queue yet" reasoning and shape as notifyBookingRequested; a PENDING
+ * cancellation doesn't need this, staff never acted on it.
+ */
+export async function notifyBookingCancelled(
+  userId: string,
+  event: { clubId: string; court: string; timeRange: string },
+): Promise<void> {
+  try {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: {
+        email: true,
+        locale: true,
+        pushSubscriptions: {
+          select: { id: true, endpoint: true, p256dh: true, auth: true },
+        },
+      },
+    });
+    if (!user) {
+      return;
+    }
+    const t = createTranslator({
+      locale: user.locale.toLowerCase(),
+      messages: MESSAGES[user.locale],
+      namespace: "PushNotifications",
+    });
+    await sendBookingNotification(userId, user, {
+      title: t("BOOKING_CANCELLED.title"),
+      body: t("BOOKING_CANCELLED.body", {
+        court: event.court,
+        timeRange: event.timeRange,
+      }),
+      path: `/club/${event.clubId}`,
+    });
+  } catch (error) {
+    console.error("Booking-cancellation notification failed:", error);
+  }
+}
+
+/**
  * K.17 (staff confirms/declines) and K.18 (auto-decline): tells the player
  * their request was decided. `reason` is the staff member's own text for a
  * decline (omitted for an auto-decline — there's no staff member to

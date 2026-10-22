@@ -81,6 +81,10 @@
       "title": "Rezerwacja odrzucona",
       "body": "{court}, {timeRange} — odrzucona.",
       "bodyWithReason": "{court}, {timeRange} — odrzucona: {reason}"
+    },
+    "BOOKING_CANCELLED": {
+      "title": "Rezerwacja odwołana",
+      "body": "{court}, {timeRange} — gracz odwołał rezerwację."
     }
   },
   "SystemMessages": {
@@ -245,7 +249,10 @@
     "declining": "Odrzucanie…",
     "cancelOfferLabel": "Odwołaj ofertę",
     "confirmCancel": "Tak, odwołaj",
-    "cancelling": "Odwoływanie…"
+    "cancelling": "Odwoływanie…",
+    "cancelBookingTooLabel": "Odwołaj też rezerwację",
+    "confirmCancelBookingToo": "Tak, odwołaj też rezerwację",
+    "cancellingBooking": "Odwoływanie…"
   },
   "AdminActionForm": {
     "done": "Gotowe.",
@@ -419,7 +426,9 @@
     "callToBook": "Zadzwoń, aby zarezerwować",
     "bookedTheCourt": "Zarezerwowano kort?",
     "markAsBooked": "Oznacz jako zarezerwowany",
-    "marking": "Oznaczanie…"
+    "marking": "Oznaczanie…",
+    "bookACourtForThisGame": "Zarezerwuj kort na ten mecz",
+    "courtBooked": "Kort zarezerwowany"
   },
   "JoinThread": {
     "messages": "Wiadomości"
@@ -523,6 +532,8 @@
     "tooManyPendingBookings": "Masz już {max} prośby czekające na decyzję. Poczekaj, aż któraś zostanie potwierdzona albo odrzucona, zanim wyślesz kolejną.",
     "bookingNotFound": "Ta prośba o rezerwację nie istnieje.",
     "bookingAlreadyDecided": "Ta prośba została już potwierdzona albo odrzucona.",
+    "bookingNotActive": "Ta rezerwacja nie jest już aktywna.",
+    "bookingCancelWindowPassed": "Zbyt blisko godziny startu, aby odwołać.",
     "blockNotFound": "Ta blokada nie istnieje.",
     "blockOverlapsBooking": "Ten termin pokrywa się z prośbą albo potwierdzoną rezerwacją. Najpierw ją potwierdź albo odrzuć.",
     "blockOverlapsBlock": "Ten termin pokrywa się z inną blokadą. Wybierz inny termin."
