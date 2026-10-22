@@ -72,6 +72,15 @@
     "BOOKING_REQUESTED": {
       "title": "Nowa prośba o rezerwację",
       "body": "{court}, {timeRange}"
+    },
+    "BOOKING_CONFIRMED": {
+      "title": "Rezerwacja potwierdzona",
+      "body": "{court}, {timeRange} — potwierdzona."
+    },
+    "BOOKING_DECLINED": {
+      "title": "Rezerwacja odrzucona",
+      "body": "{court}, {timeRange} — odrzucona.",
+      "bodyWithReason": "{court}, {timeRange} — odrzucona: {reason}"
     }
   },
   "SystemMessages": {
@@ -381,6 +390,29 @@
     "sending": "Wysyłanie…",
     "doesntFit": "Ten termin nie pomieści rezerwacji na {duration} minut. Wybierz inną godzinę."
   },
+  "ClubPanelPage": {
+    "pendingTitle": "Oczekujące prośby ({count})",
+    "nothingPending": "Nic nie czeka.",
+    "confirm": "Potwierdź",
+    "confirming": "Potwierdzanie…",
+    "decline": "Odrzuć",
+    "declining": "Odrzucanie…",
+    "declineReasonLabel": "Powód odrzucenia (opcjonalny — widoczny dla gracza)",
+    "todayTitle": "Dzisiaj",
+    "tomorrowTitle": "Jutro",
+    "blocked": "Zablokowane",
+    "blocksTitle": "Blokady",
+    "noBlocks": "Brak blokad.",
+    "removeBlock": "Usuń",
+    "removingBlock": "Usuwanie…",
+    "addBlockTitle": "Dodaj blokadę",
+    "blockStartLabel": "Początek",
+    "blockEndLabel": "Koniec",
+    "blockReasonLabel": "Powód (opcjonalny)",
+    "addBlock": "Dodaj blokadę",
+    "addingBlock": "Dodawanie…",
+    "blockAdded": "Blokada dodana."
+  },
   "OfferBookingSection": {
     "aboutClub": "O klubie {name}",
     "bookOnClubSite": "Zarezerwuj na stronie klubu",
@@ -488,7 +520,12 @@
     "noShowManualConfirmRefused": "Zgłoszenia niejawienia się nie potwierdza się ręcznie — zgłoś sprzeciw albo poczekaj, aż rozstrzygnie się automatycznie po 72 godzinach.",
     "courtNotFound": "Ten kort nie istnieje.",
     "slotTaken": "Ten termin właśnie został zajęty. Wybierz inną godzinę.",
-    "tooManyPendingBookings": "Masz już {max} prośby czekające na decyzję. Poczekaj, aż któraś zostanie potwierdzona albo odrzucona, zanim wyślesz kolejną."
+    "tooManyPendingBookings": "Masz już {max} prośby czekające na decyzję. Poczekaj, aż któraś zostanie potwierdzona albo odrzucona, zanim wyślesz kolejną.",
+    "bookingNotFound": "Ta prośba o rezerwację nie istnieje.",
+    "bookingAlreadyDecided": "Ta prośba została już potwierdzona albo odrzucona.",
+    "blockNotFound": "Ta blokada nie istnieje.",
+    "blockOverlapsBooking": "Ten termin pokrywa się z prośbą albo potwierdzoną rezerwacją. Najpierw ją potwierdź albo odrzuć.",
+    "blockOverlapsBlock": "Ten termin pokrywa się z inną blokadą. Wybierz inny termin."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "To nie jest Twój mecz.",
@@ -578,6 +615,16 @@
       "durationRequired": "Wybierz, na jak długo chcesz kort.",
       "noteTooLong": "Notatka może mieć maksymalnie {max} znaków.",
       "offerInvalid": "Nie znaleziono tej oferty."
+    },
+    "addBlock": {
+      "courtRequired": "Wybierz kort.",
+      "startsAtRequired": "Wybierz godzinę rozpoczęcia.",
+      "endsAtRequired": "Wybierz godzinę zakończenia.",
+      "endBeforeStart": "Koniec musi być po rozpoczęciu.",
+      "reasonTooLong": "Powód może mieć maksymalnie {max} znaków."
+    },
+    "declineBooking": {
+      "reasonTooLong": "Powód może mieć maksymalnie {max} znaków."
     }
   },
   "OnboardingPage": {

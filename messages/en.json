@@ -72,6 +72,15 @@
     "BOOKING_REQUESTED": {
       "title": "New booking request",
       "body": "{court}, {timeRange}"
+    },
+    "BOOKING_CONFIRMED": {
+      "title": "Booking confirmed",
+      "body": "{court}, {timeRange} — confirmed."
+    },
+    "BOOKING_DECLINED": {
+      "title": "Booking declined",
+      "body": "{court}, {timeRange} — declined.",
+      "bodyWithReason": "{court}, {timeRange} — declined: {reason}"
     }
   },
   "SystemMessages": {
@@ -381,6 +390,29 @@
     "sending": "Sending…",
     "doesntFit": "This start doesn't fit a {duration}-minute booking. Pick another time."
   },
+  "ClubPanelPage": {
+    "pendingTitle": "Pending requests ({count})",
+    "nothingPending": "Nothing waiting.",
+    "confirm": "Confirm",
+    "confirming": "Confirming…",
+    "decline": "Decline",
+    "declining": "Declining…",
+    "declineReasonLabel": "Reason for declining (optional — shown to the player)",
+    "todayTitle": "Today",
+    "tomorrowTitle": "Tomorrow",
+    "blocked": "Blocked",
+    "blocksTitle": "Blocks",
+    "noBlocks": "No blocks.",
+    "removeBlock": "Remove",
+    "removingBlock": "Removing…",
+    "addBlockTitle": "Add a block",
+    "blockStartLabel": "Start",
+    "blockEndLabel": "End",
+    "blockReasonLabel": "Reason (optional)",
+    "addBlock": "Add block",
+    "addingBlock": "Adding…",
+    "blockAdded": "Block added."
+  },
   "OfferBookingSection": {
     "aboutClub": "About {name}",
     "bookOnClubSite": "Book on club's site",
@@ -488,7 +520,12 @@
     "noShowManualConfirmRefused": "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours.",
     "courtNotFound": "This court doesn't exist.",
     "slotTaken": "That slot was just taken. Pick another time.",
-    "tooManyPendingBookings": "You already have {max} requests waiting on a decision. Wait for one to be confirmed or declined before sending another."
+    "tooManyPendingBookings": "You already have {max} requests waiting on a decision. Wait for one to be confirmed or declined before sending another.",
+    "bookingNotFound": "This booking request doesn't exist.",
+    "bookingAlreadyDecided": "This request has already been confirmed or declined.",
+    "blockNotFound": "This block doesn't exist.",
+    "blockOverlapsBooking": "That time overlaps a request or confirmed booking. Confirm or decline it first.",
+    "blockOverlapsBlock": "That time overlaps another block. Pick a different time."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "This isn't your match.",
@@ -578,6 +615,16 @@
       "durationRequired": "Choose how long you want the court for.",
       "noteTooLong": "Keep the note under {max} characters.",
       "offerInvalid": "That offer could not be found."
+    },
+    "addBlock": {
+      "courtRequired": "Choose a court.",
+      "startsAtRequired": "Choose the start time.",
+      "endsAtRequired": "Choose the end time.",
+      "endBeforeStart": "The end must be after the start.",
+      "reasonTooLong": "Keep the reason under {max} characters."
+    },
+    "declineBooking": {
+      "reasonTooLong": "Keep the reason under {max} characters."
     }
   },
   "OnboardingPage": {

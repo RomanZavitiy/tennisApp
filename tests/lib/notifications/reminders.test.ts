@@ -1,26 +1,39 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  autoDeclinePendingBookings,
   sendHowDidItGoPrompts,
   sendMatchReminders,
   sendResultConfirmationReminders,
 } from "@/lib/notifications/reminders";
 
-const { offerFindMany, offerUpdate, resultFindMany, resultUpdate, notify } =
-  vi.hoisted(() => ({
-    offerFindMany: vi.fn(),
-    offerUpdate: vi.fn(),
-    resultFindMany: vi.fn(),
-    resultUpdate: vi.fn(),
-    notify: vi.fn(),
-  }));
+const {
+  offerFindMany,
+  offerUpdate,
+  resultFindMany,
+  resultUpdate,
+  bookingFindMany,
+  bookingUpdateMany,
+  notify,
+  notifyBookingDecided,
+} = vi.hoisted(() => ({
+  offerFindMany: vi.fn(),
+  offerUpdate: vi.fn(),
+  resultFindMany: vi.fn(),
+  resultUpdate: vi.fn(),
+  bookingFindMany: vi.fn(),
+  bookingUpdateMany: vi.fn(),
+  notify: vi.fn(),
+  notifyBookingDecided: vi.fn(),
+}));
 vi.mock("@/lib/db", () => ({
   db: {
     sparringOffer: { findMany: offerFindMany, update: offerUpdate },
     matchResult: { findMany: resultFindMany, update: resultUpdate },
+    booking: { findMany: bookingFindMany, updateMany: bookingUpdateMany },
   },
 }));
-vi.mock("@/lib/notifications/notify", () => ({ notify }));
+vi.mock("@/lib/notifications/notify", () => ({ notify, notifyBookingDecided }));
 
 const NOW = new Date("2026-11-10T12:00:00Z");
 
@@ -179,5 +192,60 @@ describe("sendResultConfirmationReminders", () => {
         },
       }),
     );
+  });
+});
+
+describe("autoDeclinePendingBookings", () => {
+  const BOOKING_ROW = {
+    id: "booking-1",
+    userId: "player-1",
+    startsAt: new Date("2026-11-10T14:00:00Z"), // 15:00 Kraków (CET)
+    endsAt: new Date("2026-11-10T15:00:00Z"),
+    court: { name: "Court 1" },
+  };
+
+  beforeEach(() => {
+    bookingFindMany.mockReset().mockResolvedValue([]);
+    bookingUpdateMany.mockReset().mockResolvedValue({ count: 1 });
+  });
+
+  it("queries PENDING bookings starting within the next 3 hours", async () => {
+    await autoDeclinePendingBookings(NOW);
+
+    expect(bookingFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          status: "PENDING",
+          startsAt: { lte: new Date(NOW.getTime() + 3 * 3_600_000) },
+        },
+      }),
+    );
+  });
+
+  it("declines each due booking and notifies the player", async () => {
+    bookingFindMany.mockResolvedValue([BOOKING_ROW]);
+
+    const count = await autoDeclinePendingBookings(NOW);
+
+    expect(count).toBe(1);
+    expect(bookingUpdateMany).toHaveBeenCalledWith({
+      where: { id: "booking-1", status: "PENDING" },
+      data: { status: "DECLINED", decidedAt: NOW },
+    });
+    expect(notifyBookingDecided).toHaveBeenCalledWith("player-1", {
+      court: "Court 1",
+      timeRange: "15:00–16:00",
+      status: "DECLINED",
+    });
+  });
+
+  it("doesn't notify a booking staff just decided (lost the updateMany race)", async () => {
+    bookingFindMany.mockResolvedValue([BOOKING_ROW]);
+    bookingUpdateMany.mockResolvedValue({ count: 0 });
+
+    const count = await autoDeclinePendingBookings(NOW);
+
+    expect(count).toBe(0);
+    expect(notifyBookingDecided).not.toHaveBeenCalled();
   });
 });

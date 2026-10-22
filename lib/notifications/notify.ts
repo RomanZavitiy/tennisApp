@@ -3,6 +3,7 @@ import { createTranslator } from "next-intl";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email/send";
 import { renderEmailHtml, renderEmailText } from "@/lib/email/template";
+import type { Locale } from "@/lib/generated/prisma/enums";
 import en from "@/messages/en.json";
 import pl from "@/messages/pl.json";
 import { recordNotification } from "@/lib/notifications/inbox";
@@ -211,14 +212,73 @@ async function deliver(
   });
 }
 
+type BookingRecipient = {
+  email: string | null;
+  locale: Locale;
+  pushSubscriptions: {
+    id: string;
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+  }[];
+};
+
 /**
- * K.12: tells one club staff member a request came in — push (if
- * subscribed) and always an email too, never only a fallback: staff have
- * no in-app queue to check yet (that's K.16's page), so email is the one
- * channel guaranteed to reach them. Deliberately outside `notify()`/
- * `NotificationEvent`: the in-app bell those record to (lib/notifications/
- * inbox.ts) is shaped around an offer (every row has one), and a booking
- * request has none. Never throws, same contract as `notify()`.
+ * Shared by notifyBookingRequested and notifyBookingDecided: push (if
+ * subscribed) and always an email too, never only a fallback — neither
+ * staff nor players have an in-app queue a booking shows up in yet (K.13,
+ * "My bookings", hasn't shipped), so email is the one channel guaranteed
+ * to reach them. Takes the recipient already loaded, so a caller building
+ * the title/body from the same row's locale only queries once.
+ */
+async function sendBookingNotification(
+  userId: string,
+  user: BookingRecipient,
+  { title, body, path }: { title: string; body: string; path: string },
+): Promise<void> {
+  for (const subscription of user.pushSubscriptions) {
+    const outcome = await sendPush(subscription, { title, body, url: path });
+    if (!outcome.ok && outcome.expired) {
+      await db.pushSubscription
+        .delete({ where: { id: subscription.id } })
+        .catch(() => {
+          // Already gone — nothing left to clean up.
+        });
+    }
+  }
+
+  if (!user.email) {
+    return;
+  }
+  const tEmail = createTranslator({
+    locale: user.locale.toLowerCase(),
+    messages: MESSAGES[user.locale],
+    namespace: "EmailTemplate",
+  });
+  const actionUrl = `${appUrl()}${path}`;
+  const unsubscribeUrl = `${appUrl()}/unsubscribe?token=${createUnsubscribeToken(userId)}`;
+  const templateInput = {
+    heading: title,
+    body,
+    actionUrl,
+    actionLabel: tEmail("actionLabel"),
+    unsubscribeUrl,
+    unsubscribeLabel: tEmail("unsubscribeLabel"),
+  };
+  await sendEmail({
+    to: user.email,
+    subject: title,
+    html: renderEmailHtml(templateInput),
+    text: renderEmailText(templateInput),
+  });
+}
+
+/**
+ * K.12: tells one club staff member a request came in. Deliberately
+ * outside `notify()`/`NotificationEvent`: the in-app bell those record to
+ * (lib/notifications/inbox.ts) is shaped around an offer (every row has
+ * one), and a booking request has none. Never throws, same contract as
+ * `notify()`.
  */
 export async function notifyBookingRequested(
   userId: string,
@@ -238,57 +298,90 @@ export async function notifyBookingRequested(
     if (!user) {
       return;
     }
-
-    const { locale } = user;
-    const tNotifications = createTranslator({
-      locale: locale.toLowerCase(),
-      messages: MESSAGES[locale],
+    const t = createTranslator({
+      locale: user.locale.toLowerCase(),
+      messages: MESSAGES[user.locale],
       namespace: "PushNotifications",
     });
-    const title = tNotifications("BOOKING_REQUESTED.title");
-    const body = tNotifications("BOOKING_REQUESTED.body", {
-      court: event.court,
-      timeRange: event.timeRange,
-    });
-    // /club/[clubId] is built in K.16 — a 404 until then.
-    const path = `/club/${event.clubId}`;
-
-    for (const subscription of user.pushSubscriptions) {
-      const outcome = await sendPush(subscription, { title, body, url: path });
-      if (!outcome.ok && outcome.expired) {
-        await db.pushSubscription
-          .delete({ where: { id: subscription.id } })
-          .catch(() => {
-            // Already gone — nothing left to clean up.
-          });
-      }
-    }
-
-    if (!user.email) {
-      return;
-    }
-    const tEmail = createTranslator({
-      locale: locale.toLowerCase(),
-      messages: MESSAGES[locale],
-      namespace: "EmailTemplate",
-    });
-    const actionUrl = `${appUrl()}${path}`;
-    const unsubscribeUrl = `${appUrl()}/unsubscribe?token=${createUnsubscribeToken(userId)}`;
-    const templateInput = {
-      heading: title,
-      body,
-      actionUrl,
-      actionLabel: tEmail("actionLabel"),
-      unsubscribeUrl,
-      unsubscribeLabel: tEmail("unsubscribeLabel"),
-    };
-    await sendEmail({
-      to: user.email,
-      subject: title,
-      html: renderEmailHtml(templateInput),
-      text: renderEmailText(templateInput),
+    await sendBookingNotification(userId, user, {
+      title: t("BOOKING_REQUESTED.title"),
+      body: t("BOOKING_REQUESTED.body", {
+        court: event.court,
+        timeRange: event.timeRange,
+      }),
+      // /club/[clubId] is built in K.16 — a 404 until then.
+      path: `/club/${event.clubId}`,
     });
   } catch (error) {
     console.error("Booking-request notification failed:", error);
+  }
+}
+
+/**
+ * K.17 (staff confirms/declines) and K.18 (auto-decline): tells the player
+ * their request was decided. `reason` is the staff member's own text for a
+ * decline (omitted for an auto-decline — there's no staff member to
+ * attribute one to). Same "no in-app queue yet" reasoning as
+ * notifyBookingRequested; links to /profile rather than a "My bookings"
+ * page, same fallback requestBooking() redirects to until K.13 ships.
+ */
+export async function notifyBookingDecided(
+  userId: string,
+  event: {
+    court: string;
+    timeRange: string;
+    status: "CONFIRMED" | "DECLINED";
+    reason?: string;
+  },
+): Promise<void> {
+  try {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: {
+        email: true,
+        locale: true,
+        pushSubscriptions: {
+          select: { id: true, endpoint: true, p256dh: true, auth: true },
+        },
+      },
+    });
+    if (!user) {
+      return;
+    }
+    const t = createTranslator({
+      locale: user.locale.toLowerCase(),
+      messages: MESSAGES[user.locale],
+      namespace: "PushNotifications",
+    });
+    // Two literal branches, not a templated key: next-intl types each t()
+    // call against the real message shape, and only BOOKING_DECLINED has a
+    // `bodyWithReason` variant.
+    const title =
+      event.status === "CONFIRMED"
+        ? t("BOOKING_CONFIRMED.title")
+        : t("BOOKING_DECLINED.title");
+    const body =
+      event.status === "CONFIRMED"
+        ? t("BOOKING_CONFIRMED.body", {
+            court: event.court,
+            timeRange: event.timeRange,
+          })
+        : event.reason
+          ? t("BOOKING_DECLINED.bodyWithReason", {
+              court: event.court,
+              timeRange: event.timeRange,
+              reason: event.reason,
+            })
+          : t("BOOKING_DECLINED.body", {
+              court: event.court,
+              timeRange: event.timeRange,
+            });
+    await sendBookingNotification(userId, user, {
+      title,
+      body,
+      path: "/profile",
+    });
+  } catch (error) {
+    console.error("Booking-decision notification failed:", error);
   }
 }

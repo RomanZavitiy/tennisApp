@@ -36,7 +36,7 @@ const BLOCKING_BOOKING_STATUSES: ("PENDING" | "CONFIRMED")[] = [
 ];
 
 /** The calendar date's first instant, the next day's first instant. */
-function dayBounds(date: string): { start: Date; end: Date } | null {
+export function dayBounds(date: string): { start: Date; end: Date } | null {
   const start = krakowLocalToDate(`${date}T00:00`);
   if (!start) return null;
   const next = new Date(`${date}T00:00:00Z`);
