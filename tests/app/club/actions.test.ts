@@ -16,6 +16,7 @@ const BOOKING = "33333333-3333-4333-8333-333333333333";
 const PLAYER = "44444444-4444-4444-8444-444444444444";
 const STAFF = "55555555-5555-4555-8555-555555555555";
 const BLOCK = "66666666-6666-4666-8666-666666666666";
+const OFFER = "77777777-7777-4777-8777-777777777777";
 
 const {
   requireClubStaff,
@@ -26,7 +27,12 @@ const {
   courtBlockCreate,
   courtBlockFindUnique,
   courtBlockDelete,
+  offerFindUnique,
+  offerUpdate,
+  joinFindMany,
   notifyBookingDecided,
+  notify,
+  postSystemMessage,
   captureEvent,
 } = vi.hoisted(() => ({
   requireClubStaff: vi.fn(),
@@ -37,7 +43,12 @@ const {
   courtBlockCreate: vi.fn(),
   courtBlockFindUnique: vi.fn(),
   courtBlockDelete: vi.fn(),
+  offerFindUnique: vi.fn(),
+  offerUpdate: vi.fn(),
+  joinFindMany: vi.fn(),
   notifyBookingDecided: vi.fn(),
+  notify: vi.fn(),
+  postSystemMessage: vi.fn(),
   captureEvent: vi.fn(),
 }));
 
@@ -55,9 +66,17 @@ vi.mock("@/lib/db", () => ({
       findUnique: courtBlockFindUnique,
       delete: courtBlockDelete,
     },
+    // K.21: confirmBooking reuses markOfferCourtBooked for a booking that
+    // came from an offer's page.
+    sparringOffer: { findUnique: offerFindUnique, update: offerUpdate },
+    offerJoin: { findMany: joinFindMany },
   },
 }));
-vi.mock("@/lib/notifications/notify", () => ({ notifyBookingDecided }));
+vi.mock("@/lib/notifications/notify", () => ({ notifyBookingDecided, notify }));
+vi.mock("@/lib/messages/post-system-message", () => ({
+  postSystemMessage,
+  COURT_BOOKED_MESSAGE: "COURT_BOOKED_MESSAGE",
+}));
 vi.mock("@/lib/analytics/posthog", () => ({ captureEvent }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
@@ -98,6 +117,30 @@ describe("confirmBooking", () => {
       expect.objectContaining({ court: "Court 1", status: "CONFIRMED" }),
     );
     expect(captureEvent).toHaveBeenCalledWith("booking_confirmed", STAFF, {});
+  });
+
+  it("marks the linked offer's court booked (K.21)", async () => {
+    bookingFindUnique.mockResolvedValue({
+      ...PENDING_BOOKING,
+      offerId: OFFER,
+    });
+    offerFindUnique.mockResolvedValue({ courtStatus: "WILL_BOOK" });
+    joinFindMany.mockResolvedValue([]);
+
+    await confirmBooking(BOOKING);
+
+    expect(offerUpdate).toHaveBeenCalledWith({
+      where: { id: OFFER },
+      data: { courtStatus: "BOOKED" },
+    });
+    expect(captureEvent).toHaveBeenCalledWith("court_marked_booked", STAFF, {});
+  });
+
+  it("doesn't touch the offer when the booking isn't linked to one", async () => {
+    await confirmBooking(BOOKING);
+
+    expect(offerFindUnique).not.toHaveBeenCalled();
+    expect(offerUpdate).not.toHaveBeenCalled();
   });
 
   it("404s a non-staff member before revealing the booking exists", async () => {

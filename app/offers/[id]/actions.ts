@@ -8,7 +8,6 @@ import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
 import {
-  COURT_BOOKED_MESSAGE,
   postSystemMessage,
   THREAD_WELCOME_MESSAGE,
 } from "@/lib/messages/post-system-message";
@@ -28,6 +27,7 @@ import {
   type JoinAction,
   type JoinChangeRefusal,
 } from "@/lib/offers/join-transitions";
+import { markOfferCourtBooked } from "@/lib/offers/mark-court-booked";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import {
   isLateCancellation,
@@ -446,27 +446,7 @@ export async function markCourtBooked(
     return { ok: true };
   }
 
-  const activeJoins = await db.offerJoin.findMany({
-    where: { offerId: id.data, status: { in: ["REQUESTED", "ACCEPTED"] } },
-    select: { id: true, userId: true },
-  });
-  await db.sparringOffer.update({
-    where: { id: id.data },
-    data: { courtStatus: "BOOKED" },
-  });
-  // Task 5.16: "court booked", to the same players the system message goes
-  // to — whoever has a live request or place on this offer.
-  await Promise.all(
-    activeJoins.map((join) =>
-      notify(join.userId, { kind: "COURT_BOOKED", offerId: id.data }),
-    ),
-  );
-  await Promise.all(
-    activeJoins.map((join) =>
-      postSystemMessage({ offerJoinId: join.id }, COURT_BOOKED_MESSAGE),
-    ),
-  );
-  await captureEvent("court_marked_booked", author.id, {});
+  await markOfferCourtBooked(id.data, author.id);
 
   revalidatePath(`/offers/${id.data}`);
   return { ok: true };

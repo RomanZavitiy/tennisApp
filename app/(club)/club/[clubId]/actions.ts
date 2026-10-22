@@ -7,8 +7,10 @@ import { z } from "zod";
 import { captureEvent } from "@/lib/analytics/posthog";
 import { requireClubStaff } from "@/lib/auth/require-club-staff";
 import { isExclusionViolation } from "@/lib/booking/db-errors";
+import { bookingDurationMinutes } from "@/lib/booking/duration";
 import { db } from "@/lib/db";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
+import { markOfferCourtBooked } from "@/lib/offers/mark-court-booked";
 import { notifyBookingDecided } from "@/lib/notifications/notify";
 import {
   addBlockSchema,
@@ -24,10 +26,6 @@ import {
 
 export type ClubPanelActionResult =
   { ok: true } | { ok: false; message: string };
-
-function durationMinutes(startsAt: Date, endsAt: Date): number {
-  return (endsAt.getTime() - startsAt.getTime()) / 60_000;
-}
 
 async function overlapsABooking(
   courtId: string,
@@ -68,6 +66,7 @@ export async function confirmBooking(
       startsAt: true,
       endsAt: true,
       userId: true,
+      offerId: true,
       court: { select: { id: true, name: true, clubId: true } },
     },
   });
@@ -83,6 +82,12 @@ export async function confirmBooking(
     where: { id: booking.id },
     data: { status: "CONFIRMED", decidedById: staff.id, decidedAt: new Date() },
   });
+  // K.21: this request came from an offer's page — the same "court booked"
+  // write and notifications markCourtBooked does when the author marks it
+  // by hand.
+  if (booking.offerId) {
+    await markOfferCourtBooked(booking.offerId, staff.id);
+  }
 
   const format = await getFormatter();
   await notifyBookingDecided(booking.userId, {
@@ -90,12 +95,15 @@ export async function confirmBooking(
     timeRange: formatKrakowTimeRange(
       format,
       booking.startsAt,
-      durationMinutes(booking.startsAt, booking.endsAt),
+      bookingDurationMinutes(booking.startsAt, booking.endsAt),
     ),
     status: "CONFIRMED",
   });
   await captureEvent("booking_confirmed", staff.id, {});
   revalidatePath(`/club/${booking.court.clubId}`);
+  if (booking.offerId) {
+    revalidatePath(`/offers/${booking.offerId}`);
+  }
   return { ok: true };
 }
 
@@ -156,7 +164,7 @@ export async function declineBooking(
     timeRange: formatKrakowTimeRange(
       format,
       booking.startsAt,
-      durationMinutes(booking.startsAt, booking.endsAt),
+      bookingDurationMinutes(booking.startsAt, booking.endsAt),
     ),
     status: "DECLINED",
     reason: declineReason,

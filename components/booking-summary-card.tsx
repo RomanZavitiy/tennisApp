@@ -15,12 +15,15 @@ export function BookingSummaryCard({
   startsAt,
   duration,
   fits,
+  offerId,
 }: {
   clubName: string;
   court: { id: string; name: string; pricePerHourPln: number | null };
   startsAt: Date;
   duration: BookingDuration;
   fits: boolean;
+  /** K.20: set when this page was reached from an offer's "book a court" link. */
+  offerId?: string;
 }) {
   const t = useTranslations("BookPage");
   const format = useFormatter();
@@ -79,6 +82,7 @@ export function BookingSummaryCard({
                 courtId: court.id,
                 startsAt: toKrakowLocal(startsAt),
                 duration,
+                offerId,
               })}
               label={t("sendRequest")}
               pendingLabel={t("sending")}

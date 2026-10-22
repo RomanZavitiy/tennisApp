@@ -81,6 +81,10 @@
       "title": "Booking declined",
       "body": "{court}, {timeRange} — declined.",
       "bodyWithReason": "{court}, {timeRange} — declined: {reason}"
+    },
+    "BOOKING_CANCELLED": {
+      "title": "Booking cancelled",
+      "body": "{court}, {timeRange} — the player cancelled."
     }
   },
   "SystemMessages": {
@@ -245,7 +249,10 @@
     "declining": "Declining…",
     "cancelOfferLabel": "Cancel offer",
     "confirmCancel": "Yes, cancel it",
-    "cancelling": "Cancelling…"
+    "cancelling": "Cancelling…",
+    "cancelBookingTooLabel": "Cancel booking too",
+    "confirmCancelBookingToo": "Yes, cancel the booking too",
+    "cancellingBooking": "Cancelling…"
   },
   "AdminActionForm": {
     "done": "Done.",
@@ -419,7 +426,9 @@
     "callToBook": "Call to book",
     "bookedTheCourt": "Booked the court?",
     "markAsBooked": "Mark it as booked",
-    "marking": "Marking…"
+    "marking": "Marking…",
+    "bookACourtForThisGame": "Book a court for this game",
+    "courtBooked": "Court booked"
   },
   "JoinThread": {
     "messages": "Messages"
@@ -523,6 +532,8 @@
     "tooManyPendingBookings": "You already have {max} requests waiting on a decision. Wait for one to be confirmed or declined before sending another.",
     "bookingNotFound": "This booking request doesn't exist.",
     "bookingAlreadyDecided": "This request has already been confirmed or declined.",
+    "bookingNotActive": "This booking is no longer active.",
+    "bookingCancelWindowPassed": "Too close to the start time to cancel.",
     "blockNotFound": "This block doesn't exist.",
     "blockOverlapsBooking": "That time overlaps a request or confirmed booking. Confirm or decline it first.",
     "blockOverlapsBlock": "That time overlaps another block. Pick a different time."

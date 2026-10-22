@@ -8,32 +8,78 @@ import { markCourtBooked } from "@/app/offers/[id]/actions";
 import { BookingLink } from "@/components/booking-link";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { buttonVariants } from "@/components/ui/button";
-import type { CourtStatus } from "@/lib/generated/prisma/enums";
+import type { BookingMode, CourtStatus } from "@/lib/generated/prisma/enums";
+import { toKrakowLocal } from "@/lib/offers/krakow-time";
+import { isBookingDuration } from "@/lib/validation/booking";
 
-// The club link and booking CTA on an offer's page (tasks 3.13, 2.13), plus
-// a "Booked the court?" banner for the author alone. Booking happens outside
-// the app — on the club's own site or by phone — so there is no server
-// signal for "they clicked through and came back"; a new tab or a tel:
-// prompt both leave this tab running, so showing the banner the moment the
-// link is clicked is both the simplest option and an accurate one.
+// The club link and booking CTA on an offer's page (tasks 3.13, 2.13, K.20).
+// EXTERNAL_LINK: booking happens outside the app, so there's no server
+// signal for "they clicked through and came back" — the "Booked the court?"
+// banner shows the moment the link is clicked, author-only, unchanged by
+// this slice. SPINBUDDY: the author instead gets a link straight into the
+// grid (K.8), prefilled with this offer's own date and duration so the slot
+// they already agreed to is a click away; requestBooking (K.21) stores the
+// link back, and confirmBooking is what flips courtStatus this time, so
+// there's no manual "mark as booked" banner here.
 export function OfferBookingSection({
   offerId,
   club,
   isAuthor,
   courtStatus,
+  startsAt,
+  durationMinutes,
 }: {
   offerId: string;
   club: {
     id: string;
     name: string;
+    bookingMode: BookingMode;
     bookingUrl: string | null;
     phone: string | null;
   };
   isAuthor: boolean;
   courtStatus: CourtStatus;
+  startsAt: Date;
+  durationMinutes: number;
 }) {
   const t = useTranslations("OfferBookingSection");
   const [clicked, setClicked] = useState(false);
+
+  if (club.bookingMode === "SPINBUDDY") {
+    const aboutClubLink = (
+      <Link href={`/clubs/${club.id}`} className="hover:underline">
+        {t("aboutClub", { name: club.name })}
+      </Link>
+    );
+    if (!isAuthor) {
+      return <div className="mt-3 text-sm">{aboutClubLink}</div>;
+    }
+
+    // Capped at the grid's own max — an offer can run longer (180 min, K5)
+    // than a single booking request can.
+    const duration = isBookingDuration(durationMinutes) ? durationMinutes : 120;
+    const bookHref = `/clubs/${club.id}/book?${new URLSearchParams({
+      date: toKrakowLocal(startsAt).slice(0, 10),
+      duration: String(duration),
+      offerId,
+    }).toString()}`;
+
+    return (
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+        {aboutClubLink}
+        {courtStatus === "BOOKED" ? (
+          <span className="text-muted-foreground">{t("courtBooked")}</span>
+        ) : (
+          <Link
+            href={bookHref}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            {t("bookACourtForThisGame")}
+          </Link>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="mt-3">

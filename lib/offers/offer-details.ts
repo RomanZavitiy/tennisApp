@@ -100,10 +100,25 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
       courtStatus: true,
       comment: true,
       club: {
-        select: { id: true, name: true, bookingUrl: true, phone: true },
+        select: {
+          id: true,
+          name: true,
+          bookingUrl: true,
+          phone: true,
+          bookingMode: true,
+        },
       },
       author: { select: playerSelect },
       _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
+      // K.22: whether there's a booking tied to this offer the author could
+      // still cancel alongside it. At most one in practice, but a prior
+      // declined/cancelled attempt could leave more than one row behind.
+      bookings: {
+        where: { status: { in: ["PENDING", "CONFIRMED"] } },
+        select: { id: true, status: true },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
     },
   });
   if (!offer) {
@@ -139,9 +154,16 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
         })
       : null;
 
-  const { _count, author, ...details } = offer;
+  const { _count, author, bookings, ...details } = offer;
   return {
-    offer: { ...details, author: toOfferPlayer(author) },
+    offer: {
+      ...details,
+      author: toOfferPlayer(author),
+      // .at(), not [0]: its return type stays T | undefined even without
+      // noUncheckedIndexedAccess, so activeBooking keeps its real null case
+      // instead of TS treating the empty-array branch as unreachable.
+      activeBooking: bookings.at(0) ?? null,
+    },
     spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),
     isAuthor,
     viewerJoin,

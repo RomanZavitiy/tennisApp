@@ -64,12 +64,20 @@ type Params = {
   court?: string;
   start?: string;
   tab?: string;
+  offerId?: string;
 };
 
 function hrefWith(current: Params, overrides: Partial<Params>): string {
   const merged = { ...current, ...overrides };
   const qs = new URLSearchParams();
-  for (const key of ["date", "duration", "court", "start", "tab"] as const) {
+  for (const key of [
+    "date",
+    "duration",
+    "court",
+    "start",
+    "tab",
+    "offerId",
+  ] as const) {
     const value = merged[key];
     if (value) qs.set(key, value);
   }
@@ -122,6 +130,7 @@ export default async function BookPage({
     court: single(rawParams.court),
     start: single(rawParams.start),
     tab: single(rawParams.tab),
+    offerId: single(rawParams.offerId),
   };
 
   const selectedCourt = current.court
@@ -376,6 +385,7 @@ export default async function BookPage({
           startsAt={selectedStart}
           duration={duration}
           fits={fits}
+          offerId={current.offerId}
         />
       )}
     </main>
