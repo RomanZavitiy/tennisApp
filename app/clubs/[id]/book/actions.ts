@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 
 import { canFit } from "@/lib/booking/availability";
+import { isExclusionViolation } from "@/lib/booking/db-errors";
 import { getDayGrid } from "@/lib/booking/get-day-grid";
 import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
@@ -20,27 +21,6 @@ export type RequestBookingResult =
 
 /** K.10: at most this many requests still awaiting a staff decision. */
 const MAX_PENDING_BOOKINGS = 3;
-
-/**
- * A Postgres exclusion-violation (23P01) from the EXCLUDE constraint on
- * `bookings` (K.2) — two requests for the same slot raced past the
- * getDayGrid/canFit re-check below. Checked defensively across the shapes
- * Prisma 7 (no Rust engine) is seen to wrap a driver error in, since this
- * constraint isn't one Prisma's schema can express as a typed error code.
- */
-function isExclusionViolation(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) return false;
-  const direct = (error as { code?: unknown }).code;
-  if (direct === "23P01") return true;
-  const meta = (error as { meta?: { code?: unknown } }).meta;
-  if (meta?.code === "23P01") return true;
-  const cause = (error as { cause?: unknown }).cause;
-  return (
-    typeof cause === "object" &&
-    cause !== null &&
-    (cause as { code?: unknown }).code === "23P01"
-  );
-}
 
 /**
  * Sends a booking request from the grid (K.8): the player's own id, never

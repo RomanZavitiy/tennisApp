@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { notify } from "@/lib/notifications/notify";
+import {
+  notify,
+  notifyBookingDecided,
+  notifyBookingRequested,
+} from "@/lib/notifications/notify";
 
 const { userFindUnique, pushSubscriptionDelete, offerJoinUpdateMany } =
   vi.hoisted(() => ({
@@ -253,5 +257,139 @@ describe("notify", () => {
 
     expect(recordNotification).toHaveBeenCalledWith(USER, event, NOW);
     expect(sendPush).not.toHaveBeenCalled();
+  });
+});
+
+describe("notifyBookingRequested", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sendEmail.mockResolvedValue({ ok: true });
+  });
+
+  it("does nothing for an unknown recipient", async () => {
+    userFindUnique.mockResolvedValue(null);
+
+    await notifyBookingRequested("staff-1", {
+      clubId: "club-1",
+      court: "Court 2",
+      timeRange: "18:00–19:00",
+    });
+
+    expect(sendPush).not.toHaveBeenCalled();
+  });
+
+  it("pushes to every subscription, linking to the (K.16) club panel", async () => {
+    userFindUnique.mockResolvedValue(user());
+    sendPush.mockResolvedValue({ ok: true });
+
+    await notifyBookingRequested("staff-1", {
+      clubId: "club-1",
+      court: "Court 2",
+      timeRange: "18:00–19:00",
+    });
+
+    expect(sendPush).toHaveBeenCalledWith(SUB, {
+      title: "New booking request",
+      body: "Court 2, 18:00–19:00",
+      url: "/club/club-1",
+    });
+  });
+
+  it("emails too, even with an active push subscription — staff have no in-app queue yet", async () => {
+    userFindUnique.mockResolvedValue(user());
+    sendPush.mockResolvedValue({ ok: true });
+
+    await notifyBookingRequested("staff-1", {
+      clubId: "club-1",
+      court: "Court 2",
+      timeRange: "18:00–19:00",
+    });
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "player@example.com" }),
+    );
+  });
+
+  it("never throws when the recipient lookup fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    userFindUnique.mockRejectedValue(new Error("connection lost"));
+
+    await expect(
+      notifyBookingRequested("staff-1", {
+        clubId: "club-1",
+        court: "Court 2",
+        timeRange: "18:00–19:00",
+      }),
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe("notifyBookingDecided", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sendEmail.mockResolvedValue({ ok: true });
+    sendPush.mockResolvedValue({ ok: true });
+  });
+
+  it("tells the player their request was confirmed", async () => {
+    userFindUnique.mockResolvedValue(user());
+
+    await notifyBookingDecided("player-1", {
+      court: "Court 2",
+      timeRange: "18:00–19:00",
+      status: "CONFIRMED",
+    });
+
+    expect(sendPush).toHaveBeenCalledWith(SUB, {
+      title: "Booking confirmed",
+      body: "Court 2, 18:00–19:00 — confirmed.",
+      url: "/profile",
+    });
+  });
+
+  it("includes the staff member's reason when declining", async () => {
+    userFindUnique.mockResolvedValue(user());
+
+    await notifyBookingDecided("player-1", {
+      court: "Court 2",
+      timeRange: "18:00–19:00",
+      status: "DECLINED",
+      reason: "Court closed for maintenance",
+    });
+
+    expect(sendPush).toHaveBeenCalledWith(SUB, {
+      title: "Booking declined",
+      body: "Court 2, 18:00–19:00 — declined: Court closed for maintenance",
+      url: "/profile",
+    });
+  });
+
+  it("declines without a reason for an auto-decline (K.18)", async () => {
+    userFindUnique.mockResolvedValue(user());
+
+    await notifyBookingDecided("player-1", {
+      court: "Court 2",
+      timeRange: "18:00–19:00",
+      status: "DECLINED",
+    });
+
+    expect(sendPush).toHaveBeenCalledWith(SUB, {
+      title: "Booking declined",
+      body: "Court 2, 18:00–19:00 — declined.",
+      url: "/profile",
+    });
+  });
+
+  it("never throws when the recipient lookup fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    userFindUnique.mockRejectedValue(new Error("connection lost"));
+
+    await expect(
+      notifyBookingDecided("player-1", {
+        court: "Court 2",
+        timeRange: "18:00–19:00",
+        status: "CONFIRMED",
+      }),
+    ).resolves.toBeUndefined();
   });
 });

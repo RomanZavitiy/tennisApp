@@ -33,6 +33,10 @@ const PUBLIC_ROUTES = [
   // requireAdmin() instead of the proxy sending only the signed-out one to
   // /login — see require-admin.ts for why that distinction would leak.
   /^\/admin(\/.*)?$/,
+  // /club/[clubId] (K.15): same reasoning as /admin above — requireClubStaff
+  // gives a signed-out visitor and a signed-in non-staff player the same
+  // 404.
+  /^\/club\/[^/]+$/,
 ];
 
 export function isPublicRoute(pathname: string) {

@@ -16,14 +16,19 @@ export type AdminAction = {
   run: (reason: string | undefined) => Promise<AdminActionResult>;
 };
 
-// One row's worth of admin-queue buttons (task 6.3): a shared optional
-// reason, and whichever actions apply to this row (dismiss/hide/block for a
-// report, confirm/annul for a disputed result, or a single unblock) — the
-// one component behind both /admin/reports and /admin/results.
+// One row's worth of queue buttons (task 6.3; reused by the club staff
+// panel, K.17): a shared optional reason, and whichever actions apply to
+// this row (dismiss/hide/block for a report, confirm/annul for a disputed
+// result, a single unblock, or confirm/decline for a booking request) —
+// one component behind /admin/reports, /admin/results and /club/[clubId].
+// `reasonLabel` overrides the default "log" copy for a caller (the club
+// panel) where the reason means something more specific to the player.
 export function AdminActionForm({
   actions,
+  reasonLabel,
 }: {
   actions: readonly AdminAction[];
+  reasonLabel?: string;
 }) {
   const t = useTranslations("AdminActionForm");
   const [reason, setReason] = useState("");
@@ -36,16 +41,17 @@ export function AdminActionForm({
     return <p className="text-sm text-muted-foreground">{t("done")}</p>;
   }
 
+  const label = reasonLabel ?? t("reasonLabel");
   return (
     <div className="mt-2 space-y-2">
       <Textarea
-        aria-label={t("reasonLabel")}
+        aria-label={label}
         value={reason}
         onChange={(event) => {
           setReason(event.target.value);
         }}
         rows={1}
-        placeholder={t("reasonLabel")}
+        placeholder={label}
         className="text-sm"
       />
       <div className="flex flex-wrap gap-2">
