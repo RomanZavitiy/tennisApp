@@ -8,8 +8,10 @@ import type { ReactNode } from "react";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { MatchHistory } from "@/components/match-history";
+import { MyBookings } from "@/components/my-bookings";
 import { MyGames } from "@/components/my-games";
 import { ProfileHero } from "@/components/profile-hero";
+import { getMyBookings } from "@/lib/booking/my-bookings";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { getMyUpcomingGames } from "@/lib/offers/my-games";
 import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
@@ -29,10 +31,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ProfilePage() {
   const t = await getTranslations("ProfilePage");
   const player = await requireOnboardedUser();
-  const [profile, matches, games] = await Promise.all([
+  const [profile, matches, games, bookings] = await Promise.all([
     getPublicProfile(player.id),
     getMatchHistory(player.id),
     getMyUpcomingGames(player.id),
+    getMyBookings(player.id),
   ]);
   // requireOnboardedUser has just checked the profile is complete.
   if (!profile) {
@@ -45,6 +48,10 @@ export default async function ProfilePage() {
 
       <Card title={t("myGames")}>
         <MyGames games={games} />
+      </Card>
+
+      <Card title={t("myBookings")}>
+        <MyBookings upcoming={bookings.upcoming} past={bookings.past} />
       </Card>
 
       <Card title={t("matchHistory")}>

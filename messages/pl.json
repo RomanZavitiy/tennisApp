@@ -144,9 +144,24 @@
     "youAreIn": "Grasz",
     "requestSent": "Prośba wysłana"
   },
+  "MyBookings": {
+    "none": "Brak rezerwacji kortów.",
+    "upcoming": "Nadchodzące",
+    "past": "Minione",
+    "courtAtClub": "{court} · {club}",
+    "statusPENDING": "Oczekuje",
+    "statusCONFIRMED": "Potwierdzona",
+    "statusDECLINED": "Odrzucona",
+    "statusCANCELLED": "Anulowana",
+    "declineReason": "Powód: {reason}",
+    "cancel": "Anuluj",
+    "cancelConfirm": "Anulować rezerwację?",
+    "cancelling": "Anulowanie…"
+  },
   "ProfilePage": {
     "title": "Twój profil",
     "myGames": "Moje gry",
+    "myBookings": "Moje rezerwacje",
     "matchHistory": "Historia meczów",
     "account": "Konto",
     "photo": "Zdjęcie profilowe",

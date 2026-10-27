@@ -144,9 +144,24 @@
     "youAreIn": "You're in",
     "requestSent": "Request sent"
   },
+  "MyBookings": {
+    "none": "No court bookings yet.",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "courtAtClub": "{court} · {club}",
+    "statusPENDING": "Pending",
+    "statusCONFIRMED": "Confirmed",
+    "statusDECLINED": "Declined",
+    "statusCANCELLED": "Cancelled",
+    "declineReason": "Reason: {reason}",
+    "cancel": "Cancel",
+    "cancelConfirm": "Cancel booking?",
+    "cancelling": "Cancelling…"
+  },
   "ProfilePage": {
     "title": "Your profile",
     "myGames": "My games",
+    "myBookings": "My bookings",
     "matchHistory": "Match history",
     "account": "Account",
     "photo": "Profile photo",
