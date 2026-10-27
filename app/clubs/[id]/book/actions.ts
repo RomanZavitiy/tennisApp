@@ -145,18 +145,17 @@ export async function requestBooking(
   await captureEvent("booking_requested", player.id, {});
 
   revalidatePath(`/clubs/${court.clubId}/book`);
-  // "My bookings" (K.13) hasn't shipped — until it does this just returns
-  // the player to their profile, same as the club link above 404s until K.16.
+  // The request now shows up in "My bookings" (K.13) on the profile.
   redirect("/profile");
 }
 
 /**
- * K.22: the player cancels their own booking — reached today only from the
- * offer it was made for ("Cancel booking too"), a separate, explicit action
- * from cancelling the offer itself. Own booking, PENDING/CONFIRMED, outside
- * the cancel window (lib/booking/cancel-rules.ts). A CONFIRMED one notifies
- * club staff — they'd already greenlit it; a PENDING one just disappears
- * from their queue.
+ * K.22: the player cancels their own booking — from "My bookings" (K.13) on
+ * their profile, or from the offer it was made for ("Cancel booking too"), a
+ * separate, explicit action from cancelling the offer itself. Own booking,
+ * PENDING/CONFIRMED, outside the cancel window (lib/booking/cancel-rules.ts).
+ * A CONFIRMED one notifies club staff — they'd already greenlit it; a
+ * PENDING one just disappears from their queue.
  */
 export async function cancelBooking(
   bookingId: unknown,
@@ -222,6 +221,7 @@ export async function cancelBooking(
   await captureEvent("booking_cancelled", player.id, {});
   revalidatePath(`/clubs/${booking.court.clubId}/book`);
   revalidatePath(`/club/${booking.court.clubId}`);
+  revalidatePath("/profile");
   if (booking.offerId) {
     revalidatePath(`/offers/${booking.offerId}`);
   }

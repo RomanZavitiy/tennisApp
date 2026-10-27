@@ -225,11 +225,13 @@ type BookingRecipient = {
 
 /**
  * Shared by notifyBookingRequested and notifyBookingDecided: push (if
- * subscribed) and always an email too, never only a fallback — neither
- * staff nor players have an in-app queue a booking shows up in yet (K.13,
- * "My bookings", hasn't shipped), so email is the one channel guaranteed
- * to reach them. Takes the recipient already loaded, so a caller building
- * the title/body from the same row's locale only queries once.
+ * subscribed) and always an email too, never only a fallback — staff have
+ * no notification history to check later (only the live PENDING queue),
+ * so email is the one channel guaranteed to reach them; players do have
+ * "My bookings" (K.13) now, but still get the same push+email so they
+ * don't have to go looking. Takes the recipient already loaded, so a
+ * caller building the title/body from the same row's locale only queries
+ * once.
  */
 async function sendBookingNotification(
   userId: string,
@@ -363,9 +365,8 @@ export async function notifyBookingCancelled(
  * K.17 (staff confirms/declines) and K.18 (auto-decline): tells the player
  * their request was decided. `reason` is the staff member's own text for a
  * decline (omitted for an auto-decline — there's no staff member to
- * attribute one to). Same "no in-app queue yet" reasoning as
- * notifyBookingRequested; links to /profile rather than a "My bookings"
- * page, same fallback requestBooking() redirects to until K.13 ships.
+ * attribute one to). Links to /profile, same as requestBooking()'s own
+ * redirect — "My bookings" (K.13) lives there now.
  */
 export async function notifyBookingDecided(
   userId: string,
