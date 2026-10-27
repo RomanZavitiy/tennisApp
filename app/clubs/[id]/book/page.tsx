@@ -5,14 +5,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
+import { BookingGrid } from "@/components/booking-grid";
 import { BookingSummaryCard } from "@/components/booking-summary-card";
-import {
-  canFit,
-  type CourtDayGrid,
-  type DaySlot,
-  type SlotStatus,
-} from "@/lib/booking/availability";
+import { canFit, type SlotStatus } from "@/lib/booking/availability";
 import { getDayGrid, type DayGridCourt } from "@/lib/booking/get-day-grid";
+import { visibleRange } from "@/lib/booking/grid-layout";
 import {
   BOOKING_DURATIONS,
   isBookingDuration,
@@ -20,10 +17,13 @@ import {
 } from "@/lib/validation/booking";
 import { todayInKrakow } from "@/lib/validation/profile";
 
-// The court × time grid (K.8, slice K): twojtenis-style, entirely
+// The court × time grid (K.8, redesigned K.23-K.25 as slice K v2): entirely
 // server-rendered — every choice (date, duration, court, start) lives in the
 // URL, so there's no client fetching and the page works with JS off except
-// for the "Send request" button itself (BookingSummaryCard, K.11).
+// for the "Send request" button itself (BookingSummaryCard, K.11). The grid
+// itself (courts as columns, time as rows) lives in BookingGrid; this page
+// is URL parsing, data loading, and the "closed this day" / "no courts"
+// branches around it.
 
 type BookPageProps = {
   params: Promise<{ id: string }>;
@@ -84,14 +84,6 @@ function hrefWith(current: Params, overrides: Partial<Params>): string {
   return `?${qs.toString()}`;
 }
 
-const STATUS_STYLE: Record<SlotStatus, string> = {
-  FREE: "border-primary/50 bg-background text-foreground hover:bg-primary/10 hover:border-primary",
-  TAKEN: "border-border bg-muted text-muted-foreground",
-  PAST: "border-border/60 bg-muted/40 text-muted-foreground/50",
-  CLOSED:
-    "border-dashed border-border/50 bg-transparent text-muted-foreground/30",
-};
-
 export async function generateMetadata({
   params,
 }: BookPageProps): Promise<Metadata> {
@@ -116,12 +108,14 @@ export default async function BookPage({
   const date = parseDate(rawParams.date, validDates);
   const duration = parseDuration(rawParams.duration);
 
-  const day = await getDayGrid(id, date);
+  const now = new Date();
+  const day = await getDayGrid(id, date, now);
   if (!day) {
     notFound();
   }
 
   const t = await getTranslations("BookPage");
+  const tSurface = await getTranslations("Surface");
   const format = await getFormatter();
 
   const current: Params = {
@@ -150,29 +144,47 @@ export default async function BookPage({
     selectedCourt?.id ??
     day.courts[0]?.id;
 
-  const slotAriaLabel = (court: DayGridCourt, slot: DaySlot): string =>
+  const timeRangeLabel = (start: Date, end: Date): string => {
+    const startLabel = format.dateTime(start, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    if (end.getTime() - start.getTime() <= 30 * 60_000) return startLabel;
+    const endLabel = format.dateTime(end, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    return `${startLabel}–${endLabel}`;
+  };
+
+  const slotAriaLabel = (
+    court: DayGridCourt,
+    start: Date,
+    end: Date,
+    status: SlotStatus,
+  ): string =>
     t("slotAriaLabel", {
       court: court.name,
-      time: format.dateTime(slot.start, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23",
-      }),
-      status: t(`status${slot.status}` as const),
+      time: timeRangeLabel(start, end),
+      status: t(`status${status}` as const),
     });
 
-  const slotHref = (court: DayGridCourt, slot: DaySlot): string =>
+  const slotHref = (court: DayGridCourt, start: Date): string =>
     hrefWith(current, {
       court: court.id,
-      start: slot.start.toISOString(),
+      start: start.toISOString(),
       tab: court.id,
     });
 
-  const gridFor = (courtId: string): CourtDayGrid | undefined =>
-    day.grid.find((c) => c.courtId === courtId);
+  const tabHref = (courtId: string): string =>
+    hrefWith(current, { tab: courtId });
+
+  const range = day.courts.length > 0 ? visibleRange(day.grid) : null;
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
       <Link
         href={`/clubs/${id}`}
         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
@@ -230,163 +242,39 @@ export default async function BookPage({
 
       {day.courts.length === 0 ? (
         <p className="mt-6 text-muted-foreground">{t("noCourts")}</p>
+      ) : range === null ? (
+        <p className="mt-6 text-muted-foreground">{t("closedAllDay")}</p>
       ) : (
-        <>
-          {/* Desktop/tablet: full grid, courts as rows. */}
-          <div className="mt-6 hidden overflow-x-auto sm:block">
-            <table className="border-collapse">
-              <thead>
-                <tr>
-                  <th className="sticky left-0 bg-background pr-2 text-left text-sm font-medium">
-                    {t("courtLabel")}
-                  </th>
-                  {gridFor(day.courts[0].id)?.slots.map((slot) => (
-                    <th
-                      key={slot.start.toISOString()}
-                      className="w-9 px-0.5 pb-1 text-center text-[0.65rem] font-normal text-muted-foreground"
-                    >
-                      {format.dateTime(slot.start, {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hourCycle: "h23",
-                      })}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {day.courts.map((court) => (
-                  <tr key={court.id}>
-                    <td className="sticky left-0 bg-background pr-2 text-sm font-medium whitespace-nowrap">
-                      {court.name}
-                    </td>
-                    {gridFor(court.id)?.slots.map((slot) => {
-                      const isSelected =
-                        selectedCourt?.id === court.id &&
-                        selectedStart?.getTime() === slot.start.getTime();
-                      const style = cn(
-                        "block size-7 rounded border",
-                        STATUS_STYLE[slot.status],
-                        isSelected && "ring-2 ring-primary",
-                      );
-                      return (
-                        <td key={slot.start.toISOString()} className="p-0.5">
-                          {slot.status === "FREE" ? (
-                            <Link
-                              href={slotHref(court, slot)}
-                              aria-label={slotAriaLabel(court, slot)}
-                              className={style}
-                            />
-                          ) : (
-                            <span
-                              aria-label={slotAriaLabel(court, slot)}
-                              className={style}
-                            />
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile: courts as tabs, slots as a vertical list. */}
-          <div className="mt-6 sm:hidden">
-            <div
-              role="tablist"
-              aria-label={t("courtLabel")}
-              className="flex gap-1 overflow-x-auto pb-2"
-            >
-              {day.courts.map((court) => (
-                <Link
-                  key={court.id}
-                  role="tab"
-                  aria-selected={court.id === activeCourtId}
-                  href={hrefWith(current, { tab: court.id })}
-                  className={cn(
-                    "shrink-0 rounded-md border px-3 py-1.5 text-sm",
-                    court.id === activeCourtId
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border hover:bg-muted",
-                  )}
-                >
-                  {court.name}
-                </Link>
-              ))}
-            </div>
-            {activeCourtId && (
-              <ul className="mt-2 space-y-1">
-                {gridFor(activeCourtId)?.slots.map((slot) => {
-                  const court = day.courts.find((c) => c.id === activeCourtId);
-                  if (!court) return null;
-                  const isSelected =
-                    selectedCourt?.id === court.id &&
-                    selectedStart?.getTime() === slot.start.getTime();
-                  const style = cn(
-                    "flex items-center justify-between rounded-md border px-3 py-2 text-sm",
-                    STATUS_STYLE[slot.status],
-                    isSelected && "ring-2 ring-primary",
-                  );
-                  const time = format.dateTime(slot.start, {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hourCycle: "h23",
-                  });
-                  const label = t(`status${slot.status}` as const);
-                  return (
-                    <li key={slot.start.toISOString()}>
-                      {slot.status === "FREE" ? (
-                        <Link
-                          href={slotHref(court, slot)}
-                          aria-label={slotAriaLabel(court, slot)}
-                          className={style}
-                        >
-                          <span>{time}</span>
-                          <span>{label}</span>
-                        </Link>
-                      ) : (
-                        <span
-                          aria-label={slotAriaLabel(court, slot)}
-                          className={style}
-                        >
-                          <span>{time}</span>
-                          <span>{label}</span>
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-
-          <ul className="mt-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
-            {(["FREE", "TAKEN", "PAST", "CLOSED"] as const).map((status) => (
-              <li key={status} className="flex items-center gap-1.5">
-                <span
-                  className={cn(
-                    "block size-3 rounded border",
-                    STATUS_STYLE[status],
-                  )}
-                />
-                {t(`status${status}` as const)}
-              </li>
-            ))}
-          </ul>
-        </>
+        <BookingGrid
+          day={day}
+          range={range}
+          t={t}
+          tSurface={tSurface}
+          format={format}
+          duration={duration}
+          selectedCourt={selectedCourt}
+          selectedStart={selectedStart}
+          fits={fits}
+          activeCourtId={activeCourtId}
+          now={now}
+          isToday={date === today}
+          slotHref={slotHref}
+          tabHref={tabHref}
+          slotAriaLabel={slotAriaLabel}
+        />
       )}
 
       {selectedCourt && selectedStart && (
-        <BookingSummaryCard
-          clubName={day.club.name}
-          court={selectedCourt}
-          startsAt={selectedStart}
-          duration={duration}
-          fits={fits}
-          offerId={current.offerId}
-        />
+        <div className="max-w-sm">
+          <BookingSummaryCard
+            clubName={day.club.name}
+            court={selectedCourt}
+            startsAt={selectedStart}
+            duration={duration}
+            fits={fits}
+            offerId={current.offerId}
+          />
+        </div>
       )}
     </main>
   );
