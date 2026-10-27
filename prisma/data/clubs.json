@@ -178,5 +178,50 @@
     "verifiedAt": "2026-10-09",
     "source": "https://centrum.ksos.pl/oferta-komercyjna/korty-tenisowe/",
     "todo": ["phone"]
+  },
+  {
+    "slug": "spinbuddy-demo-club",
+    "name": "SpinBuddy Demo Club",
+    "address": "Testowa 1, 30-001 Kraków",
+    "district": null,
+    "latitude": 50.07,
+    "longitude": 19.92,
+    "courtCount": 3,
+    "surfaces": ["CLAY", "HARD", "ARTIFICIAL_GRASS"],
+    "indoor": null,
+    "priceInfo": "Demo club for manually testing SpinBuddy's own court-booking feature — not a real business.",
+    "phone": null,
+    "websiteUrl": null,
+    "bookingUrl": null,
+    "bookingMode": "SPINBUDDY",
+    "courts": [
+      {
+        "name": "Court 1",
+        "surface": "CLAY",
+        "indoor": false,
+        "pricePerHourPln": 80
+      },
+      {
+        "name": "Court 2",
+        "surface": "HARD",
+        "indoor": true,
+        "pricePerHourPln": 100
+      },
+      { "name": "Court 3", "surface": "ARTIFICIAL_GRASS", "indoor": false }
+    ],
+    "hours": [
+      { "weekday": 0, "opens": "08:00", "closes": "22:00" },
+      { "weekday": 1, "opens": "08:00", "closes": "22:00" },
+      { "weekday": 2, "opens": "08:00", "closes": "22:00" },
+      { "weekday": 3, "opens": "08:00", "closes": "22:00" },
+      { "weekday": 4, "opens": "08:00", "closes": "22:00" },
+      { "weekday": 5, "opens": "08:00", "closes": "22:00" },
+      { "weekday": 6, "opens": "08:00", "closes": "22:00" }
+    ],
+    "verifiedAt": "2026-10-27",
+    "source": "https://github.com/RomanZavitiy/tennisApp/blob/main/docs/BOOKING-EPIC.md",
+    "todo": [
+      "This is a demo/test club for exercising the SPINBUDDY booking grid, not a real business — replace or remove once a real pilot club onboards."
+    ]
   }
 ]
