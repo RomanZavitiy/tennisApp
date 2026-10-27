@@ -68,6 +68,23 @@
     "NEW_OFFER_FOR_LEVEL": {
       "title": "New offer near you",
       "body": "A new sparring offer matches your level and district."
+    },
+    "BOOKING_REQUESTED": {
+      "title": "New booking request",
+      "body": "{court}, {timeRange}"
+    },
+    "BOOKING_CONFIRMED": {
+      "title": "Booking confirmed",
+      "body": "{court}, {timeRange} — confirmed."
+    },
+    "BOOKING_DECLINED": {
+      "title": "Booking declined",
+      "body": "{court}, {timeRange} — declined.",
+      "bodyWithReason": "{court}, {timeRange} — declined: {reason}"
+    },
+    "BOOKING_CANCELLED": {
+      "title": "Booking cancelled",
+      "body": "{court}, {timeRange} — the player cancelled."
     }
   },
   "SystemMessages": {
@@ -232,7 +249,10 @@
     "declining": "Declining…",
     "cancelOfferLabel": "Cancel offer",
     "confirmCancel": "Yes, cancel it",
-    "cancelling": "Cancelling…"
+    "cancelling": "Cancelling…",
+    "cancelBookingTooLabel": "Cancel booking too",
+    "confirmCancelBookingToo": "Yes, cancel the booking too",
+    "cancellingBooking": "Cancelling…"
   },
   "AdminActionForm": {
     "done": "Done.",
@@ -353,13 +373,68 @@
     "noOffers": "No open offers at this club right now.",
     "createOfferHere": "Create an offer at this club"
   },
+  "BookPage": {
+    "title": "Book a court — {club}",
+    "notFound": "Booking not available",
+    "dateLabel": "Date",
+    "durationLabel": "Duration:",
+    "durationOption": "{minutes} min",
+    "courtLabel": "Court",
+    "timeLabel": "Time",
+    "statusFREE": "Free",
+    "statusTAKEN": "Taken",
+    "statusPAST": "Past",
+    "statusCLOSED": "Closed",
+    "takenLabel": "Taken",
+    "runRangeLabel": "{start}–{end} · {status}",
+    "slotAriaLabel": "{court}, {time}, {status}",
+    "courtIndoor": "Indoor",
+    "courtOutdoor": "Outdoor",
+    "noCourts": "This club hasn't set up its courts yet.",
+    "closedAllDay": "Closed this day.",
+    "summaryTitle": "Your selection",
+    "summaryClub": "Club",
+    "summaryCourt": "Court",
+    "summaryDate": "Date",
+    "summaryTime": "Time",
+    "summaryPrice": "Price",
+    "pricePerHour": "{price} zł/h",
+    "sendRequest": "Send request",
+    "sending": "Sending…",
+    "doesntFit": "This start doesn't fit a {duration}-minute booking. Pick another time."
+  },
+  "ClubPanelPage": {
+    "pendingTitle": "Pending requests ({count})",
+    "nothingPending": "Nothing waiting.",
+    "confirm": "Confirm",
+    "confirming": "Confirming…",
+    "decline": "Decline",
+    "declining": "Declining…",
+    "declineReasonLabel": "Reason for declining (optional — shown to the player)",
+    "todayTitle": "Today",
+    "tomorrowTitle": "Tomorrow",
+    "blocked": "Blocked",
+    "blocksTitle": "Blocks",
+    "noBlocks": "No blocks.",
+    "removeBlock": "Remove",
+    "removingBlock": "Removing…",
+    "addBlockTitle": "Add a block",
+    "blockStartLabel": "Start",
+    "blockEndLabel": "End",
+    "blockReasonLabel": "Reason (optional)",
+    "addBlock": "Add block",
+    "addingBlock": "Adding…",
+    "blockAdded": "Block added."
+  },
   "OfferBookingSection": {
     "aboutClub": "About {name}",
     "bookOnClubSite": "Book on club's site",
     "callToBook": "Call to book",
     "bookedTheCourt": "Booked the court?",
     "markAsBooked": "Mark it as booked",
-    "marking": "Marking…"
+    "marking": "Marking…",
+    "bookACourtForThisGame": "Book a court for this game",
+    "courtBooked": "Court booked"
   },
   "JoinThread": {
     "messages": "Messages"
@@ -457,7 +532,17 @@
     "matchNotFound": "This match doesn't exist.",
     "checkTheScore": "Check the score.",
     "resultNotFound": "This result doesn't exist.",
-    "noShowManualConfirmRefused": "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours."
+    "noShowManualConfirmRefused": "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours.",
+    "courtNotFound": "This court doesn't exist.",
+    "slotTaken": "That slot was just taken. Pick another time.",
+    "tooManyPendingBookings": "You already have {max} requests waiting on a decision. Wait for one to be confirmed or declined before sending another.",
+    "bookingNotFound": "This booking request doesn't exist.",
+    "bookingAlreadyDecided": "This request has already been confirmed or declined.",
+    "bookingNotActive": "This booking is no longer active.",
+    "bookingCancelWindowPassed": "Too close to the start time to cancel.",
+    "blockNotFound": "This block doesn't exist.",
+    "blockOverlapsBooking": "That time overlaps a request or confirmed booking. Confirm or decline it first.",
+    "blockOverlapsBlock": "That time overlaps another block. Pick a different time."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "This isn't your match.",
@@ -488,7 +573,8 @@
     "JOIN_REQUEST": "You've sent a lot of join requests today. Try again tomorrow.",
     "MESSAGE": "You're sending messages too quickly. Wait a few minutes.",
     "REPORT": "You've filed a lot of reports today. Try again tomorrow.",
-    "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again."
+    "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again.",
+    "BOOKING_REQUEST": "You've sent a lot of booking requests today. Try again tomorrow."
   },
   "Validation": {
     "login": {
@@ -536,6 +622,26 @@
     "report": {
       "reasonRequired": "Choose a reason.",
       "commentTooLong": "Keep the comment under {max} characters."
+    },
+    "booking": {
+      "courtRequired": "Choose a court.",
+      "startsAtRequired": "Choose the start time.",
+      "startsAtNotAligned": "Choose a time on the hour or half hour.",
+      "startsAtPast": "That time has already passed.",
+      "startsAtTooFarAhead": "Choose a time within the next 14 days.",
+      "durationRequired": "Choose how long you want the court for.",
+      "noteTooLong": "Keep the note under {max} characters.",
+      "offerInvalid": "That offer could not be found."
+    },
+    "addBlock": {
+      "courtRequired": "Choose a court.",
+      "startsAtRequired": "Choose the start time.",
+      "endsAtRequired": "Choose the end time.",
+      "endBeforeStart": "The end must be after the start.",
+      "reasonTooLong": "Keep the reason under {max} characters."
+    },
+    "declineBooking": {
+      "reasonTooLong": "Keep the reason under {max} characters."
     }
   },
   "OnboardingPage": {

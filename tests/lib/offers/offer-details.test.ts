@@ -37,6 +37,7 @@ describe("getOfferDetails", () => {
       format: "DOUBLES",
       hasPartner: false,
       author: player,
+      bookings: [],
       _count: { joins: 1 },
     });
     joinFindMany.mockResolvedValue([
@@ -106,6 +107,40 @@ describe("getOfferDetails", () => {
     });
     expect(joinFindMany.mock.calls[0]?.[0]).toMatchObject({
       where: { offerId: OFFER, status: { in: ["REQUESTED", "ACCEPTED"] } },
+    });
+  });
+
+  it("surfaces the offer's active booking, if any (K.22)", async () => {
+    const noActive = await getOfferDetails(OFFER, AUTHOR);
+    expect(noActive?.offer.activeBooking).toBeNull();
+
+    offerFindUnique.mockResolvedValue({
+      id: OFFER,
+      format: "DOUBLES",
+      hasPartner: false,
+      author: player,
+      bookings: [{ id: "b1", status: "CONFIRMED" }],
+      _count: { joins: 1 },
+    });
+    const withActive = await getOfferDetails(OFFER, AUTHOR);
+    expect(withActive?.offer.activeBooking).toEqual({
+      id: "b1",
+      status: "CONFIRMED",
+    });
+  });
+
+  it("selects club bookingMode alongside the booking-link fields", async () => {
+    await getOfferDetails(OFFER, AUTHOR);
+
+    const offerQuery = offerFindUnique.mock.calls[0]?.[0] as {
+      select: { club: { select: unknown } };
+    };
+    expect(offerQuery.select.club.select).toEqual({
+      id: true,
+      name: true,
+      bookingUrl: true,
+      phone: true,
+      bookingMode: true,
     });
   });
 

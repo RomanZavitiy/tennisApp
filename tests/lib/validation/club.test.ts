@@ -21,6 +21,9 @@ const valid: ClubRecord = {
   phone: "+48 12 000 00 00",
   websiteUrl: "https://example.com/",
   bookingUrl: null,
+  bookingMode: "EXTERNAL_LINK",
+  courts: [],
+  hours: [],
   verifiedAt: "2026-10-01",
   source: "https://www.openstreetmap.org/way/1506762794",
 };
@@ -101,6 +104,98 @@ describe("clubSchema", () => {
 
   it("accepts today as the check date", () => {
     expect(errorsFor({ verifiedAt: "2026-10-06" })).toEqual([]);
+  });
+
+  describe("bookingMode, courts and hours (K.6)", () => {
+    it("defaults bookingMode to EXTERNAL_LINK and courts/hours to empty when omitted", () => {
+      const { bookingMode, courts, hours, ...rest } = valid;
+      expect(clubSchema.parse(rest)).toEqual(valid);
+      expect(bookingMode).toBe("EXTERNAL_LINK");
+      expect(courts).toEqual([]);
+      expect(hours).toEqual([]);
+    });
+
+    it("accepts a SPINBUDDY club with courts and hours", () => {
+      expect(
+        errorsFor({
+          bookingMode: "SPINBUDDY",
+          courts: [
+            { name: "Court 1", surface: "CLAY", indoor: false },
+            {
+              name: "Court 2",
+              surface: "HARD",
+              indoor: true,
+              pricePerHourPln: 90,
+            },
+          ],
+          hours: [{ weekday: 1, opens: "08:00", closes: "22:00" }],
+        }),
+      ).toEqual([]);
+    });
+
+    it("accepts a court with no price as unknown, not invented", () => {
+      expect(
+        errorsFor({
+          courts: [{ name: "Court 1", surface: "CLAY", indoor: false }],
+        }),
+      ).toEqual([]);
+    });
+
+    it("rejects an unknown bookingMode", () => {
+      expect(errorsFor({ bookingMode: "PARTNER_X" })).not.toEqual([]);
+    });
+
+    it("rejects two courts with the same name", () => {
+      expect(
+        errorsFor({
+          courts: [
+            { name: "Court 1", surface: "CLAY", indoor: false },
+            { name: "Court 1", surface: "HARD", indoor: true },
+          ],
+        }),
+      ).not.toEqual([]);
+    });
+
+    it("rejects an unknown field on a court, so a typo can't drop data", () => {
+      expect(
+        errorsFor({
+          courts: [
+            { name: "Court 1", surface: "CLAY", indoor: false, prize: 1 },
+          ],
+        }),
+      ).not.toEqual([]);
+    });
+
+    it("rejects two hours rows for the same weekday", () => {
+      expect(
+        errorsFor({
+          hours: [
+            { weekday: 1, opens: "08:00", closes: "22:00" },
+            { weekday: 1, opens: "09:00", closes: "20:00" },
+          ],
+        }),
+      ).not.toEqual([]);
+    });
+
+    it.each([
+      ["opens", "8:00"], // not zero-padded
+      ["opens", "24:00"],
+      ["closes", "22:60"],
+    ])("rejects hours.%s = %j", (field, value) => {
+      expect(
+        errorsFor({
+          hours: [
+            { weekday: 1, opens: "08:00", closes: "22:00", [field]: value },
+          ],
+        }),
+      ).not.toEqual([]);
+    });
+
+    it("rejects hours where opens is not before closes", () => {
+      expect(
+        errorsFor({ hours: [{ weekday: 1, opens: "22:00", closes: "08:00" }] }),
+      ).not.toEqual([]);
+    });
   });
 });
 

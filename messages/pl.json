@@ -68,6 +68,23 @@
     "NEW_OFFER_FOR_LEVEL": {
       "title": "Nowa oferta w Twojej okolicy",
       "body": "Nowa oferta sparingowa odpowiada Twojemu poziomowi i dzielnicy."
+    },
+    "BOOKING_REQUESTED": {
+      "title": "Nowa prośba o rezerwację",
+      "body": "{court}, {timeRange}"
+    },
+    "BOOKING_CONFIRMED": {
+      "title": "Rezerwacja potwierdzona",
+      "body": "{court}, {timeRange} — potwierdzona."
+    },
+    "BOOKING_DECLINED": {
+      "title": "Rezerwacja odrzucona",
+      "body": "{court}, {timeRange} — odrzucona.",
+      "bodyWithReason": "{court}, {timeRange} — odrzucona: {reason}"
+    },
+    "BOOKING_CANCELLED": {
+      "title": "Rezerwacja odwołana",
+      "body": "{court}, {timeRange} — gracz odwołał rezerwację."
     }
   },
   "SystemMessages": {
@@ -232,7 +249,10 @@
     "declining": "Odrzucanie…",
     "cancelOfferLabel": "Odwołaj ofertę",
     "confirmCancel": "Tak, odwołaj",
-    "cancelling": "Odwoływanie…"
+    "cancelling": "Odwoływanie…",
+    "cancelBookingTooLabel": "Odwołaj też rezerwację",
+    "confirmCancelBookingToo": "Tak, odwołaj też rezerwację",
+    "cancellingBooking": "Odwoływanie…"
   },
   "AdminActionForm": {
     "done": "Gotowe.",
@@ -353,13 +373,68 @@
     "noOffers": "Brak otwartych ogłoszeń w tym klubie.",
     "createOfferHere": "Dodaj ogłoszenie w tym klubie"
   },
+  "BookPage": {
+    "title": "Zarezerwuj kort — {club}",
+    "notFound": "Rezerwacja niedostępna",
+    "dateLabel": "Data",
+    "durationLabel": "Czas trwania:",
+    "durationOption": "{minutes} min",
+    "courtLabel": "Kort",
+    "timeLabel": "Godzina",
+    "statusFREE": "Wolny",
+    "statusTAKEN": "Zajęty",
+    "statusPAST": "Minął",
+    "statusCLOSED": "Zamknięty",
+    "takenLabel": "Zajęte",
+    "runRangeLabel": "{start}–{end} · {status}",
+    "slotAriaLabel": "{court}, {time}, {status}",
+    "courtIndoor": "Kryty",
+    "courtOutdoor": "Odkryty",
+    "noCourts": "Ten klub jeszcze nie skonfigurował swoich kortów.",
+    "closedAllDay": "Zamknięte tego dnia.",
+    "summaryTitle": "Twój wybór",
+    "summaryClub": "Klub",
+    "summaryCourt": "Kort",
+    "summaryDate": "Data",
+    "summaryTime": "Godzina",
+    "summaryPrice": "Cena",
+    "pricePerHour": "{price} zł/h",
+    "sendRequest": "Wyślij prośbę",
+    "sending": "Wysyłanie…",
+    "doesntFit": "Ten termin nie pomieści rezerwacji na {duration} minut. Wybierz inną godzinę."
+  },
+  "ClubPanelPage": {
+    "pendingTitle": "Oczekujące prośby ({count})",
+    "nothingPending": "Nic nie czeka.",
+    "confirm": "Potwierdź",
+    "confirming": "Potwierdzanie…",
+    "decline": "Odrzuć",
+    "declining": "Odrzucanie…",
+    "declineReasonLabel": "Powód odrzucenia (opcjonalny — widoczny dla gracza)",
+    "todayTitle": "Dzisiaj",
+    "tomorrowTitle": "Jutro",
+    "blocked": "Zablokowane",
+    "blocksTitle": "Blokady",
+    "noBlocks": "Brak blokad.",
+    "removeBlock": "Usuń",
+    "removingBlock": "Usuwanie…",
+    "addBlockTitle": "Dodaj blokadę",
+    "blockStartLabel": "Początek",
+    "blockEndLabel": "Koniec",
+    "blockReasonLabel": "Powód (opcjonalny)",
+    "addBlock": "Dodaj blokadę",
+    "addingBlock": "Dodawanie…",
+    "blockAdded": "Blokada dodana."
+  },
   "OfferBookingSection": {
     "aboutClub": "O klubie {name}",
     "bookOnClubSite": "Zarezerwuj na stronie klubu",
     "callToBook": "Zadzwoń, aby zarezerwować",
     "bookedTheCourt": "Zarezerwowano kort?",
     "markAsBooked": "Oznacz jako zarezerwowany",
-    "marking": "Oznaczanie…"
+    "marking": "Oznaczanie…",
+    "bookACourtForThisGame": "Zarezerwuj kort na ten mecz",
+    "courtBooked": "Kort zarezerwowany"
   },
   "JoinThread": {
     "messages": "Wiadomości"
@@ -457,7 +532,17 @@
     "matchNotFound": "Ten mecz nie istnieje.",
     "checkTheScore": "Sprawdź wynik.",
     "resultNotFound": "Ten wynik nie istnieje.",
-    "noShowManualConfirmRefused": "Zgłoszenia niejawienia się nie potwierdza się ręcznie — zgłoś sprzeciw albo poczekaj, aż rozstrzygnie się automatycznie po 72 godzinach."
+    "noShowManualConfirmRefused": "Zgłoszenia niejawienia się nie potwierdza się ręcznie — zgłoś sprzeciw albo poczekaj, aż rozstrzygnie się automatycznie po 72 godzinach.",
+    "courtNotFound": "Ten kort nie istnieje.",
+    "slotTaken": "Ten termin właśnie został zajęty. Wybierz inną godzinę.",
+    "tooManyPendingBookings": "Masz już {max} prośby czekające na decyzję. Poczekaj, aż któraś zostanie potwierdzona albo odrzucona, zanim wyślesz kolejną.",
+    "bookingNotFound": "Ta prośba o rezerwację nie istnieje.",
+    "bookingAlreadyDecided": "Ta prośba została już potwierdzona albo odrzucona.",
+    "bookingNotActive": "Ta rezerwacja nie jest już aktywna.",
+    "bookingCancelWindowPassed": "Zbyt blisko godziny startu, aby odwołać.",
+    "blockNotFound": "Ta blokada nie istnieje.",
+    "blockOverlapsBooking": "Ten termin pokrywa się z prośbą albo potwierdzoną rezerwacją. Najpierw ją potwierdź albo odrzuć.",
+    "blockOverlapsBlock": "Ten termin pokrywa się z inną blokadą. Wybierz inny termin."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "To nie jest Twój mecz.",
@@ -488,7 +573,8 @@
     "JOIN_REQUEST": "Wysłano już dziś wiele zgłoszeń. Spróbuj ponownie jutro.",
     "MESSAGE": "Wiadomości są wysyłane za szybko. Poczekaj kilka minut.",
     "REPORT": "Zgłoszono już dziś wiele skarg. Spróbuj ponownie jutro.",
-    "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie."
+    "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie.",
+    "BOOKING_REQUEST": "Wysłano już dziś wiele prośb o rezerwację. Spróbuj ponownie jutro."
   },
   "Validation": {
     "login": {
@@ -536,6 +622,26 @@
     "report": {
       "reasonRequired": "Wybierz powód.",
       "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków."
+    },
+    "booking": {
+      "courtRequired": "Wybierz kort.",
+      "startsAtRequired": "Wybierz godzinę rozpoczęcia.",
+      "startsAtNotAligned": "Wybierz godzinę pełną albo w połowie godziny.",
+      "startsAtPast": "Ten termin już minął.",
+      "startsAtTooFarAhead": "Wybierz termin w ciągu najbliższych 14 dni.",
+      "durationRequired": "Wybierz, na jak długo chcesz kort.",
+      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków.",
+      "offerInvalid": "Nie znaleziono tej oferty."
+    },
+    "addBlock": {
+      "courtRequired": "Wybierz kort.",
+      "startsAtRequired": "Wybierz godzinę rozpoczęcia.",
+      "endsAtRequired": "Wybierz godzinę zakończenia.",
+      "endBeforeStart": "Koniec musi być po rozpoczęciu.",
+      "reasonTooLong": "Powód może mieć maksymalnie {max} znaków."
+    },
+    "declineBooking": {
+      "reasonTooLong": "Powód może mieć maksymalnie {max} znaków."
     }
   },
   "OnboardingPage": {

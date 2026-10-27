@@ -136,3 +136,15 @@
     @apply font-sans;
   }
 }
+
+/* Booking grid (slice K v2): a soft diagonal stripe for TAKEN cells —
+   lighter than twojtenis's full hatching, and theme-aware since it's built
+   from the same muted tokens that already flip under .dark. */
+@utility booking-taken-stripes {
+  background-color: var(--muted);
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 9px,
+    color-mix(in oklch, var(--muted-foreground) 30%, transparent) 9px 10px
+  );
+}

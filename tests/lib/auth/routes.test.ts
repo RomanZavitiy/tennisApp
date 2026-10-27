@@ -9,6 +9,7 @@ describe("isPublicRoute", () => {
     "/auth/callback",
     "/clubs",
     "/clubs/abc",
+    "/clubs/abc/book",
     "/offers",
     "/offers/44444444-4444-4444-8444-444444444444",
     "/players/abc",
@@ -16,6 +17,7 @@ describe("isPublicRoute", () => {
     "/unsubscribe",
     "/admin",
     "/admin/reports",
+    "/club/abc",
   ])("%s is public", (path) => {
     expect(isPublicRoute(path)).toBe(true);
   });
@@ -27,11 +29,14 @@ describe("isPublicRoute", () => {
     "/onboarding",
     "/players",
     "/clubs/a/b",
+    "/clubs/abc/book/extra",
     "/loginx",
     "/offers/new",
     "/offers/abc",
     "/installer",
     "/unsubscribed",
+    "/club",
+    "/club/abc/extra",
   ])("%s needs a session", (path) => {
     expect(isPublicRoute(path)).toBe(false);
   });

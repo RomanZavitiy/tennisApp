@@ -10,6 +10,9 @@ const PUBLIC_ROUTES = [
   /^\/login$/,
   /^\/auth\/.+$/,
   /^\/clubs(\/[^/]+)?$/,
+  // The read-only booking grid (slice K, K.8): public, same as the club
+  // page itself — sending a request (K.10) is the part that needs a session.
+  /^\/clubs\/[^/]+\/book$/,
   /^\/offers$/,
   // Only a UUID, so /offers/new (members only) never matches.
   /^\/offers\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
@@ -30,6 +33,10 @@ const PUBLIC_ROUTES = [
   // requireAdmin() instead of the proxy sending only the signed-out one to
   // /login — see require-admin.ts for why that distinction would leak.
   /^\/admin(\/.*)?$/,
+  // /club/[clubId] (K.15): same reasoning as /admin above — requireClubStaff
+  // gives a signed-out visitor and a signed-in non-staff player the same
+  // 404.
+  /^\/club\/[^/]+$/,
 ];
 
 export function isPublicRoute(pathname: string) {
