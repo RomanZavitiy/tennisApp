@@ -17,6 +17,9 @@ const PUBLIC_ROUTES = [
   // Only a UUID, so /offers/new (members only) never matches.
   /^\/offers\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
   /^\/players\/[^/]+$/,
+  // The leaderboard (slice L): a read-only ranking, public like the offer
+  // feed above — no session needed to look at it.
+  /^\/leaderboard$/,
   // How-to-install (task 5.14): shown before anyone signs in.
   /^\/install$/,
   // Email unsubscribe link (task 5.3): works by signed token, no session.

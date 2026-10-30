@@ -18,6 +18,7 @@
   "SiteHeader": {
     "sparring": "Sparring",
     "courts": "Courts",
+    "leaderboard": "Leaderboard",
     "signIn": "Sign in",
     "profile": "Profile",
     "mainNav": "Main",
@@ -350,6 +351,30 @@
     "BOOKED": "Court booked",
     "WILL_BOOK": "Will book once we agree",
     "ANY": "Whoever books first"
+  },
+  "LeaderboardPage": {
+    "title": "Leaderboard",
+    "noneMatchFilters": "No players match these filters.",
+    "noPlayersYet": "No ranked players yet."
+  },
+  "LeaderboardFilters": {
+    "formLabel": "Filter the leaderboard",
+    "districtLabel": "District",
+    "any": "Any",
+    "levelLabel": "Level (NTRP)",
+    "level": {
+      "beginner": "Beginner (1.5–2.5)",
+      "intermediate": "Intermediate (3.0–4.0)",
+      "advanced": "Advanced (4.5–5.5)",
+      "expert": "Expert (6.0–7.0)"
+    },
+    "submit": "Filter",
+    "clear": "Clear"
+  },
+  "LeaderboardRow": {
+    "aPlayer": "A player",
+    "elo": "{elo, number} ELO",
+    "matchesPlayed": "{count, plural, one {# match} other {# matches}} played"
   },
   "ClubsPage": {
     "title": "Courts"

@@ -18,6 +18,7 @@
   "SiteHeader": {
     "sparring": "Sparing",
     "courts": "Korty",
+    "leaderboard": "Ranking",
     "signIn": "Zaloguj się",
     "profile": "Profil",
     "mainNav": "Główna",
@@ -350,6 +351,30 @@
     "BOOKED": "Kort zarezerwowany",
     "WILL_BOOK": "Zarezerwujemy po ustaleniu",
     "ANY": "Rezerwuje, kto pierwszy"
+  },
+  "LeaderboardPage": {
+    "title": "Ranking",
+    "noneMatchFilters": "Żaden zawodnik nie spełnia tych filtrów.",
+    "noPlayersYet": "Brak sklasyfikowanych zawodników."
+  },
+  "LeaderboardFilters": {
+    "formLabel": "Filtruj ranking",
+    "districtLabel": "Dzielnica",
+    "any": "Każdy",
+    "levelLabel": "Poziom (NTRP)",
+    "level": {
+      "beginner": "Początkujący (1.5–2.5)",
+      "intermediate": "Średniozaawansowany (3.0–4.0)",
+      "advanced": "Zaawansowany (4.5–5.5)",
+      "expert": "Ekspert (6.0–7.0)"
+    },
+    "submit": "Filtruj",
+    "clear": "Wyczyść"
+  },
+  "LeaderboardRow": {
+    "aPlayer": "Zawodnik",
+    "elo": "{elo, number} ELO",
+    "matchesPlayed": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}"
   },
   "ClubsPage": {
     "title": "Korty"

@@ -13,6 +13,7 @@ describe("isPublicRoute", () => {
     "/offers",
     "/offers/44444444-4444-4444-8444-444444444444",
     "/players/abc",
+    "/leaderboard",
     "/install",
     "/unsubscribe",
     "/admin",
@@ -37,6 +38,8 @@ describe("isPublicRoute", () => {
     "/unsubscribed",
     "/club",
     "/club/abc/extra",
+    "/leaderboardx",
+    "/leaderboard/abc",
   ])("%s needs a session", (path) => {
     expect(isPublicRoute(path)).toBe(false);
   });
