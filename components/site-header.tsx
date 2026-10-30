@@ -25,6 +25,7 @@ export async function SiteHeader() {
   const navLinks = [
     { href: "/", label: t("courts"), section: "/clubs" },
     { href: "/offers", label: t("sparring") },
+    { href: "/leaderboard", label: t("leaderboard") },
   ];
   const signIn = { href: "/login", label: t("signIn") };
   const profile = { href: "/profile", label: t("profile") };
