@@ -391,7 +391,8 @@
     "findAPartner": "Find a partner here",
     "playersLooking": "{count, plural, one {# player looking} other {# players looking}}",
     "detailsAriaLabel": "{name} details",
-    "details": "Details"
+    "details": "Details",
+    "suggestClub": "Don't see your club? Suggest it."
   },
   "ClubMap": {
     "clubDetails": "Club details",
@@ -412,6 +413,23 @@
     "lookingForPartnerHere": "Looking for a partner here",
     "noOffers": "No open offers at this club right now.",
     "createOfferHere": "Create an offer at this club"
+  },
+  "SuggestClubPage": {
+    "title": "Suggest a club",
+    "subtitle": "Tell us about a club we're missing. We'll check it and add it.",
+    "cancel": "Cancel"
+  },
+  "ClubSubmissionForm": {
+    "nameLabel": "Club name",
+    "addressLabel": "Address",
+    "districtLabel": "District",
+    "districtHint": "Leave it if you're not sure.",
+    "districtUnknown": "Not sure",
+    "notesLabel": "Notes",
+    "notesHint": "Optional — surfaces, number of courts, contact info, up to {max} characters.",
+    "sending": "Sending…",
+    "submit": "Suggest this club",
+    "thanks": "Thanks! We'll check it out."
   },
   "BookPage": {
     "title": "Book a court — {club}",
@@ -614,7 +632,8 @@
     "MESSAGE": "You're sending messages too quickly. Wait a few minutes.",
     "REPORT": "You've filed a lot of reports today. Try again tomorrow.",
     "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again.",
-    "BOOKING_REQUEST": "You've sent a lot of booking requests today. Try again tomorrow."
+    "BOOKING_REQUEST": "You've sent a lot of booking requests today. Try again tomorrow.",
+    "CLUB_SUBMISSION": "You've suggested a few clubs today. Try again tomorrow."
   },
   "Validation": {
     "login": {
@@ -682,6 +701,14 @@
     },
     "declineBooking": {
       "reasonTooLong": "Keep the reason under {max} characters."
+    },
+    "clubSubmission": {
+      "nameRequired": "Enter the club's name.",
+      "nameTooLong": "Keep the name under {max} characters.",
+      "addressRequired": "Enter the club's address.",
+      "addressTooLong": "Keep the address under {max} characters.",
+      "districtInvalid": "Choose a district, or leave it unset.",
+      "notesTooLong": "Keep the notes under {max} characters."
     }
   },
   "OnboardingPage": {

@@ -391,7 +391,8 @@
     "findAPartner": "Znajdź tu partnera",
     "playersLooking": "{count, plural, one {# gracz szuka} few {# gracze szukają} many {# graczy szuka} other {# graczy szuka}}",
     "detailsAriaLabel": "Szczegóły: {name}",
-    "details": "Szczegóły"
+    "details": "Szczegóły",
+    "suggestClub": "Nie widzisz swojego klubu? Zgłoś go."
   },
   "ClubMap": {
     "clubDetails": "Szczegóły klubu",
@@ -412,6 +413,23 @@
     "lookingForPartnerHere": "Szukają partnera tutaj",
     "noOffers": "Brak otwartych ogłoszeń w tym klubie.",
     "createOfferHere": "Dodaj ogłoszenie w tym klubie"
+  },
+  "SuggestClubPage": {
+    "title": "Zgłoś klub",
+    "subtitle": "Powiedz nam o klubie, którego nie mamy na liście. Sprawdzimy go i dodamy.",
+    "cancel": "Anuluj"
+  },
+  "ClubSubmissionForm": {
+    "nameLabel": "Nazwa klubu",
+    "addressLabel": "Adres",
+    "districtLabel": "Dzielnica",
+    "districtHint": "Zostaw, jeśli nie jesteś pewien/pewna.",
+    "districtUnknown": "Nie jestem pewien/pewna",
+    "notesLabel": "Notatki",
+    "notesHint": "Opcjonalnie — nawierzchnie, liczba kortów, kontakt, maksymalnie {max} znaków.",
+    "sending": "Wysyłanie…",
+    "submit": "Zgłoś ten klub",
+    "thanks": "Dzięki! Sprawdzimy to."
   },
   "BookPage": {
     "title": "Zarezerwuj kort — {club}",
@@ -614,7 +632,8 @@
     "MESSAGE": "Wiadomości są wysyłane za szybko. Poczekaj kilka minut.",
     "REPORT": "Zgłoszono już dziś wiele skarg. Spróbuj ponownie jutro.",
     "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie.",
-    "BOOKING_REQUEST": "Wysłano już dziś wiele prośb o rezerwację. Spróbuj ponownie jutro."
+    "BOOKING_REQUEST": "Wysłano już dziś wiele prośb o rezerwację. Spróbuj ponownie jutro.",
+    "CLUB_SUBMISSION": "Zgłoszono już dziś kilka klubów. Spróbuj ponownie jutro."
   },
   "Validation": {
     "login": {
@@ -682,6 +701,14 @@
     },
     "declineBooking": {
       "reasonTooLong": "Powód może mieć maksymalnie {max} znaków."
+    },
+    "clubSubmission": {
+      "nameRequired": "Podaj nazwę klubu.",
+      "nameTooLong": "Nazwa może mieć maksymalnie {max} znaków.",
+      "addressRequired": "Podaj adres klubu.",
+      "addressTooLong": "Adres może mieć maksymalnie {max} znaków.",
+      "districtInvalid": "Wybierz dzielnicę albo zostaw to pole puste.",
+      "notesTooLong": "Notatki mogą mieć maksymalnie {max} znaków."
     }
   },
   "OnboardingPage": {
