@@ -44,6 +44,10 @@ const RATE_LIMITS: Record<
   // K.10 (slice K): at most 10 booking requests a day — same order of
   // magnitude as NEW_OFFER, since both create a row club staff act on.
   BOOKING_REQUEST: { windowMs: DAY_MS, limit: 10 },
+  // M.3 (slice M): at most 3 club tips a day — lower than every other
+  // limit above since a legitimate player has only a handful of clubs
+  // worth suggesting, never a stream of them.
+  CLUB_SUBMISSION: { windowMs: DAY_MS, limit: 3 },
 };
 
 export type RateLimitResult = { ok: true } | { ok: false };

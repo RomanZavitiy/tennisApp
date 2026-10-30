@@ -40,7 +40,13 @@ export function ClubList({
   if (clubs.length === 0) {
     return (
       <p className="text-muted-foreground">
-        {filtered ? t("noneMatchFilters") : t("noClubsYet")}
+        {filtered ? t("noneMatchFilters") : t("noClubsYet")}{" "}
+        <Link
+          href="/clubs/suggest"
+          className="underline-offset-4 hover:underline"
+        >
+          {t("suggestClub")}
+        </Link>
       </p>
     );
   }

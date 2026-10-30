@@ -139,6 +139,10 @@ model User {
   bookingDecisions    Booking[]          @relation("BookingDecidedBy")
   /// Court blocks this player created, as club staff.
   courtBlocksCreated  CourtBlock[]
+  /// Club tips this player filed (slice M).
+  clubSubmissionsFiled    ClubSubmission[] @relation("ClubSubmissionsFiled")
+  /// Club tips this admin reviewed (slice M).
+  clubSubmissionsReviewed ClubSubmission[] @relation("ClubSubmissionsReviewed")
 
   @@map("users")
 }
@@ -348,6 +352,37 @@ model CourtBlock {
 
   @@index([courtId])
   @@map("court_blocks")
+}
+
+/// A player's tip about a club not on the platform yet (slice M, task M.1).
+/// An inbox, not a publish pipeline: approving a submission (M2) does NOT
+/// create a `Club` row by itself — the owner still verifies the details and
+/// loads the real club through `prisma/load-clubs.ts` (`clubs:load`), the
+/// same "never invent data, always `verifiedAt`" discipline `Club` already
+/// documents.
+model ClubSubmission {
+  id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  status    ClubSubmissionStatus @default(PENDING)
+
+  submittedById String @map("submitted_by_id") @db.Uuid
+  submittedBy   User   @relation("ClubSubmissionsFiled", fields: [submittedById], references: [id], onDelete: Cascade)
+
+  name    String  @db.VarChar(100)
+  address String  @db.VarChar(200)
+  /// The submitter may not know the exact dzielnica.
+  districtGuess District? @map("district_guess")
+  /// Surfaces, approx court count, contact info the player happens to know.
+  notes         String?   @db.VarChar(500)
+
+  reviewedById    String?   @map("reviewed_by_id") @db.Uuid
+  reviewedBy      User?     @relation("ClubSubmissionsReviewed", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt      DateTime? @map("reviewed_at") @db.Timestamptz
+  rejectionReason String?   @map("rejection_reason") @db.VarChar(300)
+
+  @@index([submittedById])
+  @@index([reviewedById])
+  @@map("club_submissions")
 }
 
 /// "Looking for a sparring partner" — a post on the board (Epic 3).
@@ -794,6 +829,16 @@ enum CourtStatus {
   @@map("court_status")
 }
 
+/// A club tip's review state (slice M, task M.1). Approving does not create
+/// a `Club` row — see the `ClubSubmission` model comment.
+enum ClubSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+
+  @@map("club_submission_status")
+}
+
 /// Past offers are hidden by their start time (3.20), so there is no EXPIRED.
 enum OfferStatus {
   OPEN
@@ -917,6 +962,8 @@ enum RateLimitAction {
   REPORT
   MAGIC_LINK
   BOOKING_REQUEST
+  /// M.3 (slice M): a player suggesting a club not on the platform yet.
+  CLUB_SUBMISSION
 
   @@map("rate_limit_action")
 }
