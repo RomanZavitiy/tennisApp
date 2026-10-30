@@ -104,7 +104,8 @@
   "AdminLayout": {
     "admin": "Admin",
     "reports": "Reports",
-    "disputedResults": "Disputed results"
+    "disputedResults": "Disputed results",
+    "clubSubmissions": "Club submissions"
   },
   "Sheet": {
     "close": "Close"
@@ -293,6 +294,15 @@
     "hiding": "Hiding…",
     "blockPlayer": "Block player",
     "blocking": "Blocking…"
+  },
+  "AdminClubSubmissionsPage": {
+    "pending": "Pending ({count})",
+    "nothingWaiting": "Nothing waiting.",
+    "rejectionReasonLabel": "Reason for rejecting (optional)",
+    "approve": "Approve",
+    "approving": "Approving…",
+    "reject": "Reject",
+    "rejecting": "Rejecting…"
   },
   "AdminResultsPage": {
     "disputed": "Disputed ({count})",

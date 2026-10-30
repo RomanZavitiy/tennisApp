@@ -26,6 +26,9 @@ export default async function AdminLayout({
         <Link href="/admin/results" className="underline">
           {t("disputedResults")}
         </Link>
+        <Link href="/admin/club-submissions" className="underline">
+          {t("clubSubmissions")}
+        </Link>
       </nav>
       <div className="mt-6">{children}</div>
     </main>
