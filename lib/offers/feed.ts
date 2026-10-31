@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import type {
   CourtStatus,
   District,
@@ -137,6 +138,11 @@ export async function getOfferFeed(
   filters: FeedFilters = {},
   viewerId: string | null = null,
   now = new Date(),
+  // showDismissed (slice N, task N.3/N.6): the main feed excludes offers the
+  // viewer hid; the hidden-offers view (?show=hidden) shows only those, so
+  // there's a place to unhide them. A guest has never dismissed anything,
+  // so this only matters for a signed-in viewer.
+  showDismissed = false,
 ): Promise<FeedPage> {
   const viewer = viewerId
     ? await db.user.findUnique({
@@ -145,9 +151,26 @@ export async function getOfferFeed(
       })
     : null;
 
+  const dismissedIds = viewerId
+    ? (
+        await db.offerDismissal.findMany({
+          where: { userId: viewerId },
+          select: { offerId: true },
+        })
+      ).map((d) => d.offerId)
+    : [];
+  const dismissalCondition: Prisma.SparringOfferWhereInput | null =
+    showDismissed
+      ? { id: { in: dismissedIds } }
+      : dismissedIds.length > 0
+        ? { id: { notIn: dismissedIds } }
+        : null;
+
   const rows = await db.sparringOffer.findMany({
     // Served by the (status, starts_at) index from task 3.2.
-    where: feedWhere(filters, now),
+    where: dismissalCondition
+      ? { AND: [feedWhere(filters, now), dismissalCondition] }
+      : feedWhere(filters, now),
     // The base order, kept for offers that end up an equal ELO distance
     // apart (or for a guest, who has no ELO to rank by at all); id breaks
     // ties at the same start time.

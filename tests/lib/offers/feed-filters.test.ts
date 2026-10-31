@@ -179,6 +179,11 @@ describe("feedHref", () => {
     ).toBe("/offers?date=2026-10-20&ntrp=4.0&format=DOUBLES&page=3");
   });
 
+  it("links to the hidden-offers view (slice N)", () => {
+    expect(feedHref({}, 1, true)).toBe("/offers?show=hidden");
+    expect(feedHref({}, 2, true)).toBe("/offers?show=hidden&page=2");
+  });
+
   it("round-trips through parseFeedFilters", () => {
     const filters = {
       date: "2026-10-20",

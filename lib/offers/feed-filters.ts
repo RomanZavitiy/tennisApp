@@ -130,8 +130,15 @@ export function matchesTimeOfDay(startsAt: Date, time: TimeOfDay): boolean {
   return hour >= 17;
 }
 
-/** A link to the feed with these filters, on this page (page 1 is left out). */
-export function feedHref(filters: FeedFilters, page = 1): string {
+/**
+ * A link to the feed with these filters, on this page (page 1 is left out).
+ * showHidden (slice N) links to the hidden-offers view instead.
+ */
+export function feedHref(
+  filters: FeedFilters,
+  page = 1,
+  showHidden = false,
+): string {
   const params = new URLSearchParams();
   if (filters.date) params.set("date", filters.date);
   if (filters.district) params.set("district", filters.district);
@@ -140,6 +147,7 @@ export function feedHref(filters: FeedFilters, page = 1): string {
   if (filters.courtBooked) params.set("courtBooked", "1");
   if (filters.duration) params.set("duration", String(filters.duration));
   if (filters.time) params.set("time", filters.time);
+  if (showHidden) params.set("show", "hidden");
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/offers?${query}` : "/offers";

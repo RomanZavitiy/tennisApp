@@ -1,8 +1,14 @@
+"use client";
+
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
+import { useState, useTransition } from "react";
 
 import { PlayerAvatar } from "@/components/player-avatar";
+import { Button } from "@/components/ui/button";
 import type { FeedOffer } from "@/lib/offers/feed";
+import { dismissOffer, undismissOffer } from "@/lib/offers/dismissals/actions";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
 import {
   formatLabel,
@@ -21,9 +27,12 @@ import { cn } from "@/lib/utils";
 export function OfferCard({
   offer,
   viewerId = null,
+  dismissed = false,
 }: {
   offer: FeedOffer;
   viewerId?: string | null;
+  /** Rendering the hidden-offers view (slice N): "Unhide" instead of "Hide". */
+  dismissed?: boolean;
 }) {
   const t = useTranslations("OfferLabels");
   const tSurface = useTranslations("Surface");
@@ -33,15 +42,51 @@ export function OfferCard({
   const format = useFormatter();
   const isOwn = viewerId !== null && offer.author.id === viewerId;
 
+  // Hide/unhide (slice N): removed from the visible list on click, no
+  // reload — rolled back if the server call turns out not to have landed.
+  const [removed, setRemoved] = useState(false);
+  const [, startTransition] = useTransition();
+
+  if (removed) {
+    return null;
+  }
+
+  function toggleDismissal(event: React.MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    setRemoved(true);
+    startTransition(async () => {
+      const action = dismissed ? undismissOffer : dismissOffer;
+      const result = await action(offer.id);
+      if (!result.ok) {
+        setRemoved(false);
+      }
+    });
+  }
+
   return (
     <Link
       href={`/offers/${offer.id}`}
       className={cn(
-        "block rounded-lg border px-4 py-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+        "relative block rounded-lg border px-4 py-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
         isOwn && "border-primary",
       )}
     >
-      <div className="flex items-start gap-3">
+      {viewerId && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="absolute top-2 right-2"
+          onClick={toggleDismissal}
+        >
+          {dismissed ? <EyeIcon /> : <EyeOffIcon />}
+          <span className="sr-only">
+            {dismissed ? tCard("unhide") : tCard("hide")}
+          </span>
+        </Button>
+      )}
+      <div className={cn("flex items-start gap-3", viewerId && "pr-8")}>
         {offer.author.name && (
           <PlayerAvatar
             name={offer.author.name}
