@@ -9,14 +9,16 @@ import {
 
 // The database is replaced: what's under test is which offers the query asks
 // for, how pages are cut, and how free spots and the ranking are computed.
-const { findMany, findUnique } = vi.hoisted(() => ({
+const { findMany, findUnique, findManyDismissals } = vi.hoisted(() => ({
   findMany: vi.fn(),
   findUnique: vi.fn(),
+  findManyDismissals: vi.fn(),
 }));
 vi.mock("@/lib/db", () => ({
   db: {
     sparringOffer: { findMany },
     user: { findUnique },
+    offerDismissal: { findMany: findManyDismissals },
   },
 }));
 
@@ -79,6 +81,8 @@ describe("getOfferFeed", () => {
     findMany.mockResolvedValue([]);
     findUnique.mockReset();
     findUnique.mockResolvedValue(null);
+    findManyDismissals.mockReset();
+    findManyDismissals.mockResolvedValue([]);
   });
 
   it("asks only for open offers that haven't started, soonest first", async () => {
@@ -206,6 +210,53 @@ describe("getOfferFeed", () => {
     await getOfferFeed(1, {}, null, NOW);
 
     expect(findUnique).not.toHaveBeenCalled();
+  });
+
+  it("does not look up dismissals for a guest (slice N)", async () => {
+    await getOfferFeed(1, {}, null, NOW);
+
+    expect(findManyDismissals).not.toHaveBeenCalled();
+  });
+
+  it("excludes offers the viewer dismissed (slice N)", async () => {
+    findManyDismissals.mockResolvedValue([{ offerId: "2" }, { offerId: "5" }]);
+
+    await getOfferFeed(1, {}, "viewer-1", NOW);
+
+    expect(findManyDismissals).toHaveBeenCalledWith({
+      where: { userId: "viewer-1" },
+      select: { offerId: true },
+    });
+    const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(query.where).toEqual({
+      AND: [
+        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        { id: { notIn: ["2", "5"] } },
+      ],
+    });
+  });
+
+  it("shows only dismissed offers in the hidden view (slice N)", async () => {
+    findManyDismissals.mockResolvedValue([{ offerId: "2" }]);
+
+    await getOfferFeed(1, {}, "viewer-1", NOW, true);
+
+    const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(query.where).toEqual({
+      AND: [
+        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        { id: { in: ["2"] } },
+      ],
+    });
+  });
+
+  it("adds no dismissal condition when the viewer has none (slice N)", async () => {
+    await getOfferFeed(1, {}, "viewer-1", NOW);
+
+    const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(query.where).toEqual({
+      AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
+    });
   });
 
   it("ranks offers by ELO closeness to a signed-in viewer", async () => {

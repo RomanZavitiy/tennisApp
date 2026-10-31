@@ -123,6 +123,8 @@ model User {
 
   offers              SparringOffer[]
   joins               OfferJoin[]
+  /// Offers this player hid from their own feed (slice N).
+  offerDismissals     OfferDismissal[]
   sentMessages        Message[]
   outboundClicks      OutboundClick[]
   pushSubscriptions   PushSubscription[]
@@ -443,6 +445,8 @@ model SparringOffer {
   notifications  Notification[]
   /// A SpinBuddy court booking made for this offer, if any (slice K).
   bookings       Booking[]
+  /// Players who hid this offer from their own feed (slice N).
+  dismissals     OfferDismissal[]
 
   @@index([authorId])
   @@index([clubId])
@@ -477,6 +481,27 @@ model OfferJoin {
   @@unique([offerId, userId])
   @@index([userId])
   @@map("offer_joins")
+}
+
+/// "Hide this offer from my feed" (slice N) — no swipe/pass mechanic exists,
+/// so this is the faithful equivalent. User-scoped like every other
+/// per-user table: a dismissal is only ever read for its own userId, no new
+/// RLS judgment call.
+model OfferDismissal {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  offerId String        @map("offer_id") @db.Uuid
+  offer   SparringOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  /// Leads with userId: the feed's exclusion query is "my dismissals",
+  /// same reasoning as OfferJoin's unique index but swapped for this
+  /// table's lookup direction.
+  @@unique([userId, offerId])
+  @@map("offer_dismissals")
 }
 
 /// A chat message, in one of two threads (decision 3.1): private, on a join

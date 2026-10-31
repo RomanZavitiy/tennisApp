@@ -175,7 +175,9 @@
   },
   "OfferCard": {
     "byAuthor": "od {name}",
-    "yourOffer": "Twoja oferta"
+    "yourOffer": "Twoja oferta",
+    "hide": "Ukryj tę ofertę",
+    "unhide": "Odkryj tę ofertę"
   },
   "OfferForm": {
     "formatLabel": "Format",
@@ -209,7 +211,12 @@
     "noOpenOffers": "Brak otwartych ofert. Dodaj swoją, a inni zawodnicy będą mogli się zgłosić.",
     "pagesLabel": "Strony",
     "previous": "Poprzednia",
-    "next": "Następna"
+    "next": "Następna",
+    "showHidden": "Ukryte oferty",
+    "hiddenTitle": "Ukryte oferty",
+    "hiddenIntro": "Oferty, które ukryłeś ze swojej listy. Odkryj ofertę, aby znów ją zobaczyć.",
+    "noHiddenOffers": "Nie ukryłeś żadnych ofert.",
+    "backToFeed": "Wróć do listy"
   },
   "NewOfferPage": {
     "title": "Dodaj ogłoszenie sparingowe",

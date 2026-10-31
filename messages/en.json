@@ -175,7 +175,9 @@
   },
   "OfferCard": {
     "byAuthor": "by {name}",
-    "yourOffer": "Your offer"
+    "yourOffer": "Your offer",
+    "hide": "Hide this offer",
+    "unhide": "Unhide this offer"
   },
   "OfferForm": {
     "formatLabel": "Format",
@@ -209,7 +211,12 @@
     "noOpenOffers": "No open offers right now. Post one and other players can join you.",
     "pagesLabel": "Pages",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "showHidden": "Hidden offers",
+    "hiddenTitle": "Hidden offers",
+    "hiddenIntro": "Offers you hid from your feed. Unhide one to see it there again.",
+    "noHiddenOffers": "You haven't hidden any offers.",
+    "backToFeed": "Back to feed"
   },
   "NewOfferPage": {
     "title": "Post a sparring offer",
