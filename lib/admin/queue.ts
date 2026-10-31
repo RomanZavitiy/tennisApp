@@ -1,5 +1,9 @@
 import { db } from "@/lib/db";
-import type { MatchParty, ReportReason } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  MatchParty,
+  ReportReason,
+} from "@/lib/generated/prisma/enums";
 
 // What the admin queue (task 6.3) shows: open reports, currently blocked
 // players, and disputed results. Public to nobody but requireAdmin() — the
@@ -95,6 +99,33 @@ export async function getDisputedResults(): Promise<DisputedResult[]> {
           },
         },
       },
+    },
+  });
+}
+
+export type OpenClubSubmission = {
+  id: string;
+  createdAt: Date;
+  name: string;
+  address: string;
+  districtGuess: District | null;
+  notes: string | null;
+  submittedBy: { id: string; name: string | null };
+};
+
+/** Slice M, task M.8: a player's club tip waiting on a decision (M.9). */
+export async function getOpenClubSubmissions(): Promise<OpenClubSubmission[]> {
+  return db.clubSubmission.findMany({
+    where: { status: "PENDING" },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      createdAt: true,
+      name: true,
+      address: true,
+      districtGuess: true,
+      notes: true,
+      submittedBy: { select: { id: true, name: true } },
     },
   });
 }

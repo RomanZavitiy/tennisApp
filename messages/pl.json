@@ -104,7 +104,8 @@
   "AdminLayout": {
     "admin": "Administracja",
     "reports": "Zgłoszenia",
-    "disputedResults": "Zaskarżone wyniki"
+    "disputedResults": "Zaskarżone wyniki",
+    "clubSubmissions": "Zgłoszone kluby"
   },
   "Sheet": {
     "close": "Zamknij"
@@ -293,6 +294,15 @@
     "hiding": "Usuwanie…",
     "blockPlayer": "Zablokuj zawodnika",
     "blocking": "Blokowanie…"
+  },
+  "AdminClubSubmissionsPage": {
+    "pending": "Czekające ({count})",
+    "nothingWaiting": "Nic nie czeka.",
+    "rejectionReasonLabel": "Powód odrzucenia (opcjonalnie)",
+    "approve": "Zatwierdź",
+    "approving": "Zatwierdzanie…",
+    "reject": "Odrzuć",
+    "rejecting": "Odrzucanie…"
   },
   "AdminResultsPage": {
     "disputed": "Zaskarżone ({count})",
