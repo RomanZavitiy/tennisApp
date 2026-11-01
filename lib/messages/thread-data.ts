@@ -4,6 +4,7 @@ import {
   canWriteToThread,
   isJoinThreadParticipant,
 } from "@/lib/messages/thread-rules";
+import { firstNameAndInitial } from "@/lib/privacy/opponent-name";
 
 export type ThreadMessage = {
   id: string;
@@ -47,4 +48,56 @@ export async function getJoinThread(offerJoinId: string, viewerId: string) {
     messages,
     writable: canWriteToThread(join, join.offer, new Date()),
   };
+}
+
+const CLUB_THREAD_MESSAGE_LIMIT = 100;
+
+/**
+ * What a club's chat page (O.13) shows: its last 100 messages, oldest
+ * first, and the sender names to go with them. Null for anyone who isn't a
+ * follower — the same "someone else's thread looks the same as a missing
+ * one" convention as getJoinThread. A club's chat is semi-public to its
+ * followers (not a 1:1 conversation), so names are first name + last
+ * initial (lib/privacy/opponent-name.ts) rather than full names.
+ */
+export async function getClubThread(clubId: string, viewerId: string) {
+  const follow = await db.clubFollow.findUnique({
+    where: { userId_clubId: { userId: viewerId, clubId } },
+    select: { id: true },
+  });
+  if (!follow) {
+    return null;
+  }
+
+  const rows = await db.message.findMany({
+    where: { clubId },
+    orderBy: { createdAt: "asc" },
+    take: CLUB_THREAD_MESSAGE_LIMIT,
+    select: {
+      id: true,
+      type: true,
+      content: true,
+      senderId: true,
+      createdAt: true,
+      sender: { select: { name: true } },
+    },
+  });
+
+  const senderNames: Record<string, string> = {};
+  const messages: ThreadMessage[] = rows.map(
+    ({ id, type, content, senderId, createdAt: rowCreatedAt }) => ({
+      id,
+      type,
+      content,
+      senderId,
+      createdAt: rowCreatedAt,
+    }),
+  );
+  for (const row of rows) {
+    if (row.senderId) {
+      senderNames[row.senderId] = firstNameAndInitial(row.sender?.name ?? null);
+    }
+  }
+
+  return { messages, senderNames, writable: true };
 }

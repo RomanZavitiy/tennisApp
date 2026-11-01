@@ -32,7 +32,7 @@ export async function JoinThread({
       </summary>
       <div className="mt-2">
         <MessageThread
-          offerJoinId={offerJoinId}
+          thread={{ kind: "join", id: offerJoinId }}
           viewerId={viewerId}
           senderNames={senderNames}
           initialMessages={thread.messages.map((message) => ({

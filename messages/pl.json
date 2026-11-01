@@ -429,13 +429,20 @@
     "checkedOn": "Dane sprawdzone {date}. Ceny i godziny się zmieniają — potwierdź w klubie przed przyjazdem.",
     "lookingForPartnerHere": "Szukają partnera tutaj",
     "noOffers": "Brak otwartych ogłoszeń w tym klubie.",
-    "createOfferHere": "Dodaj ogłoszenie w tym klubie"
+    "createOfferHere": "Dodaj ogłoszenie w tym klubie",
+    "clubChat": "Czat klubu"
   },
   "FollowClubButton": {
     "follow": "Obserwuj",
     "following": "Obserwujesz",
     "signInToFollow": "Zaloguj się, aby obserwować ten klub",
     "followerCount": "{count, plural, one {# obserwujący} few {# obserwujących} many {# obserwujących} other {# obserwujących}}"
+  },
+  "ClubChatPage": {
+    "title": "Czat klubu {club}",
+    "notFound": "Klub nie znaleziony",
+    "backToClub": "← Powrót do klubu",
+    "followToJoinChat": "Obserwuj ten klub, aby czytać i pisać na czacie."
   },
   "SuggestClubPage": {
     "title": "Zgłoś klub",

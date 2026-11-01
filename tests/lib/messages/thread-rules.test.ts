@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  canWriteToClubThread,
   canWriteToThread,
   isJoinThreadParticipant,
 } from "@/lib/messages/thread-rules";
@@ -58,5 +59,22 @@ describe("canWriteToThread", () => {
     expect(
       canWriteToThread({ status: "ACCEPTED" }, { startsAt: STARTS_AT }, now),
     ).toBe(false);
+  });
+});
+
+const NOT_BLOCKED = { blockedAt: null };
+const BLOCKED = { blockedAt: new Date("2026-10-15T09:00:00Z") };
+
+describe("canWriteToClubThread", () => {
+  it("lets a non-blocked follower write", () => {
+    expect(canWriteToClubThread(true, NOT_BLOCKED)).toBe(true);
+  });
+
+  it("keeps a non-follower out", () => {
+    expect(canWriteToClubThread(false, NOT_BLOCKED)).toBe(false);
+  });
+
+  it("never lets a blocked follower write", () => {
+    expect(canWriteToClubThread(true, BLOCKED)).toBe(false);
   });
 });

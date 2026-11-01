@@ -24,6 +24,7 @@ type EventProperties = {
   booking_cancelled: Record<string, never>;
   club_followed: Record<string, never>;
   club_unfollowed: Record<string, never>;
+  club_message_sent: Record<string, never>;
 };
 
 export type AnalyticsEvent = keyof EventProperties;
