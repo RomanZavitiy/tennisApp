@@ -125,6 +125,8 @@ model User {
   joins               OfferJoin[]
   /// Offers this player hid from their own feed (slice N).
   offerDismissals     OfferDismissal[]
+  /// Clubs this player follows (slice O).
+  clubFollows         ClubFollow[]
   sentMessages        Message[]
   outboundClicks      OutboundClick[]
   pushSubscriptions   PushSubscription[]
@@ -217,6 +219,8 @@ model Club {
   courts         Court[]
   courtHours     CourtHours[]
   staff          ClubStaff[]
+  /// Players following this club (slice O).
+  follows        ClubFollow[]
 
   @@map("clubs")
 }
@@ -502,6 +506,26 @@ model OfferDismissal {
   /// table's lookup direction.
   @@unique([userId, offerId])
   @@map("offer_dismissals")
+}
+
+/// A player following a club (task O.1-O.2): free, instant, no approval.
+/// Scopes club chat (session O2) to followers rather than an open wall —
+/// RLS is enabled with no policy below, same as offer_dismissals, since
+/// only the server reads/writes this table today; O2's SECURITY DEFINER
+/// function reads it as the owner.
+model ClubFollow {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  clubId String @map("club_id") @db.Uuid
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clubId])
+  @@index([clubId])
+  @@map("club_follows")
 }
 
 /// A chat message, in one of two threads (decision 3.1): private, on a join

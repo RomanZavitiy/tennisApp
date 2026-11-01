@@ -431,6 +431,12 @@
     "noOffers": "No open offers at this club right now.",
     "createOfferHere": "Create an offer at this club"
   },
+  "FollowClubButton": {
+    "follow": "Follow",
+    "following": "Following",
+    "signInToFollow": "Sign in to follow this club",
+    "followerCount": "{count, plural, one {# follower} other {# followers}}"
+  },
   "SuggestClubPage": {
     "title": "Suggest a club",
     "subtitle": "Tell us about a club we're missing. We'll check it and add it.",
@@ -591,6 +597,7 @@
     "blocked": "Your account is blocked pending a review. You can't create offers, join requests or messages until an admin makes a decision.",
     "tooManyActiveOffers": "You already have {max} offers out there. Cancel one before posting another.",
     "clubNotFound": "Choose a club from the list.",
+    "clubDoesNotExist": "This club doesn't exist.",
     "offerNotFound": "This offer doesn't exist.",
     "threadNotFound": "This conversation doesn't exist.",
     "threadReadOnly": "This conversation is read-only now.",
