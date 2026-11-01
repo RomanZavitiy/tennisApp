@@ -132,10 +132,10 @@
     "semantic_hash": "e815b7b792baa0d594bad9f9eb9563ae"
   },
   "app/clubs/[id]/page.tsx": {
-    "mtime": 1793394403.634558,
-    "seen": 1793431740.9053524,
-    "ast_hash": "0114a64dc8f4bb94cf84edd9745c3cdb",
-    "semantic_hash": "0114a64dc8f4bb94cf84edd9745c3cdb"
+    "mtime": 1793555303.8543892,
+    "seen": 1793556921.778959,
+    "ast_hash": "d841630724c64866418abf36f1dde722",
+    "semantic_hash": "d841630724c64866418abf36f1dde722"
   },
   "app/clubs/actions.ts": {
     "mtime": 1792180987.0457504,
@@ -714,10 +714,10 @@
     "semantic_hash": "daee1b5f75e34ef8ed0570d70037c994"
   },
   "lib/analytics/events.ts": {
-    "mtime": 1793394403.6611266,
-    "seen": 1793431740.9055376,
-    "ast_hash": "6f63c282cbd6c5e3d5d9f9e5de5dc224",
-    "semantic_hash": "6f63c282cbd6c5e3d5d9f9e5de5dc224"
+    "mtime": 1793555303.8563592,
+    "seen": 1793556921.8061254,
+    "ast_hash": "eb66c88c9b61db2c2f11eb9222a5a28a",
+    "semantic_hash": "eb66c88c9b61db2c2f11eb9222a5a28a"
   },
   "lib/analytics/posthog.ts": {
     "mtime": 1792180987.063299,
@@ -762,10 +762,10 @@
     "semantic_hash": "bf583e053ee212c92e553f1710a97d80"
   },
   "lib/clubs/club-details.ts": {
-    "mtime": 1793394403.6680505,
-    "seen": 1793431740.90556,
-    "ast_hash": "bf6db199ed974f462b277f179e2adaaf",
-    "semantic_hash": "bf6db199ed974f462b277f179e2adaaf"
+    "mtime": 1793555303.857359,
+    "seen": 1793556921.809763,
+    "ast_hash": "138fa01627737ba4a9efcc7c28b6d4bd",
+    "semantic_hash": "138fa01627737ba4a9efcc7c28b6d4bd"
   },
   "lib/clubs/upsert-clubs.ts": {
     "mtime": 1793394403.6693454,
@@ -984,10 +984,10 @@
     "semantic_hash": "0956ca7360c70448c4844354645238f7"
   },
   "lib/privacy/export-user-data.ts": {
-    "mtime": 1792180987.0671866,
-    "seen": 1792608744.5635138,
-    "ast_hash": "751c54e38d58696f95d6ca365a96b842",
-    "semantic_hash": "751c54e38d58696f95d6ca365a96b842"
+    "mtime": 1793555303.858387,
+    "seen": 1793556921.818805,
+    "ast_hash": "8eea9c41aa3ab91281e234331d549510",
+    "semantic_hash": "8eea9c41aa3ab91281e234331d549510"
   },
   "lib/privacy/opponent-name.ts": {
     "mtime": 1792180987.0686052,
@@ -1152,16 +1152,16 @@
     "semantic_hash": "3ce6f69f0975ce89c9fd644efa09a118"
   },
   "messages/en.json": {
-    "mtime": 1793432429.6434672,
-    "seen": 1793482365.6950839,
-    "ast_hash": "b6257c90a47ba90f9e973dc216c51d83",
-    "semantic_hash": "b6257c90a47ba90f9e973dc216c51d83"
+    "mtime": 1793555303.8603604,
+    "seen": 1793556921.8253357,
+    "ast_hash": "95ca096e23a8373fe062daeedaa77dd2",
+    "semantic_hash": "95ca096e23a8373fe062daeedaa77dd2"
   },
   "messages/pl.json": {
-    "mtime": 1793432432.9689345,
-    "seen": 1793482365.6950865,
-    "ast_hash": "797b2448a741d1360306a586a862d673",
-    "semantic_hash": "797b2448a741d1360306a586a862d673"
+    "mtime": 1793555303.861359,
+    "seen": 1793556921.8253381,
+    "ast_hash": "ecad112098e3006b78a36f248582effd",
+    "semantic_hash": "ecad112098e3006b78a36f248582effd"
   },
   "next.config.ts": {
     "mtime": 1792180987.0721037,
@@ -1208,128 +1208,128 @@
   "prisma/migrations/20260929191021_init/migration.sql": {
     "mtime": 1790710922.0323062,
     "seen": 1792660651.4423096,
-    "ast_hash": "f5fba9169b68689ae68f03dc2cd699c1",
-    "semantic_hash": "f5fba9169b68689ae68f03dc2cd699c1"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20260929194214_enable_rls/migration.sql": {
     "mtime": 1790711800.7436464,
     "seen": 1792660651.4423115,
-    "ast_hash": "b20287ece05e88d4b0af7e39b58b9552",
-    "semantic_hash": "b20287ece05e88d4b0af7e39b58b9552"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20260929194407_enable_rls_prisma_migrations/migration.sql": {
     "mtime": 1790711800.745155,
     "seen": 1792660651.4423132,
-    "ast_hash": "464c7fe100c1733994a2e4b1f800afeb",
-    "semantic_hash": "464c7fe100c1733994a2e4b1f800afeb"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261004082125_add_profile_fields/migration.sql": {
     "mtime": 1791102617.5785341,
     "seen": 1792660651.4423158,
-    "ast_hash": "89b219553f2abcb9f49727f9d323220c",
-    "semantic_hash": "89b219553f2abcb9f49727f9d323220c"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261004124135_avatars_bucket/migration.sql": {
     "mtime": 1791118367.596685,
     "seen": 1792660651.442318,
-    "ast_hash": "9d07674d3194c9db44561a2ce217af30",
-    "semantic_hash": "9d07674d3194c9db44561a2ce217af30"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261004125320_add_avatar_path/migration.sql": {
     "mtime": 1791119071.7154424,
     "seen": 1792660651.4423206,
-    "ast_hash": "4a76fe5191063eba0c9f7f5ec76a0f3e",
-    "semantic_hash": "4a76fe5191063eba0c9f7f5ec76a0f3e"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261005120000_add_club_fields/migration.sql": {
     "mtime": 1791320139.6245978,
     "seen": 1792660651.4423232,
-    "ast_hash": "5f24b27129a1cf8a161d3e27dc9b9de7",
-    "semantic_hash": "5f24b27129a1cf8a161d3e27dc9b9de7"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261009204449_club_unknown_fields/migration.sql": {
     "mtime": 1791580201.9650662,
     "seen": 1792660651.4423258,
-    "ast_hash": "3b5b54c010455a3b79940ecc85b93762",
-    "semantic_hash": "3b5b54c010455a3b79940ecc85b93762"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261011153803_add_offer_fields/migration.sql": {
     "mtime": 1791734134.9459472,
     "seen": 1792660651.4423277,
-    "ast_hash": "57693a9d3dc3dc3d7623562c0beecda0",
-    "semantic_hash": "57693a9d3dc3dc3d7623562c0beecda0"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261011210442_add_user_elo/migration.sql": {
     "mtime": 1791825938.8479018,
     "seen": 1792660651.4423296,
-    "ast_hash": "14e29ef9a109343aa4847afcc0625c2f",
-    "semantic_hash": "14e29ef9a109343aa4847afcc0625c2f"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261012185710_add_messages/migration.sql": {
     "mtime": 1792010426.57941,
     "seen": 1792660651.4423316,
-    "ast_hash": "6c90e23912dfd12d43dee1c808741ba6",
-    "semantic_hash": "6c90e23912dfd12d43dee1c808741ba6"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261014211253_add_offer_court_status/migration.sql": {
     "mtime": 1792020227.4585035,
     "seen": 1792660651.4423447,
-    "ast_hash": "45c6cb6d7d11da5deb2abeaa9751baff",
-    "semantic_hash": "45c6cb6d7d11da5deb2abeaa9751baff"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261015090000_add_message_type/migration.sql": {
     "mtime": 1792052502.2934573,
     "seen": 1792660651.4423468,
-    "ast_hash": "1aecc9998893f129cfb5662760ec936b",
-    "semantic_hash": "1aecc9998893f129cfb5662760ec936b"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261015100000_add_match_result_fields/migration.sql": {
     "mtime": 1792052502.2944734,
     "seen": 1792660651.442349,
-    "ast_hash": "48ca57ecc9637bfc6adca13c68884152",
-    "semantic_hash": "48ca57ecc9637bfc6adca13c68884152"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261015110000_add_reliability_fields/migration.sql": {
     "mtime": 1792062498.6928935,
     "seen": 1792660651.4423516,
-    "ast_hash": "2e2dbdeb6bf505bb3bb92407f2c5f0b0",
-    "semantic_hash": "2e2dbdeb6bf505bb3bb92407f2c5f0b0"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261015120000_add_outbound_clicks/migration.sql": {
     "mtime": 1792065910.6857264,
     "seen": 1792660651.442354,
-    "ast_hash": "f43df8ee45cea5eb9c3ae62930b4389b",
-    "semantic_hash": "f43df8ee45cea5eb9c3ae62930b4389b"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261015130000_add_notifications/migration.sql": {
     "mtime": 1792070958.9553838,
     "seen": 1792660651.442356,
-    "ast_hash": "c3a44a0d8e7a94d35e1adff6e5861f0c",
-    "semantic_hash": "c3a44a0d8e7a94d35e1adff6e5861f0c"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261015140000_add_safety_admin/migration.sql": {
     "mtime": 1792087180.5903757,
     "seen": 1792660651.4423575,
-    "ast_hash": "587cc00a760635755819a6486f55a423",
-    "semantic_hash": "587cc00a760635755819a6486f55a423"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261015150000_add_user_locale/migration.sql": {
     "mtime": 1792094491.9932826,
     "seen": 1792660651.4423594,
-    "ast_hash": "a32d425acb1dad449fa291b1de01fee1",
-    "semantic_hash": "a32d425acb1dad449fa291b1de01fee1"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261016090000_add_user_consent/migration.sql": {
     "mtime": 1792180987.076341,
     "seen": 1792660651.4423616,
-    "ast_hash": "cc7c6b2c559f6e3bfb8c37c732bd9ae7",
-    "semantic_hash": "cc7c6b2c559f6e3bfb8c37c732bd9ae7"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/seed.sql": {
     "mtime": 1792052502.2964673,
     "seen": 1792660651.4423716,
-    "ast_hash": "41d15f4b997cd349cf577f68ca442453",
-    "semantic_hash": "41d15f4b997cd349cf577f68ca442453"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "proxy.ts": {
     "mtime": 1792241563.1982558,
@@ -1512,10 +1512,10 @@
     "semantic_hash": "cb145fe4046a6df3183f5bac2a1981b0"
   },
   "tests/lib/clubs/club-details.test.ts": {
-    "mtime": 1792094492.0041895,
-    "seen": 1792608744.563637,
-    "ast_hash": "4c8035b65192413086e8e22b5f4da871",
-    "semantic_hash": "4c8035b65192413086e8e22b5f4da871"
+    "mtime": 1793555303.867702,
+    "seen": 1793556921.8354552,
+    "ast_hash": "02fcb63734ac4f2239f449dd0e53053e",
+    "semantic_hash": "02fcb63734ac4f2239f449dd0e53053e"
   },
   "tests/lib/db.test.ts": {
     "mtime": 1790713177.5644753,
@@ -1692,10 +1692,10 @@
     "semantic_hash": "2fb48dc22c462266290021f7d553e97c"
   },
   "tests/lib/privacy/export-user-data.test.ts": {
-    "mtime": 1792180987.0862522,
-    "seen": 1792608744.5636814,
-    "ast_hash": "fea2c5e1c40c5a7d2123946f07cda483",
-    "semantic_hash": "fea2c5e1c40c5a7d2123946f07cda483"
+    "mtime": 1793555303.8697035,
+    "seen": 1793556921.8434832,
+    "ast_hash": "5f98b31af41952bdd1b93cada8e60ac6",
+    "semantic_hash": "5f98b31af41952bdd1b93cada8e60ac6"
   },
   "tests/lib/privacy/opponent-name.test.ts": {
     "mtime": 1792180987.0866175,
@@ -2192,20 +2192,20 @@
   "prisma/migrations/20261017090000_add_in_app_notifications/migration.sql": {
     "mtime": 1792256105.545604,
     "seen": 1792660651.4423645,
-    "ast_hash": "42fffae0c2cc371cd1472a8e466e501a",
-    "semantic_hash": "42fffae0c2cc371cd1472a8e466e501a"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261017120000_add_offer_duration/migration.sql": {
     "mtime": 1792261132.4376771,
     "seen": 1792660651.4423661,
-    "ast_hash": "efd8211764a62d991a3e670ececc7f80",
-    "semantic_hash": "efd8211764a62d991a3e670ececc7f80"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "prisma/migrations/20261021090000_add_booking/migration.sql": {
     "mtime": 1793394403.6806953,
     "seen": 1793431740.905814,
-    "ast_hash": "67145f063759eba4e6149a88da1d4b46",
-    "semantic_hash": "67145f063759eba4e6149a88da1d4b46"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/lib/booking/availability.test.ts": {
     "mtime": 1793394403.6866574,
@@ -2360,8 +2360,8 @@
   "prisma/migrations/20261021100000_add_booking_request_rate_limit/migration.sql": {
     "mtime": 1793394403.6817024,
     "seen": 1793431740.905816,
-    "ast_hash": "357adf40e556c0de7e95f44bbdc89e3b",
-    "semantic_hash": "357adf40e556c0de7e95f44bbdc89e3b"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "components/booking-grid.tsx": {
     "mtime": 1793394403.6405568,
@@ -2516,8 +2516,8 @@
   "prisma/migrations/20261030090000_add_club_submissions/migration.sql": {
     "mtime": 1793398629.5746603,
     "seen": 1793431740.9058175,
-    "ast_hash": "94cd596e0a45c8b1b24ae0ad454ff390",
-    "semantic_hash": "94cd596e0a45c8b1b24ae0ad454ff390"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/app/admin/club-submissions/actions.test.ts": {
     "mtime": 1793431168.386717,
@@ -2552,8 +2552,8 @@
   "prisma/migrations/20261031090000_add_offer_dismissals/migration.sql": {
     "mtime": 1793432134.734069,
     "seen": 1793482365.695193,
-    "ast_hash": "d96f6500ed3479e75fff75b13452e7df",
-    "semantic_hash": "d96f6500ed3479e75fff75b13452e7df"
+    "ast_hash": "",
+    "semantic_hash": ""
   },
   "tests/lib/offers/dismissals/actions.test.ts": {
     "mtime": 1793432692.9751644,
@@ -2566,5 +2566,23 @@
     "seen": 1793482365.6955447,
     "ast_hash": "fd0aef1f6b8a56e776c3d98a896cd74c",
     "semantic_hash": "fd0aef1f6b8a56e776c3d98a896cd74c"
+  },
+  "app/clubs/[id]/follow-actions.ts": {
+    "mtime": 1793555303.8533614,
+    "seen": 1793556921.7789555,
+    "ast_hash": "7219e234e03acd4ad2ae03150edd83ba",
+    "semantic_hash": "7219e234e03acd4ad2ae03150edd83ba"
+  },
+  "components/follow-club-button.tsx": {
+    "mtime": 1793555303.85536,
+    "seen": 1793556921.7896867,
+    "ast_hash": "d4f0f832346499c83d131c6c50e32f68",
+    "semantic_hash": "d4f0f832346499c83d131c6c50e32f68"
+  },
+  "tests/app/clubs/follow-actions.test.ts": {
+    "mtime": 1793555303.866694,
+    "seen": 1793556921.8306398,
+    "ast_hash": "55d817a54b1c79b0a606fb9cb5cf3fea",
+    "semantic_hash": "55d817a54b1c79b0a606fb9cb5cf3fea"
   }
 }

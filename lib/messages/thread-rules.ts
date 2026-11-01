@@ -30,3 +30,16 @@ export function canWriteToThread(
   );
   return now <= readOnlyFrom;
 }
+
+// Who may write to a club's chat (session O2, task O.9): any follower, same
+// idea as isJoinThreadParticipant above but with one membership flag instead
+// of two ids, since club_follows has already answered "is this a follower"
+// by the time a caller has this. Blocked users never write — repeated here
+// even though every caller already runs blockedRefusal first (task 6.4), so
+// the rule reads correctly on its own.
+export function canWriteToClubThread(
+  isFollower: boolean,
+  user: { blockedAt: Date | null },
+): boolean {
+  return isFollower && user.blockedAt === null;
+}

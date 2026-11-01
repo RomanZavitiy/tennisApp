@@ -121,32 +121,32 @@ model User {
   consentedAt    DateTime? @map("consented_at") @db.Timestamptz
   consentVersion String?   @map("consent_version") @db.VarChar(20)
 
-  offers              SparringOffer[]
-  joins               OfferJoin[]
+  offers                  SparringOffer[]
+  joins                   OfferJoin[]
   /// Offers this player hid from their own feed (slice N).
-  offerDismissals     OfferDismissal[]
+  offerDismissals         OfferDismissal[]
   /// Clubs this player follows (slice O).
-  clubFollows         ClubFollow[]
-  sentMessages        Message[]
-  outboundClicks      OutboundClick[]
-  pushSubscriptions   PushSubscription[]
-  notifications       Notification[]
-  reportsFiled        Report[]           @relation("ReportsFiled")
-  reportsAgainst      Report[]           @relation("ReportsAgainst")
-  adminActionsTaken   AdminAction[]      @relation("AdminActionsTaken")
-  adminActionsAgainst AdminAction[]      @relation("AdminActionsAgainst")
+  clubFollows             ClubFollow[]
+  sentMessages            Message[]
+  outboundClicks          OutboundClick[]
+  pushSubscriptions       PushSubscription[]
+  notifications           Notification[]
+  reportsFiled            Report[]           @relation("ReportsFiled")
+  reportsAgainst          Report[]           @relation("ReportsAgainst")
+  adminActionsTaken       AdminAction[]      @relation("AdminActionsTaken")
+  adminActionsAgainst     AdminAction[]      @relation("AdminActionsAgainst")
   /// Partner clubs this player is OWNER/STAFF for (slice K).
-  clubStaffRoles      ClubStaff[]
+  clubStaffRoles          ClubStaff[]
   /// Court bookings this player requested.
-  bookings            Booking[]          @relation("BookingPlayer")
+  bookings                Booking[]          @relation("BookingPlayer")
   /// Bookings this player confirmed or declined, as club staff.
-  bookingDecisions    Booking[]          @relation("BookingDecidedBy")
+  bookingDecisions        Booking[]          @relation("BookingDecidedBy")
   /// Court blocks this player created, as club staff.
-  courtBlocksCreated  CourtBlock[]
+  courtBlocksCreated      CourtBlock[]
   /// Club tips this player filed (slice M).
-  clubSubmissionsFiled    ClubSubmission[] @relation("ClubSubmissionsFiled")
+  clubSubmissionsFiled    ClubSubmission[]   @relation("ClubSubmissionsFiled")
   /// Club tips this admin reviewed (slice M).
-  clubSubmissionsReviewed ClubSubmission[] @relation("ClubSubmissionsReviewed")
+  clubSubmissionsReviewed ClubSubmission[]   @relation("ClubSubmissionsReviewed")
 
   @@map("users")
 }
@@ -221,6 +221,8 @@ model Club {
   staff          ClubStaff[]
   /// Players following this club (slice O).
   follows        ClubFollow[]
+  /// The club's chat thread, scoped to followers (session O2).
+  messages       Message[]
 
   @@map("clubs")
 }
@@ -374,8 +376,8 @@ model ClubSubmission {
   submittedById String @map("submitted_by_id") @db.Uuid
   submittedBy   User   @relation("ClubSubmissionsFiled", fields: [submittedById], references: [id], onDelete: Cascade)
 
-  name    String  @db.VarChar(100)
-  address String  @db.VarChar(200)
+  name          String    @db.VarChar(100)
+  address       String    @db.VarChar(200)
   /// The submitter may not know the exact dzielnica.
   districtGuess District? @map("district_guess")
   /// Surfaces, approx court count, contact info the player happens to know.
@@ -528,11 +530,13 @@ model ClubFollow {
   @@map("club_follows")
 }
 
-/// A chat message, in one of two threads (decision 3.1): private, on a join
-/// (author <-> that player), or group, on a doubles offer (author + accepted
-/// players, task 3.21). Exactly one of offerJoinId/offerId is set (CHECK).
-/// Realtime reads these directly with the user's own session (RLS below),
-/// writes go through the server action (3.16).
+/// A chat message, in one of three threads (decision 3.1, extended
+/// 2026-11-01 for session O2): private, on a join (author <-> that player);
+/// group, on a doubles offer (author + accepted players, task 3.21); or a
+/// club's chat, open to its followers (task O.8). Exactly one of
+/// offerJoinId/offerId/clubId is set (CHECK). Realtime reads these directly
+/// with the user's own session (RLS below), writes go through the server
+/// action (3.16, O.11).
 model Message {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz
@@ -549,6 +553,10 @@ model Message {
   offerId String?        @map("offer_id") @db.Uuid
   offer   SparringOffer? @relation(fields: [offerId], references: [id], onDelete: Cascade)
 
+  /// A club's chat (task O.8): any follower may read and write (RLS below).
+  clubId String? @map("club_id") @db.Uuid
+  club   Club?   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
   /// The real, shorter limit a sender can type is a Zod schema's job (3.16);
   /// this is just an outer bound the database enforces regardless of caller.
   content String @db.VarChar(2000)
@@ -559,6 +567,7 @@ model Message {
   @@index([senderId])
   @@index([offerJoinId])
   @@index([offerId])
+  @@index([clubId, createdAt])
   @@map("messages")
 }
 

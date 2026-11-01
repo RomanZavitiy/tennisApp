@@ -5,6 +5,10 @@ import { useEffect, useRef, useState, useTransition } from "react";
 
 import { sendMessage } from "@/app/offers/[id]/actions";
 import { reportMessage } from "@/app/offers/[id]/report-actions";
+import {
+  reportClubMessage,
+  sendClubMessage,
+} from "@/app/clubs/[id]/chat-actions";
 import { ReportButton } from "@/components/report-button";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,21 +32,32 @@ type MessageRow = {
   created_at: string;
 };
 
-// A join's private thread (3.17, 3.18): server-rendered history, a compose
-// box, and a Realtime subscription so a message sent from another browser
-// shows up here without a reload. This browser's own sends are appended
-// straight from sendMessage's result, not round-tripped through Realtime —
-// `seen` only guards against the subscription later echoing the same row
-// back. Losing the Realtime connection doesn't break anything here: there's
-// nothing to undo, and the next reload re-reads history from the server.
+/** Which thread this is: a join's private one, or a club's chat (O.12). */
+export type ThreadRef =
+  { kind: "join"; id: string } | { kind: "club"; id: string };
+
+function threadColumn(kind: ThreadRef["kind"]): "offer_join_id" | "club_id" {
+  return kind === "join" ? "offer_join_id" : "club_id";
+}
+
+// A thread's messages (3.17, 3.18, generalized for O.12): server-rendered
+// history, a compose box, and a Realtime subscription so a message sent
+// from another browser shows up here without a reload. This browser's own
+// sends are appended straight from the send action's result, not
+// round-tripped through Realtime — `seen` only guards against the
+// subscription later echoing the same row back. Losing the Realtime
+// connection doesn't break anything here: there's nothing to undo, and the
+// next reload re-reads history from the server. The join thread's own
+// behaviour is unchanged — only the Realtime filter, channel name, and
+// which send/report action fires now depend on `thread.kind`.
 export function MessageThread({
-  offerJoinId,
+  thread,
   viewerId,
   senderNames,
   initialMessages,
   writable,
 }: {
-  offerJoinId: string;
+  thread: ThreadRef;
   viewerId: string;
   /** Display name for every id that can send into this thread. */
   senderNames: Record<string, string>;
@@ -65,15 +80,16 @@ export function MessageThread({
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
+    const column = threadColumn(thread.kind);
     const channel = supabase
-      .channel(`messages:offer-join:${offerJoinId}`)
+      .channel(`messages:${thread.kind}:${thread.id}`)
       .on<MessageRow>(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `offer_join_id=eq.${offerJoinId}`,
+          filter: `${column}=eq.${thread.id}`,
         },
         (payload) => {
           addMessage({
@@ -90,14 +106,17 @@ export function MessageThread({
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [offerJoinId]);
+  }, [thread.kind, thread.id]);
 
   function submit() {
     const content = text.trim();
     if (!content || pending) return;
     setError(null);
     startTransition(async () => {
-      const result = await sendMessage(offerJoinId, content);
+      const result =
+        thread.kind === "join"
+          ? await sendMessage(thread.id, content)
+          : await sendClubMessage(thread.id, content);
       if (result.ok) {
         addMessage(result.sentMessage);
         setText("");
@@ -144,7 +163,11 @@ export function MessageThread({
               {message.senderId !== viewerId && (
                 <div className="mt-1">
                   <ReportButton
-                    action={reportMessage.bind(null, offerJoinId, message.id)}
+                    action={
+                      thread.kind === "join"
+                        ? reportMessage.bind(null, thread.id, message.id)
+                        : reportClubMessage.bind(null, thread.id, message.id)
+                    }
                     label={t("report")}
                   />
                 </div>

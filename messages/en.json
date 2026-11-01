@@ -429,13 +429,20 @@
     "checkedOn": "Info checked on {date}. Prices and hours change — confirm with the club before you go.",
     "lookingForPartnerHere": "Looking for a partner here",
     "noOffers": "No open offers at this club right now.",
-    "createOfferHere": "Create an offer at this club"
+    "createOfferHere": "Create an offer at this club",
+    "clubChat": "Club chat"
   },
   "FollowClubButton": {
     "follow": "Follow",
     "following": "Following",
     "signInToFollow": "Sign in to follow this club",
     "followerCount": "{count, plural, one {# follower} other {# followers}}"
+  },
+  "ClubChatPage": {
+    "title": "{club} chat",
+    "notFound": "Club not found",
+    "backToClub": "← Back to club",
+    "followToJoinChat": "Follow this club to read and join its chat."
   },
   "SuggestClubPage": {
     "title": "Suggest a club",

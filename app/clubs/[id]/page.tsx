@@ -120,6 +120,12 @@ export default async function ClubPage({ params }: ClubPageProps) {
         ) : (
           <SignInToFollowLink clubId={club.id} />
         )}
+        <Link
+          href={`/clubs/${club.id}/chat`}
+          className="mt-1 block text-sm underline-offset-4 hover:underline"
+        >
+          {t("clubChat")}
+        </Link>
       </div>
 
       {club.bookingMode === "SPINBUDDY" ? (
