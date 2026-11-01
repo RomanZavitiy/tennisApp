@@ -58,86 +58,100 @@ export type UserDataExport = {
     noShowParty: "me" | "opponent" | null;
     createdAt: string;
   }>;
+  followedClubs: Array<{
+    slug: string;
+    name: string;
+    createdAt: string;
+  }>;
 };
 
 export async function exportUserData(userId: string): Promise<UserDataExport> {
-  const [user, offers, joins, messages, matchResults] = await Promise.all([
-    db.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        birthDate: true,
-        gender: true,
-        district: true,
-        selfRatedNtrp: true,
-        elo: true,
-        matchesPlayed: true,
-        locale: true,
-        createdAt: true,
-      },
-    }),
-    db.sparringOffer.findMany({
-      where: { authorId: userId },
-      select: {
-        id: true,
-        status: true,
-        format: true,
-        startsAt: true,
-        district: true,
-        clubId: true,
-        comment: true,
-        courtStatus: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: "asc" },
-    }),
-    db.offerJoin.findMany({
-      where: { userId },
-      select: { id: true, offerId: true, status: true, createdAt: true },
-      orderBy: { createdAt: "asc" },
-    }),
-    db.message.findMany({
-      where: { senderId: userId },
-      select: {
-        id: true,
-        offerJoinId: true,
-        offerId: true,
-        content: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: "asc" },
-    }),
-    db.matchResult.findMany({
-      where: {
-        offerJoin: { OR: [{ userId }, { offer: { authorId: userId } }] },
-      },
-      select: {
-        id: true,
-        status: true,
-        score: true,
-        winner: true,
-        reportedBy: true,
-        noShowParty: true,
-        createdAt: true,
-        offerJoin: {
-          select: {
-            userId: true,
-            user: { select: { name: true } },
-            offer: {
-              select: {
-                authorId: true,
-                startsAt: true,
-                author: { select: { name: true } },
+  const [user, offers, joins, messages, matchResults, clubFollows] =
+    await Promise.all([
+      db.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          birthDate: true,
+          gender: true,
+          district: true,
+          selfRatedNtrp: true,
+          elo: true,
+          matchesPlayed: true,
+          locale: true,
+          createdAt: true,
+        },
+      }),
+      db.sparringOffer.findMany({
+        where: { authorId: userId },
+        select: {
+          id: true,
+          status: true,
+          format: true,
+          startsAt: true,
+          district: true,
+          clubId: true,
+          comment: true,
+          courtStatus: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "asc" },
+      }),
+      db.offerJoin.findMany({
+        where: { userId },
+        select: { id: true, offerId: true, status: true, createdAt: true },
+        orderBy: { createdAt: "asc" },
+      }),
+      db.message.findMany({
+        where: { senderId: userId },
+        select: {
+          id: true,
+          offerJoinId: true,
+          offerId: true,
+          content: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "asc" },
+      }),
+      db.matchResult.findMany({
+        where: {
+          offerJoin: { OR: [{ userId }, { offer: { authorId: userId } }] },
+        },
+        select: {
+          id: true,
+          status: true,
+          score: true,
+          winner: true,
+          reportedBy: true,
+          noShowParty: true,
+          createdAt: true,
+          offerJoin: {
+            select: {
+              userId: true,
+              user: { select: { name: true } },
+              offer: {
+                select: {
+                  authorId: true,
+                  startsAt: true,
+                  author: { select: { name: true } },
+                },
               },
             },
           },
         },
-      },
-      orderBy: { createdAt: "asc" },
-    }),
-  ]);
+        orderBy: { createdAt: "asc" },
+      }),
+      db.clubFollow.findMany({
+        where: { userId },
+        select: {
+          createdAt: true,
+          club: { select: { slug: true, name: true } },
+        },
+        orderBy: { createdAt: "asc" },
+      }),
+    ]);
 
   return {
     exportedAt: new Date().toISOString(),
@@ -186,5 +200,10 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
         createdAt: result.createdAt.toISOString(),
       };
     }),
+    followedClubs: clubFollows.map((follow) => ({
+      slug: follow.club.slug,
+      name: follow.club.name,
+      createdAt: follow.createdAt.toISOString(),
+    })),
   };
 }

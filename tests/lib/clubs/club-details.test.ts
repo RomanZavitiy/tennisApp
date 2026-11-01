@@ -1,16 +1,30 @@
 import { createFormatter } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { formatCheckedDate, getClub } from "@/lib/clubs/club-details";
+import {
+  formatCheckedDate,
+  getClub,
+  getClubFollowInfo,
+} from "@/lib/clubs/club-details";
 import { IndoorCourts, Surface } from "@/lib/generated/prisma/enums";
 import en from "@/messages/en.json";
 import pl from "@/messages/pl.json";
 
-const { findUnique } = vi.hoisted(() => ({ findUnique: vi.fn() }));
+const { findUnique, followCount, followFindUnique } = vi.hoisted(() => ({
+  findUnique: vi.fn(),
+  followCount: vi.fn(),
+  followFindUnique: vi.fn(),
+}));
 
-vi.mock("@/lib/db", () => ({ db: { club: { findUnique } } }));
+vi.mock("@/lib/db", () => ({
+  db: {
+    club: { findUnique },
+    clubFollow: { count: followCount, findUnique: followFindUnique },
+  },
+}));
 
 const ID = "11111111-1111-4111-8111-111111111111";
+const VIEWER = "22222222-2222-4222-8222-222222222222";
 
 describe("getClub", () => {
   beforeEach(() => {
@@ -35,6 +49,48 @@ describe("getClub", () => {
   it("returns null for a non-UUID without asking the database", async () => {
     expect(await getClub("not-a-uuid")).toBeNull();
     expect(findUnique).not.toHaveBeenCalled();
+  });
+});
+
+describe("getClubFollowInfo (task O.4)", () => {
+  beforeEach(() => {
+    followCount.mockReset();
+    followFindUnique.mockReset();
+  });
+
+  it("reports the follower count with no viewer following", async () => {
+    followCount.mockResolvedValue(3);
+
+    expect(await getClubFollowInfo(ID, null)).toEqual({
+      followerCount: 3,
+      viewerFollows: false,
+    });
+    expect(followFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("reports whether the viewer follows this club", async () => {
+    followCount.mockResolvedValue(3);
+    followFindUnique.mockResolvedValue({ id: "follow-1" });
+
+    expect(await getClubFollowInfo(ID, VIEWER)).toEqual({
+      followerCount: 3,
+      viewerFollows: true,
+    });
+    expect(followFindUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_clubId: { userId: VIEWER, clubId: ID } },
+      }),
+    );
+  });
+
+  it("a signed-in viewer who doesn't follow gets false, not a crash", async () => {
+    followCount.mockResolvedValue(0);
+    followFindUnique.mockResolvedValue(null);
+
+    expect(await getClubFollowInfo(ID, VIEWER)).toEqual({
+      followerCount: 0,
+      viewerFollows: false,
+    });
   });
 });
 

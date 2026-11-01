@@ -54,3 +54,25 @@ export async function getClub(id: string) {
 }
 
 export type ClubDetails = NonNullable<Awaited<ReturnType<typeof getClub>>>;
+
+/**
+ * Follower count and whether `viewerId` follows this club (task O.4). A
+ * sibling to `getClub` rather than a change to its shape, so existing
+ * callers (and its test) keep returning exactly the row they select — the
+ * follow button is the only caller that needs this.
+ */
+export async function getClubFollowInfo(
+  clubId: string,
+  viewerId: string | null,
+) {
+  const [followerCount, viewerFollow] = await Promise.all([
+    db.clubFollow.count({ where: { clubId } }),
+    viewerId
+      ? db.clubFollow.findUnique({
+          where: { userId_clubId: { userId: viewerId, clubId } },
+          select: { id: true },
+        })
+      : null,
+  ]);
+  return { followerCount, viewerFollows: viewerFollow !== null };
+}

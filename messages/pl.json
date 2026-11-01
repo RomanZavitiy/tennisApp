@@ -431,6 +431,12 @@
     "noOffers": "Brak otwartych ogłoszeń w tym klubie.",
     "createOfferHere": "Dodaj ogłoszenie w tym klubie"
   },
+  "FollowClubButton": {
+    "follow": "Obserwuj",
+    "following": "Obserwujesz",
+    "signInToFollow": "Zaloguj się, aby obserwować ten klub",
+    "followerCount": "{count, plural, one {# obserwujący} few {# obserwujących} many {# obserwujących} other {# obserwujących}}"
+  },
   "SuggestClubPage": {
     "title": "Zgłoś klub",
     "subtitle": "Powiedz nam o klubie, którego nie mamy na liście. Sprawdzimy go i dodamy.",
@@ -591,6 +597,7 @@
     "blocked": "Twoje konto jest zablokowane do czasu decyzji administratora. Nie możesz tworzyć ofert, zgłoszeń ani wiadomości, dopóki administrator nie podejmie decyzji.",
     "tooManyActiveOffers": "Masz już {max} aktywnych ofert. Odwołaj jedną, aby dodać kolejną.",
     "clubNotFound": "Wybierz klub z listy.",
+    "clubDoesNotExist": "Ten klub nie istnieje.",
     "offerNotFound": "Ta oferta nie istnieje.",
     "threadNotFound": "Ta rozmowa nie istnieje.",
     "threadReadOnly": "Ta rozmowa jest teraz tylko do odczytu.",

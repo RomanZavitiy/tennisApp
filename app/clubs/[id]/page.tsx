@@ -7,10 +7,18 @@ import type { ReactNode } from "react";
 
 import { BookingLink } from "@/components/booking-link";
 import { ExternalLink } from "@/components/external-link";
+import {
+  FollowClubButton,
+  SignInToFollowLink,
+} from "@/components/follow-club-button";
 import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
-import { formatCheckedDate, getClub } from "@/lib/clubs/club-details";
+import {
+  formatCheckedDate,
+  getClub,
+  getClubFollowInfo,
+} from "@/lib/clubs/club-details";
 import { getClubOffers } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
@@ -38,6 +46,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
   }
   const offers = await getClubOffers(club.id);
   const viewer = await getCurrentUser();
+  const followInfo = await getClubFollowInfo(club.id, viewer?.id ?? null);
 
   const t = await getTranslations("ClubPage");
   const tSurface = await getTranslations("Surface");
@@ -100,6 +109,18 @@ export default async function ClubPage({ params }: ClubPageProps) {
           {DISTRICT_LABELS[club.district]}
         </p>
       )}
+
+      <div className="mt-4">
+        {viewer ? (
+          <FollowClubButton
+            clubId={club.id}
+            initialFollowing={followInfo.viewerFollows}
+            initialFollowerCount={followInfo.followerCount}
+          />
+        ) : (
+          <SignInToFollowLink clubId={club.id} />
+        )}
+      </div>
 
       {club.bookingMode === "SPINBUDDY" ? (
         <Link

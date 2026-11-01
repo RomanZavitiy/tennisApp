@@ -11,12 +11,14 @@ const {
   joinFindMany,
   messageFindMany,
   matchResultFindMany,
+  clubFollowFindMany,
 } = vi.hoisted(() => ({
   userFindUniqueOrThrow: vi.fn(),
   offerFindMany: vi.fn(),
   joinFindMany: vi.fn(),
   messageFindMany: vi.fn(),
   matchResultFindMany: vi.fn(),
+  clubFollowFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -26,6 +28,7 @@ vi.mock("@/lib/db", () => ({
     offerJoin: { findMany: joinFindMany },
     message: { findMany: messageFindMany },
     matchResult: { findMany: matchResultFindMany },
+    clubFollow: { findMany: clubFollowFindMany },
   },
 }));
 
@@ -49,6 +52,7 @@ describe("exportUserData", () => {
     joinFindMany.mockResolvedValue([]);
     messageFindMany.mockResolvedValue([]);
     matchResultFindMany.mockResolvedValue([]);
+    clubFollowFindMany.mockResolvedValue([]);
   });
 
   it("includes only the exported user's own profile, offers, joins and messages", async () => {
@@ -157,5 +161,27 @@ describe("exportUserData", () => {
       winner: "opponent",
       reportedBy: "opponent",
     });
+  });
+
+  it("includes the clubs the user follows, by slug and name (task O.6)", async () => {
+    clubFollowFindMany.mockResolvedValue([
+      {
+        createdAt: new Date("2026-10-28T09:00:00Z"),
+        club: { slug: "krakow-tennis-club", name: "Krakow Tennis Club" },
+      },
+    ]);
+
+    const result = await exportUserData(ME);
+
+    expect(clubFollowFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { userId: ME } }),
+    );
+    expect(result.followedClubs).toEqual([
+      {
+        slug: "krakow-tennis-club",
+        name: "Krakow Tennis Club",
+        createdAt: "2026-10-28T09:00:00.000Z",
+      },
+    ]);
   });
 });
