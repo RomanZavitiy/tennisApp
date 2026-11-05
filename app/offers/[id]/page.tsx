@@ -16,6 +16,7 @@ import { OfferBookingSection } from "@/components/offer-booking-section";
 import { PlayerLink } from "@/components/player-link";
 import { ReportButton } from "@/components/report-button";
 import { ResultSection } from "@/components/result-section";
+import { ShareOfferButton } from "@/components/share-offer-button";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { joinRefusal } from "@/lib/offers/join-rules";
@@ -24,6 +25,7 @@ import { getOfferDetails, type OfferDetails } from "@/lib/offers/offer-details";
 import {
   formatLabel,
   levelLabel,
+  offerShareTitle,
   placeLabel,
   spotsLabel,
 } from "@/lib/offers/offer-labels";
@@ -41,9 +43,33 @@ type OfferPageProps = {
   searchParams: Promise<{ created?: string }>;
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const t = await getTranslations("OfferPage");
-  return { title: t("title") };
+  // Public data only — no viewer, same as a guest would see (task Q.4). A
+  // bad id or a deleted offer falls back to the generic title; the page
+  // itself calls notFound() separately.
+  const details = await getOfferDetails((await params).id, null);
+  if (!details) {
+    return { title: t("title") };
+  }
+  const { offer } = details;
+  const tOfferLabels = await getTranslations("OfferLabels");
+  const format = await getFormatter();
+  const title = offerShareTitle(t, tOfferLabels, format, offer);
+  const description = t("ogDescription", {
+    title,
+    author: offer.author.name ?? t("defaultAuthorName"),
+  });
+  return {
+    title,
+    description,
+    openGraph: { title, description },
+    twitter: { title, description },
+  };
 }
 
 export default async function OfferPage({
@@ -96,11 +122,20 @@ export default async function OfferPage({
       <p className="text-sm text-muted-foreground">
         {formatLabel(tOfferLabels, offer)}
       </p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-        <time dateTime={offer.startsAt.toISOString()}>
-          {formatKrakowTimeRange(format, offer.startsAt, offer.durationMinutes)}
-        </time>
-      </h1>
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+          <time dateTime={offer.startsAt.toISOString()}>
+            {formatKrakowTimeRange(
+              format,
+              offer.startsAt,
+              offer.durationMinutes,
+            )}
+          </time>
+        </h1>
+        <ShareOfferButton
+          title={offerShareTitle(t, tOfferLabels, format, offer)}
+        />
+      </div>
       <p className="mt-2 font-medium text-primary">
         {offer.status === "CANCELLED"
           ? t("statusCancelled")

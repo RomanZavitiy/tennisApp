@@ -5,12 +5,14 @@ import { formatKrakowTime } from "@/lib/offers/krakow-time";
 import {
   formatLabel,
   levelLabel,
+  offerShareTitle,
   placeLabel,
   spotsLabel,
 } from "@/lib/offers/offer-labels";
 import { testTranslator } from "@/tests/helpers/translator";
 
 const t = testTranslator("OfferLabels");
+const tOfferPage = testTranslator("OfferPage");
 const format = createFormatter({ locale: "en", timeZone: "Europe/Warsaw" });
 
 describe("offer labels", () => {
@@ -66,5 +68,31 @@ describe("placeLabel", () => {
     expect(placeLabel({ club: null, district: "PODGORZE" }, "Podgórze")).toBe(
       "Podgórze",
     );
+  });
+});
+
+describe("offerShareTitle", () => {
+  it("combines the word, time, level and place", () => {
+    expect(
+      offerShareTitle(tOfferPage, t, format, {
+        startsAt: new Date("2026-10-20T16:00:00Z"),
+        ntrpMin: 3.5,
+        ntrpMax: 4,
+        club: null,
+        district: "PODGORZE",
+      }),
+    ).toBe("Sparring, Tue, Oct 20, 18:00, NTRP 3.5–4.0, Podgórze");
+  });
+
+  it("drops the place when the offer has neither club nor district", () => {
+    expect(
+      offerShareTitle(tOfferPage, t, format, {
+        startsAt: new Date("2026-10-20T16:00:00Z"),
+        ntrpMin: null,
+        ntrpMax: null,
+        club: null,
+        district: null,
+      }),
+    ).toBe("Sparring, Tue, Oct 20, 18:00, Any level");
   });
 });

@@ -243,6 +243,9 @@
   },
   "OfferPage": {
     "title": "Sparring offer",
+    "ogWord": "Sparring",
+    "ogTitle": "{word}, {time}, {level}",
+    "ogDescription": "{title}. Posted by {author} on SpinBuddy.",
     "whereLabel": "Where",
     "levelLabel": "Level",
     "surfaceLabel": "Surface",
@@ -566,6 +569,10 @@
   },
   "ReportButton": {
     "defaultLabel": "Report"
+  },
+  "ShareOfferButton": {
+    "share": "Share",
+    "linkCopied": "Link copied!"
   },
   "ReportForm": {
     "done": "Reported. An admin will review it.",
