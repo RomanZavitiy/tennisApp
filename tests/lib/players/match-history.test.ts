@@ -15,6 +15,7 @@ vi.mock("@/lib/db", () => ({
 
 const PLAYER = "11111111-1111-4111-8111-111111111111";
 const AUTHOR = "22222222-2222-4222-8222-222222222222";
+const MATCH_STARTS_AT = new Date("2026-10-20T16:00:00Z");
 
 describe("getMatchHistory", () => {
   it("queries only this player's confirmed results", async () => {
@@ -46,9 +47,15 @@ describe("getMatchHistory", () => {
           userId: "opponent-id",
           user: { id: "opponent-id", name: "Bob" },
           offer: {
-            startsAt: new Date(),
+            startsAt: MATCH_STARTS_AT,
             authorId: PLAYER,
             author: { id: PLAYER, name: "Ola" },
+            durationMinutes: 90,
+            format: "SINGLES",
+            clubId: "club-1",
+            district: "PODGORZE",
+            ntrpMin: 3.5,
+            ntrpMax: 4,
           },
         },
       },
@@ -66,6 +73,13 @@ describe("getMatchHistory", () => {
         won: true,
         eloBefore: 1500,
         eloAfter: 1510,
+        startsAt: MATCH_STARTS_AT,
+        durationMinutes: 90,
+        format: "SINGLES",
+        clubId: "club-1",
+        district: "PODGORZE",
+        ntrpMin: 3.5,
+        ntrpMax: 4,
       },
     ]);
   });
@@ -84,9 +98,15 @@ describe("getMatchHistory", () => {
           userId: PLAYER,
           user: { id: PLAYER, name: "Ola" },
           offer: {
-            startsAt: new Date(),
+            startsAt: MATCH_STARTS_AT,
             authorId: AUTHOR,
             author: { id: AUTHOR, name: "Bob" },
+            durationMinutes: 60,
+            format: "DOUBLES",
+            clubId: null,
+            district: "ZWIERZYNIEC",
+            ntrpMin: null,
+            ntrpMax: null,
           },
         },
       },
@@ -104,6 +124,13 @@ describe("getMatchHistory", () => {
         won: false,
         eloBefore: 1500,
         eloAfter: 1490,
+        startsAt: MATCH_STARTS_AT,
+        durationMinutes: 60,
+        format: "DOUBLES",
+        clubId: null,
+        district: "ZWIERZYNIEC",
+        ntrpMin: null,
+        ntrpMax: null,
       },
     ]);
   });
@@ -119,6 +146,13 @@ describe("summarizeMatches", () => {
     won,
     eloBefore: 1500,
     eloAfter: won ? 1516 : 1484,
+    startsAt: MATCH_STARTS_AT,
+    durationMinutes: 90,
+    format: "SINGLES",
+    clubId: null,
+    district: null,
+    ntrpMin: null,
+    ntrpMax: null,
   });
 
   it("counts played, won and lost", () => {

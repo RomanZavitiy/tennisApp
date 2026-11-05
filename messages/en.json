@@ -547,7 +547,8 @@
     "won": "Won",
     "lost": "Lost",
     "vs": "vs",
-    "aPlayer": "A player"
+    "aPlayer": "A player",
+    "playAgain": "Play again"
   },
   "ResultForm": {
     "you": "You",

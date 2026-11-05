@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
 import type { SetScore } from "@/lib/validation/match-result";
 
 // A player's confirmed matches (task 4.9) for their public page: opponent,
@@ -18,6 +19,14 @@ export type MatchHistoryEntry = {
   won: boolean;
   eloBefore: number;
   eloAfter: number;
+  /** The finished offer's own facts, for "play again" (task Q.1). */
+  startsAt: Date;
+  durationMinutes: number;
+  format: OfferFormat;
+  clubId: string | null;
+  district: District | null;
+  ntrpMin: number | null;
+  ntrpMax: number | null;
 };
 
 export async function getMatchHistory(
@@ -47,6 +56,12 @@ export async function getMatchHistory(
               startsAt: true,
               authorId: true,
               author: { select: { id: true, name: true } },
+              durationMinutes: true,
+              format: true,
+              clubId: true,
+              district: true,
+              ntrpMin: true,
+              ntrpMax: true,
             },
           },
         },
@@ -79,6 +94,13 @@ export async function getMatchHistory(
       won: result.winner === (wasAuthor ? "AUTHOR" : "PLAYER"),
       eloBefore,
       eloAfter,
+      startsAt: result.offerJoin.offer.startsAt,
+      durationMinutes: result.offerJoin.offer.durationMinutes,
+      format: result.offerJoin.offer.format,
+      clubId: result.offerJoin.offer.clubId,
+      district: result.offerJoin.offer.district,
+      ntrpMin: result.offerJoin.offer.ntrpMin,
+      ntrpMax: result.offerJoin.offer.ntrpMax,
     };
   });
 }

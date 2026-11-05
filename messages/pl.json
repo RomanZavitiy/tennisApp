@@ -547,7 +547,8 @@
     "won": "Wygrana",
     "lost": "Porażka",
     "vs": "vs",
-    "aPlayer": "Zawodnik"
+    "aPlayer": "Zawodnik",
+    "playAgain": "Zagraj znowu"
   },
   "ResultForm": {
     "you": "Ty",
