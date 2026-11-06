@@ -6,7 +6,10 @@ import { createOffer } from "@/app/(member)/offers/new/actions";
 import { OfferForm } from "@/components/offer-form";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import { isOfferDuration } from "@/lib/offers/duration";
 import { toKrakowLocal } from "@/lib/offers/krakow-time";
+import { NTRP_LEVELS } from "@/lib/profile/options";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("NewOfferPage");
@@ -25,10 +28,21 @@ export default async function NewOfferPage({
     select: { id: true, name: true, district: true },
     orderBy: { name: "asc" },
   });
-  // "Create an offer at this club" (task 2.10): a bad or unknown id is
-  // simply ignored, same as every other optional query param in the app.
-  const rawClubId = (await searchParams).clubId;
-  const clubId = Array.isArray(rawClubId) ? rawClubId[0] : rawClubId;
+  // "Create an offer at this club" (task 2.10) and "play again" (task Q.1)
+  // both prefill the form through query params. A bad or unknown value is
+  // simply ignored, same convention as clubId always had.
+  const params = await searchParams;
+  const param = (key: string) => {
+    const raw = params[key];
+    return Array.isArray(raw) ? raw[0] : raw;
+  };
+  const clubId = param("clubId");
+  const district = param("district");
+  const format = param("format");
+  const durationMinutes = Number(param("durationMinutes"));
+  const ntrpMin = Number(param("ntrpMin"));
+  const ntrpMax = Number(param("ntrpMax"));
+  const startsAt = param("startsAt");
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
@@ -37,8 +51,23 @@ export default async function NewOfferPage({
       <OfferForm
         action={createOffer}
         clubs={clubs}
-        defaultDistrict={player.district}
+        defaultDistrict={
+          Object.values(District).includes(district as District)
+            ? (district as District)
+            : player.district
+        }
         defaultClubId={clubId}
+        defaultFormat={
+          Object.values(OfferFormat).includes(format as OfferFormat)
+            ? (format as OfferFormat)
+            : undefined
+        }
+        defaultDurationMinutes={
+          isOfferDuration(durationMinutes) ? durationMinutes : undefined
+        }
+        defaultNtrpMin={NTRP_LEVELS.includes(ntrpMin) ? ntrpMin : undefined}
+        defaultNtrpMax={NTRP_LEVELS.includes(ntrpMax) ? ntrpMax : undefined}
+        defaultStartsAt={startsAt}
         earliestStart={toKrakowLocal(new Date())}
       />
       <Link

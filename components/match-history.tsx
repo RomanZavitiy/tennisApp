@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
+import { playAgainParams } from "@/lib/offers/play-again";
 import { eloChangeLabel, formatScoreFor } from "@/lib/offers/result-labels";
 import type { MatchHistoryEntry } from "@/lib/players/match-history";
 
@@ -36,9 +37,17 @@ export function MatchHistory({ matches }: { matches: MatchHistoryEntry[] }) {
               {formatScoreFor(match.sets, match.wasAuthor)}
             </p>
           </div>
-          <p className="shrink-0 text-muted-foreground">
-            {eloChangeLabel(match.eloBefore, match.eloAfter)}
-          </p>
+          <div className="shrink-0 text-right">
+            <p className="text-muted-foreground">
+              {eloChangeLabel(match.eloBefore, match.eloAfter)}
+            </p>
+            <Link
+              href={`/offers/new?${playAgainParams(match).toString()}`}
+              className="text-xs text-primary hover:underline"
+            >
+              {t("playAgain")}
+            </Link>
+          </div>
         </li>
       ))}
     </ul>

@@ -243,6 +243,9 @@
   },
   "OfferPage": {
     "title": "Oferta sparingowa",
+    "ogWord": "Sparing",
+    "ogTitle": "{word}, {time}, {level}",
+    "ogDescription": "{title}. Autor: {author}, SpinBuddy.",
     "whereLabel": "Gdzie",
     "levelLabel": "Poziom",
     "surfaceLabel": "Nawierzchnia",
@@ -547,7 +550,8 @@
     "won": "Wygrana",
     "lost": "Porażka",
     "vs": "vs",
-    "aPlayer": "Zawodnik"
+    "aPlayer": "Zawodnik",
+    "playAgain": "Zagraj znowu"
   },
   "ResultForm": {
     "you": "Ty",
@@ -565,6 +569,10 @@
   },
   "ReportButton": {
     "defaultLabel": "Zgłoś"
+  },
+  "ShareOfferButton": {
+    "share": "Udostępnij",
+    "linkCopied": "Link skopiowany!"
   },
   "ReportForm": {
     "done": "Zgłoszono. Administrator to sprawdzi.",

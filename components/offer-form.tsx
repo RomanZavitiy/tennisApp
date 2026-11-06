@@ -13,7 +13,7 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
-import type { District } from "@/lib/generated/prisma/enums";
+import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
 import { CourtStatus, Surface } from "@/lib/generated/prisma/enums";
 import { DEFAULT_OFFER_DURATION, OFFER_DURATIONS } from "@/lib/offers/duration";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
@@ -44,6 +44,11 @@ export function OfferForm({
   clubs,
   defaultDistrict,
   defaultClubId,
+  defaultFormat,
+  defaultDurationMinutes,
+  defaultNtrpMin,
+  defaultNtrpMax,
+  defaultStartsAt,
   earliestStart,
 }: {
   action: (values: OfferInput) => Promise<CreateOfferResult>;
@@ -51,6 +56,13 @@ export function OfferForm({
   defaultDistrict: District;
   /** Pre-selected from "Create an offer at this club" (task 2.10). */
   defaultClubId?: string;
+  /** Pre-selected from "play again" (task Q.1), same as a finished match's offer. */
+  defaultFormat?: OfferFormat;
+  defaultDurationMinutes?: number;
+  defaultNtrpMin?: number;
+  defaultNtrpMax?: number;
+  /** Kraków local time, "YYYY-MM-DDTHH:mm". */
+  defaultStartsAt?: string;
   /** Kraków time now, "YYYY-MM-DDTHH:mm": the picker's lower bound. */
   earliestStart: string;
 }) {
@@ -70,16 +82,16 @@ export function OfferForm({
   } = useForm<OfferInput>({
     resolver: zodResolver(offerSchema(tValidation), undefined, { raw: true }),
     defaultValues: {
-      format: "SINGLES",
-      startsAt: "",
-      durationMinutes: String(DEFAULT_OFFER_DURATION),
+      format: defaultFormat ?? "SINGLES",
+      startsAt: defaultStartsAt ?? "",
+      durationMinutes: String(defaultDurationMinutes ?? DEFAULT_OFFER_DURATION),
       clubId: presetClub?.id ?? "",
       // A preset club decides the district, same as picking one below.
       district: presetClub
         ? (presetClub.district ?? undefined)
         : defaultDistrict,
-      ntrpMin: "",
-      ntrpMax: "",
+      ntrpMin: defaultNtrpMin !== undefined ? String(defaultNtrpMin) : "",
+      ntrpMax: defaultNtrpMax !== undefined ? String(defaultNtrpMax) : "",
       surface: "",
       courtStatus: "WILL_BOOK",
       comment: "",
