@@ -18,12 +18,14 @@ const {
   messageCreate,
   notify,
   checkRateLimit,
+  isBlockedEitherWay,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
   joinFindUnique: vi.fn(),
   messageCreate: vi.fn(),
   notify: vi.fn(),
   checkRateLimit: vi.fn(),
+  isBlockedEitherWay: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
@@ -40,6 +42,10 @@ vi.mock("@/lib/notifications/notify", () => ({ notify }));
 // (lib/rate-limit/check-rate-limit.test.ts); here only that a limit refuses
 // the send matters (tested explicitly below).
 vi.mock("@/lib/rate-limit/check-rate-limit", () => ({ checkRateLimit }));
+// Personal blocking (slice R) is its own concern
+// (lib/moderation/personal-block.test.ts); here only that a block makes the
+// thread read-only matters (tested explicitly below).
+vi.mock("@/lib/moderation/personal-block", () => ({ isBlockedEitherWay }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 const upcomingJoin = {
@@ -63,6 +69,18 @@ describe("sendMessage", () => {
     });
     notify.mockResolvedValue(undefined);
     checkRateLimit.mockResolvedValue({ ok: true });
+    isBlockedEitherWay.mockResolvedValue(false);
+  });
+
+  it("refuses a message once either side has personally blocked the other", async () => {
+    isBlockedEitherWay.mockResolvedValue(true);
+
+    await expect(sendMessage(JOIN, "hi")).resolves.toEqual({
+      ok: false,
+      message: "This conversation is read-only now.",
+    });
+    expect(isBlockedEitherWay).toHaveBeenCalledWith(ME, AUTHOR);
+    expect(messageCreate).not.toHaveBeenCalled();
   });
 
   it("refuses a blocked player without writing", async () => {

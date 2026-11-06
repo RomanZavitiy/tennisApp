@@ -6,7 +6,12 @@ import type { JoinStatus, OfferStatus } from "@/lib/generated/prisma/enums";
 // again after withdrawing reuses that row (decision for 3.10).
 
 export type JoinRefusal =
-  "OWN_OFFER" | "STARTED" | "NOT_OPEN" | "ALREADY_REQUESTED" | "DECLINED";
+  | "OWN_OFFER"
+  | "BLOCKED"
+  | "STARTED"
+  | "NOT_OPEN"
+  | "ALREADY_REQUESTED"
+  | "DECLINED";
 
 // Task 1.20: the message a caller shows for one of these codes comes from
 // the "JoinRefusal" translation namespace, keyed by this same code — not
@@ -18,15 +23,21 @@ export function joinRefusal({
   playerId,
   existing,
   now,
+  blocked = false,
 }: {
   offer: { authorId: string; status: OfferStatus; startsAt: Date };
   playerId: string;
   /** The player's earlier join on this offer, if any. */
   existing: { status: JoinStatus } | null;
   now: Date;
+  /** Either side has personally blocked the other (slice R, task R.2). */
+  blocked?: boolean;
 }): JoinRefusal | null {
   if (offer.authorId === playerId) {
     return "OWN_OFFER";
+  }
+  if (blocked) {
+    return "BLOCKED";
   }
   if (offer.startsAt <= now) {
     return "STARTED";

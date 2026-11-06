@@ -9,11 +9,13 @@ import {
 
 // The database is replaced: what's under test is which offers the query asks
 // for, how pages are cut, and how free spots and the ranking are computed.
-const { findMany, findUnique, findManyDismissals } = vi.hoisted(() => ({
-  findMany: vi.fn(),
-  findUnique: vi.fn(),
-  findManyDismissals: vi.fn(),
-}));
+const { findMany, findUnique, findManyDismissals, blockedCounterpartIds } =
+  vi.hoisted(() => ({
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    findManyDismissals: vi.fn(),
+    blockedCounterpartIds: vi.fn(),
+  }));
 vi.mock("@/lib/db", () => ({
   db: {
     sparringOffer: { findMany },
@@ -21,6 +23,10 @@ vi.mock("@/lib/db", () => ({
     offerDismissal: { findMany: findManyDismissals },
   },
 }));
+// Personal blocking (slice R) is its own concern
+// (lib/moderation/personal-block.test.ts); here only that a block excludes
+// the offer matters (tested explicitly below).
+vi.mock("@/lib/moderation/personal-block", () => ({ blockedCounterpartIds }));
 
 const NOW = new Date("2026-10-11T10:00:00Z");
 
@@ -83,6 +89,8 @@ describe("getOfferFeed", () => {
     findUnique.mockResolvedValue(null);
     findManyDismissals.mockReset();
     findManyDismissals.mockResolvedValue([]);
+    blockedCounterpartIds.mockReset();
+    blockedCounterpartIds.mockResolvedValue([]);
   });
 
   it("asks only for open offers that haven't started, soonest first", async () => {
@@ -256,6 +264,43 @@ describe("getOfferFeed", () => {
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
       AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
+    });
+  });
+
+  it("does not look up blocks for a guest (slice R)", async () => {
+    await getOfferFeed(1, {}, null, NOW);
+
+    expect(blockedCounterpartIds).not.toHaveBeenCalled();
+  });
+
+  it("excludes offers from a blocked player, either direction (slice R)", async () => {
+    blockedCounterpartIds.mockResolvedValue(["blocker-or-blocked-1"]);
+
+    await getOfferFeed(1, {}, "viewer-1", NOW);
+
+    expect(blockedCounterpartIds).toHaveBeenCalledWith("viewer-1");
+    const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(query.where).toEqual({
+      AND: [
+        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        { authorId: { notIn: ["blocker-or-blocked-1"] } },
+      ],
+    });
+  });
+
+  it("still shows dismissed offers from a blocked player in the hidden view (slice R)", async () => {
+    findManyDismissals.mockResolvedValue([{ offerId: "2" }]);
+    blockedCounterpartIds.mockResolvedValue(["blocker-1"]);
+
+    await getOfferFeed(1, {}, "viewer-1", NOW, true);
+
+    const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(query.where).toEqual({
+      AND: [
+        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        { id: { in: ["2"] } },
+        { authorId: { notIn: ["blocker-1"] } },
+      ],
     });
   });
 

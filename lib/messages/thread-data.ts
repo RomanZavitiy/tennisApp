@@ -4,6 +4,7 @@ import {
   canWriteToThread,
   isJoinThreadParticipant,
 } from "@/lib/messages/thread-rules";
+import { isBlockedEitherWay } from "@/lib/moderation/personal-block";
 import { firstNameAndInitial } from "@/lib/privacy/opponent-name";
 
 export type ThreadMessage = {
@@ -44,9 +45,17 @@ export async function getJoinThread(offerJoinId: string, viewerId: string) {
     },
   });
 
+  // The other side of this 1:1 thread (slice R): whichever of the two
+  // participants isn't the viewer.
+  const otherParticipantId =
+    viewerId === join.userId ? join.offer.authorId : join.userId;
+  const blocked = await isBlockedEitherWay(viewerId, otherParticipantId);
+
   return {
     messages,
-    writable: canWriteToThread(join, join.offer, new Date()),
+    writable: canWriteToThread(join, join.offer, new Date(), blocked),
+    otherParticipantId,
+    blocked,
   };
 }
 

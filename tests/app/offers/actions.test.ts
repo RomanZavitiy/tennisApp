@@ -34,6 +34,7 @@ const {
   postSystemMessage,
   notify,
   checkRateLimit,
+  isBlockedEitherWay,
   tx,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
@@ -49,6 +50,7 @@ const {
   postSystemMessage: vi.fn(),
   notify: vi.fn(),
   checkRateLimit: vi.fn(),
+  isBlockedEitherWay: vi.fn(),
   // What the status-change transaction (3.12) sees.
   tx: {
     $queryRaw: vi.fn(),
@@ -103,6 +105,10 @@ notify.mockResolvedValue(undefined);
 // (lib/rate-limit/check-rate-limit.test.ts); here only that a limit refuses
 // the request matters (tested explicitly below).
 vi.mock("@/lib/rate-limit/check-rate-limit", () => ({ checkRateLimit }));
+// Personal blocking (slice R) is its own concern
+// (lib/moderation/personal-block.test.ts); here only that a block refuses
+// the request/message matters (tested explicitly below).
+vi.mock("@/lib/moderation/personal-block", () => ({ isBlockedEitherWay }));
 
 const upcoming = {
   authorId: AUTHOR,
@@ -119,6 +125,18 @@ describe("requestToJoin", () => {
     joinCreateManyAndReturn.mockResolvedValue([{ id: JOIN }]);
     joinUpdateMany.mockResolvedValue({ count: 1 });
     checkRateLimit.mockResolvedValue({ ok: true });
+    isBlockedEitherWay.mockResolvedValue(false);
+  });
+
+  it("refuses a join between two players who have personally blocked each other", async () => {
+    isBlockedEitherWay.mockResolvedValue(true);
+
+    await expect(requestToJoin(OFFER)).resolves.toEqual({
+      ok: false,
+      message: "You can't join this offer.",
+    });
+    expect(isBlockedEitherWay).toHaveBeenCalledWith(ME, AUTHOR);
+    expect(joinCreateManyAndReturn).not.toHaveBeenCalled();
   });
 
   it("refuses a blocked player without writing", async () => {

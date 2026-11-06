@@ -16,6 +16,7 @@ import {
   isJoinThreadParticipant,
 } from "@/lib/messages/thread-rules";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
+import { isBlockedEitherWay } from "@/lib/moderation/personal-block";
 import { notify } from "@/lib/notifications/notify";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { joinRefusal } from "@/lib/offers/join-rules";
@@ -82,6 +83,7 @@ export async function requestToJoin(
     playerId: player.id,
     existing,
     now: new Date(),
+    blocked: await isBlockedEitherWay(player.id, offer.authorId),
   });
   if (refusal) {
     return { ok: false, message: tJoinRefusal(refusal) };
@@ -190,7 +192,13 @@ export async function sendMessage(
   if (!join || !isJoinThreadParticipant(join, user.id)) {
     return { ok: false, message: tErrors("threadNotFound") };
   }
-  if (!canWriteToThread(join, join.offer, new Date())) {
+  const otherParticipantId =
+    user.id === join.offer.authorId ? join.userId : join.offer.authorId;
+  const personallyBlocked = await isBlockedEitherWay(
+    user.id,
+    otherParticipantId,
+  );
+  if (!canWriteToThread(join, join.offer, new Date(), personallyBlocked)) {
     return { ok: false, message: tErrors("threadReadOnly") };
   }
 

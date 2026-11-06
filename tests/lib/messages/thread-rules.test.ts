@@ -60,6 +60,17 @@ describe("canWriteToThread", () => {
       canWriteToThread({ status: "ACCEPTED" }, { startsAt: STARTS_AT }, now),
     ).toBe(false);
   });
+
+  it("never writes once either side has personally blocked the other", () => {
+    expect(
+      canWriteToThread(
+        { status: "ACCEPTED" },
+        { startsAt: STARTS_AT },
+        new Date("2026-10-10T10:00:00Z"),
+        true,
+      ),
+    ).toBe(false);
+  });
 });
 
 const NOT_BLOCKED = { blockedAt: null };

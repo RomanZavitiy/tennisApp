@@ -3,10 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { reportPlayer } from "@/app/players/[id]/actions";
+import { BlockPlayerButton } from "@/components/block-player-button";
 import { MatchHistory } from "@/components/match-history";
 import { ProfileHero } from "@/components/profile-hero";
 import { ReportButton } from "@/components/report-button";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { isBlocked } from "@/lib/moderation/personal-block";
 import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
 import { getPublicProfile } from "@/lib/players/public-profile";
 
@@ -34,6 +36,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const matches = await getMatchHistory(id);
   const viewer = await getCurrentUser();
   const t = await getTranslations("PlayerPage");
+  const alreadyBlocked =
+    viewer && viewer.id !== profile.id
+      ? await isBlocked(viewer.id, profile.id)
+      : false;
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 px-4 py-8">
@@ -44,10 +50,14 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         <MatchHistory matches={matches} />
       </section>
       {viewer && viewer.id !== profile.id && (
-        <div>
+        <div className="flex flex-wrap items-center gap-3">
           <ReportButton
             action={reportPlayer.bind(null, profile.id)}
             label={t("reportThisPlayer")}
+          />
+          <BlockPlayerButton
+            targetUserId={profile.id}
+            initialBlocked={alreadyBlocked}
           />
         </div>
       )}
