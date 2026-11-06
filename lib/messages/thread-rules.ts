@@ -21,7 +21,14 @@ export function canWriteToThread(
   join: { status: JoinStatus },
   offer: { startsAt: Date },
   now: Date,
+  // Either side has personally blocked the other (slice R, task R.2/R.4) --
+  // the caller already resolved this (lib/moderation/personal-block.ts),
+  // same "pass a pre-resolved boolean in" convention as isFollower below.
+  blocked = false,
 ): boolean {
+  if (blocked) {
+    return false;
+  }
   if (join.status !== "REQUESTED" && join.status !== "ACCEPTED") {
     return false;
   }

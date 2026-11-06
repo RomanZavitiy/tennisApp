@@ -147,6 +147,10 @@ model User {
   clubSubmissionsFiled    ClubSubmission[]   @relation("ClubSubmissionsFiled")
   /// Club tips this admin reviewed (slice M).
   clubSubmissionsReviewed ClubSubmission[]   @relation("ClubSubmissionsReviewed")
+  /// Players this player has personally blocked (slice R).
+  blocksMade              UserBlock[]        @relation("BlocksMade")
+  /// Players who have personally blocked this player (slice R).
+  blocksReceived          UserBlock[]        @relation("BlocksReceived")
 
   @@map("users")
 }
@@ -508,6 +512,22 @@ model OfferDismissal {
   /// table's lookup direction.
   @@unique([userId, offerId])
   @@map("offer_dismissals")
+}
+
+model UserBlock {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  blockerId String @map("blocker_id") @db.Uuid
+  blocker   User   @relation("BlocksMade", fields: [blockerId], references: [id], onDelete: Cascade)
+
+  blockedId String @map("blocked_id") @db.Uuid
+  blocked   User   @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  /// Leads with blockerId: every lookup is "who has this player blocked",
+  /// same reasoning as OfferDismissal's unique index above.
+  @@unique([blockerId, blockedId])
+  @@map("user_blocks")
 }
 
 /// A player following a club (task O.1-O.2): free, instant, no approval.

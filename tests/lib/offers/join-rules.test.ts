@@ -11,6 +11,7 @@ function refusal({
   startsAt = new Date("2026-10-20T16:00:00Z"),
   authorId = AUTHOR,
   existing = null,
+  blocked = false,
 }: {
   status?: "OPEN" | "FULL" | "CANCELLED";
   startsAt?: Date;
@@ -18,12 +19,14 @@ function refusal({
   existing?: {
     status: "REQUESTED" | "ACCEPTED" | "DECLINED" | "WITHDRAWN";
   } | null;
+  blocked?: boolean;
 } = {}) {
   return joinRefusal({
     offer: { authorId, status, startsAt },
     playerId: PLAYER,
     existing,
     now: NOW,
+    blocked,
   });
 }
 
@@ -34,6 +37,14 @@ describe("joinRefusal", () => {
 
   it("refuses the author's own offer", () => {
     expect(refusal({ authorId: PLAYER })).toBe("OWN_OFFER");
+  });
+
+  it("refuses a join between two players who have blocked each other", () => {
+    expect(refusal({ blocked: true })).toBe("BLOCKED");
+  });
+
+  it("blocked takes priority over an offer that has already started", () => {
+    expect(refusal({ blocked: true, startsAt: NOW })).toBe("BLOCKED");
   });
 
   it("refuses an offer that has started or is in the past", () => {

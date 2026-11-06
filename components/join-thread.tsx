@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { BlockPlayerButton } from "@/components/block-player-button";
 import { MessageThread } from "@/components/message-thread";
 import { getJoinThread } from "@/lib/messages/thread-data";
 
@@ -30,7 +31,15 @@ export async function JoinThread({
       <summary className="cursor-pointer text-sm text-muted-foreground">
         {t("messages")}
       </summary>
-      <div className="mt-2">
+      <div className="mt-2 space-y-2">
+        {/* Slice R, task R.3: blocking from right here, not only from the
+            other player's profile — this is where a conversation actually
+            goes wrong. Outside <summary> so clicking it doesn't also
+            toggle the <details> open/closed. */}
+        <BlockPlayerButton
+          targetUserId={thread.otherParticipantId}
+          initialBlocked={thread.blocked}
+        />
         <MessageThread
           thread={{ kind: "join", id: offerJoinId }}
           viewerId={viewerId}

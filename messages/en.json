@@ -165,6 +165,7 @@
     "myGames": "My games",
     "myBookings": "My bookings",
     "matchHistory": "Match history",
+    "blockedPlayers": "Blocked players",
     "account": "Account",
     "photo": "Profile photo",
     "editProfile": "Edit profile",
@@ -545,6 +546,14 @@
     "matchHistory": "Match history",
     "reportThisPlayer": "Report this player"
   },
+  "BlockPlayerButton": {
+    "block": "Block",
+    "unblock": "Unblock"
+  },
+  "BlockedPlayersList": {
+    "none": "You haven't blocked anyone.",
+    "aPlayer": "A player"
+  },
   "MatchHistory": {
     "noMatches": "No matches yet.",
     "won": "Won",
@@ -654,6 +663,7 @@
   },
   "JoinRefusal": {
     "OWN_OFFER": "This is your own offer.",
+    "BLOCKED": "You can't join this offer.",
     "STARTED": "This game has already started.",
     "NOT_OPEN": "This offer is no longer taking players.",
     "ALREADY_REQUESTED": "You have already asked to join.",

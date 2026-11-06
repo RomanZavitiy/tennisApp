@@ -2221,6 +2221,25 @@ SECURITY DEFINER функцію в тій самій схемі `private`, що 
 SELECT-політики (сесія O1) — функція читає її як власник, той самий трюк, що й для
 `offer_joins`/`sparring_offers` у 3.15.
 
+## 2026-11-06 — Особисте блокування: нова таблиця `UserBlock`, без RLS-політики (слайс R, R.1-R.4)
+
+**Рішення:** `UserBlock` (`blockerId`, `blockedId`, `@@unique([blockerId, blockedId])`) —
+гравець блокує іншого гравця: безкоштовно, миттєво, без схвалення, будь-яка сторона може
+розблокувати будь-коли. RLS увімкнено в тій самій міграції (`20261106090000_add_user_block`)
+без жодної політики — лише сервер (Prisma) читає й пише цю таблицю, той самий підхід, що
+`offer_dismissals`/`club_follows`. Ефект двосторонній (хто кого заблокував — не важливо):
+`lib/offers/join-rules.ts`, `lib/messages/thread-rules.ts` і фід (`lib/offers/feed.ts`) усі
+читають через `lib/moderation/personal-block.ts`, єдине місце, що знає про `user_blocks`.
+Міграцію застосовано напряму (`prisma db execute --file` + `migrate resolve --applied`), той
+самий обхідний шлях, що кожна міграція з 3.15.
+**Чому:** окрема таблиця, а не колонка на `OfferJoin`/`Message`, бо блокування існує незалежно
+від будь-якої конкретної оферти чи треду — той самий аргумент, що для `OfferDismissal`/
+`ClubFollow`. Асиметрична пара (`blockerId`/`blockedId`), а не `User.blockedUserIds[]`, бо
+Prisma-реляції з двома FK на одну модель (`BlocksMade`/`BlocksReceived`) дають типобезпечний
+запит в обидва боки без JSON-масиву. Відмінне від адмінського `blockedAt`
+(`lib/moderation/block-rules.ts`): те блокування — рішення власника, стосується всього
+акаунту; це — особистий вибір гравця, стосується лише двох людей.
+
 **Чат клубу, а не нова модель:** `lib/messages/thread-rules.ts` отримав `canWriteToClubThread`
 (фоловер і не блокований) поряд із `canWriteToThread`; `lib/messages/thread-data.ts` отримав
 `getClubThread`, який — на відміну від `getJoinThread` — сам резолвить імена відправників через

@@ -7,6 +7,7 @@ import type {
   Surface,
 } from "@/lib/generated/prisma/enums";
 import { rankByEloCloseness } from "@/lib/matching/elo-rank";
+import { blockedCounterpartIds } from "@/lib/moderation/personal-block";
 import {
   feedWhere,
   matchesTimeOfDay,
@@ -166,11 +167,26 @@ export async function getOfferFeed(
         ? { id: { notIn: dismissedIds } }
         : null;
 
+  // Personal blocking (slice R, task R.2): offers from either side of a
+  // block disappear from the feed, regardless of ?show=hidden — unlike a
+  // dismissal, a block isn't something to toggle back into view here (it
+  // has its own list, the profile's "blocked players").
+  const blockedIds = viewerId ? await blockedCounterpartIds(viewerId) : [];
+  const blockCondition: Prisma.SparringOfferWhereInput | null =
+    blockedIds.length > 0 ? { authorId: { notIn: blockedIds } } : null;
+
+  const conditions = [
+    feedWhere(filters, now),
+    dismissalCondition,
+    blockCondition,
+  ].filter(
+    (condition): condition is Prisma.SparringOfferWhereInput =>
+      condition !== null,
+  );
+
   const rows = await db.sparringOffer.findMany({
     // Served by the (status, starts_at) index from task 3.2.
-    where: dismissalCondition
-      ? { AND: [feedWhere(filters, now), dismissalCondition] }
-      : feedWhere(filters, now),
+    where: conditions.length > 1 ? { AND: conditions } : conditions[0],
     // The base order, kept for offers that end up an equal ELO distance
     // apart (or for a guest, who has no ELO to rank by at all); id breaks
     // ties at the same start time.

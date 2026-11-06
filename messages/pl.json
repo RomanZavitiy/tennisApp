@@ -165,6 +165,7 @@
     "myGames": "Moje gry",
     "myBookings": "Moje rezerwacje",
     "matchHistory": "Historia meczów",
+    "blockedPlayers": "Zablokowani zawodnicy",
     "account": "Konto",
     "photo": "Zdjęcie profilowe",
     "editProfile": "Edytuj profil",
@@ -545,6 +546,14 @@
     "matchHistory": "Historia meczów",
     "reportThisPlayer": "Zgłoś tego zawodnika"
   },
+  "BlockPlayerButton": {
+    "block": "Zablokuj",
+    "unblock": "Odblokuj"
+  },
+  "BlockedPlayersList": {
+    "none": "Nie zablokowałeś nikogo.",
+    "aPlayer": "Zawodnik"
+  },
   "MatchHistory": {
     "noMatches": "Brak meczów.",
     "won": "Wygrana",
@@ -654,6 +663,7 @@
   },
   "JoinRefusal": {
     "OWN_OFFER": "To Twoja własna oferta.",
+    "BLOCKED": "Nie możesz dołączyć do tej oferty.",
     "STARTED": "Ta gra już się zaczęła.",
     "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
     "ALREADY_REQUESTED": "Zgłoszenie do tej gry zostało już wysłane.",
