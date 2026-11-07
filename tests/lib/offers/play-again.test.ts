@@ -33,6 +33,7 @@ describe("playAgainParams", () => {
     district: "PODGORZE",
     ntrpMin: 3.5,
     ntrpMax: 4,
+    opponentId: "opponent-1",
   };
 
   it("carries the offer's facts and the date one week on", () => {
@@ -44,6 +45,11 @@ describe("playAgainParams", () => {
     expect(params.get("district")).toBe("PODGORZE");
     expect(params.get("ntrpMin")).toBe("3.5");
     expect(params.get("ntrpMax")).toBe("4");
+  });
+
+  it("carries the opponent to invite (task Q.2)", () => {
+    const params = playAgainParams(base);
+    expect(params.get("invite")).toBe("opponent-1");
   });
 
   it("omits fields the original offer didn't have", () => {
