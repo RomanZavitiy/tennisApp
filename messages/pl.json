@@ -94,6 +94,10 @@
     "INVITE_ACCEPTED": {
       "title": "Zaproszenie zaakceptowane",
       "body": "Twoje zaproszenie zostało zaakceptowane."
+    },
+    "SPOT_OPENED": {
+      "title": "Zwolniło się miejsce",
+      "body": "Jesteś następny w rezerwie — Twoje zgłoszenie czeka na autora."
     }
   },
   "SystemMessages": {
@@ -292,7 +296,13 @@
     "cancellingBooking": "Odwoływanie…",
     "invitedToJoin": "{author} zaprosił(a) Cię do tej gry.",
     "acceptInvite": "Przyjmij zaproszenie",
-    "declineInvite": "Odrzuć zaproszenie"
+    "declineInvite": "Odrzuć zaproszenie",
+    "fromWaitlistLabel": "z rezerwy",
+    "waitlistPosition": "Jesteś #{position} w kolejce. Damy znać, jeśli zwolni się miejsce.",
+    "joinWaitlist": "Dołącz do rezerwy",
+    "joiningWaitlist": "Dołączanie…",
+    "leaveWaitlist": "Opuść rezerwę",
+    "leavingWaitlist": "Opuszczanie…"
   },
   "AdminActionForm": {
     "done": "Gotowe.",
@@ -973,5 +983,14 @@
   "DiscoverableToggle": {
     "label": "Pokazuj mnie w sekcji \"Kogo zaprosić\"",
     "description": "Inni autorzy mogą zobaczyć Cię jako kandydata do zaproszenia w swoich otwartych ofertach. Wyłączenie chowa Cię tylko z tej listy — lista ofert i zgłoszenia działają tak samo."
+  },
+  "WaitlistRefusal": {
+    "OWN_OFFER": "To Twoja własna oferta.",
+    "BLOCKED": "Nie możesz dołączyć do rezerwy tej oferty.",
+    "STARTED": "Ta gra już się zaczęła.",
+    "NOT_FULL": "Ta oferta ma jeszcze wolne miejsca — zgłoś się normalnie.",
+    "ALREADY_JOINED": "Masz już zgłoszenie na tę ofertę.",
+    "ALREADY_WAITLISTED": "Jesteś już na liście rezerwowej.",
+    "DECLINED": "Autor odrzucił Twoje zgłoszenie."
   }
 }

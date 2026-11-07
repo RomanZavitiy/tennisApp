@@ -4,18 +4,25 @@ import { getOfferDetails } from "@/lib/offers/offer-details";
 
 // The database is replaced: what's under test is who gets which part of the
 // offer — the request list is the author's alone.
-const { offerFindUnique, joinFindMany, joinFindUnique, inviteFindUnique } =
-  vi.hoisted(() => ({
-    offerFindUnique: vi.fn(),
-    joinFindMany: vi.fn(),
-    joinFindUnique: vi.fn(),
-    inviteFindUnique: vi.fn(),
-  }));
+const {
+  offerFindUnique,
+  joinFindMany,
+  joinFindUnique,
+  inviteFindUnique,
+  waitlistFindMany,
+} = vi.hoisted(() => ({
+  offerFindUnique: vi.fn(),
+  joinFindMany: vi.fn(),
+  joinFindUnique: vi.fn(),
+  inviteFindUnique: vi.fn(),
+  waitlistFindMany: vi.fn(),
+}));
 vi.mock("@/lib/db", () => ({
   db: {
     sparringOffer: { findUnique: offerFindUnique },
     offerJoin: { findMany: joinFindMany, findUnique: joinFindUnique },
     offerInvite: { findUnique: inviteFindUnique },
+    offerWaitlist: { findMany: waitlistFindMany },
   },
 }));
 
@@ -48,6 +55,7 @@ describe("getOfferDetails", () => {
     ]);
     joinFindUnique.mockResolvedValue({ id: "j2", status: "REQUESTED" });
     inviteFindUnique.mockResolvedValue(null);
+    waitlistFindMany.mockResolvedValue([]);
   });
 
   it("returns null for an id that isn't a uuid, without a query", async () => {
@@ -101,6 +109,39 @@ describe("getOfferDetails", () => {
       select: { id: true, status: true, result: { select: resultSelect } },
     });
     expect(joinFindMany).not.toHaveBeenCalled();
+  });
+
+  it("gives a non-author viewer their waitlist position on a FULL offer (T.2)", async () => {
+    offerFindUnique.mockResolvedValue({
+      id: OFFER,
+      status: "FULL",
+      format: "DOUBLES",
+      hasPartner: false,
+      author: player,
+      bookings: [],
+      _count: { joins: 1 },
+    });
+    waitlistFindMany.mockResolvedValue([
+      { userId: "someone-else" },
+      { userId: PLAYER },
+    ]);
+
+    const details = await getOfferDetails(OFFER, PLAYER);
+
+    expect(details?.viewerWaitlistPosition).toBe(2);
+    expect(waitlistFindMany).toHaveBeenCalledWith({
+      where: { offerId: OFFER },
+      orderBy: { createdAt: "asc" },
+      select: { userId: true },
+    });
+  });
+
+  it("skips the waitlist query for the author or a non-FULL offer", async () => {
+    await getOfferDetails(OFFER, AUTHOR);
+    expect(waitlistFindMany).not.toHaveBeenCalled();
+
+    await getOfferDetails(OFFER, PLAYER);
+    expect(waitlistFindMany).not.toHaveBeenCalled();
   });
 
   it("gives the author the open and accepted requests", async () => {

@@ -31,6 +31,10 @@ type EventProperties = {
   invite_expired: Record<string, never>;
   candidates_viewed: { count: number };
   candidate_invited: { rank: number };
+  waitlist_joined: Record<string, never>;
+  waitlist_spot_offered: Record<string, never>;
+  waitlist_spot_taken: Record<string, never>;
+  waitlist_spot_passed: Record<string, never>;
 };
 
 // Where "Invite to game" (slice S1) was clicked from. "playAgain" is Q.2's

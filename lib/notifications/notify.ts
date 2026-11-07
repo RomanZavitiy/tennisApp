@@ -38,7 +38,8 @@ export type NotificationEvent =
   | { kind: "CONFIRM_RESULT_REMINDER"; offerId: string }
   | { kind: "NEW_OFFER_FOR_LEVEL"; offerId: string }
   | { kind: "INVITE_RECEIVED"; offerId: string }
-  | { kind: "INVITE_ACCEPTED"; offerId: string };
+  | { kind: "INVITE_ACCEPTED"; offerId: string }
+  | { kind: "SPOT_OPENED"; offerId: string };
 
 type Kind = NotificationEvent["kind"];
 
@@ -56,6 +57,7 @@ const CATEGORY: Record<Kind, "matches" | "newOffers"> = {
   NEW_OFFER_FOR_LEVEL: "newOffers",
   INVITE_RECEIVED: "matches",
   INVITE_ACCEPTED: "matches",
+  SPOT_OPENED: "matches",
 };
 
 // Decision 2026-10-14: email fallback exists only for "new join request,

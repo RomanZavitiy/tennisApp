@@ -2,6 +2,8 @@ import { captureEvent } from "@/lib/analytics/posthog";
 import { db } from "@/lib/db";
 import { notify, notifyBookingDecided } from "@/lib/notifications/notify";
 import { toKrakowLocal } from "@/lib/offers/krakow-time";
+import { promoteNextWaitlistEntry } from "@/lib/offers/promote-waitlist";
+import { isWaitlistOfferStale } from "@/lib/offers/waitlist-rules";
 
 // The time-based pushes (tasks 5.10, 5.16), run by the hourly GitHub Actions
 // workflow against /api/cron?job=reminders (decision 2026-10-15, "Cron").
@@ -203,12 +205,68 @@ export async function expirePendingInvites(now = new Date()): Promise<number> {
   return expired;
 }
 
+/**
+ * T.4: a priority request nobody answered in time (2h, or 1h once the
+ * offer starts soon) is withdrawn and the spot passes to whoever's next
+ * on the waitlist — the same `updateMany`-claims-the-row idiom as
+ * expirePendingInvites, so a request the author just accepted or declined
+ * in the same instant doesn't get withdrawn out from under them.
+ */
+export async function advanceStaleWaitlistOffers(
+  now = new Date(),
+): Promise<number> {
+  const due = await db.offerJoin.findMany({
+    where: {
+      fromWaitlist: true,
+      status: "REQUESTED",
+      waitlistOfferedAt: { not: null },
+    },
+    select: {
+      id: true,
+      userId: true,
+      offerId: true,
+      waitlistOfferedAt: true,
+      offer: { select: { startsAt: true } },
+    },
+  });
+
+  let passed = 0;
+  for (const join of due) {
+    if (
+      !join.waitlistOfferedAt ||
+      !isWaitlistOfferStale(join.offer, join.waitlistOfferedAt, now)
+    ) {
+      continue;
+    }
+    const { count } = await db.offerJoin.updateMany({
+      where: { id: join.id, status: "REQUESTED" },
+      data: { status: "WITHDRAWN" },
+    });
+    if (count === 0) {
+      continue;
+    }
+    passed++;
+    await captureEvent("waitlist_spot_passed", join.userId, {});
+
+    const promoted = await promoteNextWaitlistEntry(db, join.offerId, now);
+    if (promoted) {
+      await notify(promoted.userId, {
+        kind: "SPOT_OPENED",
+        offerId: join.offerId,
+      });
+      await captureEvent("waitlist_spot_offered", promoted.userId, {});
+    }
+  }
+  return passed;
+}
+
 export type ReminderCounts = {
   matchReminders: number;
   howDidItGoPrompts: number;
   resultConfirmationReminders: number;
   autoDeclinedBookings: number;
   expiredInvites: number;
+  waitlistsAdvanced: number;
 };
 
 export async function runNotificationReminders(
@@ -220,5 +278,6 @@ export async function runNotificationReminders(
     resultConfirmationReminders: await sendResultConfirmationReminders(now),
     autoDeclinedBookings: await autoDeclinePendingBookings(now),
     expiredInvites: await expirePendingInvites(now),
+    waitlistsAdvanced: await advanceStaleWaitlistOffers(now),
   };
 }

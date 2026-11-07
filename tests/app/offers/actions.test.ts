@@ -54,12 +54,15 @@ const {
   // What the status-change transaction (3.12) sees.
   tx: {
     $queryRaw: vi.fn(),
-    offerJoin: { findUnique: vi.fn(), update: vi.fn() },
+    offerJoin: { findUnique: vi.fn(), update: vi.fn(), upsert: vi.fn() },
     sparringOffer: {
       findFirst: vi.fn(),
       findUniqueOrThrow: vi.fn(),
       update: vi.fn(),
     },
+    // T.3: promoteNextWaitlistEntry's own reads/writes, inside this same
+    // transaction.
+    offerWaitlist: { findFirst: vi.fn(), delete: vi.fn() },
   },
 }));
 

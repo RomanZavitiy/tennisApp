@@ -94,6 +94,10 @@
     "INVITE_ACCEPTED": {
       "title": "Invite accepted",
       "body": "Your invite was accepted."
+    },
+    "SPOT_OPENED": {
+      "title": "A spot opened up",
+      "body": "You're next on the reserve list — your request is waiting for the author."
     }
   },
   "SystemMessages": {
@@ -292,7 +296,13 @@
     "cancellingBooking": "Cancelling…",
     "invitedToJoin": "{author} invited you to join this game.",
     "acceptInvite": "Accept invite",
-    "declineInvite": "Decline invite"
+    "declineInvite": "Decline invite",
+    "fromWaitlistLabel": "from reserve",
+    "waitlistPosition": "You're #{position} in line. We'll let you know if a spot opens up.",
+    "joinWaitlist": "Join the reserve list",
+    "joiningWaitlist": "Joining…",
+    "leaveWaitlist": "Leave the reserve list",
+    "leavingWaitlist": "Leaving…"
   },
   "AdminActionForm": {
     "done": "Done.",
@@ -973,5 +983,14 @@
   "DiscoverableToggle": {
     "label": "Show me in \"Who to invite\"",
     "description": "Other authors can suggest inviting you into their open offers. Off hides you from that list only — the feed and join requests still work the same."
+  },
+  "WaitlistRefusal": {
+    "OWN_OFFER": "This is your own offer.",
+    "BLOCKED": "You can't join this offer's reserve list.",
+    "STARTED": "This game has already started.",
+    "NOT_FULL": "This offer still has places — ask to join instead.",
+    "ALREADY_JOINED": "You already have a request on this offer.",
+    "ALREADY_WAITLISTED": "You're already on the reserve list.",
+    "DECLINED": "The author has declined your request."
   }
 }

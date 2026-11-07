@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import type { JoinStatus } from "@/lib/generated/prisma/enums";
 import { playersNeeded } from "@/lib/offers/players-needed";
+import { waitlistPosition } from "@/lib/offers/waitlist-rules";
 import { computeReliability, type Reliability } from "@/lib/rating/reliability";
 
 // What /offers/[id] shows (task 3.13), depending on who is looking. Public
@@ -127,22 +128,26 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
 
   const isAuthor = viewerId === offer.author.id;
   // The author answers open requests and sees who is in; withdrawn and
-  // declined requests are history and stay off the page.
+  // declined requests are history and stay off the page. A waitlist
+  // promotion (task T.3) sorts first, so it reads as the priority request
+  // it is, whatever order it landed in relative to older ones.
   const rawJoins = isAuthor
     ? await db.offerJoin.findMany({
         where: { offerId: id, status: { in: ["REQUESTED", "ACCEPTED"] } },
         select: {
           id: true,
           status: true,
+          fromWaitlist: true,
           user: { select: playerSelect },
           result: { select: resultSelect },
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ fromWaitlist: "desc" }, { createdAt: "asc" }],
       })
     : [];
   const joins: {
     id: string;
     status: JoinStatus;
+    fromWaitlist: boolean;
     user: OfferPlayer;
     result: OfferJoinResult | null;
   }[] = rawJoins.map((join) => ({ ...join, user: toOfferPlayer(join.user) }));
@@ -162,6 +167,19 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
           select: { id: true, status: true },
         })
       : null;
+  // T.2: the player's own place in line, only worth computing on a FULL
+  // offer — every other status has no waitlist to show a position in.
+  const viewerWaitlistPosition =
+    viewerId && !isAuthor && offer.status === "FULL"
+      ? waitlistPosition(
+          await db.offerWaitlist.findMany({
+            where: { offerId: id },
+            orderBy: { createdAt: "asc" },
+            select: { userId: true },
+          }),
+          viewerId,
+        )
+      : null;
 
   const { _count, author, bookings, ...details } = offer;
   return {
@@ -177,6 +195,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
     isAuthor,
     viewerJoin,
     viewerInvite,
+    viewerWaitlistPosition,
     joins,
   };
 }

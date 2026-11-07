@@ -155,6 +155,8 @@ model User {
   invitesSent             OfferInvite[]      @relation("InvitesSent")
   /// Invites this player received (slice S1).
   invitesReceived         OfferInvite[]      @relation("InvitesReceived")
+  /// Offers this player is waiting in line for (slice T).
+  waitlistEntries         OfferWaitlist[]
 
   // Discoverability (slice S2, task S2.3, owner decision 2026-11-07): whether
   // this player can appear in another author's "candidates to invite" list
@@ -470,6 +472,8 @@ model SparringOffer {
   bookings       Booking[]
   /// Players who hid this offer from their own feed (slice N).
   dismissals     OfferDismissal[]
+  /// Players waiting in line while this offer is FULL (slice T).
+  waitlist       OfferWaitlist[]
 
   @@index([authorId])
   @@index([clubId])
@@ -500,6 +504,19 @@ model OfferJoin {
   /// grouped to at most one push per thread per 5 minutes. Null until the
   /// first push.
   lastMessagePushAt DateTime? @map("last_message_push_at") @db.Timestamptz
+
+  /// Set when this request was created by promoting the next person off
+  /// the waitlist (slice T, task T.3), not by the player asking directly.
+  /// Drives the "from reserve" label and sort order in the author's request
+  /// list, and which REQUESTED rows the hourly cron's waitlist timeout
+  /// (task T.4) looks at.
+  fromWaitlist      Boolean   @default(false) @map("from_waitlist")
+  /// When the waitlist promotion above happened — separate from
+  /// `createdAt`/`updatedAt`, which a reused (previously withdrawn/
+  /// declined) row would carry over from its first creation. Task T.4's
+  /// "2h (or 1h) without a reaction" window is measured from here, not
+  /// from either of those.
+  waitlistOfferedAt DateTime? @map("waitlist_offered_at") @db.Timestamptz
 
   @@unique([offerId, userId])
   @@index([userId])
@@ -553,6 +570,32 @@ model OfferDismissal {
   /// table's lookup direction.
   @@unique([userId, offerId])
   @@map("offer_dismissals")
+}
+
+/// A player's place in line for a FULL offer (slice T, task T.1). Position
+/// isn't stored: it's the row's rank by createdAt among the offer's
+/// remaining entries, computed where it's shown (lib/offers/waitlist.ts)
+/// rather than kept as a column that would need renumbering on every
+/// departure. A row is deleted the moment it's promoted (task T.3) or the
+/// player leaves (task T.2) — it never lingers as history the way a
+/// declined OfferJoin does, since there's nothing to show once it's gone.
+model OfferWaitlist {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  offerId String        @map("offer_id") @db.Uuid
+  offer   SparringOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  /// One waitlist spot per player per offer, same reasoning as OfferJoin's
+  /// own unique index.
+  @@unique([offerId, userId])
+  /// The promotion query's shape: "the earliest entry still waiting" for
+  /// one offer.
+  @@index([offerId, createdAt])
+  @@map("offer_waitlists")
 }
 
 model UserBlock {
@@ -1087,6 +1130,10 @@ enum NotificationKind {
   INVITE_RECEIVED
   /// Slice S1 (task S1.3): an invite the player sent was accepted.
   INVITE_ACCEPTED
+  /// Slice T (task T.3): a FULL offer's waitlist reached this player — a
+  /// spot just opened up and their priority request is waiting for the
+  /// author.
+  SPOT_OPENED
 
   @@map("notification_kind")
 }
