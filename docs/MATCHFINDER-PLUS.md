@@ -1,8 +1,8 @@
 # SpinBuddy — MatchFinder+: що взяти з Korteo (пункт 3.1 «Ігри та пошук партнерів»)
 
 План, як перенести механіки пошуку партнера з Korteo (korteo.pl, аналіз від 2026-11-02) у SpinBuddy.
-Нічого з цього ще не реалізовано: це план слайсів для майбутніх сесій, розміряний за правилами
-`AGENTS.md` (§6 розмір змін, §9/§10 коли зупинятись і питати). Слайси **Q–W** продовжують
+Q і R уже зроблено. Решта — план слайсів, згрупованих у сесії (розділ 6). Правила зупинки —
+`AGENTS.md` §9/§10; розмір PR не обмежено (`AGENTS.md` §6, 2026-11-07). Слайси **Q–W** продовжують
 нумерацію після O (клубний чат) і P (довідник тренерів, `docs/TIER2-FEATURES.md`).
 
 Korteo — мультиспортова платформа з оплатами. SpinBuddy лишається тенісним matchFinder для Кракова
@@ -218,17 +218,32 @@ Korteo міряє воронку кожної механіки. Пропоную
 
 ---
 
-## 6. Шаблон сесії (вставляти першим у кожну сесію)
+## 6. Сесії і шаблон
+
+Одна сесія робить кілька слайсів підряд, одна гілка й один PR на сесію:
+
+| Сесія | Слайси | Примітка |
+|---|---|---|
+| 1 | **S1 → S2** | S2 спирається на S1, спільний код `lib/matching/`, `lib/offers/` |
+| 2 | **T** | незалежний; можна паралельно з сесією 1, але в окремому worktree (обидва міняють `schema.prisma`) |
+| 3 | **U1 → U2 → U3** | після сесії 1 (U2.3 використовує запрошення з S1) |
+| пізніше | V, W | чекають щільності гравців |
+
+Перед стартом сесії власник відповідає на питання з розділу 5, що стосуються її слайсів, щоб
+сесія не зупинялась на «стоп-і-спитай».
+
+Шаблон (вставляти першим у кожну сесію):
 
 ```
-SpinBuddy repo. Read AGENTS.md first and follow it (change-size, tests, §9/§10 boundaries).
-Read docs/MATCHFINDER-PLUS.md, section for Slice <X>, and the owner decisions in section 5.
+SpinBuddy repo. Read AGENTS.md first and follow it (tests, §9/§10 boundaries).
+Read docs/MATCHFINDER-PLUS.md, sections for Slices <X, Y, ...>, and the owner decisions in
+section 5. Do all listed slices back-to-back in this session without stopping between them.
 
 Before opening files, check graphify-out/GRAPH_REPORT.md and graph.json. If HEAD is newer than
-the graph's commit, run `graphify update .` first.
+the graph's commit, run `graphify update .` once at the start.
 
-Branch: git fetch origin main && git checkout -b feat/<x>-<short-name> origin/main
-PR base = main, title "Slice <X>: <task ids>".
+Branch: git fetch origin main && git checkout -b feat/<x-y>-<short-name> origin/main
+One commit per slice. PR base = main, title "Slices <X>+<Y>: <task ids>".
 
 No new libraries or external services without asking me first. All UI copy via next-intl
 (messages/en.json + messages/pl.json); `pnpm check:i18n-keys` and `pnpm check:i18n-strings` pass.
