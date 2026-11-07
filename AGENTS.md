@@ -1,9 +1,9 @@
 # AGENTS.md — SpinBuddy
 
 Rules for any AI coding agent (Claude Code, Cursor, Codex, etc.) working in this repo.
-Human owner reviews every change — the agent writes faster than the human can read, so
-the discipline below exists to keep the diff reviewable, not to slow the agent down for
-its own sake.
+The human owner does not read diffs line by line (decision 2026-11-07). Throughput comes
+first; the safety net is the test suite, CI, and the stop-and-ask boundaries in §9/§10 —
+not small PRs.
 
 ## 1. Project in one paragraph
 
@@ -73,30 +73,28 @@ New top-level folders need a one-line reason in the PR description.
 - Prefer editing an existing file over creating a new one that duplicates similar logic;
   search for an existing helper before writing a new one.
 
-## 6. Change-size discipline (the core rule — read this twice)
+## 6. Change size (relaxed 2026-11-07)
 
-This is the single most important rule in this file, because it's the one the human
-asked for by name.
-
-- **One PR = one small, reviewable idea.** A handful of files at a time — think "one
-  epic's one task," not "one epic."
-- **~500 lines is a soft ceiling per source file.** If a file is heading past that,
-  that's a signal to split it (extract a hook, a sub-component, a second module) rather
-  than to keep appending. Generated/config files (`package-lock.json`,
+- **No limit on PR size or file count.** A PR can cover one slice or several. Don't stop
+  to propose splitting because a change touches many files.
+- **One session can ship several slices back-to-back.** Prefer grouping slices that depend
+  on each other or share code (e.g. S1 → S2) into one session, so the codebase context is
+  built once, not re-learned per slice.
+- **~500 lines is a soft ceiling per source file.** Not for review — big files are harder
+  for agents to read and edit. If a file is heading past that, split it (extract a hook,
+  a sub-component, a second module). Generated/config files (`pnpm-lock.yaml`,
   `prisma/migrations/*`) are exempt.
-- **Never touch files outside the task at hand.** If a refactor is tempting while doing
-  something else, stop, note it in `.agents/decisions.md` or as a TODO comment, and leave
-  it for its own PR.
-- **Every PR includes a one-paragraph summary of *why*, not just *what*.** The human is
-  new to this stack; "what" is visible in the diff, "why" is not.
-- If a task naturally needs touching more than ~8-10 files, stop and propose splitting it
-  into two PRs before writing code, rather than after.
+- **Refactors along the way are fine** when they serve the task (removing duplication the
+  new code would add, splitting a file that grows too big). Unrelated cleanups still go in
+  their own commit, so `git log` stays readable.
+- **Every PR includes a short summary of *why*, not just *what*** — it's the project's
+  history, even if nobody reads the diff.
 
 ## 7. Testing instructions
 
 - New logic in `lib/` (rating calculation, validation, matching rules) needs a unit test
-  in the matching `tests/` path — no exceptions, this is the part most likely to have a
-  subtle bug a human reviewer won't catch by reading.
+  in the matching `tests/` path — no exceptions. Nobody reads the diff, so the tests are
+  the only reviewer.
 - E2E (Playwright) covers only 4 critical flows, end to end: (1) sign in → onboarding;
   (2) create an offer → see it in the feed; (3) join request → acceptance → a chat
   message; (4) result → confirmation → ELO changes. Every other flow gets a unit test,
@@ -105,16 +103,18 @@ asked for by name.
 
 ## 8. Git workflow
 
-- Small commits, one logical change each; commit message says why, not just what changed.
-- One slice = one branch (`feat/<slice>-<short-name>`) = one PR. A slice is a vertical
-  piece of functionality — usually several task IDs from `docs/PLANNING.md` — and the
-  agent works through all of them back-to-back on that branch, without stopping between
-  tasks; the PR covers the whole slice, not one task.
-- Open a PR rather than pushing straight to `main`; human review happens once, at the end
-  of the slice, on the preview deploy (subject to the stop-and-ask conditions in §10).
+- Commits per logical step (a slice or a big chunk of one); commit message says why, not
+  just what changed.
+- One branch (`feat/<slices>-<short-name>`) = one PR, covering one slice or several. A
+  slice is a vertical piece of functionality — usually several task IDs from the plan doc —
+  and the agent works through all of them back-to-back without stopping between tasks or
+  slices.
+- Open a PR rather than pushing straight to `main`. The owner checks the result on the
+  preview deploy, not the diff (subject to the stop-and-ask conditions in §10).
 - `main` is protected: PRs land only by squash-merge with green CI, and the squash commit
-  is the PR title, which carries the slice's task IDs (e.g. `Slice B: 1.21, 3.20, 3.22`), so
-  `git log --oneline main` reads as the list of finished slices.
+  is the PR title, which carries every slice and task ID in it (e.g.
+  `Slices S1+S2: S1.1–S1.5, S2.1–S2.3`), so `git log --oneline main` reads as the list of
+  finished slices.
 - Never `git push --force` to a shared branch, never rewrite history the human has
   already pulled.
 
@@ -129,8 +129,8 @@ asked for by name.
 - **Auth & (future) payment code:** propose changes, don't merge them unreviewed.
 - **Deleting data or files in bulk:** ask first, always.
 - **Anything not listed above:** if you're unsure whether something is a "regular" change
-  or needs a heads-up, default to asking — a short question is cheaper than an unreviewed
-  mistake in a 500-line diff.
+  or needs a heads-up, default to asking — a short question is cheaper than a mistake
+  nobody will catch in the diff.
 
 ## 10. How this file grows
 
