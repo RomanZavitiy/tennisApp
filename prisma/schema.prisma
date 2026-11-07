@@ -93,11 +93,11 @@ model User {
   // WEEKDAYS, lib/offers/feed-filters.ts's TIMES_OF_DAY), validated by Zod
   // rather than a CHECK, the same reasoning `time` already has as a feed
   // filter with no column of its own before this.
-  preferredDays       String[]   @map("preferred_days")
-  preferredTimes      String[]   @map("preferred_times")
+  preferredDays      String[]   @map("preferred_days")
+  preferredTimes     String[]   @map("preferred_times")
   /// Districts besides `district` above this player is also open to
   /// playing in. A Postgres enum array, same as Club.surfaces.
-  preferredDistricts  District[] @map("preferred_districts")
+  preferredDistricts District[] @map("preferred_districts")
 
   // Notification settings (task 5.3, slice H). All default on: push is the
   // main channel (decision 2026-10-14) and starts silent until 5.15 asks for
@@ -256,6 +256,9 @@ model Club {
   follows        ClubFollow[]
   /// The club's chat thread, scoped to followers (session O2).
   messages       Message[]
+  /// Coaches who teach here (slice P) — implicit many-to-many, owner-curated
+  /// on both sides, loaded the same way as the club itself (task P.2).
+  coaches        Coach[]
 
   @@map("clubs")
 }
@@ -313,6 +316,42 @@ model CourtHours {
   @@unique([clubId, weekday])
   @@index([clubId])
   @@map("court_hours")
+}
+
+/// A coach listed in the directory (slice P, task P.2): owner-curated,
+/// loaded the same way as `Club` (data file → Zod check → upsert script,
+/// task P.1 decision) — no self-registration, no approval queue in v1.
+/// Contact goes out by phone or website; no in-app booking, no payments.
+model Coach {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  /// Stable key from the data file, same role as `Club.slug`.
+  slug       String       @unique @db.VarChar(60)
+  name       String       @db.VarChar(100)
+  bio        String?      @db.VarChar(600)
+  district   District?
+  /// Every level this coach teaches; empty is invalid (the loader's schema
+  /// requires at least one), same reasoning as `Club.surfaces`.
+  levels     CoachLevel[]
+  /// Languages this coach teaches in. Reuses `Locale` (EN/PL) rather than a
+  /// new enum: the app itself only has two languages, so it already fits
+  /// (task P.2 decision).
+  languages  Locale[]
+  /// Free text: rates differ by lesson length and whether it's private or
+  /// group, same reasoning as `Club.priceInfo`.
+  priceInfo  String?      @map("price_info") @db.VarChar(300)
+  phone      String?      @db.VarChar(30)
+  websiteUrl String?      @map("website_url") @db.VarChar(500)
+  /// When the owner last checked these details, shown on the page like
+  /// `Club.verifiedAt`.
+  verifiedAt DateTime     @map("verified_at") @db.Date
+
+  /// Where this coach teaches (implicit many-to-many, task P.2).
+  clubs Club[]
+
+  @@map("coaches")
 }
 
 /// A player who can act on a partner club's behalf (slice K): confirm or
@@ -546,10 +585,10 @@ model OfferJoin {
 /// this player when they sent the invite, so there's no second approval
 /// step the way a join request has.
 model OfferInvite {
-  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  status     InviteStatus @default(PENDING)
-  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz
-  respondedAt DateTime?   @map("responded_at") @db.Timestamptz
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status      InviteStatus @default(PENDING)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  respondedAt DateTime?    @map("responded_at") @db.Timestamptz
 
   offerId String        @map("offer_id") @db.Uuid
   offer   SparringOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
@@ -632,20 +671,20 @@ model PlayIntent {
 
   /// The Kraków calendar day this intent is for — a date, not a timestamp,
   /// same convention as Club.verifiedAt.
-  date DateTime @db.Date
+  date      DateTime    @db.Date
   /// Parts of day (lib/offers/feed-filters.ts's TIMES_OF_DAY), at least
   /// one — validated by Zod, not a Postgres enum, same reasoning as
   /// User.preferredTimes (slice U1).
-  times String[]
+  times     String[]
   /// Districts this player would play in for this intent, at least one.
   districts District[]
   format    OfferFormat @default(SINGLES)
   /// Free text, e.g. "flexible on time" — the only optional field.
-  note String? @db.VarChar(200)
+  note      String?     @db.VarChar(200)
   /// Midnight Europe/Warsaw after `date` (task U2.1) — the hourly cron
   /// could prune by this, though nothing does yet; today only the feed
   /// query (lib/offers/play-intent-feed.ts) filters live ones out by date.
-  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  expiresAt DateTime    @map("expires_at") @db.Timestamptz
 
   /// At most one active intent per day per player (task U2.1): posting
   /// again for the same date replaces it rather than adding a second row.
@@ -998,6 +1037,18 @@ enum IndoorCourts {
   WINTER_BUBBLE
 
   @@map("indoor_courts")
+}
+
+/// Skill levels a coach teaches (slice P, task P.2). KIDS is its own value
+/// rather than a BEGINNER sub-case: a coach for kids isn't necessarily one
+/// for adult beginners, and the directory filters on this directly.
+enum CoachLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  KIDS
+
+  @@map("coach_level")
 }
 
 /// Whether a club's courts can be booked through SpinBuddy, or only
