@@ -4,7 +4,9 @@ import { connection } from "next/server";
 
 import { LeaderboardFiltersForm } from "@/components/leaderboard-filters";
 import { LeaderboardRow } from "@/components/leaderboard-row";
+import { getCurrentUser } from "@/lib/auth/require-user";
 import { getLeaderboard } from "@/lib/leaderboard/get-leaderboard";
+import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
 import { parseLeaderboardFilters } from "@/lib/validation/leaderboard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,6 +30,10 @@ export default async function LeaderboardPage({
   const players = await getLeaderboard(filters);
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("LeaderboardPage");
+  // "Invite to game" (task S1.4): the same list of the viewer's own open
+  // offers on every row — loaded once, not per player.
+  const viewer = await getCurrentUser();
+  const myOpenOffers = viewer ? await getMyOpenOffers(viewer.id) : null;
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
@@ -43,7 +49,13 @@ export default async function LeaderboardPage({
         <ol className="mt-6 space-y-3">
           {players.map((player, index) => (
             <li key={player.id}>
-              <LeaderboardRow rank={index + 1} player={player} />
+              <LeaderboardRow
+                rank={index + 1}
+                player={player}
+                myOpenOffers={
+                  viewer && viewer.id !== player.id ? myOpenOffers : null
+                }
+              />
             </li>
           ))}
         </ol>

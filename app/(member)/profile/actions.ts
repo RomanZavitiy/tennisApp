@@ -87,3 +87,27 @@ export async function updateProfile(
   revalidatePath("/profile");
   redirect("/profile");
 }
+
+export type UpdateDiscoverableResult =
+  { ok: true } | { ok: false; message: string };
+
+/**
+ * The "Кого запросити" opt-out (task S2.3, owner decision 2026-11-07:
+ * defaults true) — one switch, saved the moment it's toggled, same
+ * immediate-save idiom as updateNotificationSetting.
+ */
+export async function updateDiscoverable(
+  discoverable: unknown,
+): Promise<UpdateDiscoverableResult> {
+  const user = await requireUser();
+  const t = await getTranslations("Errors");
+
+  if (typeof discoverable !== "boolean") {
+    return { ok: false, message: t("invalidSetting") };
+  }
+
+  await db.user.update({ where: { id: user.id }, data: { discoverable } });
+
+  revalidatePath("/profile");
+  return { ok: true };
+}

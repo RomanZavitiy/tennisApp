@@ -88,6 +88,13 @@ export function offerSchema(t: ValidationT) {
           .max(COMMENT_MAX, t("commentTooLong", { max: COMMENT_MAX }))
           .optional(),
       ),
+      // "Play again" (task Q.2, after S1): the past opponent, carried
+      // through a hidden field so createOffer can invite them the moment
+      // this offer is saved. Not shown anywhere, so an invalid value is
+      // dropped rather than failing the whole form.
+      inviteeId: z
+        .preprocess(emptyToUndefined, z.uuid().optional())
+        .catch(undefined),
     })
     .superRefine((offer, ctx) => {
       if (offer.hasPartner && offer.format !== "DOUBLES") {

@@ -13,6 +13,7 @@ import {
   activeOffersWhere,
   MAX_ACTIVE_OFFERS,
 } from "@/lib/offers/active-offers";
+import { sendOfferInvite } from "@/lib/offers/send-invite";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import {
   offerFieldErrors,
@@ -58,7 +59,7 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     const tRateLimit = await getTranslations("RateLimit");
     return { ok: false, fieldErrors: {}, message: tRateLimit("NEW_OFFER") };
   }
-  const { clubId, district, ...offer } = parsed.data;
+  const { clubId, district, inviteeId, ...offer } = parsed.data;
 
   // A club's district wins over the one sent: the form fills it in from the
   // club (3.5), and the server keeps the two consistent even when a request
@@ -99,6 +100,19 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     format: offer.format,
     hasClub: place.clubId != null,
   });
+
+  // "Play again" (task Q.2, after S1): invite the past opponent the moment
+  // this offer exists. Best-effort — a refusal (rate-limited, blocked
+  // since the last match…) never blocks the offer that was just created.
+  if (inviteeId) {
+    const limited = await checkRateLimit(author.id, "OFFER_INVITE");
+    if (limited.ok) {
+      const outcome = await sendOfferInvite(created.id, author.id, inviteeId);
+      if (outcome.ok) {
+        await captureEvent("invite_sent", author.id, { source: "playAgain" });
+      }
+    }
+  }
 
   revalidatePath("/offers");
   // ?created=1 flags "the first offer created" (task 5.15) for

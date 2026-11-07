@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { z } from "zod";
 
 import { createOffer } from "@/app/(member)/offers/new/actions";
 import { OfferForm } from "@/components/offer-form";
@@ -43,6 +44,10 @@ export default async function NewOfferPage({
   const ntrpMin = Number(param("ntrpMin"));
   const ntrpMax = Number(param("ntrpMax"));
   const startsAt = param("startsAt");
+  // "Play again" (task Q.2, after S1): the past opponent, carried through
+  // as a hidden field so createOffer can invite them on save.
+  const invite = z.uuid().safeParse(param("invite"));
+  const inviteeId = invite.success ? invite.data : undefined;
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
@@ -68,6 +73,7 @@ export default async function NewOfferPage({
         defaultNtrpMin={NTRP_LEVELS.includes(ntrpMin) ? ntrpMin : undefined}
         defaultNtrpMax={NTRP_LEVELS.includes(ntrpMax) ? ntrpMax : undefined}
         defaultStartsAt={startsAt}
+        defaultInviteeId={inviteeId}
         earliestStart={toKrakowLocal(new Date())}
       />
       <Link

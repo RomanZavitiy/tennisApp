@@ -25,7 +25,20 @@ type EventProperties = {
   club_followed: Record<string, never>;
   club_unfollowed: Record<string, never>;
   club_message_sent: Record<string, never>;
+  invite_sent: { source: InviteSource };
+  invite_accepted: Record<string, never>;
+  invite_declined: Record<string, never>;
+  invite_expired: Record<string, never>;
+  candidates_viewed: { count: number };
+  candidate_invited: { rank: number };
 };
+
+// Where "Invite to game" (slice S1) was clicked from. "playAgain" is Q.2's
+// own trigger — the plan's table (docs/MATCHFINDER-PLUS.md §4) only lists
+// profile/leaderboard/candidates/intent (U2, not built yet), but it's the
+// same event with one more funnel to tell apart.
+export type InviteSource =
+  "profile" | "leaderboard" | "candidates" | "playAgain";
 
 export type AnalyticsEvent = keyof EventProperties;
 

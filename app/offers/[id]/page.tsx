@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
 import { requestToJoin, withdrawJoin } from "@/app/offers/[id]/actions";
+import { acceptInvite, declineInvite } from "@/app/offers/[id]/invite-actions";
 import { reportOffer } from "@/app/offers/[id]/report-actions";
 import { JoinThread } from "@/components/join-thread";
 import { MarkMeaningfulAction } from "@/components/mark-meaningful-action";
@@ -21,6 +22,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { joinRefusal } from "@/lib/offers/join-rules";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
+import { getOfferCandidates } from "@/lib/offers/offer-candidates";
 import { getOfferDetails, type OfferDetails } from "@/lib/offers/offer-details";
 import {
   formatLabel,
@@ -89,6 +91,11 @@ export default async function OfferPage({
   }
   const { offer } = details;
   const started = offer.startsAt <= new Date();
+  // "Кого запросити" (task S2.2): only for the author, only while OPEN.
+  const candidates =
+    details.isAuthor && offer.status === "OPEN"
+      ? await getOfferCandidates(offer.id)
+      : [];
 
   const t = await getTranslations("OfferPage");
   const tOfferLabels = await getTranslations("OfferLabels");
@@ -185,6 +192,7 @@ export default async function OfferPage({
             details={details}
             started={started}
             viewerId={viewer.id}
+            candidates={candidates}
           />
         ) : (
           <PlayerView details={details} viewerId={viewer.id} />
@@ -211,7 +219,7 @@ function PlayerView({
 }) {
   const t = useTranslations("OfferPage");
   const tJoinRefusal = useTranslations("JoinRefusal");
-  const { offer, viewerJoin } = details;
+  const { offer, viewerJoin, viewerInvite } = details;
 
   if (viewerJoin?.status === "REQUESTED" || viewerJoin?.status === "ACCEPTED") {
     return (
@@ -247,6 +255,38 @@ function PlayerView({
             opponentName={offer.author.name ?? t("theAuthor")}
           />
         )}
+      </div>
+    );
+  }
+
+  // S1.3's "you were invited" banner: shown instead of "ask to join" while
+  // the invite is still pending, on an offer that can still take players.
+  if (
+    viewerInvite?.status === "PENDING" &&
+    offer.status === "OPEN" &&
+    offer.startsAt > new Date()
+  ) {
+    return (
+      <div className="space-y-3">
+        <p className="font-medium">
+          {t("invitedToJoin", {
+            author: offer.author.name ?? t("defaultAuthorName"),
+          })}
+        </p>
+        <div className="flex gap-2">
+          <OfferActionButton
+            action={acceptInvite.bind(null, viewerInvite.id)}
+            label={t("acceptInvite")}
+            pendingLabel={t("accepting")}
+            trackMeaningfulAction
+          />
+          <OfferActionButton
+            action={declineInvite.bind(null, viewerInvite.id)}
+            label={t("declineInvite")}
+            pendingLabel={t("declining")}
+            variant="outline"
+          />
+        </div>
       </div>
     );
   }

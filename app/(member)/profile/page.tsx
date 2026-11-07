@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { AvatarUpload } from "@/components/avatar-upload";
 import { BlockedPlayersList } from "@/components/blocked-players-list";
+import { DiscoverableToggle } from "@/components/discoverable-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { MatchHistory } from "@/components/match-history";
 import { MyBookings } from "@/components/my-bookings";
@@ -14,6 +15,7 @@ import { MyGames } from "@/components/my-games";
 import { ProfileHero } from "@/components/profile-hero";
 import { getMyBookings } from "@/lib/booking/my-bookings";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
+import { db } from "@/lib/db";
 import { getBlockedPlayers } from "@/lib/moderation/personal-block";
 import { getMyUpcomingGames } from "@/lib/offers/my-games";
 import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
@@ -33,15 +35,18 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ProfilePage() {
   const t = await getTranslations("ProfilePage");
   const player = await requireOnboardedUser();
-  const [profile, matches, games, bookings, blockedPlayers] = await Promise.all(
-    [
+  const [profile, matches, games, bookings, blockedPlayers, settings] =
+    await Promise.all([
       getPublicProfile(player.id),
       getMatchHistory(player.id),
       getMyUpcomingGames(player.id),
       getMyBookings(player.id),
       getBlockedPlayers(player.id),
-    ],
-  );
+      db.user.findUniqueOrThrow({
+        where: { id: player.id },
+        select: { discoverable: true },
+      }),
+    ]);
   // requireOnboardedUser has just checked the profile is complete.
   if (!profile) {
     notFound();
@@ -65,6 +70,10 @@ export default async function ProfilePage() {
 
       <Card title={t("blockedPlayers")}>
         <BlockedPlayersList players={blockedPlayers} />
+      </Card>
+
+      <Card title={t("privacy")}>
+        <DiscoverableToggle discoverable={settings.discoverable} />
       </Card>
 
       <Card title={t("account")}>

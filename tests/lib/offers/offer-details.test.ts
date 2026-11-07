@@ -4,15 +4,18 @@ import { getOfferDetails } from "@/lib/offers/offer-details";
 
 // The database is replaced: what's under test is who gets which part of the
 // offer — the request list is the author's alone.
-const { offerFindUnique, joinFindMany, joinFindUnique } = vi.hoisted(() => ({
-  offerFindUnique: vi.fn(),
-  joinFindMany: vi.fn(),
-  joinFindUnique: vi.fn(),
-}));
+const { offerFindUnique, joinFindMany, joinFindUnique, inviteFindUnique } =
+  vi.hoisted(() => ({
+    offerFindUnique: vi.fn(),
+    joinFindMany: vi.fn(),
+    joinFindUnique: vi.fn(),
+    inviteFindUnique: vi.fn(),
+  }));
 vi.mock("@/lib/db", () => ({
   db: {
     sparringOffer: { findUnique: offerFindUnique },
     offerJoin: { findMany: joinFindMany, findUnique: joinFindUnique },
+    offerInvite: { findUnique: inviteFindUnique },
   },
 }));
 
@@ -44,6 +47,7 @@ describe("getOfferDetails", () => {
       { id: "j1", status: "REQUESTED", user: player },
     ]);
     joinFindUnique.mockResolvedValue({ id: "j2", status: "REQUESTED" });
+    inviteFindUnique.mockResolvedValue(null);
   });
 
   it("returns null for an id that isn't a uuid, without a query", async () => {
@@ -68,6 +72,7 @@ describe("getOfferDetails", () => {
     expect(details?.offer).not.toHaveProperty("_count");
     expect(joinFindMany).not.toHaveBeenCalled();
     expect(joinFindUnique).not.toHaveBeenCalled();
+    expect(inviteFindUnique).not.toHaveBeenCalled();
   });
 
   it("gives a player their own request only", async () => {
@@ -76,6 +81,7 @@ describe("getOfferDetails", () => {
     expect(details).toMatchObject({
       isAuthor: false,
       viewerJoin: { id: "j2", status: "REQUESTED" },
+      viewerInvite: null,
       joins: [],
     });
     const resultSelect = {

@@ -49,6 +49,7 @@ export function OfferForm({
   defaultNtrpMin,
   defaultNtrpMax,
   defaultStartsAt,
+  defaultInviteeId,
   earliestStart,
 }: {
   action: (values: OfferInput) => Promise<CreateOfferResult>;
@@ -63,6 +64,9 @@ export function OfferForm({
   defaultNtrpMax?: number;
   /** Kraków local time, "YYYY-MM-DDTHH:mm". */
   defaultStartsAt?: string;
+  /** "Play again"'s past opponent (task Q.2, after S1) — a hidden field,
+   * never shown. */
+  defaultInviteeId?: string;
   /** Kraków time now, "YYYY-MM-DDTHH:mm": the picker's lower bound. */
   earliestStart: string;
 }) {
@@ -95,6 +99,7 @@ export function OfferForm({
       surface: "",
       courtStatus: "WILL_BOOK",
       comment: "",
+      inviteeId: defaultInviteeId ?? "",
     },
   });
   const isDoubles = useWatch({ control, name: "format" }) === "DOUBLES";
@@ -300,6 +305,8 @@ export function OfferForm({
           {...register("comment")}
         />
       </Field>
+
+      <input type="hidden" {...register("inviteeId")} />
 
       <ErrorText id="root" error={errors.root} />
 

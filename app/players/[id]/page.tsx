@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 
 import { reportPlayer } from "@/app/players/[id]/actions";
 import { BlockPlayerButton } from "@/components/block-player-button";
+import { InvitePlayerButton } from "@/components/invite-player-button";
 import { MatchHistory } from "@/components/match-history";
 import { ProfileHero } from "@/components/profile-hero";
 import { ReportButton } from "@/components/report-button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { isBlocked } from "@/lib/moderation/personal-block";
+import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
 import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
 import { getPublicProfile } from "@/lib/players/public-profile";
 
@@ -36,10 +38,13 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const matches = await getMatchHistory(id);
   const viewer = await getCurrentUser();
   const t = await getTranslations("PlayerPage");
+  const isOwnProfile = viewer?.id === profile.id;
   const alreadyBlocked =
-    viewer && viewer.id !== profile.id
-      ? await isBlocked(viewer.id, profile.id)
-      : false;
+    viewer && !isOwnProfile ? await isBlocked(viewer.id, profile.id) : false;
+  // "Invite to game" (task S1.4): the viewer's own open offers to invite
+  // this player into.
+  const myOpenOffers =
+    viewer && !isOwnProfile ? await getMyOpenOffers(viewer.id) : null;
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 px-4 py-8">
@@ -49,16 +54,23 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         <h2 className="mb-2 text-lg font-semibold">{t("matchHistory")}</h2>
         <MatchHistory matches={matches} />
       </section>
-      {viewer && viewer.id !== profile.id && (
-        <div className="flex flex-wrap items-center gap-3">
-          <ReportButton
-            action={reportPlayer.bind(null, profile.id)}
-            label={t("reportThisPlayer")}
-          />
-          <BlockPlayerButton
+      {viewer && !isOwnProfile && (
+        <div className="space-y-3">
+          <InvitePlayerButton
             targetUserId={profile.id}
-            initialBlocked={alreadyBlocked}
+            offers={myOpenOffers ?? []}
+            source="profile"
           />
+          <div className="flex flex-wrap items-center gap-3">
+            <ReportButton
+              action={reportPlayer.bind(null, profile.id)}
+              label={t("reportThisPlayer")}
+            />
+            <BlockPlayerButton
+              targetUserId={profile.id}
+              initialBlocked={alreadyBlocked}
+            />
+          </div>
         </div>
       )}
     </main>
