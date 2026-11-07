@@ -2259,3 +2259,25 @@ Prisma-реляції з двома FK на одну модель (`BlocksMade`/
 самий обхідний шлях (`prisma db execute --file` + `migrate resolve --applied`), що кожна
 міграція з 3.15, але застосування зміни, що замінює єдину read-політику на `messages`, лишено
 власнику (AGENTS.md §9/§10).
+
+## 2026-11-07 — Запрошення в оферту: прийняте → ACCEPTED одразу (слайс S1, задача S1.2)
+
+**Рішення (власник, `docs/MATCHFINDER-PLUS.md` §5.2):** прийняте запрошення (`OfferInvite`)
+створює `OfferJoin` одразу в статусі `ACCEPTED`, не `REQUESTED` з авто-схваленням. Нова таблиця
+`offer_invites` (міграція `20261107090000_add_offer_invites`) + enum `invite_status`
+(`PENDING`/`ACCEPTED`/`DECLINED`/`EXPIRED`); застосована напряму (`prisma db execute --file` +
+`migrate resolve --applied`), той самий обхідний шлях, що кожна міграція з 3.15.
+**Чому:** автор уже погодився на цього гравця в момент запрошення — друге схвалення нічого не
+додає, лише зайвий клік. Ті самі перевірки, що й для заявки (місця, час, блок із R), живуть у
+`lib/offers/invite-rules.ts`/`invite-transitions.ts`, мирror `join-rules.ts`/`join-transitions.ts`.
+`EXPIRED` ставить погодинний cron (`expirePendingInvites`, `lib/notifications/reminders.ts`) —
+той самий момент, коли `startsAt` минає, а не окрема дія гравця.
+
+## 2026-11-07 — «Підібрані гравці»: discoverable за замовчуванням true (слайс S2, задача S2.3)
+
+**Рішення (власник, `docs/MATCHFINDER-PLUS.md` §5.1):** нова колонка `users.discoverable`
+(міграція `20261107100000_add_discoverable`) дефолтить на `true` — опт-аут у профілі
+(`DiscoverableToggle`), не опт-ін. Застосована напряму, той самий обхідний шлях.
+**Чому:** без цього дефолту «Кого запросити» (S2.2) стартує порожнім для майже всіх — колонка
+лише приховує гравця з чужого підбору, нічого не змінює в стрічці чи заявках (ті й далі працюють
+незалежно від `discoverable`).

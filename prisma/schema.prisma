@@ -151,6 +151,17 @@ model User {
   blocksMade              UserBlock[]        @relation("BlocksMade")
   /// Players who have personally blocked this player (slice R).
   blocksReceived          UserBlock[]        @relation("BlocksReceived")
+  /// Invites this player sent, as an offer's author (slice S1).
+  invitesSent             OfferInvite[]      @relation("InvitesSent")
+  /// Invites this player received (slice S1).
+  invitesReceived         OfferInvite[]      @relation("InvitesReceived")
+
+  // Discoverability (slice S2, task S2.3, owner decision 2026-11-07): whether
+  // this player can appear in another author's "candidates to invite" list
+  // (lib/matching/candidates.ts). Defaults true — opt-out, not opt-in — and
+  // only ever hides what the profile already shows publicly; it isn't a
+  // block and doesn't touch the feed or join requests.
+  discoverable Boolean @default(true) @map("discoverable")
 
   @@map("users")
 }
@@ -447,6 +458,8 @@ model SparringOffer {
   howDidItGoSentAt    DateTime? @map("how_did_it_go_sent_at") @db.Timestamptz
 
   joins          OfferJoin[]
+  /// Invites the author sent for this offer (slice S1).
+  invites        OfferInvite[]
   /// The group thread for a doubles offer (task 3.21): author + accepted players.
   messages       Message[]
   outboundClicks OutboundClick[]
@@ -491,6 +504,34 @@ model OfferJoin {
   @@unique([offerId, userId])
   @@index([userId])
   @@map("offer_joins")
+}
+
+/// A player invited by an offer's author to join it directly (slice S1,
+/// task S1.1) — the author's side of matchmaking, the mirror of OfferJoin's
+/// "a player asked". Accepting creates an OfferJoin straight in ACCEPTED
+/// (task S1.2, owner decision 2026-11-07): the author already agreed to
+/// this player when they sent the invite, so there's no second approval
+/// step the way a join request has.
+model OfferInvite {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status     InviteStatus @default(PENDING)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  respondedAt DateTime?   @map("responded_at") @db.Timestamptz
+
+  offerId String        @map("offer_id") @db.Uuid
+  offer   SparringOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  inviterId String @map("inviter_id") @db.Uuid
+  inviter   User   @relation("InvitesSent", fields: [inviterId], references: [id], onDelete: Cascade)
+
+  inviteeId String @map("invitee_id") @db.Uuid
+  invitee   User   @relation("InvitesReceived", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  /// One invite per player per offer (task S1.1) — a declined invite stands,
+  /// same reasoning as OfferJoin's own unique index.
+  @@unique([offerId, inviteeId])
+  @@index([inviteeId])
+  @@map("offer_invites")
 }
 
 /// "Hide this offer from my feed" (slice N) — no swipe/pass mechanic exists,
@@ -935,6 +976,19 @@ enum MessageType {
   @@map("message_type")
 }
 
+/// A sent invite's status (slice S1, task S1.1). Mirrors JoinStatus, minus
+/// WITHDRAWN: only the invitee acts on an invite (accept/decline); the
+/// inviter has nothing to take back once it's sent. EXPIRED is set by the
+/// hourly cron once the offer's startsAt passes with no answer.
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+
+  @@map("invite_status")
+}
+
 enum JoinStatus {
   REQUESTED
   ACCEPTED
@@ -1029,6 +1083,10 @@ enum NotificationKind {
   HOW_DID_IT_GO
   CONFIRM_RESULT_REMINDER
   NEW_OFFER_FOR_LEVEL
+  /// Slice S1 (task S1.3): a player was invited into an offer.
+  INVITE_RECEIVED
+  /// Slice S1 (task S1.3): an invite the player sent was accepted.
+  INVITE_ACCEPTED
 
   @@map("notification_kind")
 }
@@ -1042,6 +1100,8 @@ enum RateLimitAction {
   BOOKING_REQUEST
   /// M.3 (slice M): a player suggesting a club not on the platform yet.
   CLUB_SUBMISSION
+  /// S1.5 (slice S1): at most 10 invites an hour, so inviting can't be spammed.
+  OFFER_INVITE
 
   @@map("rate_limit_action")
 }

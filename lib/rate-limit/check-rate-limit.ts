@@ -48,6 +48,8 @@ const RATE_LIMITS: Record<
   // limit above since a legitimate player has only a handful of clubs
   // worth suggesting, never a stream of them.
   CLUB_SUBMISSION: { windowMs: DAY_MS, limit: 3 },
+  // S1.5 (slice S1): at most 10 invites an hour.
+  OFFER_INVITE: { windowMs: HOUR_MS, limit: 10 },
 };
 
 export type RateLimitResult = { ok: true } | { ok: false };

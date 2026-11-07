@@ -1,3 +1,4 @@
+import { captureEvent } from "@/lib/analytics/posthog";
 import { db } from "@/lib/db";
 import { notify, notifyBookingDecided } from "@/lib/notifications/notify";
 import { toKrakowLocal } from "@/lib/offers/krakow-time";
@@ -175,11 +176,39 @@ export async function autoDeclinePendingBookings(
   return declined;
 }
 
+/**
+ * S1.1: "an invite expires the moment the offer's startsAt passes" — the
+ * update's own `status: "PENDING"` condition is its claim, same idiom as
+ * autoDeclinePendingBookings: an invite the invitee just accepted or
+ * declined in the same instant doesn't match it again next run.
+ */
+export async function expirePendingInvites(now = new Date()): Promise<number> {
+  const due = await db.offerInvite.findMany({
+    where: { status: "PENDING", offer: { startsAt: { lte: now } } },
+    select: { id: true, inviterId: true },
+  });
+
+  let expired = 0;
+  for (const invite of due) {
+    const { count } = await db.offerInvite.updateMany({
+      where: { id: invite.id, status: "PENDING" },
+      data: { status: "EXPIRED", respondedAt: now },
+    });
+    if (count === 0) {
+      continue;
+    }
+    expired++;
+    await captureEvent("invite_expired", invite.inviterId, {});
+  }
+  return expired;
+}
+
 export type ReminderCounts = {
   matchReminders: number;
   howDidItGoPrompts: number;
   resultConfirmationReminders: number;
   autoDeclinedBookings: number;
+  expiredInvites: number;
 };
 
 export async function runNotificationReminders(
@@ -190,5 +219,6 @@ export async function runNotificationReminders(
     howDidItGoPrompts: await sendHowDidItGoPrompts(now),
     resultConfirmationReminders: await sendResultConfirmationReminders(now),
     autoDeclinedBookings: await autoDeclinePendingBookings(now),
+    expiredInvites: await expirePendingInvites(now),
   };
 }

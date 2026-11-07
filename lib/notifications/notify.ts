@@ -36,7 +36,9 @@ export type NotificationEvent =
   | { kind: "MATCH_REMINDER_3H"; offerId: string }
   | { kind: "HOW_DID_IT_GO"; offerId: string }
   | { kind: "CONFIRM_RESULT_REMINDER"; offerId: string }
-  | { kind: "NEW_OFFER_FOR_LEVEL"; offerId: string };
+  | { kind: "NEW_OFFER_FOR_LEVEL"; offerId: string }
+  | { kind: "INVITE_RECEIVED"; offerId: string }
+  | { kind: "INVITE_ACCEPTED"; offerId: string };
 
 type Kind = NotificationEvent["kind"];
 
@@ -52,14 +54,20 @@ const CATEGORY: Record<Kind, "matches" | "newOffers"> = {
   HOW_DID_IT_GO: "matches",
   CONFIRM_RESULT_REMINDER: "matches",
   NEW_OFFER_FOR_LEVEL: "newOffers",
+  INVITE_RECEIVED: "matches",
+  INVITE_ACCEPTED: "matches",
 };
 
 // Decision 2026-10-14: email fallback exists only for "new join request,
-// accepted, confirm the result" — every other event is push-only.
+// accepted, confirm the result" — every other event is push-only. Task
+// S1.3 adds the invite pair with the same fallback as their join-request
+// mirrors (INVITE_RECEIVED ~ JOIN_REQUESTED, INVITE_ACCEPTED ~ JOIN_ACCEPTED).
 const EMAIL_ELIGIBLE: ReadonlySet<Kind> = new Set([
   "JOIN_REQUESTED",
   "JOIN_ACCEPTED",
   "CONFIRM_RESULT_REMINDER",
+  "INVITE_RECEIVED",
+  "INVITE_ACCEPTED",
 ]);
 
 // At most one push per thread per 5 minutes (task 5.16). Shared by both

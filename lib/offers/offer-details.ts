@@ -153,6 +153,15 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
           select: { id: true, status: true, result: { select: resultSelect } },
         })
       : null;
+  // S1.3's "you were invited" banner: a player's own pending invite to this
+  // offer, if any — the mirror of viewerJoin above.
+  const viewerInvite =
+    viewerId && !isAuthor
+      ? await db.offerInvite.findUnique({
+          where: { offerId_inviteeId: { offerId: id, inviteeId: viewerId } },
+          select: { id: true, status: true },
+        })
+      : null;
 
   const { _count, author, bookings, ...details } = offer;
   return {
@@ -167,6 +176,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
     spotsLeft: Math.max(0, playersNeeded(offer) - _count.joins),
     isAuthor,
     viewerJoin,
+    viewerInvite,
     joins,
   };
 }

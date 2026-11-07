@@ -86,6 +86,14 @@
     "BOOKING_CANCELLED": {
       "title": "Booking cancelled",
       "body": "{court}, {timeRange} — the player cancelled."
+    },
+    "INVITE_RECEIVED": {
+      "title": "You've been invited to a game",
+      "body": "Someone invited you to join their offer."
+    },
+    "INVITE_ACCEPTED": {
+      "title": "Invite accepted",
+      "body": "Your invite was accepted."
     }
   },
   "SystemMessages": {
@@ -172,7 +180,8 @@
     "notifications": "Notifications",
     "exportData": "Download my data",
     "language": "Language",
-    "deleteAccount": "Delete my account"
+    "deleteAccount": "Delete my account",
+    "privacy": "Privacy"
   },
   "OfferCard": {
     "byAuthor": "by {name}",
@@ -280,7 +289,10 @@
     "cancelling": "Cancelling…",
     "cancelBookingTooLabel": "Cancel booking too",
     "confirmCancelBookingToo": "Yes, cancel the booking too",
-    "cancellingBooking": "Cancelling…"
+    "cancellingBooking": "Cancelling…",
+    "invitedToJoin": "{author} invited you to join this game.",
+    "acceptInvite": "Accept invite",
+    "declineInvite": "Decline invite"
   },
   "AdminActionForm": {
     "done": "Done.",
@@ -648,7 +660,8 @@
     "bookingCancelWindowPassed": "Too close to the start time to cancel.",
     "blockNotFound": "This block doesn't exist.",
     "blockOverlapsBooking": "That time overlaps a request or confirmed booking. Confirm or decline it first.",
-    "blockOverlapsBlock": "That time overlaps another block. Pick a different time."
+    "blockOverlapsBlock": "That time overlaps another block. Pick a different time.",
+    "inviteNotFound": "This invite doesn't exist."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "This isn't your match.",
@@ -682,7 +695,8 @@
     "REPORT": "You've filed a lot of reports today. Try again tomorrow.",
     "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again.",
     "BOOKING_REQUEST": "You've sent a lot of booking requests today. Try again tomorrow.",
-    "CLUB_SUBMISSION": "You've suggested a few clubs today. Try again tomorrow."
+    "CLUB_SUBMISSION": "You've suggested a few clubs today. Try again tomorrow.",
+    "OFFER_INVITE": "You've sent a lot of invites this hour. Try again later."
   },
   "Validation": {
     "login": {
@@ -925,5 +939,39 @@
     "draftNotice": "Draft — pending legal review. This page is a placeholder until the final text is ready.",
     "revisedOn": "Draft dated {date}",
     "placeholder": "The Privacy Policy will describe what personal data SpinBuddy collects, why, how long it's kept, and how to export or delete it. Real text will replace this paragraph before the app accepts outside users."
+  },
+  "InviteRefusal": {
+    "NOT_AUTHOR": "You can't invite players into this offer.",
+    "SELF": "You can't invite yourself.",
+    "BLOCKED": "You can't invite this player.",
+    "STARTED": "This game has already started.",
+    "NOT_OPEN": "This offer is no longer taking players.",
+    "ALREADY_JOINED": "This player already has a request on this offer.",
+    "ALREADY_INVITED": "This player is already invited.",
+    "DECLINED": "This player already declined an invite to this offer."
+  },
+  "InviteChangeRefusal": {
+    "NOT_ALLOWED": "This invite can't be changed right now.",
+    "BLOCKED": "You can't accept this invite.",
+    "STARTED": "This game has already started.",
+    "NOT_OPEN": "This offer is no longer taking players.",
+    "FULL": "This offer is already full."
+  },
+  "InvitePlayerButton": {
+    "noOpenOffers": "You have no open offers to invite them into.",
+    "sent": "Invite sent.",
+    "invite": "Invite to game",
+    "sending": "Sending…"
+  },
+  "CandidatesSection": {
+    "title": "Who to invite",
+    "noneYet": "No matching players yet.",
+    "reason": "NTRP {ntrp}, your district · reliability {reliability}",
+    "invite": "Invite",
+    "inviting": "Inviting…"
+  },
+  "DiscoverableToggle": {
+    "label": "Show me in \"Who to invite\"",
+    "description": "Other authors can suggest inviting you into their open offers. Off hides you from that list only — the feed and join requests still work the same."
   }
 }
