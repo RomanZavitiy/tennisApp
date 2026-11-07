@@ -180,6 +180,7 @@
   "ProfilePage": {
     "title": "Your profile",
     "myGames": "My games",
+    "rateYourOpponent": "Rate your opponent",
     "myBookings": "My bookings",
     "matchHistory": "Match history",
     "blockedPlayers": "Blocked players",
@@ -592,6 +593,51 @@
     "vs": "vs",
     "aPlayer": "A player",
     "playAgain": "Play again"
+  },
+  "PendingFeedbackPrompt": {
+    "vsOpponent": "vs {name}",
+    "aPlayer": "a player"
+  },
+  "RateOpponentButton": {
+    "label": "Rate your opponent"
+  },
+  "RateOpponentForm": {
+    "tagsLabel": "How was it?",
+    "levelSignalLabel": "Their level felt...",
+    "levelSignalNone": "About right",
+    "submitting": "Submitting…",
+    "submit": "Submit feedback",
+    "done": "Thanks for the feedback!"
+  },
+  "FeedbackTag": {
+    "PUNCTUAL": "Punctual",
+    "LEVEL_MATCHES_NTRP": "Level matches NTRP",
+    "GOOD_GAME": "Good game"
+  },
+  "LevelSignal": {
+    "HIGHER": "Higher",
+    "LOWER": "Lower"
+  },
+  "LevelHint": {
+    "HIGHER": "Several opponents felt your level plays higher than your declared NTRP.",
+    "LOWER": "Several opponents felt your level plays lower than your declared NTRP."
+  },
+  "Achievement": {
+    "FIRST_MATCH": "First match",
+    "MATCHES_10": "10 matches",
+    "MATCHES_25": "25 matches",
+    "MATCHES_50": "50 matches",
+    "RELIABLE": "Reliable",
+    "FIVE_OPPONENTS": "5 different opponents",
+    "REGULAR_MONTH": "Regular player"
+  },
+  "SubmitFeedbackRefusal": {
+    "MATCH_NOT_FOUND": "This match doesn't exist.",
+    "NOT_PARTICIPANT": "This isn't your match.",
+    "NOT_CONFIRMED": "This match's result hasn't been confirmed yet.",
+    "WINDOW_CLOSED": "Feedback is only open for 7 days after a match is confirmed.",
+    "ALREADY_GIVEN": "You've already rated this opponent for this match.",
+    "BLOCKED": "You can't leave feedback for this player."
   },
   "ResultForm": {
     "you": "You",

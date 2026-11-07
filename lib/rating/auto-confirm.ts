@@ -1,3 +1,4 @@
+import { notifyNewAchievements } from "@/lib/achievements/achievements";
 import { db } from "@/lib/db";
 import {
   postSystemMessage,
@@ -62,7 +63,7 @@ export async function autoConfirmExpiredResults(
           noShowParty: result.noShowParty,
           offerJoin: result.offerJoin,
         });
-        return { settled: true as const, offerJoinId: null };
+        return { settled: true as const, offerJoinId: null, parties: null };
       }
       if (!result.winner) {
         throw new Error(
@@ -73,7 +74,14 @@ export async function autoConfirmExpiredResults(
         winner: result.winner,
         offerJoin: result.offerJoin,
       });
-      return { settled: true as const, offerJoinId: result.offerJoin.id };
+      return {
+        settled: true as const,
+        offerJoinId: result.offerJoin.id,
+        parties: {
+          authorId: result.offerJoin.offer.authorId,
+          playerId: result.offerJoin.userId,
+        },
+      };
     });
 
     if (outcome.settled) {
@@ -82,6 +90,13 @@ export async function autoConfirmExpiredResults(
         await postSystemMessage(
           { offerJoinId: outcome.offerJoinId },
           RESULT_AUTO_CONFIRMED_MESSAGE,
+        );
+      }
+      if (outcome.parties) {
+        await notifyNewAchievements(
+          outcome.parties.authorId,
+          outcome.parties.playerId,
+          id,
         );
       }
     }

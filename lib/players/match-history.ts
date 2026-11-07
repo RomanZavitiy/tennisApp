@@ -19,6 +19,10 @@ export type MatchHistoryEntry = {
   won: boolean;
   eloBefore: number;
   eloAfter: number;
+  /** When this result became CONFIRMED (slice W's 7-day feedback window) --
+   * a result's status only ever moves to CONFIRMED once, so its own
+   * `updatedAt` at that moment is the confirmation instant. */
+  confirmedAt: Date;
   /** The finished offer's own facts, for "play again" (task Q.1). */
   startsAt: Date;
   durationMinutes: number;
@@ -43,6 +47,7 @@ export async function getMatchHistory(
       id: true,
       winner: true,
       score: true,
+      updatedAt: true,
       authorEloBefore: true,
       authorEloAfter: true,
       playerEloBefore: true,
@@ -94,6 +99,7 @@ export async function getMatchHistory(
       won: result.winner === (wasAuthor ? "AUTHOR" : "PLAYER"),
       eloBefore,
       eloAfter,
+      confirmedAt: result.updatedAt,
       startsAt: result.offerJoin.offer.startsAt,
       durationMinutes: result.offerJoin.offer.durationMinutes,
       format: result.offerJoin.offer.format,

@@ -16,6 +16,10 @@ const { matchResultFindMany, postSystemMessage, tx } = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({
   db: {
     matchResult: { findMany: matchResultFindMany },
+    // The post-confirmation achievement check (slice W) also reads these; a
+    // null user short-circuits it to `[]` without this test needing to know
+    // anything about that feature.
+    user: { findUnique: vi.fn().mockResolvedValue(null) },
     $transaction: (run: (client: typeof tx) => Promise<unknown>) => run(tx),
   },
 }));

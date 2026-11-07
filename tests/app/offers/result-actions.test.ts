@@ -50,7 +50,14 @@ vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
   db: {
     offerJoin: { findUnique: joinFindUnique },
-    matchResult: { createManyAndReturn: matchResultCreateManyAndReturn },
+    matchResult: {
+      createManyAndReturn: matchResultCreateManyAndReturn,
+      // confirmResult's post-confirmation achievement check (slice W) reads
+      // these; a null user short-circuits getPlayerAchievements to `[]`
+      // without this test needing to know anything about that feature.
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    user: { findUnique: vi.fn().mockResolvedValue(null) },
     $transaction: (run: (client: typeof tx) => Promise<unknown>) => run(tx),
   },
 }));

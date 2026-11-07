@@ -6,9 +6,12 @@ import { reportPlayer } from "@/app/players/[id]/actions";
 import { BlockPlayerButton } from "@/components/block-player-button";
 import { InvitePlayerButton } from "@/components/invite-player-button";
 import { MatchHistory } from "@/components/match-history";
+import { PlayerBadges } from "@/components/player-badges";
 import { ProfileHero } from "@/components/profile-hero";
 import { ReportButton } from "@/components/report-button";
+import { getPlayerAchievements } from "@/lib/achievements/achievements";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { getPublicBadges } from "@/lib/feedback/badges";
 import { isBlocked } from "@/lib/moderation/personal-block";
 import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
 import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
@@ -35,7 +38,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   if (!profile) {
     notFound();
   }
-  const matches = await getMatchHistory(id);
+  const [matches, achievements, feedbackBadges] = await Promise.all([
+    getMatchHistory(id),
+    getPlayerAchievements(id),
+    getPublicBadges(id),
+  ]);
   const viewer = await getCurrentUser();
   const t = await getTranslations("PlayerPage");
   const isOwnProfile = viewer?.id === profile.id;
@@ -50,6 +57,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 px-4 py-8">
       {/* The same hero as the player's own /profile (slice K6). */}
       <ProfileHero profile={profile} summary={summarizeMatches(matches)} />
+      <PlayerBadges
+        achievements={achievements}
+        feedbackBadges={feedbackBadges}
+      />
       <section className="rounded-2xl border bg-card px-5 py-4 shadow-sm">
         <h2 className="mb-2 text-lg font-semibold">{t("matchHistory")}</h2>
         <MatchHistory matches={matches} />

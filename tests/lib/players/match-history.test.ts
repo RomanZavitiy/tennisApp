@@ -16,6 +16,7 @@ vi.mock("@/lib/db", () => ({
 const PLAYER = "11111111-1111-4111-8111-111111111111";
 const AUTHOR = "22222222-2222-4222-8222-222222222222";
 const MATCH_STARTS_AT = new Date("2026-10-20T16:00:00Z");
+const CONFIRMED_AT = new Date("2026-10-21T10:00:00Z");
 
 describe("getMatchHistory", () => {
   it("queries only this player's confirmed results", async () => {
@@ -39,6 +40,7 @@ describe("getMatchHistory", () => {
         id: "result-1",
         winner: "AUTHOR",
         score: [{ author: 6, player: 4 }],
+        updatedAt: CONFIRMED_AT,
         authorEloBefore: 1500,
         authorEloAfter: 1510,
         playerEloBefore: 1500,
@@ -73,6 +75,7 @@ describe("getMatchHistory", () => {
         won: true,
         eloBefore: 1500,
         eloAfter: 1510,
+        confirmedAt: CONFIRMED_AT,
         startsAt: MATCH_STARTS_AT,
         durationMinutes: 90,
         format: "SINGLES",
@@ -90,6 +93,7 @@ describe("getMatchHistory", () => {
         id: "result-2",
         winner: "AUTHOR",
         score: [{ author: 6, player: 4 }],
+        updatedAt: CONFIRMED_AT,
         authorEloBefore: 1500,
         authorEloAfter: 1510,
         playerEloBefore: 1500,
@@ -124,6 +128,7 @@ describe("getMatchHistory", () => {
         won: false,
         eloBefore: 1500,
         eloAfter: 1490,
+        confirmedAt: CONFIRMED_AT,
         startsAt: MATCH_STARTS_AT,
         durationMinutes: 60,
         format: "DOUBLES",
@@ -146,6 +151,7 @@ describe("summarizeMatches", () => {
     won,
     eloBefore: 1500,
     eloAfter: won ? 1516 : 1484,
+    confirmedAt: CONFIRMED_AT,
     startsAt: MATCH_STARTS_AT,
     durationMinutes: 90,
     format: "SINGLES",
