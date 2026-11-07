@@ -23,7 +23,9 @@ export function rankByEloCloseness<T extends RankableOffer>(
   });
 }
 
-function eloDistance(
+/** Reused by lib/matching/candidates.ts (task S2.1) for the same "closest
+ * ELO first, missing ELO sorts last" ranking. */
+export function eloDistance(
   offerElo: number | null,
   viewerElo: number | null,
 ): number {

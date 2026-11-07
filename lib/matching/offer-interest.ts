@@ -60,7 +60,9 @@ export type OfferPushCandidate = {
   offerPushSentCount: number;
 };
 
-function levelMatches(
+/** Reused by lib/matching/candidates.ts (task S2.1): "the same constant" the
+ * plan calls for. */
+export function levelMatches(
   candidateNtrp: number | null,
   ntrpMin: number | null,
   ntrpMax: number | null,

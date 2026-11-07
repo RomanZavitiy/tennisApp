@@ -6,10 +6,12 @@ import {
   cancelOffer,
   declineJoin,
 } from "@/app/offers/[id]/actions";
+import { CandidatesSection } from "@/components/candidates-section";
 import { JoinThread } from "@/components/join-thread";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { PlayerLink } from "@/components/player-link";
 import { ResultSection } from "@/components/result-section";
+import type { Candidate } from "@/lib/matching/candidates";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import type { OfferDetails } from "@/lib/offers/offer-details";
 import { reliabilityLabel } from "@/lib/rating/reliability";
@@ -22,10 +24,13 @@ export function AuthorView({
   details,
   started,
   viewerId,
+  candidates,
 }: {
   details: OfferDetails;
   started: boolean;
   viewerId: string;
+  /** "Кого запросити" (task S2.2) — empty while the offer isn't OPEN. */
+  candidates: Candidate[];
 }) {
   const t = useTranslations("OfferPage");
   const tReliability = useTranslations("Reliability");
@@ -67,6 +72,9 @@ export function AuthorView({
           </ul>
         )}
       </div>
+      {details.offer.status === "OPEN" && (
+        <CandidatesSection offerId={details.offer.id} candidates={candidates} />
+      )}
       <div>
         <h2 className="font-semibold">
           {t("requestsCount", { count: requested.length })}
