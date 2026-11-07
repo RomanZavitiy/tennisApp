@@ -9,7 +9,7 @@ import { useClubSelection } from "@/components/club-selection";
 import { buttonVariants } from "@/components/ui/button";
 import type { District } from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 
 export type ClubListItem = {
   id: string;

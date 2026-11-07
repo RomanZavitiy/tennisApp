@@ -1,4 +1,4 @@
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";

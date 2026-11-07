@@ -9,7 +9,7 @@ import {
   type ClubSelectionContextValue,
 } from "@/components/club-selection";
 import { Button } from "@/components/ui/button";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 
 type View = "list" | "map";
 
