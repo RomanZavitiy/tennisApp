@@ -38,6 +38,9 @@ type EventProperties = {
   intent_posted: Record<string, never>;
   intent_invited: Record<string, never>;
   intent_converted: Record<string, never>;
+  play_today_viewed: Record<string, never>;
+  play_today_result_selected: Record<string, never>;
+  play_today_empty_state: Record<string, never>;
 };
 
 // Where "Invite to game" (slice S1) was clicked from. "playAgain" is Q.2's

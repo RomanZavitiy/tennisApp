@@ -70,12 +70,16 @@ export default async function OffersPage({
         )}
       </div>
 
-      {/* "Шукають гру" (slice U2, task U2.2): signed-in players only — a
-          guest sees no link, same gate the page itself enforces. */}
+      {/* "Шукають гру" (U2.2) and "Грати сьогодні" (U3.1): signed-in
+          players only — a guest sees neither link, same gate both pages
+          enforce themselves. */}
       {!showHidden && viewer && (
-        <p className="mt-4 text-sm">
+        <p className="mt-4 flex flex-wrap gap-4 text-sm">
           <Link href="/offers/looking" className="hover:underline">
             {t("lookingForGame")}
+          </Link>
+          <Link href="/offers/today" className="hover:underline">
+            {t("playToday")}
           </Link>
         </p>
       )}

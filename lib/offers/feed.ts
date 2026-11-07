@@ -64,7 +64,10 @@ export function parsePage(value: string | string[] | undefined): number {
   return Number.isSafeInteger(page) && page >= 1 ? page : 1;
 }
 
-const feedOfferSelect = {
+/** Exported for lib/offers/play-today-feed.ts (slice U3, task U3.1), which
+ * needs the same shape OfferCard expects but a different where clause
+ * (an 8h window, not the full filtered feed) and no pagination/ranking. */
+export const feedOfferSelect = {
   id: true,
   format: true,
   hasPartner: true,
@@ -90,7 +93,8 @@ const feedOfferSelect = {
   _count: { select: { joins: { where: { status: "ACCEPTED" as const } } } },
 } as const;
 
-function toFeedOffer({
+/** Exported for the same reason as feedOfferSelect above. */
+export function toFeedOffer({
   _count,
   author,
   ...offer

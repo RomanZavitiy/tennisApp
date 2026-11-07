@@ -226,6 +226,7 @@
     "title": "Oferty sparingowe",
     "postAnOffer": "Dodaj ogłoszenie",
     "lookingForGame": "Szukasz gry? →",
+    "playToday": "Zagraj dziś →",
     "noMoreOffers": "Brak kolejnych ofert.",
     "noneMatchFilters": "Żadna oferta nie spełnia tych filtrów.",
     "noOpenOffers": "Brak otwartych ofert. Dodaj swoją, a inni zawodnicy będą mogli się zgłosić.",
@@ -1056,5 +1057,14 @@
     "aPlayer": "Zawodnik",
     "summary": "{date} · {districts} · {times} · {format}",
     "createAndInvite": "Stwórz grę i zaproś"
+  },
+  "PlayTodayPage": {
+    "title": "Zagraj dziś",
+    "subtitle": "Otwarte gry zaczynające się w najbliższych godzinach blisko Twojego poziomu, plus dzisiejsze ogłoszenia \"szukam gry\".",
+    "backToFeed": "Wróć do ofert",
+    "offersHeading": "Zaczynają się wkrótce",
+    "intentsHeading": "Szukają gry dzisiaj",
+    "emptyState": "Nikt dzisiaj — stwórz grę na wieczór i bądź pierwszy.",
+    "createForTonight": "Stwórz grę na wieczór"
   }
 }

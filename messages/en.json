@@ -226,6 +226,7 @@
     "title": "Sparring offers",
     "postAnOffer": "Post an offer",
     "lookingForGame": "Looking for a game? →",
+    "playToday": "Play today →",
     "noMoreOffers": "No more offers.",
     "noneMatchFilters": "No offers match these filters.",
     "noOpenOffers": "No open offers right now. Post one and other players can join you.",
@@ -1056,5 +1057,14 @@
     "aPlayer": "A player",
     "summary": "{date} · {districts} · {times} · {format}",
     "createAndInvite": "Create a game and invite"
+  },
+  "PlayTodayPage": {
+    "title": "Play today",
+    "subtitle": "Open games starting in the next few hours near your level, plus today's \"looking for a game\" posts.",
+    "backToFeed": "Back to offers",
+    "offersHeading": "Starting soon",
+    "intentsHeading": "Looking for a game today",
+    "emptyState": "Nobody today — create a game for tonight and be the first.",
+    "createForTonight": "Create a game for tonight"
   }
 }
