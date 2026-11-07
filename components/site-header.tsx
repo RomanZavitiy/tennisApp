@@ -26,6 +26,7 @@ export async function SiteHeader() {
     { href: "/", label: t("courts"), section: "/clubs" },
     { href: "/offers", label: t("sparring") },
     { href: "/leaderboard", label: t("leaderboard") },
+    { href: "/coaches", label: t("coaches") },
   ];
   const signIn = { href: "/login", label: t("signIn") };
   const profile = { href: "/profile", label: t("profile") };

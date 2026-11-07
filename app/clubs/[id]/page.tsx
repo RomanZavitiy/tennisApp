@@ -14,6 +14,7 @@ import {
 import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { getCoachesForClub } from "@/lib/coaches/get-coaches";
 import {
   formatCheckedDate,
   getClub,
@@ -47,6 +48,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
   const offers = await getClubOffers(club.id);
   const viewer = await getCurrentUser();
   const followInfo = await getClubFollowInfo(club.id, viewer?.id ?? null);
+  const coaches = await getCoachesForClub(club.id);
 
   const t = await getTranslations("ClubPage");
   const tSurface = await getTranslations("Surface");
@@ -159,6 +161,24 @@ export default async function ClubPage({ params }: ClubPageProps) {
         <section className="mt-6">
           <h2 className="font-semibold">{t("prices")}</h2>
           <p className="mt-1 whitespace-pre-line">{club.priceInfo}</p>
+        </section>
+      )}
+
+      {coaches.length > 0 && (
+        <section className="mt-6">
+          <h2 className="font-semibold">{t("coachesHere")}</h2>
+          <ul className="mt-1 space-y-1">
+            {coaches.map((coach) => (
+              <li key={coach.slug}>
+                <Link
+                  href={`/coaches#${coach.slug}`}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {coach.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
