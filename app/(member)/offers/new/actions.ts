@@ -94,6 +94,7 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     district: place.district ?? null,
     ntrpMin: offer.ntrpMin ?? null,
     ntrpMax: offer.ntrpMax ?? null,
+    startsAt: offer.startsAt,
   });
 
   await captureEvent("offer_created", author.id, {

@@ -29,6 +29,7 @@ import {
   type JoinChangeRefusal,
 } from "@/lib/offers/join-transitions";
 import { markOfferCourtBooked } from "@/lib/offers/mark-court-booked";
+import { promoteNextWaitlistEntry } from "@/lib/offers/promote-waitlist";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import {
   isLateCancellation,
@@ -288,11 +289,15 @@ async function changeJoin(
         format: true,
         hasPartner: true,
         startsAt: true,
-        joins: { where: { id: id.data }, select: { status: true } },
+        joins: {
+          where: { id: id.data },
+          select: { status: true, fromWaitlist: true },
+        },
         _count: { select: { joins: { where: { status: "ACCEPTED" } } } },
       },
     });
     const joinStatus = offer.joins.at(0)?.status;
+    const joinFromWaitlist = offer.joins.at(0)?.fromWaitlist ?? false;
     const acceptedCount = offer._count.joins;
     const next = joinStatus && nextJoinStatus(action, joinStatus);
     const now = new Date();
@@ -337,11 +342,22 @@ async function changeJoin(
         data: { status: offerStatus },
       });
     }
+
+    // Task T.3: a FULL offer going back to OPEN is the only moment a spot
+    // actually frees up — pop the waitlist's longest-waiting player into a
+    // priority request for the author to see.
+    const promoted =
+      offer.status === "FULL" && offerStatus === "OPEN"
+        ? await promoteNextWaitlistEntry(tx, join.offerId, now)
+        : null;
+
     return {
       ok: true as const,
       offerId: join.offerId,
       playerId: join.userId,
       format: offer.format,
+      fromWaitlist: joinFromWaitlist,
+      promoted,
     };
   });
 
@@ -360,6 +376,20 @@ async function changeJoin(
     await captureEvent("join_accepted", result.playerId, {
       format: result.format,
     });
+    // §4 (T): the author finally accepted a priority request from the
+    // waitlist, not just any join.
+    if (result.fromWaitlist) {
+      await captureEvent("waitlist_spot_taken", result.playerId, {});
+    }
+  }
+  // T.3: the player the waitlist just promoted gets the same push a fresh
+  // join request never does — they didn't ask again, the system did.
+  if (result.promoted) {
+    await notify(result.promoted.userId, {
+      kind: "SPOT_OPENED",
+      offerId: result.offerId,
+    });
+    await captureEvent("waitlist_spot_offered", result.promoted.userId, {});
   }
   // The offer's page and the feed's free places both change.
   revalidatePath(`/offers/${result.offerId}`);

@@ -94,6 +94,14 @@
     "INVITE_ACCEPTED": {
       "title": "Zaproszenie zaakceptowane",
       "body": "Twoje zaproszenie zostało zaakceptowane."
+    },
+    "SPOT_OPENED": {
+      "title": "Zwolniło się miejsce",
+      "body": "Jesteś następny w rezerwie — Twoje zgłoszenie czeka na autora."
+    },
+    "INTENT_FOR_YOUR_OFFER": {
+      "title": "Ktoś szuka gry jak Twoja",
+      "body": "Zawodnik dodał ogłoszenie \"szukam gry\", które pasuje do jednej z Twoich otwartych ofert."
     }
   },
   "SystemMessages": {
@@ -177,6 +185,7 @@
     "account": "Konto",
     "photo": "Zdjęcie profilowe",
     "editProfile": "Edytuj profil",
+    "playPreferences": "Kiedy lubię grać",
     "notifications": "Powiadomienia",
     "exportData": "Pobierz moje dane",
     "language": "Język",
@@ -216,6 +225,8 @@
   "OffersPage": {
     "title": "Oferty sparingowe",
     "postAnOffer": "Dodaj ogłoszenie",
+    "lookingForGame": "Szukasz gry? →",
+    "playToday": "Zagraj dziś →",
     "noMoreOffers": "Brak kolejnych ofert.",
     "noneMatchFilters": "Żadna oferta nie spełnia tych filtrów.",
     "noOpenOffers": "Brak otwartych ofert. Dodaj swoją, a inni zawodnicy będą mogli się zgłosić.",
@@ -292,7 +303,13 @@
     "cancellingBooking": "Odwoływanie…",
     "invitedToJoin": "{author} zaprosił(a) Cię do tej gry.",
     "acceptInvite": "Przyjmij zaproszenie",
-    "declineInvite": "Odrzuć zaproszenie"
+    "declineInvite": "Odrzuć zaproszenie",
+    "fromWaitlistLabel": "z rezerwy",
+    "waitlistPosition": "Jesteś #{position} w kolejce. Damy znać, jeśli zwolni się miejsce.",
+    "joinWaitlist": "Dołącz do rezerwy",
+    "joiningWaitlist": "Dołączanie…",
+    "leaveWaitlist": "Opuść rezerwę",
+    "leavingWaitlist": "Opuszczanie…"
   },
   "AdminActionForm": {
     "done": "Gotowe.",
@@ -696,7 +713,8 @@
     "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie.",
     "BOOKING_REQUEST": "Wysłano już dziś wiele prośb o rezerwację. Spróbuj ponownie jutro.",
     "CLUB_SUBMISSION": "Zgłoszono już dziś kilka klubów. Spróbuj ponownie jutro.",
-    "OFFER_INVITE": "Wysłano już wiele zaproszeń w tej godzinie. Spróbuj ponownie później."
+    "OFFER_INVITE": "Wysłano już wiele zaproszeń w tej godzinie. Spróbuj ponownie później.",
+    "PLAY_INTENT": "Zbyt wiele zmian ogłoszenia \"szukam gry\" dzisiaj. Spróbuj ponownie jutro."
   },
   "Validation": {
     "login": {
@@ -772,6 +790,13 @@
       "addressTooLong": "Adres może mieć maksymalnie {max} znaków.",
       "districtInvalid": "Wybierz dzielnicę albo zostaw to pole puste.",
       "notesTooLong": "Notatki mogą mieć maksymalnie {max} znaków."
+    },
+    "playIntent": {
+      "dateRequired": "Wybierz datę.",
+      "datePast": "Wybierz dzisiejszą lub późniejszą datę.",
+      "timesRequired": "Wybierz co najmniej jedną porę dnia.",
+      "districtsRequired": "Wybierz co najmniej jedną dzielnicę.",
+      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków."
     }
   },
   "OnboardingPage": {
@@ -973,5 +998,73 @@
   "DiscoverableToggle": {
     "label": "Pokazuj mnie w sekcji \"Kogo zaprosić\"",
     "description": "Inni autorzy mogą zobaczyć Cię jako kandydata do zaproszenia w swoich otwartych ofertach. Wyłączenie chowa Cię tylko z tej listy — lista ofert i zgłoszenia działają tak samo."
+  },
+  "WaitlistRefusal": {
+    "OWN_OFFER": "To Twoja własna oferta.",
+    "BLOCKED": "Nie możesz dołączyć do rezerwy tej oferty.",
+    "STARTED": "Ta gra już się zaczęła.",
+    "NOT_FULL": "Ta oferta ma jeszcze wolne miejsca — zgłoś się normalnie.",
+    "ALREADY_JOINED": "Masz już zgłoszenie na tę ofertę.",
+    "ALREADY_WAITLISTED": "Jesteś już na liście rezerwowej.",
+    "DECLINED": "Autor odrzucił Twoje zgłoszenie."
+  },
+  "PlayPreferencesPage": {
+    "title": "Kiedy lubię grać",
+    "subtitle": "Wszystko opcjonalne — zostaw puste, aby widzieć wszystko jak dotychczas.",
+    "backToProfile": "Wróć do profilu"
+  },
+  "PlayPreferencesForm": {
+    "daysLabel": "Dni tygodnia",
+    "timesLabel": "Pora dnia",
+    "districtsLabel": "Inne dzielnice, które Ci odpowiadają",
+    "time": {
+      "morning": "Rano",
+      "afternoon": "Popołudnie",
+      "evening": "Wieczór"
+    },
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano."
+  },
+  "Weekday": {
+    "MON": "Pon",
+    "TUE": "Wt",
+    "WED": "Śr",
+    "THU": "Czw",
+    "FRI": "Pt",
+    "SAT": "Sob",
+    "SUN": "Ndz"
+  },
+  "LookingForGamePage": {
+    "title": "Szukają gry",
+    "subtitle": "Dodaj czego szukasz albo przeglądaj, czego szukają inni zawodnicy.",
+    "backToFeed": "Wróć do ofert",
+    "postYours": "Dodaj czego szukasz",
+    "noneYet": "Nikt jeszcze nie dodał ogłoszenia \"szukam gry\"."
+  },
+  "PostIntentForm": {
+    "dateLabel": "Data",
+    "timesLabel": "Pora dnia",
+    "districtsLabel": "Dzielnice",
+    "formatLabel": "Format",
+    "noteLabel": "Notatka (opcjonalnie)",
+    "noteHint": "Maksymalnie {max} znaków.",
+    "posting": "Dodawanie…",
+    "submit": "Dodaj",
+    "posted": "Dodano. Inni zawodnicy mogą Cię teraz znaleźć i zaprosić."
+  },
+  "IntentCard": {
+    "aPlayer": "Zawodnik",
+    "summary": "{date} · {districts} · {times} · {format}",
+    "createAndInvite": "Stwórz grę i zaproś"
+  },
+  "PlayTodayPage": {
+    "title": "Zagraj dziś",
+    "subtitle": "Otwarte gry zaczynające się w najbliższych godzinach blisko Twojego poziomu, plus dzisiejsze ogłoszenia \"szukam gry\".",
+    "backToFeed": "Wróć do ofert",
+    "offersHeading": "Zaczynają się wkrótce",
+    "intentsHeading": "Szukają gry dzisiaj",
+    "emptyState": "Nikt dzisiaj — stwórz grę na wieczór i bądź pierwszy.",
+    "createForTonight": "Stwórz grę na wieczór"
   }
 }

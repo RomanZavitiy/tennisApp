@@ -19,8 +19,10 @@ import { ReportButton } from "@/components/report-button";
 import { ResultSection } from "@/components/result-section";
 import { ShareOfferButton } from "@/components/share-offer-button";
 import { buttonVariants } from "@/components/ui/button";
+import { WaitlistSection } from "@/components/waitlist-section";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { joinRefusal } from "@/lib/offers/join-rules";
+import { waitlistJoinRefusal } from "@/lib/offers/waitlist-rules";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
 import { getOfferCandidates } from "@/lib/offers/offer-candidates";
 import { getOfferDetails, type OfferDetails } from "@/lib/offers/offer-details";
@@ -288,6 +290,24 @@ function PlayerView({
           />
         </div>
       </div>
+    );
+  }
+
+  // T.2: a FULL offer takes no new direct requests, but a line to join
+  // instead — joinRefusal below would just say "no longer taking players".
+  if (offer.status === "FULL" && offer.startsAt > new Date()) {
+    return (
+      <WaitlistSection
+        offerId={offer.id}
+        position={details.viewerWaitlistPosition}
+        refusal={waitlistJoinRefusal({
+          offer: { ...offer, authorId: offer.author.id },
+          playerId: viewerId,
+          existingJoin: viewerJoin,
+          alreadyWaitlisted: details.viewerWaitlistPosition !== null,
+          now: new Date(),
+        })}
+      />
     );
   }
 

@@ -28,11 +28,18 @@ export function OfferCard({
   offer,
   viewerId = null,
   dismissed = false,
+  onResultSelected,
 }: {
   offer: FeedOffer;
   viewerId?: string | null;
   /** Rendering the hidden-offers view (slice N): "Unhide" instead of "Hide". */
   dismissed?: boolean;
+  /** "Грати сьогодні" (task U3.3) hooks in here — a server action
+   * reference passed straight from the page (a Server Component), the
+   * same way a server action crosses into a client component as a form's
+   * own `action` prop. Fire-and-forget, same idiom as BookingLink's own
+   * onClick: never blocks the navigation the browser is already doing. */
+  onResultSelected?: () => Promise<void>;
 }) {
   const t = useTranslations("OfferLabels");
   const tSurface = useTranslations("Surface");
@@ -71,6 +78,13 @@ export function OfferCard({
         "relative block rounded-lg border px-4 py-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
         isOwn && "border-primary",
       )}
+      onClick={
+        onResultSelected
+          ? () => {
+              onResultSelected().catch(() => undefined);
+            }
+          : undefined
+      }
     >
       {viewerId && (
         <Button

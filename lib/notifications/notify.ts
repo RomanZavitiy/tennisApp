@@ -38,7 +38,9 @@ export type NotificationEvent =
   | { kind: "CONFIRM_RESULT_REMINDER"; offerId: string }
   | { kind: "NEW_OFFER_FOR_LEVEL"; offerId: string }
   | { kind: "INVITE_RECEIVED"; offerId: string }
-  | { kind: "INVITE_ACCEPTED"; offerId: string };
+  | { kind: "INVITE_ACCEPTED"; offerId: string }
+  | { kind: "SPOT_OPENED"; offerId: string }
+  | { kind: "INTENT_FOR_YOUR_OFFER"; offerId: string };
 
 type Kind = NotificationEvent["kind"];
 
@@ -56,6 +58,12 @@ const CATEGORY: Record<Kind, "matches" | "newOffers"> = {
   NEW_OFFER_FOR_LEVEL: "newOffers",
   INVITE_RECEIVED: "matches",
   INVITE_ACCEPTED: "matches",
+  SPOT_OPENED: "matches",
+  // U2.4: reuses the exact same daily-cap counters as NEW_OFFER_FOR_LEVEL
+  // (lib/matching/intent-interest.ts's hasPushCapacityNow), so this has to
+  // share its category too — notify()'s own gate and the pre-filtering in
+  // lib/notifications/intent-notify.ts must check the same toggle.
+  INTENT_FOR_YOUR_OFFER: "newOffers",
 };
 
 // Decision 2026-10-14: email fallback exists only for "new join request,

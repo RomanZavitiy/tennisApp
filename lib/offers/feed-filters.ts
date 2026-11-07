@@ -63,8 +63,10 @@ export function parseFeedFilters(params: SearchParams): FeedFilters {
   return filters;
 }
 
-/** The day after a "YYYY-MM-DD" date, in the same format. */
-function nextDay(date: string): string {
+/** The day after a "YYYY-MM-DD" date, in the same format. Also used by
+ * lib/offers/play-intent.ts to compute a PlayIntent's own expiresAt
+ * (task U2.1, "опівночі за Europe/Warsaw"). */
+export function nextDay(date: string): string {
   const next = new Date(`${date}T00:00:00Z`);
   next.setUTCDate(next.getUTCDate() + 1);
   return next.toISOString().slice(0, 10);

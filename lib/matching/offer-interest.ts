@@ -1,4 +1,5 @@
 import type { District } from "@/lib/generated/prisma/enums";
+import { matchesTimeOfDay, type TimeOfDay } from "@/lib/offers/feed-filters";
 
 // "Who's interested in this offer" (task 5.16): the push that tells a player
 // a new offer near their level and district was just posted. Matching rules
@@ -46,6 +47,9 @@ export type NewOfferInfo = {
   /** Null bound means "any level" on that side (same as feedWhere's ntrp filter). */
   ntrpMin: number | null;
   ntrpMax: number | null;
+  /** U1.3: which part of the day this offer falls in, against the
+   * candidate's own preferredTimes. */
+  startsAt: Date;
 };
 
 export type OfferPushCandidate = {
@@ -58,6 +62,12 @@ export type OfferPushCandidate = {
   offerPushSentOn: string | null;
   /** How many "new offer" pushes this candidate got on offerPushSentOn. */
   offerPushSentCount: number;
+  /** U1.3: districts besides their own this candidate is also open to —
+   * empty means "home district only", the behaviour before U1. */
+  preferredDistricts: readonly District[];
+  /** U1.3: parts of the day this candidate wants to hear about — empty
+   * means "any time", the behaviour before U1. */
+  preferredTimes: readonly TimeOfDay[];
 };
 
 /** Reused by lib/matching/candidates.ts (task S2.1): "the same constant" the
@@ -77,14 +87,43 @@ export function levelMatches(
   return minOk && maxOk;
 }
 
+/** The shared counters/toggle every "new offer"-shaped push is gated by —
+ * also U2.4's push to a matching offer's author, which reuses this same
+ * throttle rather than a second set of counters. */
+export type PushThrottleState = {
+  notifyNewOffers: boolean;
+  offerPushSentOn: string | null;
+  offerPushSentCount: number;
+};
+
 function hasDailyCapacity(
-  candidate: OfferPushCandidate,
+  recipient: PushThrottleState,
   today: string,
 ): boolean {
   return (
-    candidate.offerPushSentOn !== today ||
-    candidate.offerPushSentCount < DAILY_OFFER_PUSH_LIMIT
+    recipient.offerPushSentOn !== today ||
+    recipient.offerPushSentCount < DAILY_OFFER_PUSH_LIMIT
   );
+}
+
+/**
+ * Whether `recipient` is open to a "new offer"-shaped push right now at
+ * all: opted in, under today's cap, not during quiet hours. Shared by
+ * isInterestedIn below and U2.4's own matching rule
+ * (lib/matching/intent-interest.ts) — neither has anything more to add on
+ * top of these three checks, only their own structural match.
+ */
+export function hasPushCapacityNow(
+  recipient: PushThrottleState,
+  now: Date,
+): boolean {
+  if (!recipient.notifyNewOffers) {
+    return false;
+  }
+  if (isQuietHours(now)) {
+    return false;
+  }
+  return hasDailyCapacity(recipient, warsawDateString(now));
 }
 
 /**
@@ -102,22 +141,31 @@ export function isInterestedIn(
   if (candidate.userId === offer.authorId) {
     return false;
   }
-  if (!candidate.notifyNewOffers) {
+  if (offer.district === null) {
     return false;
   }
-  if (offer.district === null || candidate.district !== offer.district) {
+  // U1.3: a candidate's home district always matches, like before U1;
+  // preferredDistricts (empty by default) widens that, never narrows it.
+  const districtMatches =
+    candidate.district === offer.district ||
+    candidate.preferredDistricts.includes(offer.district);
+  if (!districtMatches) {
     return false;
   }
   if (!levelMatches(candidate.selfRatedNtrp, offer.ntrpMin, offer.ntrpMax)) {
     return false;
   }
-  if (isQuietHours(now)) {
+  // U1.3: an empty preferredTimes means "any time" — the behaviour before
+  // U1, so this never excludes a candidate who hasn't set one.
+  if (
+    candidate.preferredTimes.length > 0 &&
+    !candidate.preferredTimes.some((time) =>
+      matchesTimeOfDay(offer.startsAt, time),
+    )
+  ) {
     return false;
   }
-  if (!hasDailyCapacity(candidate, warsawDateString(now))) {
-    return false;
-  }
-  return true;
+  return hasPushCapacityNow(candidate, now);
 }
 
 /** Every candidate `isInterestedIn` this offer, in the order given. */

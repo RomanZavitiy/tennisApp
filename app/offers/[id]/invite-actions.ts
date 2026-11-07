@@ -30,6 +30,7 @@ const INVITE_SOURCES = [
   "leaderboard",
   "candidates",
   "playAgain",
+  "intent",
 ] as const;
 
 /**
@@ -73,6 +74,8 @@ export async function inviteToOffer(
     parsedOfferId.data,
     inviter.id,
     parsedInviteeId.data,
+    new Date(),
+    parsedSource.data === "intent",
   );
   if (!outcome.ok) {
     if (outcome.refusal === "NOT_FOUND") {
@@ -88,6 +91,9 @@ export async function inviteToOffer(
     await captureEvent("candidate_invited", inviter.id, {
       rank: parsedRank.data,
     });
+  }
+  if (parsedSource.data === "intent") {
+    await captureEvent("intent_invited", inviter.id, {});
   }
 
   revalidatePath(`/offers/${parsedOfferId.data}`);
@@ -119,7 +125,12 @@ export async function acceptInvite(
   const result = await db.$transaction(async (tx) => {
     const invite = await tx.offerInvite.findUnique({
       where: { id: id.data },
-      select: { offerId: true, inviteeId: true, status: true },
+      select: {
+        offerId: true,
+        inviteeId: true,
+        status: true,
+        fromIntent: true,
+      },
     });
     // Someone else's invite looks the same as a missing one.
     if (!invite || invite.inviteeId !== user.id) {
@@ -202,6 +213,7 @@ export async function acceptInvite(
       authorId: offer.authorId,
       joinId,
       isNewJoin: !existingJoin,
+      fromIntent: invite.fromIntent,
     };
   });
 
@@ -221,6 +233,12 @@ export async function acceptInvite(
     offerId: result.offerId,
   });
   await captureEvent("invite_accepted", user.id, {});
+  // U2.4: this invite started life as "Invite to my game" on a PlayIntent
+  // card (task U2.3) — the moment it's accepted is the intent converting
+  // into an actual game.
+  if (result.fromIntent) {
+    await captureEvent("intent_converted", user.id, {});
+  }
 
   revalidatePath(`/offers/${result.offerId}`);
   revalidatePath("/offers");

@@ -90,6 +90,11 @@ export function AuthorView({
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <PlayerLink player={join.user} />
+                    {join.fromWaitlist && (
+                      <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs font-medium">
+                        {t("fromWaitlistLabel")}
+                      </span>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       {reliabilityLabel(tReliability, join.user.reliability)}
                     </p>

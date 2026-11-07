@@ -135,6 +135,7 @@ describe("createOffer", () => {
       district: "KROWODRZA",
       ntrpMin: null,
       ntrpMax: null,
+      startsAt: new Date("2026-10-20T16:00:00.000Z"),
     });
   });
 

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  advanceStaleWaitlistOffers,
   autoDeclinePendingBookings,
   sendHowDidItGoPrompts,
   sendMatchReminders,
@@ -14,8 +15,14 @@ const {
   resultUpdate,
   bookingFindMany,
   bookingUpdateMany,
+  joinFindMany,
+  joinUpdateMany,
+  joinUpsert,
+  waitlistFindFirst,
+  waitlistDelete,
   notify,
   notifyBookingDecided,
+  captureEvent,
 } = vi.hoisted(() => ({
   offerFindMany: vi.fn(),
   offerUpdate: vi.fn(),
@@ -23,17 +30,30 @@ const {
   resultUpdate: vi.fn(),
   bookingFindMany: vi.fn(),
   bookingUpdateMany: vi.fn(),
+  joinFindMany: vi.fn(),
+  joinUpdateMany: vi.fn(),
+  joinUpsert: vi.fn(),
+  waitlistFindFirst: vi.fn(),
+  waitlistDelete: vi.fn(),
   notify: vi.fn(),
   notifyBookingDecided: vi.fn(),
+  captureEvent: vi.fn(),
 }));
 vi.mock("@/lib/db", () => ({
   db: {
     sparringOffer: { findMany: offerFindMany, update: offerUpdate },
     matchResult: { findMany: resultFindMany, update: resultUpdate },
     booking: { findMany: bookingFindMany, updateMany: bookingUpdateMany },
+    offerJoin: {
+      findMany: joinFindMany,
+      updateMany: joinUpdateMany,
+      upsert: joinUpsert,
+    },
+    offerWaitlist: { findFirst: waitlistFindFirst, delete: waitlistDelete },
   },
 }));
 vi.mock("@/lib/notifications/notify", () => ({ notify, notifyBookingDecided }));
+vi.mock("@/lib/analytics/posthog", () => ({ captureEvent }));
 
 const NOW = new Date("2026-11-10T12:00:00Z");
 
@@ -247,5 +267,97 @@ describe("autoDeclinePendingBookings", () => {
 
     expect(count).toBe(0);
     expect(notifyBookingDecided).not.toHaveBeenCalled();
+  });
+});
+
+describe("advanceStaleWaitlistOffers", () => {
+  const STALE_JOIN = {
+    id: "join-1",
+    userId: "player-1",
+    offerId: "offer-1",
+    waitlistOfferedAt: new Date(NOW.getTime() - 3 * 3_600_000),
+    offer: { startsAt: new Date("2026-11-11T12:00:00Z") },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    joinFindMany.mockResolvedValue([]);
+    joinUpdateMany.mockResolvedValue({ count: 1 });
+    waitlistFindFirst.mockResolvedValue(null);
+  });
+
+  it("queries pending priority requests", async () => {
+    await advanceStaleWaitlistOffers(NOW);
+
+    expect(joinFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          fromWaitlist: true,
+          status: "REQUESTED",
+          waitlistOfferedAt: { not: null },
+        },
+      }),
+    );
+  });
+
+  it("ignores a priority request still within its response window", async () => {
+    joinFindMany.mockResolvedValue([
+      { ...STALE_JOIN, waitlistOfferedAt: new Date(NOW.getTime() - 3_600_000) },
+    ]);
+
+    const count = await advanceStaleWaitlistOffers(NOW);
+
+    expect(count).toBe(0);
+    expect(joinUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("withdraws a stale priority request and passes the spot on", async () => {
+    joinFindMany.mockResolvedValue([STALE_JOIN]);
+    waitlistFindFirst.mockResolvedValue({ id: "wl-2", userId: "player-2" });
+    joinUpsert.mockResolvedValue({ id: "join-2" });
+
+    const count = await advanceStaleWaitlistOffers(NOW);
+
+    expect(count).toBe(1);
+    expect(joinUpdateMany).toHaveBeenCalledWith({
+      where: { id: "join-1", status: "REQUESTED" },
+      data: { status: "WITHDRAWN" },
+    });
+    expect(captureEvent).toHaveBeenCalledWith(
+      "waitlist_spot_passed",
+      "player-1",
+      {},
+    );
+    expect(waitlistDelete).toHaveBeenCalledWith({ where: { id: "wl-2" } });
+    expect(notify).toHaveBeenCalledWith("player-2", {
+      kind: "SPOT_OPENED",
+      offerId: "offer-1",
+    });
+    expect(captureEvent).toHaveBeenCalledWith(
+      "waitlist_spot_offered",
+      "player-2",
+      {},
+    );
+  });
+
+  it("doesn't pass it on when the author just accepted or declined it (lost the race)", async () => {
+    joinFindMany.mockResolvedValue([STALE_JOIN]);
+    joinUpdateMany.mockResolvedValue({ count: 0 });
+
+    const count = await advanceStaleWaitlistOffers(NOW);
+
+    expect(count).toBe(0);
+    expect(waitlistFindFirst).not.toHaveBeenCalled();
+    expect(captureEvent).not.toHaveBeenCalled();
+  });
+
+  it("doesn't notify anyone when the waitlist is now empty", async () => {
+    joinFindMany.mockResolvedValue([STALE_JOIN]);
+    waitlistFindFirst.mockResolvedValue(null);
+
+    const count = await advanceStaleWaitlistOffers(NOW);
+
+    expect(count).toBe(1);
+    expect(notify).not.toHaveBeenCalled();
   });
 });
