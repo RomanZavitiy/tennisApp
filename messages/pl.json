@@ -22,7 +22,8 @@
     "signIn": "Zaloguj się",
     "profile": "Profil",
     "mainNav": "Główna",
-    "signOut": "Wyloguj się"
+    "signOut": "Wyloguj się",
+    "coaches": "Trenerzy"
   },
   "NotificationBell": {
     "label": "Powiadomienia",
@@ -463,7 +464,8 @@
     "lookingForPartnerHere": "Szukają partnera tutaj",
     "noOffers": "Brak otwartych ogłoszeń w tym klubie.",
     "createOfferHere": "Dodaj ogłoszenie w tym klubie",
-    "clubChat": "Czat klubu"
+    "clubChat": "Czat klubu",
+    "coachesHere": "Trenerzy w tym klubie"
   },
   "FollowClubButton": {
     "follow": "Obserwuj",
@@ -1066,5 +1068,32 @@
     "intentsHeading": "Szukają gry dzisiaj",
     "emptyState": "Nikt dzisiaj — stwórz grę na wieczór i bądź pierwszy.",
     "createForTonight": "Stwórz grę na wieczór"
+  },
+  "CoachLevel": {
+    "BEGINNER": "Początkujący",
+    "INTERMEDIATE": "Średniozaawansowany",
+    "ADVANCED": "Zaawansowany",
+    "KIDS": "Dzieci"
+  },
+  "Locale": {
+    "EN": "Angielski",
+    "PL": "Polski"
+  },
+  "CoachesPage": {
+    "title": "Trenerzy",
+    "noneMatchFilters": "Żaden trener nie spełnia tych filtrów.",
+    "directoryGrowing": "Katalog się rozwija — kolejni trenerzy pojawią się tu wkrótce."
+  },
+  "CoachFilters": {
+    "formLabel": "Filtruj trenerów",
+    "districtLabel": "Dzielnica",
+    "levelLabel": "Poziom",
+    "any": "Dowolny",
+    "submit": "Szukaj",
+    "clear": "Wyczyść"
+  },
+  "CoachCard": {
+    "teachesAt": "Uczy w:",
+    "checkedOn": "Dane sprawdzone {date}."
   }
 }

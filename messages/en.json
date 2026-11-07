@@ -22,7 +22,8 @@
     "signIn": "Sign in",
     "profile": "Profile",
     "mainNav": "Main",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "coaches": "Coaches"
   },
   "NotificationBell": {
     "label": "Notifications",
@@ -463,7 +464,8 @@
     "lookingForPartnerHere": "Looking for a partner here",
     "noOffers": "No open offers at this club right now.",
     "createOfferHere": "Create an offer at this club",
-    "clubChat": "Club chat"
+    "clubChat": "Club chat",
+    "coachesHere": "Coaches at this club"
   },
   "FollowClubButton": {
     "follow": "Follow",
@@ -1066,5 +1068,32 @@
     "intentsHeading": "Looking for a game today",
     "emptyState": "Nobody today — create a game for tonight and be the first.",
     "createForTonight": "Create a game for tonight"
+  },
+  "CoachLevel": {
+    "BEGINNER": "Beginner",
+    "INTERMEDIATE": "Intermediate",
+    "ADVANCED": "Advanced",
+    "KIDS": "Kids"
+  },
+  "Locale": {
+    "EN": "English",
+    "PL": "Polish"
+  },
+  "CoachesPage": {
+    "title": "Coaches",
+    "noneMatchFilters": "No coaches match these filters.",
+    "directoryGrowing": "The directory is growing — more coaches will appear here soon."
+  },
+  "CoachFilters": {
+    "formLabel": "Filter coaches",
+    "districtLabel": "District",
+    "levelLabel": "Level",
+    "any": "Any",
+    "submit": "Search",
+    "clear": "Clear"
+  },
+  "CoachCard": {
+    "teachesAt": "Teaches at:",
+    "checkedOn": "Info checked on {date}."
   }
 }
