@@ -35,14 +35,15 @@ type EventProperties = {
   waitlist_spot_offered: Record<string, never>;
   waitlist_spot_taken: Record<string, never>;
   waitlist_spot_passed: Record<string, never>;
+  intent_posted: Record<string, never>;
+  intent_invited: Record<string, never>;
+  intent_converted: Record<string, never>;
 };
 
 // Where "Invite to game" (slice S1) was clicked from. "playAgain" is Q.2's
-// own trigger — the plan's table (docs/MATCHFINDER-PLUS.md §4) only lists
-// profile/leaderboard/candidates/intent (U2, not built yet), but it's the
-// same event with one more funnel to tell apart.
+// own trigger; "intent" is U2.3's "Invite to my game" on a PlayIntent card.
 export type InviteSource =
-  "profile" | "leaderboard" | "candidates" | "playAgain";
+  "profile" | "leaderboard" | "candidates" | "playAgain" | "intent";
 
 export type AnalyticsEvent = keyof EventProperties;
 

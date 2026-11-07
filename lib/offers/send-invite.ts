@@ -19,6 +19,9 @@ export async function sendOfferInvite(
   inviterId: string,
   inviteeId: string,
   now: Date = new Date(),
+  /** U2.3: this invite came from a PlayIntent card — stored so accepting
+   * it can fire `intent_converted` (task U2.4). */
+  fromIntent = false,
 ): Promise<SendInviteOutcome> {
   const offer = await db.sparringOffer.findUnique({
     where: { id: offerId },
@@ -57,7 +60,9 @@ export async function sendOfferInvite(
     return { ok: false, refusal };
   }
 
-  await db.offerInvite.create({ data: { offerId, inviterId, inviteeId } });
+  await db.offerInvite.create({
+    data: { offerId, inviterId, inviteeId, fromIntent },
+  });
   await notify(inviteeId, { kind: "INVITE_RECEIVED", offerId });
   return { ok: true };
 }

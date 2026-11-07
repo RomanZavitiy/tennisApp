@@ -87,14 +87,43 @@ export function levelMatches(
   return minOk && maxOk;
 }
 
+/** The shared counters/toggle every "new offer"-shaped push is gated by —
+ * also U2.4's push to a matching offer's author, which reuses this same
+ * throttle rather than a second set of counters. */
+export type PushThrottleState = {
+  notifyNewOffers: boolean;
+  offerPushSentOn: string | null;
+  offerPushSentCount: number;
+};
+
 function hasDailyCapacity(
-  candidate: OfferPushCandidate,
+  recipient: PushThrottleState,
   today: string,
 ): boolean {
   return (
-    candidate.offerPushSentOn !== today ||
-    candidate.offerPushSentCount < DAILY_OFFER_PUSH_LIMIT
+    recipient.offerPushSentOn !== today ||
+    recipient.offerPushSentCount < DAILY_OFFER_PUSH_LIMIT
   );
+}
+
+/**
+ * Whether `recipient` is open to a "new offer"-shaped push right now at
+ * all: opted in, under today's cap, not during quiet hours. Shared by
+ * isInterestedIn below and U2.4's own matching rule
+ * (lib/matching/intent-interest.ts) — neither has anything more to add on
+ * top of these three checks, only their own structural match.
+ */
+export function hasPushCapacityNow(
+  recipient: PushThrottleState,
+  now: Date,
+): boolean {
+  if (!recipient.notifyNewOffers) {
+    return false;
+  }
+  if (isQuietHours(now)) {
+    return false;
+  }
+  return hasDailyCapacity(recipient, warsawDateString(now));
 }
 
 /**
@@ -110,9 +139,6 @@ export function isInterestedIn(
   now: Date,
 ): boolean {
   if (candidate.userId === offer.authorId) {
-    return false;
-  }
-  if (!candidate.notifyNewOffers) {
     return false;
   }
   if (offer.district === null) {
@@ -139,13 +165,7 @@ export function isInterestedIn(
   ) {
     return false;
   }
-  if (isQuietHours(now)) {
-    return false;
-  }
-  if (!hasDailyCapacity(candidate, warsawDateString(now))) {
-    return false;
-  }
-  return true;
+  return hasPushCapacityNow(candidate, now);
 }
 
 /** Every candidate `isInterestedIn` this offer, in the order given. */

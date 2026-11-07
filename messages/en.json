@@ -98,6 +98,10 @@
     "SPOT_OPENED": {
       "title": "A spot opened up",
       "body": "You're next on the reserve list — your request is waiting for the author."
+    },
+    "INTENT_FOR_YOUR_OFFER": {
+      "title": "Someone's looking for your kind of game",
+      "body": "A player posted a \"looking for a game\" intent that matches one of your open offers."
     }
   },
   "SystemMessages": {
@@ -221,6 +225,7 @@
   "OffersPage": {
     "title": "Sparring offers",
     "postAnOffer": "Post an offer",
+    "lookingForGame": "Looking for a game? →",
     "noMoreOffers": "No more offers.",
     "noneMatchFilters": "No offers match these filters.",
     "noOpenOffers": "No open offers right now. Post one and other players can join you.",
@@ -707,7 +712,8 @@
     "MAGIC_LINK": "Too many sign-in emails. Wait a bit and try again.",
     "BOOKING_REQUEST": "You've sent a lot of booking requests today. Try again tomorrow.",
     "CLUB_SUBMISSION": "You've suggested a few clubs today. Try again tomorrow.",
-    "OFFER_INVITE": "You've sent a lot of invites this hour. Try again later."
+    "OFFER_INVITE": "You've sent a lot of invites this hour. Try again later.",
+    "PLAY_INTENT": "You've changed your \"looking for a game\" post a lot today. Try again tomorrow."
   },
   "Validation": {
     "login": {
@@ -783,6 +789,13 @@
       "addressTooLong": "Keep the address under {max} characters.",
       "districtInvalid": "Choose a district, or leave it unset.",
       "notesTooLong": "Keep the notes under {max} characters."
+    },
+    "playIntent": {
+      "dateRequired": "Choose a date.",
+      "datePast": "Choose today or a later date.",
+      "timesRequired": "Choose at least one time of day.",
+      "districtsRequired": "Choose at least one district.",
+      "noteTooLong": "Keep the note under {max} characters."
     }
   },
   "OnboardingPage": {
@@ -1020,5 +1033,28 @@
     "FRI": "Fri",
     "SAT": "Sat",
     "SUN": "Sun"
+  },
+  "LookingForGamePage": {
+    "title": "Looking for a game",
+    "subtitle": "Post what you're after, or browse what other players are looking for.",
+    "backToFeed": "Back to offers",
+    "postYours": "Post what you're looking for",
+    "noneYet": "Nobody's posted a \"looking for a game\" intent yet."
+  },
+  "PostIntentForm": {
+    "dateLabel": "Date",
+    "timesLabel": "Time of day",
+    "districtsLabel": "Districts",
+    "formatLabel": "Format",
+    "noteLabel": "Note (optional)",
+    "noteHint": "Up to {max} characters.",
+    "posting": "Posting…",
+    "submit": "Post",
+    "posted": "Posted. Other players can now find and invite you."
+  },
+  "IntentCard": {
+    "aPlayer": "A player",
+    "summary": "{date} · {districts} · {times} · {format}",
+    "createAndInvite": "Create a game and invite"
   }
 }

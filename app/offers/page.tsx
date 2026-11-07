@@ -70,6 +70,16 @@ export default async function OffersPage({
         )}
       </div>
 
+      {/* "Шукають гру" (slice U2, task U2.2): signed-in players only — a
+          guest sees no link, same gate the page itself enforces. */}
+      {!showHidden && viewer && (
+        <p className="mt-4 text-sm">
+          <Link href="/offers/looking" className="hover:underline">
+            {t("lookingForGame")}
+          </Link>
+        </p>
+      )}
+
       {showHidden ? (
         viewer && (
           <p className="mt-2 text-sm text-muted-foreground">

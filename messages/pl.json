@@ -98,6 +98,10 @@
     "SPOT_OPENED": {
       "title": "Zwolniło się miejsce",
       "body": "Jesteś następny w rezerwie — Twoje zgłoszenie czeka na autora."
+    },
+    "INTENT_FOR_YOUR_OFFER": {
+      "title": "Ktoś szuka gry jak Twoja",
+      "body": "Zawodnik dodał ogłoszenie \"szukam gry\", które pasuje do jednej z Twoich otwartych ofert."
     }
   },
   "SystemMessages": {
@@ -221,6 +225,7 @@
   "OffersPage": {
     "title": "Oferty sparingowe",
     "postAnOffer": "Dodaj ogłoszenie",
+    "lookingForGame": "Szukasz gry? →",
     "noMoreOffers": "Brak kolejnych ofert.",
     "noneMatchFilters": "Żadna oferta nie spełnia tych filtrów.",
     "noOpenOffers": "Brak otwartych ofert. Dodaj swoją, a inni zawodnicy będą mogli się zgłosić.",
@@ -707,7 +712,8 @@
     "MAGIC_LINK": "Za dużo e-maili logowania. Poczekaj chwilę i spróbuj ponownie.",
     "BOOKING_REQUEST": "Wysłano już dziś wiele prośb o rezerwację. Spróbuj ponownie jutro.",
     "CLUB_SUBMISSION": "Zgłoszono już dziś kilka klubów. Spróbuj ponownie jutro.",
-    "OFFER_INVITE": "Wysłano już wiele zaproszeń w tej godzinie. Spróbuj ponownie później."
+    "OFFER_INVITE": "Wysłano już wiele zaproszeń w tej godzinie. Spróbuj ponownie później.",
+    "PLAY_INTENT": "Zbyt wiele zmian ogłoszenia \"szukam gry\" dzisiaj. Spróbuj ponownie jutro."
   },
   "Validation": {
     "login": {
@@ -783,6 +789,13 @@
       "addressTooLong": "Adres może mieć maksymalnie {max} znaków.",
       "districtInvalid": "Wybierz dzielnicę albo zostaw to pole puste.",
       "notesTooLong": "Notatki mogą mieć maksymalnie {max} znaków."
+    },
+    "playIntent": {
+      "dateRequired": "Wybierz datę.",
+      "datePast": "Wybierz dzisiejszą lub późniejszą datę.",
+      "timesRequired": "Wybierz co najmniej jedną porę dnia.",
+      "districtsRequired": "Wybierz co najmniej jedną dzielnicę.",
+      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków."
     }
   },
   "OnboardingPage": {
@@ -1020,5 +1033,28 @@
     "FRI": "Pt",
     "SAT": "Sob",
     "SUN": "Ndz"
+  },
+  "LookingForGamePage": {
+    "title": "Szukają gry",
+    "subtitle": "Dodaj czego szukasz albo przeglądaj, czego szukają inni zawodnicy.",
+    "backToFeed": "Wróć do ofert",
+    "postYours": "Dodaj czego szukasz",
+    "noneYet": "Nikt jeszcze nie dodał ogłoszenia \"szukam gry\"."
+  },
+  "PostIntentForm": {
+    "dateLabel": "Data",
+    "timesLabel": "Pora dnia",
+    "districtsLabel": "Dzielnice",
+    "formatLabel": "Format",
+    "noteLabel": "Notatka (opcjonalnie)",
+    "noteHint": "Maksymalnie {max} znaków.",
+    "posting": "Dodawanie…",
+    "submit": "Dodaj",
+    "posted": "Dodano. Inni zawodnicy mogą Cię teraz znaleźć i zaprosić."
+  },
+  "IntentCard": {
+    "aPlayer": "Zawodnik",
+    "summary": "{date} · {districts} · {times} · {format}",
+    "createAndInvite": "Stwórz grę i zaproś"
   }
 }

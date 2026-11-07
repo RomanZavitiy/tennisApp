@@ -50,6 +50,10 @@ const RATE_LIMITS: Record<
   CLUB_SUBMISSION: { windowMs: DAY_MS, limit: 3 },
   // S1.5 (slice S1): at most 10 invites an hour.
   OFFER_INVITE: { windowMs: HOUR_MS, limit: 10 },
+  // U2.1 (slice U2): at most 1 intent per day anyway (the unique index on
+  // userId+date), but changing your mind a few times in one day is normal
+  // — this only stops a genuine spam loop.
+  PLAY_INTENT: { windowMs: DAY_MS, limit: 10 },
 };
 
 export type RateLimitResult = { ok: true } | { ok: false };

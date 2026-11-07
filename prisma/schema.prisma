@@ -171,6 +171,8 @@ model User {
   invitesReceived         OfferInvite[]      @relation("InvitesReceived")
   /// Offers this player is waiting in line for (slice T).
   waitlistEntries         OfferWaitlist[]
+  /// This player's "looking for a game" posts (slice U2).
+  playIntents             PlayIntent[]
 
   // Discoverability (slice S2, task S2.3, owner decision 2026-11-07): whether
   // this player can appear in another author's "candidates to invite" list
@@ -558,6 +560,12 @@ model OfferInvite {
   inviteeId String @map("invitee_id") @db.Uuid
   invitee   User   @relation("InvitesReceived", fields: [inviteeId], references: [id], onDelete: Cascade)
 
+  /// Set when this invite was sent from a PlayIntent card (slice U2, task
+  /// U2.3) — drives `intent_converted` (task U2.4's analytics table) the
+  /// moment the invitee accepts, the one place that funnel can be told
+  /// apart from an ordinary "Invite to game" after the fact.
+  fromIntent Boolean @default(false) @map("from_intent")
+
   /// One invite per player per offer (task S1.1) — a declined invite stands,
   /// same reasoning as OfferJoin's own unique index.
   @@unique([offerId, inviteeId])
@@ -610,6 +618,41 @@ model OfferWaitlist {
   /// one offer.
   @@index([offerId, createdAt])
   @@map("offer_waitlists")
+}
+
+/// "Хочу зіграти" (slice U2, task U2.1): a player looking for a game
+/// without a concrete offer yet. Visible to every signed-in player (owner
+/// decision 2026-11-07), read only on the server — see the RLS note below.
+model PlayIntent {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// The Kraków calendar day this intent is for — a date, not a timestamp,
+  /// same convention as Club.verifiedAt.
+  date DateTime @db.Date
+  /// Parts of day (lib/offers/feed-filters.ts's TIMES_OF_DAY), at least
+  /// one — validated by Zod, not a Postgres enum, same reasoning as
+  /// User.preferredTimes (slice U1).
+  times String[]
+  /// Districts this player would play in for this intent, at least one.
+  districts District[]
+  format    OfferFormat @default(SINGLES)
+  /// Free text, e.g. "flexible on time" — the only optional field.
+  note String? @db.VarChar(200)
+  /// Midnight Europe/Warsaw after `date` (task U2.1) — the hourly cron
+  /// could prune by this, though nothing does yet; today only the feed
+  /// query (lib/offers/play-intent-feed.ts) filters live ones out by date.
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+
+  /// At most one active intent per day per player (task U2.1): posting
+  /// again for the same date replaces it rather than adding a second row.
+  @@unique([userId, date])
+  /// The feed's own query shape: live intents for one calendar day.
+  @@index([date])
+  @@map("play_intents")
 }
 
 model UserBlock {
@@ -1148,6 +1191,9 @@ enum NotificationKind {
   /// spot just opened up and their priority request is waiting for the
   /// author.
   SPOT_OPENED
+  /// Slice U2 (task U2.4): a new "looking for a game" post matches one of
+  /// this player's open offers.
+  INTENT_FOR_YOUR_OFFER
 
   @@map("notification_kind")
 }
@@ -1163,6 +1209,8 @@ enum RateLimitAction {
   CLUB_SUBMISSION
   /// S1.5 (slice S1): at most 10 invites an hour, so inviting can't be spammed.
   OFFER_INVITE
+  /// U2.1 (slice U2): posting a "looking for a game" intent.
+  PLAY_INTENT
 
   @@map("rate_limit_action")
 }
