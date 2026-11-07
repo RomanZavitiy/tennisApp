@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import type { JoinChangeResult } from "@/app/offers/[id]/actions";
+import { notifyNewAchievements } from "@/lib/achievements/achievements";
 import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
@@ -184,7 +185,14 @@ export async function submitNoShow(
 }
 
 type SettleOutcome =
-  | { ok: true; offerId: string; offerJoinId: string }
+  | {
+      ok: true;
+      matchResultId: string;
+      offerId: string;
+      offerJoinId: string;
+      authorId: string;
+      playerId: string;
+    }
   | { ok: false; message: string };
 
 // One path for confirm and dispute (4.7, extended by 4.10 for a no-show
@@ -275,7 +283,14 @@ async function settleResult(
     if (!outcome.ok) {
       return outcome;
     }
-    return { ok: true, offerId: join.offerId, offerJoinId: join.id };
+    return {
+      ok: true,
+      matchResultId: id.data,
+      offerId: join.offerId,
+      offerJoinId: join.id,
+      authorId: join.offer.authorId,
+      playerId: join.userId,
+    };
   });
 }
 
@@ -320,6 +335,11 @@ export async function confirmResult(
     RESULT_CONFIRMED_MESSAGE,
   );
   await captureEvent("result_confirmed", user.id, {});
+  await notifyNewAchievements(
+    outcome.authorId,
+    outcome.playerId,
+    outcome.matchResultId,
+  );
   revalidatePath(`/offers/${outcome.offerId}`);
   return { ok: true };
 }

@@ -1,3 +1,5 @@
+import type { AchievementId } from "@/lib/achievements/achievements";
+
 // The product events task 6.5/6.6 and K.14 ask for. Each event's property type
 // is the allowlist: no field here may carry an email, a name, or message/
 // report text (decision 2026-10-14, "Аналітика: PostHog EU без cookie") —
@@ -41,6 +43,8 @@ type EventProperties = {
   play_today_viewed: Record<string, never>;
   play_today_result_selected: Record<string, never>;
   play_today_empty_state: Record<string, never>;
+  feedback_given: { count: number };
+  achievement_unlocked: { id: AchievementId };
 };
 
 // Where "Invite to game" (slice S1) was clicked from. "playAgain" is Q.2's

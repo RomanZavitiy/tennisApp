@@ -173,6 +173,10 @@ model User {
   waitlistEntries         OfferWaitlist[]
   /// This player's "looking for a game" posts (slice U2).
   playIntents             PlayIntent[]
+  /// Feedback this player left about an opponent after a match (slice W).
+  feedbackGiven           MatchFeedback[] @relation("FeedbackGiven")
+  /// Feedback this player received from an opponent after a match (slice W).
+  feedbackReceived        MatchFeedback[] @relation("FeedbackReceived")
 
   // Discoverability (slice S2, task S2.3, owner decision 2026-11-07): whether
   // this player can appear in another author's "candidates to invite" list
@@ -821,8 +825,54 @@ model MatchResult {
   playerEloBefore Int?          @map("player_elo_before")
   playerEloAfter  Int?          @map("player_elo_after")
   adminActions    AdminAction[]
+  /// Post-match feedback either side left about the other (slice W).
+  feedback        MatchFeedback[]
 
   @@map("match_results")
+}
+
+/// Optional feedback one player leaves about their opponent after a
+/// CONFIRMED result (slice W, owner decision 2026-11-07): up to three tags
+/// ("punctual", "level matches NTRP", "good game") plus a separate level
+/// signal, once per opponent per match, within 7 days of confirmation (the
+/// window is `matchResult.updatedAt` — a result's status only ever
+/// transitions to CONFIRMED once, so that timestamp is the confirmation
+/// moment). No free text, by design. Tags only ever become a public badge
+/// in aggregate (lib/feedback/badges.ts, >=5 different givers); an
+/// individual row — and who gave it — is never shown to anyone, including
+/// the receiver (enforced by never querying this table by anything other
+/// than the giver's own id or an aggregate over receiverId).
+model MatchFeedback {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  matchResultId String      @map("match_result_id") @db.Uuid
+  matchResult   MatchResult @relation(fields: [matchResultId], references: [id], onDelete: Cascade)
+
+  giverId String @map("giver_id") @db.Uuid
+  giver   User   @relation("FeedbackGiven", fields: [giverId], references: [id], onDelete: Cascade)
+
+  receiverId String @map("receiver_id") @db.Uuid
+  receiver   User   @relation("FeedbackReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  /// 0-3 entries (CHECK in the migration caps the count; no-duplicates is
+  /// the Zod schema's job — Postgres CHECK can't de-dupe without a
+  /// subquery) — each tag is its own optional checkbox, not a ranked or
+  /// required choice.
+  tags FeedbackTag[]
+  /// "This player's level felt higher/lower than their declared NTRP" —
+  /// deliberately separate from `tags`: it calibrates NTRP (hint only, once
+  /// >=3 givers agree — lib/feedback/level-signal.ts), not a politeness tag.
+  levelSignal LevelSignal? @map("level_signal")
+
+  /// One feedback row per giver per match — same reasoning as MatchResult's
+  /// own unique offerJoinId, but keyed by giver since a match has two
+  /// possible givers, not one result.
+  @@unique([matchResultId, giverId])
+  /// The badge/hint aggregate's own query shape: every feedback a player
+  /// has received.
+  @@index([receiverId])
+  @@map("match_feedback")
 }
 
 /// A click on a club's booking link or phone number, from `/clubs/[id]` or an
@@ -1247,6 +1297,27 @@ enum NotificationKind {
   INTENT_FOR_YOUR_OFFER
 
   @@map("notification_kind")
+}
+
+/// The three optional feedback tags a player may leave about an opponent
+/// after a confirmed match (slice W, owner decision 2026-11-07) — no free
+/// text, and no more than these three.
+enum FeedbackTag {
+  PUNCTUAL
+  LEVEL_MATCHES_NTRP
+  GOOD_GAME
+
+  @@map("feedback_tag")
+}
+
+/// "This opponent's level felt higher/lower than their declared NTRP"
+/// (slice W) — a separate signal from `FeedbackTag`, shown only privately
+/// to the player themselves as a hint once enough opponents agree.
+enum LevelSignal {
+  HIGHER
+  LOWER
+
+  @@map("level_signal")
 }
 
 enum RateLimitAction {

@@ -180,6 +180,7 @@
   "ProfilePage": {
     "title": "Twój profil",
     "myGames": "Moje gry",
+    "rateYourOpponent": "Oceń przeciwnika",
     "myBookings": "Moje rezerwacje",
     "matchHistory": "Historia meczów",
     "blockedPlayers": "Zablokowani zawodnicy",
@@ -592,6 +593,51 @@
     "vs": "vs",
     "aPlayer": "Zawodnik",
     "playAgain": "Zagraj znowu"
+  },
+  "PendingFeedbackPrompt": {
+    "vsOpponent": "vs {name}",
+    "aPlayer": "zawodnikiem"
+  },
+  "RateOpponentButton": {
+    "label": "Oceń przeciwnika"
+  },
+  "RateOpponentForm": {
+    "tagsLabel": "Jak było?",
+    "levelSignalLabel": "Jego/jej poziom wydawał się...",
+    "levelSignalNone": "Odpowiedni",
+    "submitting": "Wysyłanie…",
+    "submit": "Wyślij opinię",
+    "done": "Dziękujemy za opinię!"
+  },
+  "FeedbackTag": {
+    "PUNCTUAL": "Punktualny",
+    "LEVEL_MATCHES_NTRP": "Poziom zgodny z NTRP",
+    "GOOD_GAME": "Przyjemna gra"
+  },
+  "LevelSignal": {
+    "HIGHER": "Wyższy",
+    "LOWER": "Niższy"
+  },
+  "LevelHint": {
+    "HIGHER": "Kilku przeciwników uznało, że Twój poziom gry jest wyższy niż zadeklarowany NTRP.",
+    "LOWER": "Kilku przeciwników uznało, że Twój poziom gry jest niższy niż zadeklarowany NTRP."
+  },
+  "Achievement": {
+    "FIRST_MATCH": "Pierwszy mecz",
+    "MATCHES_10": "10 meczów",
+    "MATCHES_25": "25 meczów",
+    "MATCHES_50": "50 meczów",
+    "RELIABLE": "Solidny zawodnik",
+    "FIVE_OPPONENTS": "5 różnych przeciwników",
+    "REGULAR_MONTH": "Regularny gracz"
+  },
+  "SubmitFeedbackRefusal": {
+    "MATCH_NOT_FOUND": "Ten mecz nie istnieje.",
+    "NOT_PARTICIPANT": "To nie Twój mecz.",
+    "NOT_CONFIRMED": "Wynik tego meczu nie został jeszcze potwierdzony.",
+    "WINDOW_CLOSED": "Opinię można dodać tylko w ciągu 7 dni od potwierdzenia meczu.",
+    "ALREADY_GIVEN": "Już oceniłeś/aś tego przeciwnika w tym meczu.",
+    "BLOCKED": "Nie możesz zostawić opinii temu zawodnikowi."
   },
   "ResultForm": {
     "you": "Ty",
