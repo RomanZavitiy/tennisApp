@@ -19,6 +19,7 @@ const OFFER = {
   district: "STARE_MIASTO" as const,
   ntrpMin: 3.5,
   ntrpMax: 4.0,
+  startsAt: new Date("2026-11-10T17:00:00Z"), // 18:00 Europe/Warsaw, evening
 };
 const NOW = new Date("2026-11-10T12:00:00Z"); // noon Europe/Warsaw
 
@@ -30,6 +31,8 @@ function candidateRow(over: Partial<Record<string, unknown>> = {}) {
     notifyNewOffers: true,
     offerPushSentOn: null,
     offerPushSentCount: 0,
+    preferredDistricts: [],
+    preferredTimes: [],
     ...over,
   };
 }
@@ -92,7 +95,7 @@ describe("notifyInterestedPlayers", () => {
     expect(userUpdate).not.toHaveBeenCalled();
   });
 
-  it("queries only onboarded players in the offer's own district, excluding the author", async () => {
+  it("queries onboarded players whose home or preferred district matches, excluding the author", async () => {
     userFindMany.mockResolvedValue([]);
 
     await notifyInterestedPlayers(OFFER, NOW);
@@ -100,9 +103,29 @@ describe("notifyInterestedPlayers", () => {
     const [args] = userFindMany.mock.calls[0] as [{ where: object }];
     expect(args.where).toEqual({
       id: { not: AUTHOR },
-      district: "STARE_MIASTO",
+      OR: [
+        { district: "STARE_MIASTO" },
+        { preferredDistricts: { has: "STARE_MIASTO" } },
+      ],
       notifyNewOffers: true,
       onboardingCompletedAt: { not: null },
     });
+  });
+
+  it("notifies a candidate whose home district differs but who prefers this one (U1.3)", async () => {
+    userFindMany.mockResolvedValue([
+      candidateRow({
+        district: "PODGORZE",
+        preferredDistricts: ["STARE_MIASTO"],
+      }),
+    ]);
+
+    await notifyInterestedPlayers(OFFER, NOW);
+
+    expect(notify).toHaveBeenCalledWith(
+      "candidate-1",
+      { kind: "NEW_OFFER_FOR_LEVEL", offerId: "offer-1" },
+      NOW,
+    );
   });
 });

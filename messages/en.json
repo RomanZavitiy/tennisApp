@@ -181,6 +181,7 @@
     "account": "Account",
     "photo": "Profile photo",
     "editProfile": "Edit profile",
+    "playPreferences": "When I like to play",
     "notifications": "Notifications",
     "exportData": "Download my data",
     "language": "Language",
@@ -992,5 +993,32 @@
     "ALREADY_JOINED": "You already have a request on this offer.",
     "ALREADY_WAITLISTED": "You're already on the reserve list.",
     "DECLINED": "The author has declined your request."
+  },
+  "PlayPreferencesPage": {
+    "title": "When I like to play",
+    "subtitle": "All optional — leave anything blank to keep seeing everything you do today.",
+    "backToProfile": "Back to profile"
+  },
+  "PlayPreferencesForm": {
+    "daysLabel": "Days of the week",
+    "timesLabel": "Time of day",
+    "districtsLabel": "Other districts you're open to",
+    "time": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved."
+  },
+  "Weekday": {
+    "MON": "Mon",
+    "TUE": "Tue",
+    "WED": "Wed",
+    "THU": "Thu",
+    "FRI": "Fri",
+    "SAT": "Sat",
+    "SUN": "Sun"
   }
 }

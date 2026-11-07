@@ -10,11 +10,13 @@ import {
 } from "@/lib/matching/offer-interest";
 
 const AUTHOR = "author-id";
+// 18:00 Europe/Warsaw (winter, UTC+1) — the "evening" bucket.
 const OFFER: NewOfferInfo = {
   authorId: AUTHOR,
   district: "STARE_MIASTO",
   ntrpMin: 3.5,
   ntrpMax: 4.0,
+  startsAt: new Date("2026-11-10T17:00:00Z"),
 };
 
 function candidate(over: Partial<OfferPushCandidate> = {}): OfferPushCandidate {
@@ -25,6 +27,8 @@ function candidate(over: Partial<OfferPushCandidate> = {}): OfferPushCandidate {
     notifyNewOffers: true,
     offerPushSentOn: null,
     offerPushSentCount: 0,
+    preferredDistricts: [],
+    preferredTimes: [],
     ...over,
   };
 }
@@ -89,6 +93,53 @@ describe("isInterestedIn", () => {
   it("skips a different district", () => {
     expect(
       isInterestedIn(candidate({ district: "PODGORZE" }), OFFER, NOON_WARSAW),
+    ).toBe(false);
+  });
+
+  it("matches a different district when it's one of the preferred ones (U1.3)", () => {
+    expect(
+      isInterestedIn(
+        candidate({
+          district: "PODGORZE",
+          preferredDistricts: ["STARE_MIASTO"],
+        }),
+        OFFER,
+        NOON_WARSAW,
+      ),
+    ).toBe(true);
+  });
+
+  it("still skips a district that isn't the home one or a preferred one (U1.3)", () => {
+    expect(
+      isInterestedIn(
+        candidate({ district: "PODGORZE", preferredDistricts: ["NOWA_HUTA"] }),
+        OFFER,
+        NOON_WARSAW,
+      ),
+    ).toBe(false);
+  });
+
+  it("matches any time of day when preferredTimes is empty (U1.3)", () => {
+    expect(isInterestedIn(candidate(), OFFER, NOON_WARSAW)).toBe(true);
+  });
+
+  it("matches when the offer falls in a preferred time of day (U1.3)", () => {
+    expect(
+      isInterestedIn(
+        candidate({ preferredTimes: ["evening"] }),
+        OFFER,
+        NOON_WARSAW,
+      ),
+    ).toBe(true);
+  });
+
+  it("skips when the offer falls outside every preferred time of day (U1.3)", () => {
+    expect(
+      isInterestedIn(
+        candidate({ preferredTimes: ["morning"] }),
+        OFFER,
+        NOON_WARSAW,
+      ),
     ).toBe(false);
   });
 

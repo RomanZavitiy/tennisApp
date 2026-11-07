@@ -7,6 +7,7 @@ import {
   type OfferPushCandidate,
 } from "@/lib/matching/offer-interest";
 import { notify } from "@/lib/notifications/notify";
+import type { TimeOfDay } from "@/lib/offers/feed-filters";
 
 // "New offer for my level" (task 5.16): called once, right after createOffer
 // (3.5) saves the row. Narrows by district in the query — the rest of the
@@ -20,6 +21,8 @@ function toCandidate(row: {
   notifyNewOffers: boolean;
   offerPushSentOn: Date | null;
   offerPushSentCount: number;
+  preferredDistricts: District[];
+  preferredTimes: string[];
 }): OfferPushCandidate {
   return {
     userId: row.id,
@@ -30,6 +33,12 @@ function toCandidate(row: {
       ? row.offerPushSentOn.toISOString().slice(0, 10)
       : null,
     offerPushSentCount: row.offerPushSentCount,
+    preferredDistricts: row.preferredDistricts,
+    // Stored as a plain text[] column (lib/profile/options.ts's WEEKDAYS
+    // has the same shape) — cast once here rather than widen
+    // OfferPushCandidate's own type to the raw column type everywhere else
+    // that builds one (e.g. the tests).
+    preferredTimes: row.preferredTimes as TimeOfDay[],
   };
 }
 
@@ -45,7 +54,12 @@ export async function notifyInterestedPlayers(
   const rows = await db.user.findMany({
     where: {
       id: { not: offer.authorId },
-      district: offer.district,
+      // U1.3: the candidate's own district still matches as before U1;
+      // OR widens the pool to players who named this one as preferred too.
+      OR: [
+        { district: offer.district },
+        { preferredDistricts: { has: offer.district } },
+      ],
       notifyNewOffers: true,
       onboardingCompletedAt: { not: null },
     },
@@ -56,6 +70,8 @@ export async function notifyInterestedPlayers(
       notifyNewOffers: true,
       offerPushSentOn: true,
       offerPushSentCount: true,
+      preferredDistricts: true,
+      preferredTimes: true,
     },
   });
 

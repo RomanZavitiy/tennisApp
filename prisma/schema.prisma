@@ -85,6 +85,20 @@ model User {
   /// before the start (isLateCancellation, lib/rating/reliability.ts).
   lateCancellations Int @default(0) @map("late_cancellations")
 
+  // Play preferences ("Коли я люблю грати", slice U1, task U1.1). All
+  // empty by default and optional in the form (U1.2) — empty means no
+  // preference and the current behaviour everywhere that reads them
+  // (task U1.3). preferredDays/preferredTimes aren't Postgres enums like
+  // District: they're UI-facing string constants (lib/profile/options.ts's
+  // WEEKDAYS, lib/offers/feed-filters.ts's TIMES_OF_DAY), validated by Zod
+  // rather than a CHECK, the same reasoning `time` already has as a feed
+  // filter with no column of its own before this.
+  preferredDays       String[]   @map("preferred_days")
+  preferredTimes      String[]   @map("preferred_times")
+  /// Districts besides `district` above this player is also open to
+  /// playing in. A Postgres enum array, same as Club.surfaces.
+  preferredDistricts  District[] @map("preferred_districts")
+
   // Notification settings (task 5.3, slice H). All default on: push is the
   // main channel (decision 2026-10-14) and starts silent until 5.15 asks for
   // permission, so defaulting off would mean asking players to find a

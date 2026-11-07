@@ -35,3 +35,17 @@ export const NTRP_LEVELS = Array.from(
   { length: (NTRP_MAX - NTRP_MIN) / NTRP_STEP + 1 },
   (_, i) => NTRP_MIN + i * NTRP_STEP,
 );
+
+/** "Коли я люблю грати" (slice U1, task U1.1), Monday first. Not a Prisma
+ * enum — User.preferredDays stores these literals in a plain text array,
+ * validated by Zod. */
+export const WEEKDAYS = [
+  "MON",
+  "TUE",
+  "WED",
+  "THU",
+  "FRI",
+  "SAT",
+  "SUN",
+] as const;
+export type Weekday = (typeof WEEKDAYS)[number];

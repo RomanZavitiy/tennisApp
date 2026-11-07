@@ -181,6 +181,7 @@
     "account": "Konto",
     "photo": "Zdjęcie profilowe",
     "editProfile": "Edytuj profil",
+    "playPreferences": "Kiedy lubię grać",
     "notifications": "Powiadomienia",
     "exportData": "Pobierz moje dane",
     "language": "Język",
@@ -992,5 +993,32 @@
     "ALREADY_JOINED": "Masz już zgłoszenie na tę ofertę.",
     "ALREADY_WAITLISTED": "Jesteś już na liście rezerwowej.",
     "DECLINED": "Autor odrzucił Twoje zgłoszenie."
+  },
+  "PlayPreferencesPage": {
+    "title": "Kiedy lubię grać",
+    "subtitle": "Wszystko opcjonalne — zostaw puste, aby widzieć wszystko jak dotychczas.",
+    "backToProfile": "Wróć do profilu"
+  },
+  "PlayPreferencesForm": {
+    "daysLabel": "Dni tygodnia",
+    "timesLabel": "Pora dnia",
+    "districtsLabel": "Inne dzielnice, które Ci odpowiadają",
+    "time": {
+      "morning": "Rano",
+      "afternoon": "Popołudnie",
+      "evening": "Wieczór"
+    },
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano."
+  },
+  "Weekday": {
+    "MON": "Pon",
+    "TUE": "Wt",
+    "WED": "Śr",
+    "THU": "Czw",
+    "FRI": "Pt",
+    "SAT": "Sob",
+    "SUN": "Ndz"
   }
 }

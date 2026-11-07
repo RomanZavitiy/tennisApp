@@ -83,6 +83,9 @@ export default async function ProfilePage() {
         </div>
         <ul className="divide-y border-t">
           <SettingsLink href="/profile/edit">{t("editProfile")}</SettingsLink>
+          <SettingsLink href="/profile/preferences">
+            {t("playPreferences")}
+          </SettingsLink>
           <SettingsLink href="/profile/notifications">
             {t("notifications")}
           </SettingsLink>
