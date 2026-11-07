@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { District } from "@/lib/generated/prisma/enums";
+import { zodFieldErrors } from "@/lib/validation/field-errors";
 
 // A player's tip about a club not on the platform yet (slice M, task M.1):
 // one schema for the form and for submitClub() (M.4), which re-checks,
@@ -68,24 +69,16 @@ export type SubmitClubResult =
       message?: string;
     };
 
-const CLUB_SUBMISSION_FIELDS = new Set<keyof ClubSubmissionInput>([
+const CLUB_SUBMISSION_FIELDS: (keyof ClubSubmissionInput)[] = [
   "name",
   "address",
   "districtGuess",
   "notes",
-]);
+];
 
 export function clubSubmissionFieldErrors(error: z.ZodError): SubmitClubResult {
-  const fieldErrors: Extract<SubmitClubResult, { ok: false }>["fieldErrors"] =
-    {};
-  for (const issue of error.issues) {
-    const field = issue.path[0];
-    if (
-      typeof field === "string" &&
-      CLUB_SUBMISSION_FIELDS.has(field as keyof ClubSubmissionInput)
-    ) {
-      fieldErrors[field as keyof ClubSubmissionInput] ??= issue.message;
-    }
-  }
-  return { ok: false, fieldErrors };
+  return {
+    ok: false,
+    fieldErrors: zodFieldErrors(error, CLUB_SUBMISSION_FIELDS),
+  };
 }

@@ -83,36 +83,3 @@ export type BookingRequestInput = z.input<
 export type BookingRequestValues = z.output<
   ReturnType<typeof bookingRequestSchema>
 >;
-
-// What a booking-creating server action returns when it doesn't redirect:
-// the first message per field, for the form to show next to it (same shape
-// as offerSchema's CreateOfferResult).
-export type CreateBookingResult = {
-  ok: false;
-  fieldErrors: Partial<Record<keyof BookingRequestInput, string>>;
-  message?: string;
-};
-
-const BOOKING_FIELDS = new Set<keyof BookingRequestInput>([
-  "courtId",
-  "startsAt",
-  "duration",
-  "note",
-  "offerId",
-]);
-
-export function bookingRequestFieldErrors(
-  error: z.ZodError,
-): CreateBookingResult {
-  const fieldErrors: CreateBookingResult["fieldErrors"] = {};
-  for (const issue of error.issues) {
-    const field = issue.path[0];
-    if (
-      typeof field === "string" &&
-      BOOKING_FIELDS.has(field as keyof BookingRequestInput)
-    ) {
-      fieldErrors[field as keyof BookingRequestInput] ??= issue.message;
-    }
-  }
-  return { ok: false, fieldErrors };
-}

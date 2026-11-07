@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 
 import { setLocale } from "@/lib/i18n/actions";
 import { LOCALES, type AppLocale } from "@/lib/i18n/locale";

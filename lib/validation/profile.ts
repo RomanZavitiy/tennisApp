@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { District, Gender } from "@/lib/generated/prisma/enums";
 import { NTRP_LEVELS } from "@/lib/profile/options";
+import { zodFieldErrors } from "@/lib/validation/field-errors";
 
 // The player profile: one schema for the onboarding/edit form and for the
 // server action that saves it (the action re-checks, since a request can skip
@@ -72,28 +73,16 @@ export type SaveProfileResult = {
 
 // The schema is now a function (it needs a translator — task 1.20), so this
 // can't read `.shape` off it any more; the field set is static anyway.
-const PROFILE_FIELDS = new Set<keyof ProfileInput>([
+const PROFILE_FIELDS: (keyof ProfileInput)[] = [
   "name",
   "birthDate",
   "gender",
   "district",
   "selfRatedNtrp",
-]);
+];
 
 export function profileFieldErrors(error: z.ZodError): SaveProfileResult {
-  const fieldErrors: SaveProfileResult["fieldErrors"] = {};
-  for (const issue of error.issues) {
-    // A request that isn't an object at all has no field to attach to; the
-    // form never sends one, so it only gets `ok: false`.
-    const field = issue.path[0];
-    if (
-      typeof field === "string" &&
-      PROFILE_FIELDS.has(field as keyof ProfileInput)
-    ) {
-      fieldErrors[field as keyof ProfileInput] ??= issue.message;
-    }
-  }
-  return { ok: false, fieldErrors };
+  return { ok: false, fieldErrors: zodFieldErrors(error, PROFILE_FIELDS) };
 }
 
 /** Validated profile values in the shape the `users` table stores them. */

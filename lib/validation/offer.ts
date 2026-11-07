@@ -9,6 +9,7 @@ import {
 import { DEFAULT_OFFER_DURATION, isOfferDuration } from "@/lib/offers/duration";
 import { krakowLocalToDate } from "@/lib/offers/krakow-time";
 import { NTRP_LEVELS } from "@/lib/profile/options";
+import { zodFieldErrors } from "@/lib/validation/field-errors";
 
 // A sparring offer: one schema for the form (3.5) and for the createOffer
 // server action (3.4), which re-checks, since a request can skip the form.
@@ -140,7 +141,7 @@ export type CreateOfferResult = {
 
 // The schema is now a function (it needs a translator), so this can't read
 // `.shape` off it any more; the field set is static anyway.
-const OFFER_FIELDS = new Set<keyof OfferInput>([
+const OFFER_FIELDS: (keyof OfferInput)[] = [
   "format",
   "hasPartner",
   "startsAt",
@@ -152,18 +153,8 @@ const OFFER_FIELDS = new Set<keyof OfferInput>([
   "surface",
   "courtStatus",
   "comment",
-]);
+];
 
 export function offerFieldErrors(error: z.ZodError): CreateOfferResult {
-  const fieldErrors: CreateOfferResult["fieldErrors"] = {};
-  for (const issue of error.issues) {
-    const field = issue.path[0];
-    if (
-      typeof field === "string" &&
-      OFFER_FIELDS.has(field as keyof OfferInput)
-    ) {
-      fieldErrors[field as keyof OfferInput] ??= issue.message;
-    }
-  }
-  return { ok: false, fieldErrors };
+  return { ok: false, fieldErrors: zodFieldErrors(error, OFFER_FIELDS) };
 }

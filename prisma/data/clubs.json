@@ -219,7 +219,7 @@
       { "weekday": 6, "opens": "08:00", "closes": "22:00" }
     ],
     "verifiedAt": "2026-10-27",
-    "source": "https://github.com/RomanZavitiy/tennisApp/blob/main/docs/BOOKING-EPIC.md",
+    "source": "https://github.com/RomanZavitiy/tennisApp/blob/27b57eb/docs/BOOKING-EPIC.md",
     "todo": [
       "This is a demo/test club for exercising the SPINBUDDY booking grid, not a real business — replace or remove once a real pilot club onboards."
     ]

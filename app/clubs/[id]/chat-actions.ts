@@ -33,9 +33,9 @@ export type SendClubMessageResult =
 // "Send" in a club's chat (task O.11): the same chain sendMessage
 // (app/offers/[id]/actions.ts) uses for a join's thread, with a follower
 // check (lib/messages/thread-rules.ts) in place of isJoinThreadParticipant.
-// No notify() call — club chat ships without notifications (out of scope,
-// docs/TIER2-FEATURES.md: notify() requires an offerId, which a club
-// message doesn't have).
+// No notify() call — club chat ships without notifications (out of scope
+// for slice O2: notify() requires an offerId, which a club message doesn't
+// have).
 export async function sendClubMessage(
   clubId: unknown,
   content: unknown,

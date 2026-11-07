@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { District, OfferFormat } from "@/lib/generated/prisma/enums";
 import { TIMES_OF_DAY } from "@/lib/offers/feed-filters";
+import { zodFieldErrors } from "@/lib/validation/field-errors";
 import { todayInKrakow } from "@/lib/validation/profile";
 
 // "Хочу зіграти" (slice U2, task U2.1): one schema for the form and for
@@ -47,27 +48,14 @@ export type PostPlayIntentResult =
       message?: string;
     };
 
-const PLAY_INTENT_FIELDS = new Set<keyof PlayIntentInput>([
+const PLAY_INTENT_FIELDS: (keyof PlayIntentInput)[] = [
   "date",
   "times",
   "districts",
   "format",
   "note",
-]);
+];
 
 export function playIntentFieldErrors(error: z.ZodError): PostPlayIntentResult {
-  const fieldErrors: Extract<
-    PostPlayIntentResult,
-    { ok: false }
-  >["fieldErrors"] = {};
-  for (const issue of error.issues) {
-    const field = issue.path[0];
-    if (
-      typeof field === "string" &&
-      PLAY_INTENT_FIELDS.has(field as keyof PlayIntentInput)
-    ) {
-      fieldErrors[field as keyof PlayIntentInput] ??= issue.message;
-    }
-  }
-  return { ok: false, fieldErrors };
+  return { ok: false, fieldErrors: zodFieldErrors(error, PLAY_INTENT_FIELDS) };
 }
