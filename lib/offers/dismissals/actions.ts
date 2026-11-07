@@ -12,7 +12,7 @@ export type DismissOfferResult = { ok: true } | { ok: false; message: string };
 // "Hide this offer from my feed" (slice N): the offer board is a filtered
 // list, not a swipe deck, so there's no existing "pass" action to attach
 // "undo" to — hide/unhide is the faithful equivalent, named that way
-// throughout (docs/TIER1-FEATURES.md). No ownership check: any onboarded
+// throughout. No ownership check: any onboarded
 // player may dismiss any offer they can see, including their own — simplest
 // to allow rather than special-case.
 export async function dismissOffer(

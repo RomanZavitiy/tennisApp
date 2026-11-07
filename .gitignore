@@ -49,8 +49,9 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 
-# local docs prompts
-docs/prompts/
+# finished plans and session prompts, kept locally only — git history has
+# every version; what is still open lives in docs/ROADMAP.md
+/docs/archive/
 # graphify: the graph and its report are committed; the extraction cache,
 # dated backups of older graphs, the local cost log and the machine-specific
 # interpreter/root pointers are not

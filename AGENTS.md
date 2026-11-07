@@ -12,9 +12,9 @@ A tennis matchFinder web app for Kraków: players find a court on a map, post/br
 that turns into an ELO-style rating as real matches get logged. Inspired by
 twojtenis.pl's sparring board, court map and profile — nothing else from that product is
 in scope. V1 adds request-based court booking for partner clubs (SpinBuddy-owned
-availability, no payments, no sync with third-party booking sites — decision 2026-10-21,
-see `docs/BOOKING-EPIC.md`); clubs not yet onboarded as partners keep the external-link
-booking flow.
+availability, no payments, no sync with third-party booking sites — decision 2026-10-21;
+how to onboard a partner club is in `docs/ROADMAP.md`); clubs not yet onboarded as
+partners keep the external-link booking flow. What's still open: `docs/ROADMAP.md`.
 
 ## 2. Stack
 
@@ -98,7 +98,7 @@ New top-level folders need a one-line reason in the PR description.
 - E2E (Playwright) covers only 4 critical flows, end to end: (1) sign in → onboarding;
   (2) create an offer → see it in the feed; (3) join request → acceptance → a chat
   message; (4) result → confirmation → ELO changes. Every other flow gets a unit test,
-  not a new Playwright spec — see `docs/PLANNING.md`'s "Процес" section.
+  not a new Playwright spec.
 - Don't delete or skip a failing test to make CI green — fix the code or ask the human.
 
 ## 8. Git workflow
@@ -149,7 +149,7 @@ implementation details go in the PR description instead, not here.
 The agent stops and asks the human only when one of these is true: a new external
 service is needed; a migration would drop or rename data; a new RLS policy would open up
 reads; or a secret is needed that it doesn't have. Everything else, the agent decides on
-its own and records the "why" in the PR — see `docs/PLANNING.md`'s "Процес" section.
+its own and records the "why" in the PR.
 
 Keep this whole file well under 500 lines. If it's creeping up, that's a sign something
 belongs in code comments or `.agents/decisions.md` instead of here.
