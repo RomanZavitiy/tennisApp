@@ -50,7 +50,7 @@ export default async function ClubChatPage({ params }: ClubChatPageProps) {
       >
         {t("backToClub")}
       </Link>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">
+      <h1 className="mt-4 text-3xl font-bold tracking-tight">
         {t("title", { club: club.name })}
       </h1>
 

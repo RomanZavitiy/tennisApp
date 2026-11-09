@@ -31,7 +31,7 @@ export default async function NotificationsPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <MarkNotificationsRead />
 
       {notifications.length === 0 ? (
@@ -46,7 +46,7 @@ export default async function NotificationsPage() {
                 <Link
                   href={`/offers/${offer.id}`}
                   className={cn(
-                    "flex gap-3 rounded-lg border px-4 py-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+                    "flex gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm transition-shadow outline-none hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
                     unread && "border-primary bg-muted/50",
                   )}
                 >

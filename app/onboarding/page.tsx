@@ -27,7 +27,7 @@ export default async function OnboardingPage() {
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-2 mb-6 text-muted-foreground">{t("subtitle")}</p>
       <ProfileForm
         action={completeOnboarding}

@@ -15,7 +15,7 @@ export default async function ExportDataPage() {
 
   return (
     <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-3 text-sm text-muted-foreground">{t("intro")}</p>
       <div className="mt-6">
         <ExportDataButton />

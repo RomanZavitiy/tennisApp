@@ -101,7 +101,7 @@ export function OfferBookingSection({
         />
       </div>
       {isAuthor && courtStatus !== "BOOKED" && clicked && (
-        <div className="mt-3 space-y-2 rounded-lg border p-3 text-sm">
+        <div className="mt-3 space-y-2 rounded-xl border bg-card p-3 text-sm shadow-sm">
           <p>{t("bookedTheCourt")}</p>
           <OfferActionButton
             action={markCourtBooked.bind(null, offerId)}

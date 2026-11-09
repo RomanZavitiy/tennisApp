@@ -53,7 +53,7 @@ export default async function OffersPage({
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight">
           {showHidden ? t("hiddenTitle") : t("title")}
         </h1>
         {showHidden ? (

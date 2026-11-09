@@ -29,7 +29,7 @@ export function BookingSummaryCard({
   const format = useFormatter();
 
   return (
-    <section className="mt-6 rounded-lg border p-4">
+    <section className="mt-6 rounded-xl border bg-card p-4 shadow-sm">
       <h2 className="font-semibold">{t("summaryTitle")}</h2>
       {fits ? (
         <>

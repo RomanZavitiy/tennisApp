@@ -102,9 +102,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
       >
         {t("allCourts")}
       </Link>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-        {club.name}
-      </h1>
+      <h1 className="mt-4 text-3xl font-bold tracking-tight">{club.name}</h1>
       <p className="mt-1 text-muted-foreground">{club.address}</p>
       {club.district && (
         <p className="text-muted-foreground">
@@ -148,9 +146,12 @@ export default async function ClubPage({ params }: ClubPageProps) {
         />
       )}
 
-      <dl className="mt-6 space-y-3">
+      <dl className="mt-6 divide-y rounded-xl border bg-card shadow-sm">
         {facts.map((fact) => (
-          <div key={fact.label} className="flex justify-between gap-4">
+          <div
+            key={fact.label}
+            className="flex justify-between gap-4 px-4 py-3"
+          >
             <dt className="text-muted-foreground">{fact.label}</dt>
             <dd className="text-right font-medium">{fact.value}</dd>
           </div>

@@ -191,7 +191,7 @@ export default async function BookPage({
       >
         ← {day.club.name}
       </Link>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">
+      <h1 className="mt-4 text-3xl font-bold tracking-tight">
         {t("title", { club: day.club.name })}
       </h1>
 

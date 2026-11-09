@@ -1,10 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { MapPinIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 import { BookingLink } from "@/components/booking-link";
+import { IconTile } from "@/components/icon-tile";
 import { useClubSelection } from "@/components/club-selection";
 import { buttonVariants } from "@/components/ui/button";
 import type { District } from "@/lib/generated/prisma/enums";
@@ -91,15 +93,26 @@ function ClubListEntry({
   }, [scrollIntoView]);
 
   return (
-    <li ref={ref} className={cn("px-4 py-3", selected && "bg-muted")}>
+    <li
+      ref={ref}
+      className={cn(
+        "px-4 py-3.5 transition-colors",
+        selected && "bg-secondary/60",
+      )}
+    >
       <div className="flex items-start gap-3">
+        <IconTile tone={selected ? "ball" : "green"}>
+          <MapPinIcon />
+        </IconTile>
         <button
           type="button"
           aria-pressed={selected}
           onClick={onSelect}
           className="min-w-0 flex-1 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="block font-medium">{club.name}</span>
+          <span className="block font-semibold tracking-[-0.01em]">
+            {club.name}
+          </span>
           <span className="block text-sm text-muted-foreground">
             {club.address}
           </span>
@@ -112,12 +125,12 @@ function ClubListEntry({
         <Link
           href={`/clubs/${club.id}`}
           aria-label={t("detailsAriaLabel", { name: club.name })}
-          className="shrink-0 text-sm underline-offset-4 hover:underline"
+          className="shrink-0 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         >
           {t("details")}
         </Link>
       </div>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-2 pl-12">
         <BookingLink
           clubId={club.id}
           bookingUrl={club.bookingUrl}
