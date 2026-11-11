@@ -1,9 +1,12 @@
+import { TrophyIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 
+import { EmptyState } from "@/components/empty-state";
 import { LeaderboardFiltersForm } from "@/components/leaderboard-filters";
 import { LeaderboardRow } from "@/components/leaderboard-row";
+import { ListingLayout, PageHeader, PageShell } from "@/components/page-shell";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { getLeaderboard } from "@/lib/leaderboard/get-leaderboard";
 import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
@@ -36,30 +39,34 @@ export default async function LeaderboardPage({
   const myOpenOffers = viewer ? await getMyOpenOffers(viewer.id) : null;
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+    <PageShell>
+      <PageHeader
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        subtitle={t("subtitle")}
+      />
 
-      <LeaderboardFiltersForm filters={filters} />
-
-      {players.length === 0 ? (
-        <p className="mt-6 text-muted-foreground">
-          {filtered ? t("noneMatchFilters") : t("noPlayersYet")}
-        </p>
-      ) : (
-        <ol className="mt-6 space-y-3">
-          {players.map((player, index) => (
-            <li key={player.id}>
-              <LeaderboardRow
-                rank={index + 1}
-                player={player}
-                myOpenOffers={
-                  viewer && viewer.id !== player.id ? myOpenOffers : null
-                }
-              />
-            </li>
-          ))}
-        </ol>
-      )}
-    </main>
+      <ListingLayout sidebar={<LeaderboardFiltersForm filters={filters} />}>
+        {players.length === 0 ? (
+          <EmptyState icon={<TrophyIcon />}>
+            {filtered ? t("noneMatchFilters") : t("noPlayersYet")}
+          </EmptyState>
+        ) : (
+          <ol className="space-y-3">
+            {players.map((player, index) => (
+              <li key={player.id}>
+                <LeaderboardRow
+                  rank={index + 1}
+                  player={player}
+                  myOpenOffers={
+                    viewer && viewer.id !== player.id ? myOpenOffers : null
+                  }
+                />
+              </li>
+            ))}
+          </ol>
+        )}
+      </ListingLayout>
+    </PageShell>
   );
 }

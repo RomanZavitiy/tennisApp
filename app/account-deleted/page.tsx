@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { SplitShell } from "@/components/page-shell";
 import { buttonVariants } from "@/components/ui/button";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,7 +16,7 @@ export default async function AccountDeletedPage() {
   const t = await getTranslations("AccountDeletedPage");
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10 text-center">
+    <SplitShell className="text-center">
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-3 text-sm text-muted-foreground">{t("body")}</p>
       <Link
@@ -24,6 +25,6 @@ export default async function AccountDeletedPage() {
       >
         {t("home")}
       </Link>
-    </main>
+    </SplitShell>
   );
 }

@@ -48,12 +48,12 @@ export function ClubsView({ list, map }: { list: ReactNode; map: ReactNode }) {
             {t("map")}
           </ViewButton>
         </div>
-        <div className="grid gap-6 lg:grid-cols-[2fr_3fr]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(22rem,2fr)_3fr]">
           {/* Hidden with CSS, not unmounted: the map keeps its position and the
             list its scroll when a phone switches back and forth. */}
           <div
             className={cn(
-              "lg:block lg:h-[32rem] lg:overflow-y-auto",
+              "lg:block lg:h-[max(34rem,calc(100dvh-23rem))] lg:overflow-y-auto",
               view === "list" ? "block" : "hidden",
             )}
           >
@@ -61,7 +61,7 @@ export function ClubsView({ list, map }: { list: ReactNode; map: ReactNode }) {
           </div>
           <div
             className={cn(
-              "h-[28rem] lg:block lg:h-[32rem]",
+              "h-[28rem] lg:block lg:h-[max(34rem,calc(100dvh-23rem))]",
               view === "map" ? "block" : "hidden",
             )}
           >

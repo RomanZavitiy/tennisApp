@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Bricolage_Grotesque, Geist_Mono, Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
 import { RegisterServiceWorker } from "@/components/register-service-worker";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
 
@@ -13,6 +14,12 @@ import "./globals.css";
 // font instead of a system fallback.
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin", "latin-ext"],
+});
+
+// Headings only (redesign): a display face with more character than Inter.
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
   subsets: ["latin", "latin-ext"],
 });
 
@@ -35,7 +42,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Separate from `metadata` since Next.js 16 (themeColor moved out of the
 // metadata object in Next 14+).
-export const viewport: Viewport = { themeColor: "#0a693c" };
+export const viewport: Viewport = {
+  // The browser's own chrome follows the system setting (it can't see the
+  // in-app theme switch): court green in light, the page background in dark.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0a693c" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1512" },
+  ],
+};
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Task 1.20: the active language always comes from the NEXT_LOCALE cookie
@@ -47,14 +61,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      // next-themes sets the theme class on <html> before React hydrates.
+      suppressHydrationWarning
+      className={`${inter.variable} ${display.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <RegisterServiceWorker />
-          <SiteHeader />
-          {children}
-          <SiteFooter />
+          <ThemeProvider>
+            <RegisterServiceWorker />
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

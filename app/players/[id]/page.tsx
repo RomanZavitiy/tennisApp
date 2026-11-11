@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { PageShell } from "@/components/page-shell";
 import { reportPlayer } from "@/app/players/[id]/actions";
 import { BlockPlayerButton } from "@/components/block-player-button";
 import { InvitePlayerButton } from "@/components/invite-player-button";
@@ -54,36 +55,40 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     viewer && !isOwnProfile ? await getMyOpenOffers(viewer.id) : null;
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 px-4 py-8">
+    <PageShell width="content" className="space-y-6">
       {/* The same hero as the player's own /profile (slice K6). */}
       <ProfileHero profile={profile} summary={summarizeMatches(matches)} />
-      <PlayerBadges
-        achievements={achievements}
-        feedbackBadges={feedbackBadges}
-      />
-      <section className="rounded-2xl border bg-card px-5 py-4 shadow-sm">
-        <h2 className="mb-2 text-lg font-semibold">{t("matchHistory")}</h2>
-        <MatchHistory matches={matches} />
-      </section>
-      {viewer && !isOwnProfile && (
-        <div className="space-y-3">
-          <InvitePlayerButton
-            targetUserId={profile.id}
-            offers={myOpenOffers ?? []}
-            source="profile"
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <section className="surface px-5 py-4">
+          <h2 className="mb-2 text-lg font-semibold">{t("matchHistory")}</h2>
+          <MatchHistory matches={matches} />
+        </section>
+        <div className="space-y-6">
+          <PlayerBadges
+            achievements={achievements}
+            feedbackBadges={feedbackBadges}
           />
-          <div className="flex flex-wrap items-center gap-3">
-            <ReportButton
-              action={reportPlayer.bind(null, profile.id)}
-              label={t("reportThisPlayer")}
-            />
-            <BlockPlayerButton
-              targetUserId={profile.id}
-              initialBlocked={alreadyBlocked}
-            />
-          </div>
+          {viewer && !isOwnProfile && (
+            <div className="surface space-y-3 px-5 py-4">
+              <InvitePlayerButton
+                targetUserId={profile.id}
+                offers={myOpenOffers ?? []}
+                source="profile"
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <ReportButton
+                  action={reportPlayer.bind(null, profile.id)}
+                  label={t("reportThisPlayer")}
+                />
+                <BlockPlayerButton
+                  targetUserId={profile.id}
+                  initialBlocked={alreadyBlocked}
+                />
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </main>
+      </div>
+    </PageShell>
   );
 }

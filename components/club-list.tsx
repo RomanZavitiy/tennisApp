@@ -55,7 +55,7 @@ export function ClubList({
 
   const selection = clubSelection?.selection;
   return (
-    <ul className="divide-y rounded-xl border bg-card shadow-sm">
+    <ul className="surface divide-y">
       {clubs.map((club) => (
         <ClubListEntry
           key={club.id}

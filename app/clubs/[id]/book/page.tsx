@@ -1,3 +1,4 @@
+import { PageShell } from "@/components/page-shell";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
@@ -184,7 +185,7 @@ export default async function BookPage({
   const range = day.courts.length > 0 ? visibleRange(day.grid) : null;
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
+    <PageShell>
       <Link
         href={`/clubs/${id}`}
         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
@@ -276,6 +277,6 @@ export default async function BookPage({
           />
         </div>
       )}
-    </main>
+    </PageShell>
   );
 }

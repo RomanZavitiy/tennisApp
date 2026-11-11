@@ -22,12 +22,12 @@ export function ClubFiltersForm({ filters }: { filters: ClubFilters }) {
   return (
     <form
       method="get"
-      action="/"
+      action="/clubs"
       // Remount on every new set of filters: the fields are uncontrolled,
       // and "Clear" must empty them, not keep what was picked.
       key={clubsHref(filters)}
       aria-label={t("formLabel")}
-      className="mt-6 grid grid-cols-2 items-end gap-3 rounded-xl border bg-card p-4 shadow-sm sm:grid-cols-4"
+      className="surface mt-6 grid grid-cols-2 items-end gap-3 p-4 sm:grid-cols-4"
     >
       <div className="space-y-1">
         <Label htmlFor="club-filter-district">{t("districtLabel")}</Label>
@@ -74,7 +74,7 @@ export function ClubFiltersForm({ filters }: { filters: ClubFilters }) {
       <div className="flex gap-2">
         <Button type="submit">{t("submit")}</Button>
         {active && (
-          <Link href="/" className={buttonVariants({ variant: "ghost" })}>
+          <Link href="/clubs" className={buttonVariants({ variant: "ghost" })}>
             {t("clear")}
           </Link>
         )}

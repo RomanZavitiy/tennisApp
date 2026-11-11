@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { z } from "zod";
 
+import { SplitShell } from "@/components/page-shell";
 import { createOffer } from "@/app/(member)/offers/new/actions";
 import { OfferForm } from "@/components/offer-form";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
@@ -50,7 +51,7 @@ export default async function NewOfferPage({
   const inviteeId = invite.success ? invite.data : undefined;
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-2 mb-6 text-muted-foreground">{t("subtitle")}</p>
       <OfferForm
@@ -82,6 +83,6 @@ export default async function NewOfferPage({
       >
         {t("cancel")}
       </Link>
-    </main>
+    </SplitShell>
   );
 }

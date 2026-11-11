@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 
 import { signOut } from "@/app/auth/actions";
@@ -7,6 +6,8 @@ import { HeaderNavLinks } from "@/components/header-nav-links";
 import { MobileNav } from "@/components/mobile-nav";
 import { NotificationBell } from "@/components/notification-bell";
 import { PushSubscribePrompt } from "@/components/push-subscribe-prompt";
+import { SiteLogo } from "@/components/site-logo";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { countUnreadNotifications } from "@/lib/notifications/inbox";
@@ -19,12 +20,11 @@ export async function SiteHeader() {
   const t = await getTranslations("SiteHeader");
   const tMetadata = await getTranslations("Metadata");
 
-  // Courts first (slice K4): the court search is the home page now, and a
-  // club's own page (/clubs/[id]) still counts as that section.
-  // Signed-in players also get Profile.
+  // The court search lives at /clubs again (redesign): "/" is the landing
+  // page, reached through the logo. Signed-in players also get Profile.
   const navLinks = [
-    { href: "/", label: t("courts"), section: "/clubs" },
     { href: "/offers", label: t("sparring") },
+    { href: "/clubs", label: t("courts") },
     { href: "/leaderboard", label: t("leaderboard") },
     { href: "/coaches", label: t("coaches") },
   ];
@@ -39,25 +39,18 @@ export async function SiteHeader() {
           is a localStorage flag that outlives sign-out, and a visitor has no
           account to save a subscription to. */}
       {user && <PushSubscribePrompt />}
-      <header className="sticky top-0 z-40 border-b bg-card/80 shadow-xs backdrop-blur-md backdrop-saturate-150">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
+      <header className="sticky top-0 z-40 border-b bg-card/75 shadow-xs backdrop-blur-lg backdrop-saturate-150">
+        <div className="container-page flex h-16 items-center justify-between gap-4">
           <Link href="/" className="flex shrink-0 items-center">
             {/* The wordmark is part of the image, so the site name is its alt
                 text: the link keeps the same accessible name as before. */}
-            <Image
-              src="/brand/spinbuddy-logo.webp"
-              alt={tMetadata("siteName")}
-              width={1661}
-              height={445}
-              priority
-              className="h-10 w-auto"
-            />
+            <SiteLogo alt={tMetadata("siteName")} priority className="h-10" />
           </Link>
 
           <div className="flex items-center gap-1">
             <nav
               aria-label={t("mainNav")}
-              className="hidden items-center gap-1 sm:flex"
+              className="hidden items-center gap-1 md:flex"
             >
               <HeaderNavLinks links={links} />
               {user ? (
@@ -72,6 +65,8 @@ export async function SiteHeader() {
                 </Link>
               )}
             </nav>
+
+            <ThemeSwitcher className="hidden md:inline-flex" />
 
             {/* One bell for both layouts, so only one copy polls. */}
             {user && <NotificationBell initialCount={unread} />}

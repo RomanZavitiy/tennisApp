@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
+import { PageShell } from "@/components/page-shell";
 import { FollowClubButton } from "@/components/follow-club-button";
 import { MessageThread } from "@/components/message-thread";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
@@ -43,7 +44,7 @@ export default async function ClubChatPage({ params }: ClubChatPageProps) {
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-10">
+    <PageShell width="prose">
       <Link
         href={`/clubs/${club.id}`}
         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
@@ -82,6 +83,6 @@ export default async function ClubChatPage({ params }: ClubChatPageProps) {
           />
         </div>
       )}
-    </main>
+    </PageShell>
   );
 }

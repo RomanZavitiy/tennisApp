@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { SplitShell } from "@/components/page-shell";
 import { updateProfile } from "@/app/(member)/profile/actions";
 import { ProfileForm } from "@/components/profile-form";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
@@ -18,7 +19,7 @@ export default async function EditProfilePage() {
   const profile = await requireOnboardedUser();
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <div className="mt-6">
         <ProfileForm
@@ -39,6 +40,6 @@ export default async function EditProfilePage() {
       >
         {t("cancel")}
       </Link>
-    </main>
+    </SplitShell>
   );
 }

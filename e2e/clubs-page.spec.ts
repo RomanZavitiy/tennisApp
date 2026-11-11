@@ -28,7 +28,7 @@ test.afterAll(async () => {
 test("desktop shows the club list and the map side by side", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/clubs");
 
   const link = page.getByRole("link", { name });
   await expect(link).toBeVisible();
@@ -43,7 +43,7 @@ test("desktop shows the club list and the map side by side", async ({
 });
 
 test("the first view shows every club", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/clubs");
   const map = page.locator(".leaflet-container");
   await expect(page.getByAltText(name)).toBeVisible();
 
@@ -71,7 +71,7 @@ async function expectAllMarkersInside(map: Locator) {
 test("filters narrow the court search and live in the URL (slice K4)", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/clubs");
   const filters = page.getByRole("form", { name: "Filter courts" });
   const link = page.getByRole("link", { name: `${name} details` });
   await expect(link).toBeVisible();
@@ -79,25 +79,25 @@ test("filters narrow the court search and live in the URL (slice K4)", async ({
   // The test club is clay, outdoor, in Stare Miasto.
   await filters.getByLabel("Surface").selectOption("HARD");
   await filters.getByRole("button", { name: "Search" }).click();
-  await expect(page).toHaveURL("/?district=&surface=HARD");
+  await expect(page).toHaveURL("/clubs?district=&surface=HARD");
   await expect(link).toHaveCount(0);
 
-  await page.goto("/?district=STARE_MIASTO&surface=CLAY");
+  await page.goto("/clubs?district=STARE_MIASTO&surface=CLAY");
   await expect(link).toBeVisible();
   await expect(filters.getByLabel("District")).toHaveValue("STARE_MIASTO");
 
-  await page.goto("/?surface=CLAY&indoor=1");
+  await page.goto("/clubs?surface=CLAY&indoor=1");
   await expect(link).toHaveCount(0);
 
   await filters.getByRole("link", { name: "Clear" }).click();
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL("/clubs");
   await expect(link).toBeVisible();
 });
 
 test("a club with no offers invites the player to post one there", async ({
   page,
 }) => {
-  await page.goto(`/?district=STARE_MIASTO&surface=CLAY`);
+  await page.goto(`/clubs?district=STARE_MIASTO&surface=CLAY`);
   const entry = page
     .getByRole("listitem")
     .filter({ has: page.getByRole("link", { name: `${name} details` }) });
@@ -107,11 +107,14 @@ test("a club with no offers invites the player to post one there", async ({
   ).toHaveAttribute("href", `/offers/new?clubId=${id}`);
 });
 
-test("/clubs redirects to the court search on the home page", async ({
-  page,
-}) => {
-  await page.goto("/clubs");
-  await expect(page).toHaveURL("/");
+test("the home page leads to the court search", async ({ page }) => {
+  await page.goto("/");
+  await page
+    .getByRole("main")
+    .getByRole("link", { name: "Find a court" })
+    .first()
+    .click();
+  await expect(page).toHaveURL("/clubs");
   await expect(
     page.getByRole("heading", { name: "Find a court in Kraków" }),
   ).toBeVisible();
@@ -121,7 +124,7 @@ test.describe("on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("the List/Map switch shows one at a time", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/clubs");
 
     const link = page.getByRole("link", { name });
     const map = page.locator(".leaflet-container");

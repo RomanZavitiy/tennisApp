@@ -39,7 +39,7 @@ export function ProfileHero({
     <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
       <div
         aria-hidden
-        className="h-24 bg-gradient-to-br from-primary to-primary/70"
+        className="h-24 bg-gradient-to-br from-brand to-brand/70"
       />
       <div className="px-5 pb-5">
         <div className="-mt-12 w-fit rounded-full ring-4 ring-card">

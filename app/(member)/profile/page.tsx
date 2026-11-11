@@ -5,6 +5,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { PageShell } from "@/components/page-shell";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { submitFeedback } from "@/app/(member)/profile/feedback-actions";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { BlockedPlayersList } from "@/components/blocked-players-list";
@@ -77,70 +79,89 @@ export default async function ProfilePage() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 px-4 py-8">
+    <PageShell width="content" className="space-y-6">
       <ProfileHero profile={profile} summary={summarizeMatches(matches)} />
-      <PlayerBadges
-        achievements={achievements}
-        feedbackBadges={feedbackBadges}
-      />
-      <LevelHint hint={levelHint} />
 
-      <Card title={t("myGames")}>
-        <MyGames games={games} />
-      </Card>
+      {/* Two columns on desktop (redesign): what the player does — games,
+          bookings, history — in the main one; badges and settings beside. */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <div className="space-y-6">
+          <Card title={t("myGames")}>
+            <MyGames games={games} />
+          </Card>
 
-      {pendingFeedback.length > 0 && (
-        <Card title={t("rateYourOpponent")}>
-          <PendingFeedbackPrompt
-            pending={pendingFeedback}
-            action={submitFeedback}
-          />
-        </Card>
-      )}
+          {pendingFeedback.length > 0 && (
+            <Card title={t("rateYourOpponent")}>
+              <PendingFeedbackPrompt
+                pending={pendingFeedback}
+                action={submitFeedback}
+              />
+            </Card>
+          )}
 
-      <Card title={t("myBookings")}>
-        <MyBookings upcoming={bookings.upcoming} past={bookings.past} />
-      </Card>
+          <Card title={t("myBookings")}>
+            <MyBookings upcoming={bookings.upcoming} past={bookings.past} />
+          </Card>
 
-      <Card title={t("matchHistory")}>
-        <MatchHistory
-          matches={matches}
-          feedback={{ eligibleIds: pendingFeedbackIds, action: submitFeedback }}
-        />
-      </Card>
-
-      <Card title={t("blockedPlayers")}>
-        <BlockedPlayersList players={blockedPlayers} />
-      </Card>
-
-      <Card title={t("privacy")}>
-        <DiscoverableToggle discoverable={settings.discoverable} />
-      </Card>
-
-      <Card title={t("account")}>
-        <div className="pb-4">
-          <p className="mb-2 text-sm font-medium">{t("photo")}</p>
-          <AvatarUpload userId={profile.id} />
+          <Card title={t("matchHistory")}>
+            <MatchHistory
+              matches={matches}
+              feedback={{
+                eligibleIds: pendingFeedbackIds,
+                action: submitFeedback,
+              }}
+            />
+          </Card>
         </div>
-        <ul className="divide-y border-t">
-          <SettingsLink href="/profile/edit">{t("editProfile")}</SettingsLink>
-          <SettingsLink href="/profile/preferences">
-            {t("playPreferences")}
-          </SettingsLink>
-          <SettingsLink href="/profile/notifications">
-            {t("notifications")}
-          </SettingsLink>
-          <SettingsLink href="/profile/export">{t("exportData")}</SettingsLink>
-          <li className="flex items-center justify-between py-3">
-            <span>{t("language")}</span>
-            <LanguageSwitcher />
-          </li>
-          <SettingsLink href="/profile/delete" destructive>
-            {t("deleteAccount")}
-          </SettingsLink>
-        </ul>
-      </Card>
-    </main>
+        <div className="space-y-6">
+          <PlayerBadges
+            achievements={achievements}
+            feedbackBadges={feedbackBadges}
+          />
+          <LevelHint hint={levelHint} />
+
+          <Card title={t("blockedPlayers")}>
+            <BlockedPlayersList players={blockedPlayers} />
+          </Card>
+
+          <Card title={t("privacy")}>
+            <DiscoverableToggle discoverable={settings.discoverable} />
+          </Card>
+
+          <Card title={t("account")}>
+            <div className="pb-4">
+              <p className="mb-2 text-sm font-medium">{t("photo")}</p>
+              <AvatarUpload userId={profile.id} />
+            </div>
+            <ul className="divide-y border-t">
+              <SettingsLink href="/profile/edit">
+                {t("editProfile")}
+              </SettingsLink>
+              <SettingsLink href="/profile/preferences">
+                {t("playPreferences")}
+              </SettingsLink>
+              <SettingsLink href="/profile/notifications">
+                {t("notifications")}
+              </SettingsLink>
+              <SettingsLink href="/profile/export">
+                {t("exportData")}
+              </SettingsLink>
+              <li className="flex items-center justify-between py-3">
+                <span>{t("language")}</span>
+                <LanguageSwitcher />
+              </li>
+              <li className="flex items-center justify-between py-3">
+                <span>{t("theme")}</span>
+                <ThemeSwitcher />
+              </li>
+              <SettingsLink href="/profile/delete" destructive>
+                {t("deleteAccount")}
+              </SettingsLink>
+            </ul>
+          </Card>
+        </div>
+      </div>
+    </PageShell>
   );
 }
 

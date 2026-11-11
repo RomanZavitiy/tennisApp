@@ -6,20 +6,12 @@ import { usePathname } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type NavLink = {
-  href: string;
-  label: string;
-  /** Another path prefix that belongs to this link's section. */
-  section?: string;
-};
+type NavLink = { href: string; label: string };
 
 /** Whether `pathname` is inside the section a link names (/offers/123 is
- * still "Sparring", /clubs/123 is "Courts" though Courts links to "/"). */
-function isActive(pathname: string, { href, section }: NavLink): boolean {
-  if (pathname === href) return true;
-  return [href, section].some(
-    (prefix) => prefix && prefix !== "/" && pathname.startsWith(`${prefix}/`),
-  );
+ * still "Sparring", /clubs/123 is still "Courts"). */
+function isActive(pathname: string, { href }: NavLink): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 // The desktop header links (slice K3), marking the section the player is in.

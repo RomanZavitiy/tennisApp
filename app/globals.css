@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display), var(--font-inter), sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,17 +49,15 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Layered depth (UI refresh): a tight contact shadow, a soft ambient one,
-     and a 1px top highlight so surfaces read as lifted, not outlined. */
-  --shadow-xs: 0 1px 2px 0 oklch(0.2 0.02 160 / 0.06);
-  --shadow-sm:
-    0 1px 2px 0 oklch(0.2 0.02 160 / 0.05),
-    0 6px 20px -6px oklch(0.2 0.02 160 / 0.1),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
-  --shadow-md:
-    0 1px 2px 0 oklch(0.2 0.02 160 / 0.06),
-    0 12px 32px -10px oklch(0.2 0.02 160 / 0.18),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+
+  /* Layered depth (UI refresh). The values live in :root / .dark below
+     (--elevation-*), because a shadow that lifts a card on a light page
+     is invisible on a dark one. */
+  --shadow-xs: var(--elevation-xs);
+  --shadow-sm: var(--elevation-sm);
+  --shadow-md: var(--elevation-md);
 }
 
 /* Tennis green (slice K3, owner's pick over a clay-orange candidate on
@@ -99,42 +97,73 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.75rem;
+  /* The big green surfaces (hero, brand panel, CTA band): court green in
+     both themes, while --primary gets lighter in the dark one. */
+  --brand: oklch(0.46 0.11 155);
+  --brand-foreground: oklch(0.99 0 0);
+  /* A tight contact shadow, a soft ambient one, and a 1px top highlight so
+     surfaces read as lifted, not outlined. */
+  --elevation-xs: 0 1px 2px 0 oklch(0.2 0.02 160 / 0.06);
+  --elevation-sm:
+    0 1px 2px 0 oklch(0.2 0.02 160 / 0.05),
+    0 6px 20px -6px oklch(0.2 0.02 160 / 0.1),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
+  --elevation-md:
+    0 1px 2px 0 oklch(0.2 0.02 160 / 0.06),
+    0 12px 32px -10px oklch(0.2 0.02 160 / 0.18),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
+  color-scheme: light;
 }
 
+/* Dark theme: the same court green and tennis-ball yellow on a very dark
+   green-tinted neutral (not pure black); cards one step lighter, borders
+   as low-alpha white, and a lighter --primary so buttons and links keep
+   their contrast. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: oklch(0.17 0.012 158);
+  --foreground: oklch(0.96 0.008 150);
+  --card: oklch(0.215 0.014 158);
+  --card-foreground: oklch(0.96 0.008 150);
+  --popover: oklch(0.235 0.014 158);
+  --popover-foreground: oklch(0.96 0.008 150);
+  --primary: oklch(0.74 0.16 152);
+  --primary-foreground: oklch(0.17 0.03 158);
+  --secondary: oklch(0.28 0.04 155);
+  --secondary-foreground: oklch(0.9 0.08 150);
+  --muted: oklch(0.255 0.014 158);
+  --muted-foreground: oklch(0.72 0.02 155);
+  --accent: oklch(0.255 0.014 158);
+  --accent-foreground: oklch(0.9 0.08 150);
+  --highlight: oklch(0.9 0.19 118);
+  --highlight-foreground: oklch(0.26 0.07 140);
+  --destructive: oklch(0.7 0.19 22);
+  --border: oklch(1 0 0 / 0.1);
+  --input: oklch(1 0 0 / 0.16);
+  --ring: oklch(0.65 0.13 155);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-  --highlight: oklch(0.92 0.19 118);
-  --highlight-foreground: oklch(0.28 0.07 140);
+  --sidebar: oklch(0.215 0.014 158);
+  --sidebar-foreground: oklch(0.96 0.008 150);
+  --sidebar-primary: oklch(0.74 0.16 152);
+  --sidebar-primary-foreground: oklch(0.17 0.03 158);
+  --sidebar-accent: oklch(0.255 0.014 158);
+  --sidebar-accent-foreground: oklch(0.9 0.08 150);
+  --sidebar-border: oklch(1 0 0 / 0.1);
+  --sidebar-ring: oklch(0.65 0.13 155);
+  --brand: oklch(0.36 0.09 155);
+  --brand-foreground: oklch(0.98 0 0);
+  --elevation-xs: 0 1px 2px 0 oklch(0 0 0 / 0.3);
+  --elevation-sm:
+    0 1px 2px 0 oklch(0 0 0 / 0.35), 0 10px 30px -12px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+  --elevation-md:
+    0 1px 2px 0 oklch(0 0 0 / 0.4), 0 16px 40px -12px oklch(0 0 0 / 0.7),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.05);
+  /* Native date pickers, selects, checkboxes and scrollbars follow too. */
+  color-scheme: dark;
 }
 
 @layer base {
@@ -144,6 +173,21 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "cv11", "ss03";
+    /* Two soft glows behind every page (redesign): the wide layout has
+       colour at its edges instead of flat empty margins. Built from theme
+       tokens, so a dark theme only has to swap the tokens. */
+    background-image:
+      radial-gradient(
+        56rem 30rem at 92% -8%,
+        color-mix(in oklch, var(--highlight) 20%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        48rem 28rem at -6% 4%,
+        color-mix(in oklch, var(--primary) 11%, transparent),
+        transparent 70%
+      );
+    background-repeat: no-repeat;
   }
   /* Tight, bold headings (UI refresh): negative tracking is most of what
      makes a heading look set rather than typed. */
@@ -152,6 +196,10 @@
   h3 {
     letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+  h1,
+  h2 {
+    font-family: var(--font-heading);
   }
   html {
     @apply font-sans;
@@ -178,4 +226,87 @@
     transparent 0 9px,
     color-mix(in oklch, var(--muted-foreground) 30%, transparent) 9px 10px
   );
+}
+
+/* The site's content column (redesign): wide enough to use a desktop
+   screen, with gutters that grow with it. */
+@utility container-page {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+/* The standard raised card. */
+@utility surface {
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+/* A faint grid that fades out towards the bottom — hero backdrops. */
+@utility bg-grid-fade {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 3rem 3rem;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 0%, black, transparent);
+}
+
+/* Marquee (landing page club strip): the track holds the list twice and
+   slides by exactly one copy, so the loop has no seam. */
+@keyframes marquee {
+  to {
+    transform: translateX(calc(-50% - 0.75rem));
+  }
+}
+@utility animate-marquee {
+  animation: marquee 40s linear infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* The map in the dark theme. The tiles stay OpenStreetMap's (no second
+   tile provider): a filter turns them dark, and Leaflet's own white
+   controls and popups take the theme's card colours. */
+.dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+.dark .leaflet-container {
+  background: var(--muted);
+}
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip,
+.dark .leaflet-bar a,
+.dark .leaflet-container .leaflet-control-attribution {
+  background: var(--card);
+  color: var(--card-foreground);
+}
+.dark .leaflet-bar a {
+  border-bottom-color: var(--border);
+}
+.dark .leaflet-bar a:hover {
+  background: var(--muted);
+}
+.dark .leaflet-container a {
+  color: var(--primary);
+}
+.dark .leaflet-container a.leaflet-popup-close-button {
+  color: var(--muted-foreground);
 }

@@ -1,64 +1,175 @@
+import { ArrowRightIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { connection } from "next/server";
 
-import { ClubFiltersForm } from "@/components/club-filters";
-import { ClubList } from "@/components/club-list";
-import { ClubMap } from "@/components/club-map";
-import { ClubsView } from "@/components/clubs-view";
+import { HeroVisual } from "@/components/landing/hero-visual";
+import { NumberTicker } from "@/components/landing/motion";
+import {
+  Faq,
+  Features,
+  FinalCta,
+  HowItWorks,
+  SectionHeading,
+} from "@/components/landing/sections";
+import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
-import { clubsHref, parseClubFilters } from "@/lib/clubs/club-filters";
+import { getCurrentUser } from "@/lib/auth/require-user";
 import { searchClubs } from "@/lib/clubs/club-search";
+import { getOfferFeed } from "@/lib/offers/feed";
+import { DISTRICT_LABELS } from "@/lib/profile/options";
 
-// The home page is the court search (slice K4): what most visitors come for
-// is a court to play on, then someone to play with. The list and the map
-// are the former /clubs page (2.6-2.7), now narrowed by URL filters; /clubs
-// redirects here. Each club links out to book (the app has no booking,
-// decision 2026-09-20) and to its open offers.
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  // Read on each request: clubs and their open offers change without a deploy.
+// How many live offers the landing page previews.
+const OFFER_PREVIEW = 3;
+
+// The landing page (redesign): says what SpinBuddy is before asking a
+// visitor to use it — hero, the clubs on the map, features, how it works,
+// live offers, FAQ. The court search that used to be here (slice K4) is back
+// at /clubs. Its numbers are real: clubs and offers are read per request.
+export default async function Home() {
   await connection();
-  const filters = parseClubFilters(await searchParams);
-  const clubs = await searchClubs(filters);
-  const filtered = Object.keys(filters).length > 0;
-  const t = await getTranslations("HomePage");
+  const [viewer, clubs, feed, t] = await Promise.all([
+    getCurrentUser(),
+    searchClubs({}),
+    getOfferFeed(1, {}, null, new Date(), false),
+    getTranslations("LandingPage"),
+  ]);
+  const offers = feed.offers.slice(0, OFFER_PREVIEW);
+
+  // A signed-in player has no use for "Join": their first step is the feed.
+  const primary = viewer
+    ? { href: "/offers", label: t("browseOffers") }
+    : { href: "/login", label: t("join") };
+  const secondary = { href: "/clubs", label: t("findCourt") };
+
+  const stats = [
+    { value: clubs.length, label: t("stats.clubs") },
+    { value: Object.keys(DISTRICT_LABELS).length, label: t("stats.districts") },
+    { value: 0, suffix: t("stats.currency"), label: t("stats.price") },
+  ];
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="eyebrow">{t("eyebrow")}</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
+    <main className="flex-1">
+      <section className="relative overflow-hidden">
+        <div aria-hidden className="bg-grid-fade absolute inset-0 -z-10" />
+        <div className="container-page grid items-center gap-12 py-12 sm:py-16 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-16 lg:py-24">
+          {/* No scroll-in animation up here: the hero is the first paint. */}
+          <div>
+            <p className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-sm font-medium shadow-xs">
+              <span className="size-2 rounded-full bg-highlight ring-2 ring-highlight/40" />
+              {t("eyebrow")}
+            </p>
+            <h1 className="mt-6 text-5xl leading-[1.02] font-bold tracking-tight sm:text-6xl xl:text-7xl">
+              {t("title")}{" "}
+              <span className="text-primary">{t("titleAccent")}</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg text-muted-foreground sm:text-xl">
+              {t("subtitle")}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href={primary.href}
+                className={buttonVariants({
+                  size: "lg",
+                  className: "h-12 px-7 text-base",
+                })}
+              >
+                {primary.label}
+                <ArrowRightIcon />
+              </Link>
+              <Link
+                href={secondary.href}
+                className={buttonVariants({
+                  size: "lg",
+                  variant: "outline",
+                  className: "h-12 px-7 text-base",
+                })}
+              >
+                {secondary.label}
+              </Link>
+            </div>
+            <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t pt-8">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <dd className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+                    <NumberTicker value={stat.value} />
+                    {stat.suffix && ` ${stat.suffix}`}
+                  </dd>
+                  <dt className="mt-1 text-sm text-muted-foreground">
+                    {stat.label}
+                  </dt>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <HeroVisual />
         </div>
-        <Link
-          href="/offers"
-          className={buttonVariants({ variant: "secondary" })}
+      </section>
+
+      {clubs.length > 0 && (
+        <section
+          aria-label={t("clubsStrip")}
+          className="border-y bg-card/70 py-6"
         >
-          {t("browseOffers")}
-        </Link>
-      </div>
+          <p className="eyebrow text-center">{t("clubsStrip")}</p>
+          {/* The list twice, the second copy hidden from assistive tech: the
+              track slides by one copy, so the loop has no seam. */}
+          <div className="mt-4 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+            <div className="animate-marquee flex w-max gap-6 hover:[animation-play-state:paused]">
+              {[false, true].map((copy) => (
+                <ul
+                  key={String(copy)}
+                  aria-hidden={copy}
+                  className="flex shrink-0 gap-6"
+                >
+                  {clubs.map((club) => (
+                    <li key={club.id}>
+                      <Link
+                        href={`/clubs/${club.id}`}
+                        tabIndex={copy ? -1 : undefined}
+                        className="font-heading text-lg font-semibold whitespace-nowrap text-muted-foreground transition-colors hover:text-primary"
+                      >
+                        {club.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-      <ClubFiltersForm filters={filters} />
+      <Features />
+      <HowItWorks />
 
-      <ClubsView
-        list={<ClubList clubs={clubs} filtered={filtered} />}
-        map={
-          <ClubMap
-            // A new search remounts the map so its first view fits the
-            // clubs found, not the previous search's.
-            key={clubsHref(filters)}
-            markers={clubs}
-            className="h-full overflow-hidden rounded-xl border shadow-sm"
+      {offers.length > 0 && (
+        <section className="container-page py-16 sm:py-24">
+          <SectionHeading
+            eyebrow={t("liveOffers.eyebrow")}
+            title={t("liveOffers.title")}
           />
-        }
-      />
+          <ul className="mt-10 grid gap-4 lg:grid-cols-3">
+            {offers.map((offer) => (
+              <li key={offer.id}>
+                <OfferCard offer={offer} />
+              </li>
+            ))}
+          </ul>
+          <p className="mt-8 text-center">
+            <Link
+              href="/offers"
+              className={buttonVariants({ variant: "secondary", size: "lg" })}
+            >
+              {t("liveOffers.seeAll")}
+              <ArrowRightIcon />
+            </Link>
+          </p>
+        </section>
+      )}
+
+      <Faq />
+      <FinalCta primary={primary} secondary={secondary} />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { SplitShell } from "@/components/page-shell";
 import { deleteMyAccount } from "@/app/(member)/profile/delete/actions";
 import { Button } from "@/components/ui/button";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
@@ -18,7 +19,7 @@ export default async function DeleteAccountPage() {
   const t = await getTranslations("DeleteAccountPage");
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-3 text-sm text-muted-foreground">{t("intro")}</p>
       <p className="mt-3 text-sm font-medium text-destructive">
@@ -29,6 +30,6 @@ export default async function DeleteAccountPage() {
           {t("confirmButton")}
         </Button>
       </form>
-    </main>
+    </SplitShell>
   );
 }

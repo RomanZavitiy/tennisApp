@@ -3,6 +3,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { connection } from "next/server";
 
+import { PageShell } from "@/components/page-shell";
 import { MarkNotificationsRead } from "@/components/mark-notifications-read";
 import { requireUser } from "@/lib/auth/require-user";
 import { listNotifications } from "@/lib/notifications/inbox";
@@ -30,7 +31,7 @@ export default async function NotificationsPage() {
   const now = new Date();
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
+    <PageShell width="prose">
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <MarkNotificationsRead />
 
@@ -95,6 +96,6 @@ export default async function NotificationsPage() {
           })}
         </ul>
       )}
-    </main>
+    </PageShell>
   );
 }

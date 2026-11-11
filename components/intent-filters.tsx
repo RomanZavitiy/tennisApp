@@ -24,7 +24,7 @@ export function IntentFilters({ filters }: { filters: FeedFilters }) {
       method="get"
       action="/offers/looking"
       aria-label={t("formLabel")}
-      className="mt-6 grid grid-cols-2 items-end gap-3 sm:grid-cols-4"
+      className="surface grid grid-cols-2 items-end gap-3 p-4 sm:grid-cols-4 lg:grid-cols-2"
     >
       <div className="space-y-1">
         <Label htmlFor="intent-filter-date">{t("dateLabel")}</Label>

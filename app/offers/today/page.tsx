@@ -1,8 +1,11 @@
+import { ZapIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { connection } from "next/server";
 
+import { EmptyState } from "@/components/empty-state";
+import { PageHeader, PageShell } from "@/components/page-shell";
 import {
   trackPlayTodayEmptyState,
   trackPlayTodayResultSelected,
@@ -37,25 +40,36 @@ export default async function PlayTodayPage() {
   const isEmpty = feed.offers.length === 0 && feed.intents.length === 0;
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <Link href="/offers" className={buttonVariants({ variant: "outline" })}>
-          {t("backToFeed")}
-        </Link>
-      </div>
-      <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
+    <PageShell>
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={
+          <Link
+            href="/offers"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            {t("backToFeed")}
+          </Link>
+        }
+      />
 
       {isEmpty ? (
-        <div className="mt-6 space-y-3">
+        <div className="mt-6">
           <MarkPlayTodayEvent action={trackPlayTodayEmptyState} />
-          <p className="text-muted-foreground">{t("emptyState")}</p>
-          <Link
-            href={`/offers/new?startsAt=${todayInKrakow()}T18:00`}
-            className={buttonVariants()}
+          <EmptyState
+            icon={<ZapIcon />}
+            action={
+              <Link
+                href={`/offers/new?startsAt=${todayInKrakow()}T18:00`}
+                className={buttonVariants()}
+              >
+                {t("createForTonight")}
+              </Link>
+            }
           >
-            {t("createForTonight")}
-          </Link>
+            {t("emptyState")}
+          </EmptyState>
         </div>
       ) : (
         <div className="mt-6 space-y-6">
@@ -63,7 +77,7 @@ export default async function PlayTodayPage() {
           {feed.offers.length > 0 && (
             <section>
               <h2 className="font-semibold">{t("offersHeading")}</h2>
-              <ul className="mt-2 space-y-3">
+              <ul className="mt-3 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                 {feed.offers.map((offer) => (
                   <li key={offer.id}>
                     <OfferCard
@@ -79,7 +93,7 @@ export default async function PlayTodayPage() {
           {feed.intents.length > 0 && (
             <section>
               <h2 className="font-semibold">{t("intentsHeading")}</h2>
-              <ul className="mt-2 space-y-3">
+              <ul className="mt-3 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
                 {feed.intents.map((intent) => (
                   <IntentCard
                     key={intent.id}
@@ -94,6 +108,6 @@ export default async function PlayTodayPage() {
           )}
         </div>
       )}
-    </main>
+    </PageShell>
   );
 }

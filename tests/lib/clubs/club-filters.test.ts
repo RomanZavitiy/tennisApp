@@ -51,9 +51,9 @@ describe("clubWhere", () => {
 
 describe("clubsHref", () => {
   it("leaves out empty filters", () => {
-    expect(clubsHref({})).toBe("/");
+    expect(clubsHref({})).toBe("/clubs");
     expect(clubsHref({ surface: "CLAY", indoor: true })).toBe(
-      "/?surface=CLAY&indoor=1",
+      "/clubs?surface=CLAY&indoor=1",
     );
   });
 
@@ -63,7 +63,7 @@ describe("clubsHref", () => {
       surface: "GRASS",
       indoor: true,
     };
-    const query = new URLSearchParams(clubsHref(filters).slice(2));
+    const query = new URLSearchParams(clubsHref(filters).split("?")[1]);
     expect(parseClubFilters(Object.fromEntries(query))).toEqual(filters);
   });
 });

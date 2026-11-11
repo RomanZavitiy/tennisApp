@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { SplitShell } from "@/components/page-shell";
 import { PlayPreferencesForm } from "@/components/play-preferences-form";
 import { buttonVariants } from "@/components/ui/button";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
@@ -30,7 +31,7 @@ export default async function PlayPreferencesPage() {
   const t = await getTranslations("PlayPreferencesPage");
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
       <div className="mt-6">
@@ -54,6 +55,6 @@ export default async function PlayPreferencesPage() {
       >
         {t("backToProfile")}
       </Link>
-    </main>
+    </SplitShell>
   );
 }
