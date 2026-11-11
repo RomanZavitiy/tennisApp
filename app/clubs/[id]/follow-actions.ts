@@ -7,6 +7,7 @@ import { z } from "zod";
 import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import { isFeatureEnabled } from "@/lib/features";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
 
 export type FollowClubResult = { ok: true } | { ok: false; message: string };
@@ -18,6 +19,13 @@ export type FollowClubResult = { ok: true } | { ok: false; message: string };
 export async function followClub(clubId: unknown): Promise<FollowClubResult> {
   const player = await requireOnboardedUser();
   const tErrors = await getTranslations("Errors");
+
+  // Following exists only for the club chat: switched off together with it
+  // (lib/features.ts), and refused here because an action can be called
+  // without the button.
+  if (!isFeatureEnabled("clubChat")) {
+    return { ok: false, message: tErrors("clubDoesNotExist") };
+  }
 
   const blocked = blockedRefusal(tErrors, player);
   if (blocked) {
@@ -52,6 +60,13 @@ export async function followClub(clubId: unknown): Promise<FollowClubResult> {
 export async function unfollowClub(clubId: unknown): Promise<FollowClubResult> {
   const player = await requireOnboardedUser();
   const tErrors = await getTranslations("Errors");
+
+  // Following exists only for the club chat: switched off together with it
+  // (lib/features.ts), and refused here because an action can be called
+  // without the button.
+  if (!isFeatureEnabled("clubChat")) {
+    return { ok: false, message: tErrors("clubDoesNotExist") };
+  }
 
   const id = z.uuid().safeParse(clubId);
   if (!id.success) {

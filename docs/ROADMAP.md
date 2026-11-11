@@ -50,9 +50,10 @@ production поводяться однаково, env-змінних немає.
    оновити `prisma/data/coaches.json` і виконати `pnpm coaches:load`. Увага: `/coaches` немає в
    `PUBLIC_ROUTES` (`lib/auth/routes.ts`), тож гостя відправить на `/login` — так було й до
    прапорців; якщо каталог має бути публічним, додати маршрут туди тим самим PR.
-3. **Чат клубу** — `clubChat: true`. Повертаються: `/clubs/[id]/chat`, посилання «Club chat» на
-   сторінці клубу, `sendClubMessage` і `reportClubMessage`. Кнопка «Follow» на сторінці клубу
-   прапорцем не керується.
+3. **Чат клубу** — `clubChat: true`. Повертаються: `/clubs/[id]/chat`, посилання «Club chat» і
+   кнопка «Follow» з лічильником фоловерів на сторінці клубу (підписка існує лише заради чату),
+   `sendClubMessage`, `reportClubMessage`, `followClub`, `unfollowClub`. Наявні підписки в
+   `club_follows` не чіпались і запрацюють одразу.
 
 Після ввімкнення: `pnpm test` (тести в `tests/lib/features.test.ts` перевіряють, що типово все
 вимкнено, — оновити очікування там) і пройтись по розділу на preview.

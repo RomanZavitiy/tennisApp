@@ -12,7 +12,8 @@ export const features: Record<FeatureName, boolean> = {
   leaderboard: false,
   /** /coaches, and "Coaches at this club" on a club's page */
   coaches: false,
-  /** /clubs/[id]/chat and its send/report actions */
+  /** /clubs/[id]/chat with its send/report actions, and following a club
+   * (the Follow button and its actions), which only scopes that chat */
   clubChat: false,
 };
 
