@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
+import { PageShell } from "@/components/page-shell";
 import { requestToJoin, withdrawJoin } from "@/app/offers/[id]/actions";
 import { acceptInvite, declineInvite } from "@/app/offers/[id]/invite-actions";
 import { reportOffer } from "@/app/offers/[id]/report-actions";
@@ -124,91 +125,98 @@ export default async function OfferPage({
   ];
 
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
+    <PageShell width="content">
       {created === "1" && <MarkMeaningfulAction />}
       {/* Opening the offer is reading what its notifications said (K2b). */}
       {viewer && <MarkNotificationsRead offerId={offer.id} />}
-      <p className="text-sm text-muted-foreground">
-        {formatLabel(tOfferLabels, offer)}
-      </p>
-      <div className="flex items-start justify-between gap-3">
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">
-          <time dateTime={offer.startsAt.toISOString()}>
-            {formatKrakowTimeRange(
-              format,
-              offer.startsAt,
-              offer.durationMinutes,
-            )}
-          </time>
-        </h1>
-        <ShareOfferButton
-          title={offerShareTitle(t, tOfferLabels, format, offer)}
-        />
-      </div>
-      <p className="mt-2 font-medium text-primary">
-        {offer.status === "CANCELLED"
-          ? t("statusCancelled")
-          : started
-            ? t("statusStarted")
-            : spotsLabel(tOfferLabels, details.spotsLeft)}
-      </p>
-
-      <dl className="mt-6 space-y-3">
-        {facts.map((fact) => (
-          <div key={fact.label} className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">{fact.label}</dt>
-            <dd className="text-right font-medium">{fact.value}</dd>
+      {/* Two cards on desktop (redesign): the offer itself, and what the
+          viewer can do about it. */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start">
+        <div className="surface p-6 sm:p-8">
+          <p className="text-sm text-muted-foreground">
+            {formatLabel(tOfferLabels, offer)}
+          </p>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="mt-1 text-3xl font-bold tracking-tight">
+              <time dateTime={offer.startsAt.toISOString()}>
+                {formatKrakowTimeRange(
+                  format,
+                  offer.startsAt,
+                  offer.durationMinutes,
+                )}
+              </time>
+            </h1>
+            <ShareOfferButton
+              title={offerShareTitle(t, tOfferLabels, format, offer)}
+            />
           </div>
-        ))}
-        <div className="flex justify-between gap-4">
-          <dt className="text-muted-foreground">{t("postedBy")}</dt>
-          <dd className="text-right font-medium">
-            <PlayerLink player={offer.author} />
-          </dd>
-        </div>
-      </dl>
-      {offer.club && (
-        <OfferBookingSection
-          offerId={offer.id}
-          club={offer.club}
-          isAuthor={details.isAuthor}
-          courtStatus={offer.courtStatus}
-          startsAt={offer.startsAt}
-          durationMinutes={offer.durationMinutes}
-        />
-      )}
-      {offer.comment && (
-        <p className="mt-6 whitespace-pre-line">{offer.comment}</p>
-      )}
+          <p className="mt-2 font-medium text-primary">
+            {offer.status === "CANCELLED"
+              ? t("statusCancelled")
+              : started
+                ? t("statusStarted")
+                : spotsLabel(tOfferLabels, details.spotsLeft)}
+          </p>
 
-      <section className="mt-8">
-        {!viewer ? (
-          <Link
-            href={`/login?next=${encodeURIComponent(`/offers/${offer.id}`)}`}
-            className={buttonVariants()}
-          >
-            {t("signInToJoin")}
-          </Link>
-        ) : details.isAuthor ? (
-          <AuthorView
-            details={details}
-            started={started}
-            viewerId={viewer.id}
-            candidates={candidates}
-          />
-        ) : (
-          <PlayerView details={details} viewerId={viewer.id} />
-        )}
-      </section>
-      {viewer && !details.isAuthor && (
-        <section className="mt-6">
-          <ReportButton
-            action={reportOffer.bind(null, offer.id)}
-            label={t("reportThisOffer")}
-          />
-        </section>
-      )}
-    </main>
+          <dl className="mt-6 space-y-3">
+            {facts.map((fact) => (
+              <div key={fact.label} className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">{fact.label}</dt>
+                <dd className="text-right font-medium">{fact.value}</dd>
+              </div>
+            ))}
+            <div className="flex justify-between gap-4">
+              <dt className="text-muted-foreground">{t("postedBy")}</dt>
+              <dd className="text-right font-medium">
+                <PlayerLink player={offer.author} />
+              </dd>
+            </div>
+          </dl>
+          {offer.club && (
+            <OfferBookingSection
+              offerId={offer.id}
+              club={offer.club}
+              isAuthor={details.isAuthor}
+              courtStatus={offer.courtStatus}
+              startsAt={offer.startsAt}
+              durationMinutes={offer.durationMinutes}
+            />
+          )}
+          {offer.comment && (
+            <p className="mt-6 whitespace-pre-line">{offer.comment}</p>
+          )}
+        </div>
+        <div className="surface p-6 sm:p-8">
+          <section>
+            {!viewer ? (
+              <Link
+                href={`/login?next=${encodeURIComponent(`/offers/${offer.id}`)}`}
+                className={buttonVariants()}
+              >
+                {t("signInToJoin")}
+              </Link>
+            ) : details.isAuthor ? (
+              <AuthorView
+                details={details}
+                started={started}
+                viewerId={viewer.id}
+                candidates={candidates}
+              />
+            ) : (
+              <PlayerView details={details} viewerId={viewer.id} />
+            )}
+          </section>
+          {viewer && !details.isAuthor && (
+            <section className="mt-6">
+              <ReportButton
+                action={reportOffer.bind(null, offer.id)}
+                label={t("reportThisOffer")}
+              />
+            </section>
+          )}
+        </div>
+      </div>
+    </PageShell>
   );
 }
 

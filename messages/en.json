@@ -11,9 +11,14 @@
     }
   },
   "SiteFooter": {
-    "tagline": "SpinBuddy · tennis sparring and courts in Kraków",
+    "tagline": "The tennis sparring board for Kraków: partners at your level, every court on one map, and a rating built from real matches.",
     "terms": "Terms",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "play": "Play",
+    "more": "More",
+    "installApp": "Install the app",
+    "suggestClub": "Suggest a club",
+    "copyright": "© {year} {siteName} · Made in Kraków"
   },
   "SiteHeader": {
     "sparring": "Sparring",
@@ -133,12 +138,6 @@
     "mobileNav": "Mobile",
     "signOut": "Sign out"
   },
-  "HomePage": {
-    "eyebrow": "Tennis · Kraków",
-    "title": "Find a court in Kraków",
-    "subtitle": "Pick a club, book it there, and find someone to play with.",
-    "browseOffers": "Browse sparring offers"
-  },
   "ClubFilters": {
     "formLabel": "Filter courts",
     "districtLabel": "District",
@@ -240,7 +239,10 @@
     "hiddenTitle": "Hidden offers",
     "hiddenIntro": "Offers you hid from your feed. Unhide one to see it there again.",
     "noHiddenOffers": "You haven't hidden any offers.",
-    "backToFeed": "Back to feed"
+    "backToFeed": "Back to feed",
+    "eyebrow": "Sparring board",
+    "subtitle": "Players looking for a partner in Kraków. Signed in, you see the ones closest to your level first.",
+    "shortcutsLabel": "Shortcuts"
   },
   "NewOfferPage": {
     "title": "Post a sparring offer",
@@ -408,7 +410,9 @@
   "LeaderboardPage": {
     "title": "Leaderboard",
     "noneMatchFilters": "No players match these filters.",
-    "noPlayersYet": "No ranked players yet."
+    "noPlayersYet": "No ranked players yet.",
+    "eyebrow": "Kraków ranking",
+    "subtitle": "Everyone starts from their self-rated level; confirmed match results move the ELO from there."
   },
   "LeaderboardFilters": {
     "formLabel": "Filter the leaderboard",
@@ -430,7 +434,11 @@
     "matchesPlayed": "{count, plural, one {# match} other {# matches}} played"
   },
   "ClubsPage": {
-    "title": "Courts"
+    "title": "Find a court in Kraków",
+    "eyebrow": "Tennis · Kraków",
+    "subtitle": "Pick a club, book it there, and find someone to play with.",
+    "browseOffers": "Browse sparring offers",
+    "suggestClub": "Suggest a club"
   },
   "ClubsView": {
     "list": "List",
@@ -1129,7 +1137,9 @@
   "CoachesPage": {
     "title": "Coaches",
     "noneMatchFilters": "No coaches match these filters.",
-    "directoryGrowing": "The directory is growing — more coaches will appear here soon."
+    "directoryGrowing": "The directory is growing — more coaches will appear here soon.",
+    "eyebrow": "Coach directory",
+    "subtitle": "Tennis coaches in Kraków, checked by hand: who they teach, where, and how to reach them."
   },
   "CoachFilters": {
     "formLabel": "Filter coaches",
@@ -1142,5 +1152,122 @@
   "CoachCard": {
     "teachesAt": "Teaches at:",
     "checkedOn": "Info checked on {date}."
+  },
+  "BrandPanel": {
+    "eyebrow": "SpinBuddy · Kraków",
+    "title": "Less searching. More tennis.",
+    "point1": "Partners at your level, ranked by how close your ratings are",
+    "point2": "Every Kraków club on one map, with a way to book",
+    "point3": "A rating that moves only when a real match is confirmed"
+  },
+  "LandingPage": {
+    "eyebrow": "Tennis in Kraków · free to use",
+    "title": "Find a tennis partner",
+    "titleAccent": "at your level.",
+    "subtitle": "SpinBuddy is the sparring board for Kraków. Say when you want to play, meet players as good as you, pick a court on the map and build a rating from real matches.",
+    "join": "Join for free",
+    "browseOffers": "Browse sparring offers",
+    "findCourt": "Find a court",
+    "clubsStrip": "Kraków clubs on the map",
+    "stats": {
+      "clubs": "clubs on the map",
+      "districts": "Kraków districts",
+      "price": "to join and play",
+      "currency": "zł"
+    },
+    "mock": {
+      "offerInitials": "MK",
+      "offerTime": "Sat 18:00–19:30 · Singles",
+      "offerSpots": "1 spot left",
+      "offerMeta": "Zwierzyniec · NTRP 3.5–4.0 · clay",
+      "offerAction": "Ask to join",
+      "ratingLabel": "Your rating",
+      "clubTitle": "Clay courts · Krowodrza",
+      "clubMeta": "3 players looking for a partner"
+    },
+    "features": {
+      "eyebrow": "What you get",
+      "title": "Everything between “I'd like to play” and the first serve",
+      "subtitle": "One place for the partner, the court and the score — built for amateur players in Kraków.",
+      "sparring": {
+        "title": "A sparring board that knows your level",
+        "text": "Post when and where you want to play, or browse what others posted. Offers are ranked by how close the author's rating is to yours, and every author shows a reliability badge — so you know who actually turns up.",
+        "link": "Browse offers"
+      },
+      "courts": {
+        "title": "Every court on one map",
+        "text": "Filter Kraków clubs by district, surface and indoor courts, then book at the club — or straight in SpinBuddy at partner clubs.",
+        "link": "Open the map"
+      },
+      "rating": {
+        "title": "A rating you earn",
+        "text": "Start from a self-rated NTRP level. Both players confirm the score after a match, and your ELO moves.",
+        "link": "See the leaderboard"
+      },
+      "today": {
+        "title": "Play today",
+        "text": "Free this evening? One list of everyone who wants a game today.",
+        "link": "Who's playing today"
+      },
+      "coaches": {
+        "title": "Coaches, checked by hand",
+        "text": "A directory of Kraków coaches with levels, languages, prices and the clubs they teach at.",
+        "link": "Find a coach"
+      },
+      "alerts": {
+        "title": "Never miss a reply",
+        "text": "Chat with your partner before the match, and get a push or an e-mail when someone asks to join.",
+        "link": "Install on your phone"
+      }
+    },
+    "steps": {
+      "eyebrow": "How it works",
+      "title": "On court in three steps",
+      "profile": {
+        "title": "Create a profile",
+        "text": "Sign in with Google or an e-mail link — no password. Pick your level and your district."
+      },
+      "offer": {
+        "title": "Post or join an offer",
+        "text": "Say when you can play, or ask to join someone else's game. The author accepts and a chat opens."
+      },
+      "play": {
+        "title": "Play and log the score",
+        "text": "Meet on court. Afterwards you both confirm the result, and your ratings update."
+      }
+    },
+    "liveOffers": {
+      "eyebrow": "Right now",
+      "title": "Players looking for a partner",
+      "seeAll": "See all offers"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Good to know",
+      "free": {
+        "question": "Is SpinBuddy free?",
+        "answer": "Yes. Creating a profile, posting offers and joining games cost nothing, and there are no payments inside the app. You pay for the court at the club, as usual."
+      },
+      "rating": {
+        "question": "How does the rating work?",
+        "answer": "You start from the NTRP level you pick yourself. After a match one player enters the score and the other confirms it — only then does the ELO of both players change. The more matches you log, the more accurate it gets."
+      },
+      "booking": {
+        "question": "Can I book a court here?",
+        "answer": "For most clubs SpinBuddy shows the booking link or phone number and you book at the club. Partner clubs take booking requests right in the app."
+      },
+      "city": {
+        "question": "Is it only for Kraków?",
+        "answer": "For now, yes. All clubs, districts and players are from Kraków — that's what keeps the board useful."
+      },
+      "app": {
+        "question": "Do I need to install anything?",
+        "answer": "No — it works in the browser. You can add SpinBuddy to your phone's home screen to get notifications when someone replies."
+      }
+    },
+    "cta": {
+      "title": "Your next match is a message away",
+      "subtitle": "Join the players in Kraków who would rather play than search."
+    }
   }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { SplitShell } from "@/components/page-shell";
 import { NotificationSettingsForm } from "@/components/notification-settings-form";
 import { PushSubscribeControl } from "@/components/push-subscribe-control";
 import { buttonVariants } from "@/components/ui/button";
@@ -29,7 +30,7 @@ export default async function NotificationSettingsPage() {
   const t = await getTranslations("NotificationSettingsPage");
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <div className="mt-6">
         <PushSubscribeControl />
@@ -46,6 +47,6 @@ export default async function NotificationSettingsPage() {
       >
         {t("backToProfile")}
       </Link>
-    </main>
+    </SplitShell>
   );
 }

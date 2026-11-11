@@ -34,7 +34,7 @@ export function MobileNav({
         className={buttonVariants({
           variant: "ghost",
           size: "icon",
-          className: "sm:hidden",
+          className: "md:hidden",
         })}
       >
         <MenuIcon />

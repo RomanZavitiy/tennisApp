@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { SplitShell } from "@/components/page-shell";
 import { confirmUnsubscribe } from "@/app/unsubscribe/actions";
 import { UnsubscribeButton } from "@/components/unsubscribe-button";
 import { verifyUnsubscribeToken } from "@/lib/notifications/unsubscribe-token";
@@ -27,7 +28,7 @@ export default async function UnsubscribePage({
   const t = await getTranslations("UnsubscribePage");
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       {valid ? (
         <>
@@ -43,6 +44,6 @@ export default async function UnsubscribePage({
           {t("invalidLinkLong")}
         </p>
       )}
-    </main>
+    </SplitShell>
   );
 }

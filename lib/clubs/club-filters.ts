@@ -3,9 +3,10 @@ import { z } from "zod";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { District, Surface } from "@/lib/generated/prisma/enums";
 
-// Court search filters on the home page (slice K4). Same approach as the
+// Court search filters on /clubs (slice K4; back at /clubs since the
+// redesign made "/" the landing page). Same approach as the
 // offer feed's (lib/offers/feed-filters.ts, task 3.7): they live in the URL
-// (/?district=…&surface=…), so a search can be shared and "back" works, and
+// (/clubs?district=…&surface=…), so a search can be shared and "back" works, and
 // a value that doesn't parse is ignored rather than an error.
 
 export type ClubFilters = {
@@ -72,5 +73,5 @@ export function clubsHref(filters: ClubFilters): string {
   if (filters.surface) params.set("surface", filters.surface);
   if (filters.indoor) params.set("indoor", "1");
   const query = params.toString();
-  return query ? `/?${query}` : "/";
+  return query ? `/clubs?${query}` : "/clubs";
 }

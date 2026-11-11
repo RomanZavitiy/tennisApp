@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 
+import { PageShell } from "@/components/page-shell";
 import { BookingLink } from "@/components/booking-link";
 import { ExternalLink } from "@/components/external-link";
 import {
@@ -95,7 +96,7 @@ export default async function ClubPage({ params }: ClubPageProps) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-10">
+    <PageShell width="content">
       <Link
         href="/clubs"
         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
@@ -146,69 +147,77 @@ export default async function ClubPage({ params }: ClubPageProps) {
         />
       )}
 
-      <dl className="mt-6 divide-y rounded-xl border bg-card shadow-sm">
-        {facts.map((fact) => (
-          <div
-            key={fact.label}
-            className="flex justify-between gap-4 px-4 py-3"
-          >
-            <dt className="text-muted-foreground">{fact.label}</dt>
-            <dd className="text-right font-medium">{fact.value}</dd>
-          </div>
-        ))}
-      </dl>
-
-      {club.priceInfo && (
-        <section className="mt-6">
-          <h2 className="font-semibold">{t("prices")}</h2>
-          <p className="mt-1 whitespace-pre-line">{club.priceInfo}</p>
-        </section>
-      )}
-
-      {coaches.length > 0 && (
-        <section className="mt-6">
-          <h2 className="font-semibold">{t("coachesHere")}</h2>
-          <ul className="mt-1 space-y-1">
-            {coaches.map((coach) => (
-              <li key={coach.slug}>
-                <Link
-                  href={`/coaches#${coach.slug}`}
-                  className="underline-offset-4 hover:underline"
-                >
-                  {coach.name}
-                </Link>
-              </li>
+      {/* Two columns on desktop (redesign): the club's facts on the left,
+          who is looking for a partner here on the right. */}
+      <div className="mt-8 grid gap-8 lg:grid-cols-2 lg:items-start">
+        <div>
+          <dl className="surface divide-y">
+            {facts.map((fact) => (
+              <div
+                key={fact.label}
+                className="flex justify-between gap-4 px-4 py-3"
+              >
+                <dt className="text-muted-foreground">{fact.label}</dt>
+                <dd className="text-right font-medium">{fact.value}</dd>
+              </div>
             ))}
-          </ul>
+          </dl>
+
+          {club.priceInfo && (
+            <section className="mt-6">
+              <h2 className="font-semibold">{t("prices")}</h2>
+              <p className="mt-1 whitespace-pre-line">{club.priceInfo}</p>
+            </section>
+          )}
+
+          {coaches.length > 0 && (
+            <section className="mt-6">
+              <h2 className="font-semibold">{t("coachesHere")}</h2>
+              <ul className="mt-1 space-y-1">
+                {coaches.map((coach) => (
+                  <li key={coach.slug}>
+                    <Link
+                      href={`/coaches#${coach.slug}`}
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {coach.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <p className="mt-8 text-sm text-muted-foreground">
+            {t("checkedOn", {
+              date: formatCheckedDate(format, club.verifiedAt),
+            })}
+          </p>
+        </div>
+
+        <section className="surface p-5">
+          <h2 className="font-semibold">{t("lookingForPartnerHere")}</h2>
+          {offers.length === 0 ? (
+            <div className="mt-2 space-y-3">
+              <p className="text-sm text-muted-foreground">{t("noOffers")}</p>
+              <Link
+                href={`/offers/new?clubId=${club.id}`}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                {t("createOfferHere")}
+              </Link>
+            </div>
+          ) : (
+            <ul className="mt-2 space-y-3">
+              {offers.map((offer) => (
+                <li key={offer.id}>
+                  <OfferCard offer={offer} viewerId={viewer?.id ?? null} />
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
-      )}
-
-      <p className="mt-8 text-sm text-muted-foreground">
-        {t("checkedOn", { date: formatCheckedDate(format, club.verifiedAt) })}
-      </p>
-
-      <section className="mt-8">
-        <h2 className="font-semibold">{t("lookingForPartnerHere")}</h2>
-        {offers.length === 0 ? (
-          <div className="mt-2 space-y-3">
-            <p className="text-sm text-muted-foreground">{t("noOffers")}</p>
-            <Link
-              href={`/offers/new?clubId=${club.id}`}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              {t("createOfferHere")}
-            </Link>
-          </div>
-        ) : (
-          <ul className="mt-2 space-y-3">
-            {offers.map((offer) => (
-              <li key={offer.id}>
-                <OfferCard offer={offer} viewerId={viewer?.id ?? null} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </main>
+      </div>
+    </PageShell>
   );
 }

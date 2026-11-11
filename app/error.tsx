@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect } from "react";
 
+import { SplitShell } from "@/components/page-shell";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 // Replaces Next.js's bare "This page couldn't load" screen for any error
@@ -29,7 +30,7 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10 text-center">
+    <SplitShell className="text-center">
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-3 text-sm text-muted-foreground">{t("body")}</p>
       <div className="mt-6 flex justify-center gap-2">
@@ -45,6 +46,6 @@ export default function ErrorPage({
           {t("reference", { digest: error.digest })}
         </p>
       )}
-    </main>
+    </SplitShell>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { SplitShell } from "@/components/page-shell";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { LoginForm } from "@/components/login-form";
 import { safeNextPath } from "@/lib/auth/routes";
@@ -22,7 +23,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const nextPath = safeNextPath(typeof next === "string" ? next : null);
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-2 mb-6 text-muted-foreground">{t("subtitle")}</p>
       {error === "link" && (
@@ -38,6 +39,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {t("orEmail")}
       </p>
       <LoginForm next={nextPath} />
-    </main>
+    </SplitShell>
   );
 }

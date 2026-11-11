@@ -11,9 +11,14 @@
     }
   },
   "SiteFooter": {
-    "tagline": "SpinBuddy · sparing tenisowy i korty w Krakowie",
+    "tagline": "Tablica sparingowa dla Krakowa: partnerzy na Twoim poziomie, wszystkie korty na jednej mapie i ranking oparty na prawdziwych meczach.",
     "terms": "Regulamin",
-    "privacy": "Prywatność"
+    "privacy": "Prywatność",
+    "play": "Gra",
+    "more": "Więcej",
+    "installApp": "Zainstaluj aplikację",
+    "suggestClub": "Zaproponuj klub",
+    "copyright": "© {year} {siteName} · Zrobione w Krakowie"
   },
   "SiteHeader": {
     "sparring": "Sparing",
@@ -133,12 +138,6 @@
     "mobileNav": "Mobilne",
     "signOut": "Wyloguj się"
   },
-  "HomePage": {
-    "eyebrow": "Tenis · Kraków",
-    "title": "Znajdź kort w Krakowie",
-    "subtitle": "Wybierz klub, zarezerwuj kort u niego i znajdź partnera do gry.",
-    "browseOffers": "Przeglądaj oferty sparingów"
-  },
   "ClubFilters": {
     "formLabel": "Filtruj korty",
     "districtLabel": "Dzielnica",
@@ -240,7 +239,10 @@
     "hiddenTitle": "Ukryte oferty",
     "hiddenIntro": "Oferty, które ukryłeś ze swojej listy. Odkryj ofertę, aby znów ją zobaczyć.",
     "noHiddenOffers": "Nie ukryłeś żadnych ofert.",
-    "backToFeed": "Wróć do listy"
+    "backToFeed": "Wróć do listy",
+    "eyebrow": "Tablica sparingowa",
+    "subtitle": "Gracze szukający partnera w Krakowie. Po zalogowaniu najpierw widzisz tych najbliższych Twojemu poziomowi.",
+    "shortcutsLabel": "Skróty"
   },
   "NewOfferPage": {
     "title": "Dodaj ogłoszenie sparingowe",
@@ -408,7 +410,9 @@
   "LeaderboardPage": {
     "title": "Ranking",
     "noneMatchFilters": "Żaden zawodnik nie spełnia tych filtrów.",
-    "noPlayersYet": "Brak sklasyfikowanych zawodników."
+    "noPlayersYet": "Brak sklasyfikowanych zawodników.",
+    "eyebrow": "Ranking Krakowa",
+    "subtitle": "Każdy zaczyna od poziomu, który sam zadeklarował; potwierdzone wyniki meczów zmieniają ELO."
   },
   "LeaderboardFilters": {
     "formLabel": "Filtruj ranking",
@@ -430,7 +434,11 @@
     "matchesPlayed": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}"
   },
   "ClubsPage": {
-    "title": "Korty"
+    "title": "Znajdź kort w Krakowie",
+    "eyebrow": "Tenis · Kraków",
+    "subtitle": "Wybierz klub, zarezerwuj kort u niego i znajdź partnera do gry.",
+    "browseOffers": "Przeglądaj oferty sparingów",
+    "suggestClub": "Zaproponuj klub"
   },
   "ClubsView": {
     "list": "Lista",
@@ -1129,7 +1137,9 @@
   "CoachesPage": {
     "title": "Trenerzy",
     "noneMatchFilters": "Żaden trener nie spełnia tych filtrów.",
-    "directoryGrowing": "Katalog się rozwija — kolejni trenerzy pojawią się tu wkrótce."
+    "directoryGrowing": "Katalog się rozwija — kolejni trenerzy pojawią się tu wkrótce.",
+    "eyebrow": "Katalog trenerów",
+    "subtitle": "Trenerzy tenisa w Krakowie, sprawdzeni ręcznie: kogo uczą, gdzie i jak się z nimi skontaktować."
   },
   "CoachFilters": {
     "formLabel": "Filtruj trenerów",
@@ -1142,5 +1152,122 @@
   "CoachCard": {
     "teachesAt": "Uczy w:",
     "checkedOn": "Dane sprawdzone {date}."
+  },
+  "BrandPanel": {
+    "eyebrow": "SpinBuddy · Kraków",
+    "title": "Mniej szukania. Więcej tenisa.",
+    "point1": "Partnerzy na Twoim poziomie, ułożeni według bliskości rankingu",
+    "point2": "Wszystkie krakowskie kluby na jednej mapie, z rezerwacją",
+    "point3": "Ranking, który zmienia się tylko po potwierdzonym meczu"
+  },
+  "LandingPage": {
+    "eyebrow": "Tenis w Krakowie · za darmo",
+    "title": "Znajdź partnera do tenisa",
+    "titleAccent": "na swoim poziomie.",
+    "subtitle": "SpinBuddy to tablica sparingowa dla Krakowa. Napisz, kiedy chcesz grać, poznaj graczy na swoim poziomie, wybierz kort na mapie i buduj ranking na podstawie prawdziwych meczów.",
+    "join": "Dołącz za darmo",
+    "browseOffers": "Przeglądaj oferty sparingów",
+    "findCourt": "Znajdź kort",
+    "clubsStrip": "Krakowskie kluby na mapie",
+    "stats": {
+      "clubs": "klubów na mapie",
+      "districts": "dzielnic Krakowa",
+      "price": "za dołączenie i grę",
+      "currency": "zł"
+    },
+    "mock": {
+      "offerInitials": "MK",
+      "offerTime": "Sob. 18:00–19:30 · Singiel",
+      "offerSpots": "1 wolne miejsce",
+      "offerMeta": "Zwierzyniec · NTRP 3.5–4.0 · mączka",
+      "offerAction": "Poproś o dołączenie",
+      "ratingLabel": "Twój ranking",
+      "clubTitle": "Korty ziemne · Krowodrza",
+      "clubMeta": "3 graczy szuka partnera"
+    },
+    "features": {
+      "eyebrow": "Co dostajesz",
+      "title": "Wszystko między „zagrałbym” a pierwszym serwisem",
+      "subtitle": "Jedno miejsce na partnera, kort i wynik — stworzone dla amatorów z Krakowa.",
+      "sparring": {
+        "title": "Tablica sparingowa, która zna Twój poziom",
+        "text": "Napisz, kiedy i gdzie chcesz grać, albo przejrzyj ogłoszenia innych. Oferty są ułożone według tego, jak bliski Twojemu jest ranking autora, a każdy autor ma odznakę rzetelności — wiesz, kto naprawdę przychodzi na kort.",
+        "link": "Przeglądaj oferty"
+      },
+      "courts": {
+        "title": "Wszystkie korty na jednej mapie",
+        "text": "Filtruj krakowskie kluby po dzielnicy, nawierzchni i kortach krytych, a potem zarezerwuj w klubie — albo od razu w SpinBuddy w klubach partnerskich.",
+        "link": "Otwórz mapę"
+      },
+      "rating": {
+        "title": "Ranking, na który pracujesz",
+        "text": "Zacznij od samodzielnie ocenionego poziomu NTRP. Po meczu obaj gracze potwierdzają wynik i Twoje ELO się zmienia.",
+        "link": "Zobacz ranking"
+      },
+      "today": {
+        "title": "Zagraj dziś",
+        "text": "Wolny wieczór? Jedna lista wszystkich, którzy chcą dziś zagrać.",
+        "link": "Kto gra dziś"
+      },
+      "coaches": {
+        "title": "Trenerzy sprawdzeni ręcznie",
+        "text": "Katalog krakowskich trenerów: poziomy, języki, ceny i kluby, w których uczą.",
+        "link": "Znajdź trenera"
+      },
+      "alerts": {
+        "title": "Nie przegap odpowiedzi",
+        "text": "Napisz do partnera przed meczem i dostań powiadomienie push lub e-mail, gdy ktoś poprosi o dołączenie.",
+        "link": "Zainstaluj na telefonie"
+      }
+    },
+    "steps": {
+      "eyebrow": "Jak to działa",
+      "title": "Na korcie w trzech krokach",
+      "profile": {
+        "title": "Załóż profil",
+        "text": "Zaloguj się przez Google albo link w e-mailu — bez hasła. Wybierz swój poziom i dzielnicę."
+      },
+      "offer": {
+        "title": "Dodaj ogłoszenie lub dołącz",
+        "text": "Napisz, kiedy możesz grać, albo poproś o dołączenie do czyjejś gry. Autor akceptuje i otwiera się czat."
+      },
+      "play": {
+        "title": "Zagraj i zapisz wynik",
+        "text": "Spotkajcie się na korcie. Po meczu obaj potwierdzacie wynik, a rankingi się aktualizują."
+      }
+    },
+    "liveOffers": {
+      "eyebrow": "Właśnie teraz",
+      "title": "Gracze szukający partnera",
+      "seeAll": "Zobacz wszystkie oferty"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Warto wiedzieć",
+      "free": {
+        "question": "Czy SpinBuddy jest darmowy?",
+        "answer": "Tak. Założenie profilu, dodawanie ogłoszeń i dołączanie do gier nic nie kosztują, a w aplikacji nie ma płatności. Za kort płacisz w klubie, jak zwykle."
+      },
+      "rating": {
+        "question": "Jak działa ranking?",
+        "answer": "Zaczynasz od poziomu NTRP, który wybierasz samodzielnie. Po meczu jeden gracz wpisuje wynik, a drugi go potwierdza — dopiero wtedy zmienia się ELO obu graczy. Im więcej meczów zapiszesz, tym jest dokładniejszy."
+      },
+      "booking": {
+        "question": "Czy mogę tu zarezerwować kort?",
+        "answer": "Dla większości klubów SpinBuddy pokazuje link do rezerwacji lub numer telefonu i rezerwujesz w klubie. Kluby partnerskie przyjmują prośby o rezerwację bezpośrednio w aplikacji."
+      },
+      "city": {
+        "question": "Czy to tylko dla Krakowa?",
+        "answer": "Na razie tak. Wszystkie kluby, dzielnice i gracze są z Krakowa — dzięki temu tablica jest użyteczna."
+      },
+      "app": {
+        "question": "Czy muszę coś instalować?",
+        "answer": "Nie — działa w przeglądarce. Możesz dodać SpinBuddy do ekranu głównego telefonu, żeby dostawać powiadomienia, gdy ktoś odpowie."
+      }
+    },
+    "cta": {
+      "title": "Od następnego meczu dzieli Cię jedna wiadomość",
+      "subtitle": "Dołącz do graczy z Krakowa, którzy wolą grać niż szukać."
+    }
   }
 }

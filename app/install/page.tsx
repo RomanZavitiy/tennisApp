@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { SplitShell } from "@/components/page-shell";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("InstallPage");
@@ -17,7 +18,7 @@ export default async function InstallPage() {
   const androidSteps = t.raw("androidSteps") as string[];
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t("intro")}</p>
 
@@ -42,6 +43,6 @@ export default async function InstallPage() {
           {t("androidBanner")}
         </p>
       </section>
-    </main>
+    </SplitShell>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { SplitShell } from "@/components/page-shell";
 import { completeOnboarding } from "@/app/onboarding/actions";
 import { ProfileForm } from "@/components/profile-form";
 import { requireUser } from "@/lib/auth/require-user";
@@ -26,7 +27,7 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-2 mb-6 text-muted-foreground">{t("subtitle")}</p>
       <ProfileForm
@@ -34,6 +35,6 @@ export default async function OnboardingPage() {
         submitLabel={t("submit")}
         withConsent
       />
-    </main>
+    </SplitShell>
   );
 }

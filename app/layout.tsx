@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Bricolage_Grotesque, Geist_Mono, Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
@@ -13,6 +13,12 @@ import "./globals.css";
 // font instead of a system fallback.
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin", "latin-ext"],
+});
+
+// Headings only (redesign): a display face with more character than Inter.
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
   subsets: ["latin", "latin-ext"],
 });
 
@@ -47,7 +53,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${display.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>

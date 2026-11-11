@@ -34,7 +34,7 @@ export function LeaderboardFiltersForm({
       // and "Clear" must empty them, not keep what was picked.
       key={leaderboardHref(filters)}
       aria-label={t("formLabel")}
-      className="mt-6 grid grid-cols-2 items-end gap-3 rounded-xl border bg-card p-4 shadow-sm sm:grid-cols-4"
+      className="surface grid grid-cols-2 items-end gap-3 p-4 sm:grid-cols-4 lg:grid-cols-2"
     >
       <div className="space-y-1">
         <Label htmlFor="leaderboard-filter-district">

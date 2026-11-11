@@ -9,7 +9,7 @@ test("the court search shows the OSM map without errors", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
 
-  await page.goto("/");
+  await page.goto("/clubs");
 
   await expect(page.locator(".leaflet-container")).toBeVisible();
   // Checks the tile URL, not the image itself, so the test doesn't depend on
@@ -41,7 +41,7 @@ test("a club shows as a marker with its details in a popup", async ({
   });
 
   try {
-    await page.goto("/");
+    await page.goto("/clubs");
     await page.getByAltText(name).click();
 
     const popup = page.locator(".leaflet-popup");

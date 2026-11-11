@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { SplitShell } from "@/components/page-shell";
 import { giveConsent } from "@/app/consent/actions";
 import { Button } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth/require-user";
@@ -33,7 +34,7 @@ export default async function ConsentPage() {
   const t = await getTranslations("ConsentPage");
 
   return (
-    <main className="mx-auto w-full max-w-sm flex-1 px-4 py-10">
+    <SplitShell>
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-2 mb-6 text-muted-foreground">
         {t.rich("body", {
@@ -64,6 +65,6 @@ export default async function ConsentPage() {
           {t("agree")}
         </Button>
       </form>
-    </main>
+    </SplitShell>
   );
 }

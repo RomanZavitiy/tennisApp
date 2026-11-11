@@ -1,10 +1,20 @@
+import {
+  EyeOffIcon,
+  PlusIcon,
+  SearchXIcon,
+  UsersIcon,
+  ZapIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { connection } from "next/server";
+import type { ReactNode } from "react";
 
+import { EmptyState } from "@/components/empty-state";
 import { OfferCard } from "@/components/offer-card";
 import { OfferFilters } from "@/components/offer-filters";
+import { ListingLayout, PageHeader, PageShell } from "@/components/page-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { getOfferFeed, parsePage } from "@/lib/offers/feed";
@@ -50,111 +60,146 @@ export default async function OffersPage({
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("OffersPage");
 
-  return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {showHidden ? t("hiddenTitle") : t("title")}
-        </h1>
-        {showHidden ? (
-          <Link
-            href="/offers"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            {t("backToFeed")}
-          </Link>
-        ) : (
-          <Link href="/offers/new" className={buttonVariants()}>
-            {t("postAnOffer")}
-          </Link>
-        )}
-      </div>
+  const results =
+    feed.offers.length === 0 ? (
+      <EmptyState
+        icon={<SearchXIcon />}
+        action={
+          !showHidden &&
+          feed.page === 1 && (
+            <Link href="/offers/new" className={buttonVariants()}>
+              {t("postAnOffer")}
+            </Link>
+          )
+        }
+      >
+        {showHidden
+          ? t("noHiddenOffers")
+          : feed.page > 1
+            ? t("noMoreOffers")
+            : filtered
+              ? t("noneMatchFilters")
+              : t("noOpenOffers")}
+      </EmptyState>
+    ) : (
+      <ul className="grid gap-3 xl:grid-cols-2">
+        {feed.offers.map((offer) => (
+          <li key={offer.id}>
+            <OfferCard
+              offer={offer}
+              viewerId={viewer?.id ?? null}
+              dismissed={showHidden}
+            />
+          </li>
+        ))}
+      </ul>
+    );
 
-      {/* "Шукають гру" (U2.2) and "Грати сьогодні" (U3.1): signed-in
-          players only — a guest sees neither link, same gate both pages
-          enforce themselves. */}
-      {!showHidden && viewer && (
-        <p className="mt-4 flex flex-wrap gap-4 text-sm">
-          <Link href="/offers/looking" className="hover:underline">
-            {t("lookingForGame")}
-          </Link>
-          <Link href="/offers/today" className="hover:underline">
-            {t("playToday")}
-          </Link>
-        </p>
-      )}
-
-      {showHidden ? (
-        viewer && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("hiddenIntro")}
-          </p>
-        )
-      ) : (
-        <>
-          <OfferFilters filters={filters} />
-          {viewer && (
-            <p className="mt-4 text-right text-sm">
-              <Link
-                href="/offers?show=hidden"
-                className="text-muted-foreground hover:underline"
-              >
-                {t("showHidden")}
-              </Link>
-            </p>
-          )}
-        </>
-      )}
-
-      {feed.offers.length === 0 ? (
-        <p className="mt-6 text-muted-foreground">
-          {showHidden
-            ? t("noHiddenOffers")
-            : feed.page > 1
-              ? t("noMoreOffers")
-              : filtered
-                ? t("noneMatchFilters")
-                : t("noOpenOffers")}
-        </p>
-      ) : (
-        <ul className="mt-6 space-y-3">
-          {feed.offers.map((offer) => (
-            <li key={offer.id}>
-              <OfferCard
-                offer={offer}
-                viewerId={viewer?.id ?? null}
-                dismissed={showHidden}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {(feed.page > 1 || feed.hasNextPage) && (
-        <nav
-          aria-label={t("pagesLabel")}
-          className="mt-6 flex items-center justify-between"
+  const pages = (feed.page > 1 || feed.hasNextPage) && (
+    <nav
+      aria-label={t("pagesLabel")}
+      className="mt-6 flex items-center justify-between"
+    >
+      {feed.page > 1 ? (
+        <Link
+          href={feedHref(filters, feed.page - 1, showHidden)}
+          className={buttonVariants({ variant: "outline" })}
         >
-          {feed.page > 1 ? (
+          {t("previous")}
+        </Link>
+      ) : (
+        <span />
+      )}
+      {feed.hasNextPage && (
+        <Link
+          href={feedHref(filters, feed.page + 1, showHidden)}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          {t("next")}
+        </Link>
+      )}
+    </nav>
+  );
+
+  return (
+    <PageShell>
+      <PageHeader
+        eyebrow={t("eyebrow")}
+        title={showHidden ? t("hiddenTitle") : t("title")}
+        subtitle={showHidden ? viewer && t("hiddenIntro") : t("subtitle")}
+        actions={
+          showHidden ? (
             <Link
-              href={feedHref(filters, feed.page - 1, showHidden)}
+              href="/offers"
               className={buttonVariants({ variant: "outline" })}
             >
-              {t("previous")}
+              {t("backToFeed")}
             </Link>
           ) : (
-            <span />
-          )}
-          {feed.hasNextPage && (
-            <Link
-              href={feedHref(filters, feed.page + 1, showHidden)}
-              className={buttonVariants({ variant: "outline" })}
-            >
-              {t("next")}
+            <Link href="/offers/new" className={buttonVariants({ size: "lg" })}>
+              <PlusIcon />
+              {t("postAnOffer")}
             </Link>
-          )}
-        </nav>
+          )
+        }
+      />
+
+      {showHidden ? (
+        <div className="mt-6">
+          {results}
+          {pages}
+        </div>
+      ) : (
+        <ListingLayout
+          sidebar={
+            <>
+              <OfferFilters filters={filters} />
+              {/* "Шукають гру" (U2.2), "Грати сьогодні" (U3.1) and the
+                  hidden offers: signed-in players only — a guest sees none
+                  of these links, same gate the pages enforce themselves. */}
+              {viewer && (
+                <nav
+                  aria-label={t("shortcutsLabel")}
+                  className="surface divide-y text-sm font-medium"
+                >
+                  <SideLink href="/offers/today" icon={<ZapIcon />}>
+                    {t("playToday")}
+                  </SideLink>
+                  <SideLink href="/offers/looking" icon={<UsersIcon />}>
+                    {t("lookingForGame")}
+                  </SideLink>
+                  <SideLink href="/offers?show=hidden" icon={<EyeOffIcon />}>
+                    {t("showHidden")}
+                  </SideLink>
+                </nav>
+              )}
+            </>
+          }
+        >
+          {results}
+          {pages}
+        </ListingLayout>
       )}
-    </main>
+    </PageShell>
+  );
+}
+
+function SideLink({
+  href,
+  icon,
+  children,
+}: {
+  href: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 px-4 py-3 transition-colors outline-none first:rounded-t-2xl last:rounded-b-2xl hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4"
+    >
+      <span className="text-primary">{icon}</span>
+      <span className="flex-1">{children}</span>
+    </Link>
   );
 }
