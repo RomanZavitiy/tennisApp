@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { PageShell } from "@/components/page-shell";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { submitFeedback } from "@/app/(member)/profile/feedback-actions";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { BlockedPlayersList } from "@/components/blocked-players-list";
@@ -148,6 +149,10 @@ export default async function ProfilePage() {
               <li className="flex items-center justify-between py-3">
                 <span>{t("language")}</span>
                 <LanguageSwitcher />
+              </li>
+              <li className="flex items-center justify-between py-3">
+                <span>{t("theme")}</span>
+                <ThemeSwitcher />
               </li>
               <SettingsLink href="/profile/delete" destructive>
                 {t("deleteAccount")}

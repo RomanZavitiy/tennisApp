@@ -19,6 +19,7 @@ partners keep the external-link booking flow. What's still open: `docs/ROADMAP.m
 ## 2. Stack
 
 Next.js 16 (App Router) + TypeScript · Supabase (Postgres + Auth + Storage + Realtime) ·
+`motion` (animation) · `next-themes` (dark mode) ·
 Prisma ORM · Tailwind CSS + shadcn/ui · react-leaflet + OpenStreetMap · React Hook Form +
 Zod · Resend (email) · Vercel (hosting) · GitHub Actions (CI) · Vitest + Playwright ·
 pnpm · PostHog EU (product analytics, `posthog-node`, server-only — decision 2026-10-14) ·

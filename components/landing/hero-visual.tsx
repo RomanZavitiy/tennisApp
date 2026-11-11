@@ -13,9 +13,9 @@ export function HeroVisual() {
 
   return (
     <div aria-hidden className="relative mx-auto w-full max-w-lg lg:max-w-none">
-      <div className="relative aspect-[5/6] overflow-hidden rounded-[2rem] bg-primary shadow-md sm:aspect-[4/3] lg:aspect-[5/6]">
+      <div className="relative aspect-[5/6] overflow-hidden rounded-[2rem] bg-brand shadow-md sm:aspect-[4/3] lg:aspect-[5/6]">
         <div className="absolute inset-0 bg-[radial-gradient(34rem_22rem_at_100%_0%,color-mix(in_oklch,var(--highlight)_50%,transparent),transparent_70%)]" />
-        <CourtLines className="absolute top-1/2 left-1/2 h-[125%] -translate-x-1/2 -translate-y-1/2 rotate-[24deg] text-primary-foreground/20" />
+        <CourtLines className="absolute top-1/2 left-1/2 h-[125%] -translate-x-1/2 -translate-y-1/2 rotate-[24deg] text-brand-foreground/20" />
         {/* The ball. */}
         <div className="absolute top-[16%] right-[18%] size-10 rounded-full bg-highlight shadow-[0_10px_30px_-6px_oklch(0.2_0.05_155/0.6)]" />
       </div>
@@ -78,7 +78,7 @@ export function HeroVisual() {
         className="absolute bottom-[6%] left-[6%] w-[64%] sm:w-[46%] lg:w-[62%]"
       >
         <div className="surface flex items-center gap-3 p-3.5">
-          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-highlight/50 text-highlight-foreground">
+          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-highlight/50 text-highlight-foreground dark:bg-highlight/15 dark:text-highlight">
             <MapPinIcon className="size-4" />
           </span>
           <div className="min-w-0">

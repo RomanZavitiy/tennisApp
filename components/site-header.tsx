@@ -7,6 +7,7 @@ import { HeaderNavLinks } from "@/components/header-nav-links";
 import { MobileNav } from "@/components/mobile-nav";
 import { NotificationBell } from "@/components/notification-bell";
 import { PushSubscribePrompt } from "@/components/push-subscribe-prompt";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { countUnreadNotifications } from "@/lib/notifications/inbox";
@@ -49,7 +50,7 @@ export async function SiteHeader() {
               width={1661}
               height={445}
               priority
-              className="h-10 w-auto"
+              className="h-10 w-auto dark:brightness-110 dark:hue-rotate-180 dark:invert"
             />
           </Link>
 
@@ -71,6 +72,8 @@ export async function SiteHeader() {
                 </Link>
               )}
             </nav>
+
+            <ThemeSwitcher className="hidden md:inline-flex" />
 
             {/* One bell for both layouts, so only one copy polls. */}
             {user && <NotificationBell initialCount={unread} />}

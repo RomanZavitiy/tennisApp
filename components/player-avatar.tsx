@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 // Initials get a colour picked from the name (UI refresh), so the same
 // player always looks the same and a list of them isn't a wall of grey.
 const INITIAL_TONES = [
-  "bg-emerald-500/15 text-emerald-800",
-  "bg-sky-500/15 text-sky-800",
-  "bg-violet-500/15 text-violet-800",
-  "bg-orange-500/15 text-orange-800",
-  "bg-rose-500/15 text-rose-800",
-  "bg-teal-500/15 text-teal-800",
+  "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300",
+  "bg-sky-500/15 text-sky-800 dark:text-sky-300",
+  "bg-violet-500/15 text-violet-800 dark:text-violet-300",
+  "bg-orange-500/15 text-orange-800 dark:text-orange-300",
+  "bg-rose-500/15 text-rose-800 dark:text-rose-300",
+  "bg-teal-500/15 text-teal-800 dark:text-teal-300",
 ] as const;
 
 function initialTone(name: string) {
@@ -53,7 +53,7 @@ export function PlayerAvatar({
     <div
       aria-hidden="true"
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ring-black/5 ring-inset",
+        "flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ring-black/5 ring-inset dark:ring-white/10",
         initialTone(name),
       )}
       style={{ width: size, height: size, fontSize: size / 2.5 }}

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export function SiteFooter() {
   const t = useTranslations("SiteFooter");
@@ -39,7 +40,7 @@ export function SiteFooter() {
             alt=""
             width={1661}
             height={445}
-            className="h-9 w-auto"
+            className="h-9 w-auto dark:brightness-110 dark:hue-rotate-180 dark:invert"
           />
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
             {t("tagline")}
@@ -71,7 +72,10 @@ export function SiteFooter() {
               siteName: tMetadata("siteName"),
             })}
           </span>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-3">
+            <ThemeSwitcher />
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
     </footer>

@@ -192,7 +192,8 @@
     "exportData": "Download my data",
     "language": "Language",
     "deleteAccount": "Delete my account",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "theme": "Theme"
   },
   "OfferCard": {
     "byAuthor": "by {name}",
@@ -1269,5 +1270,11 @@
       "title": "Your next match is a message away",
       "subtitle": "Join the players in Kraków who would rather play than search."
     }
+  },
+  "ThemeSwitcher": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
   }
 }

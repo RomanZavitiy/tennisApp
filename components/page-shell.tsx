@@ -111,14 +111,14 @@ function BrandPanel() {
   const points = [t("point1"), t("point2"), t("point3")];
 
   return (
-    <aside className="relative hidden min-h-[30rem] overflow-hidden rounded-3xl bg-primary p-10 text-primary-foreground shadow-md lg:sticky lg:top-24 lg:flex lg:flex-col lg:justify-between">
+    <aside className="relative hidden min-h-[30rem] overflow-hidden rounded-3xl bg-brand p-10 text-brand-foreground shadow-md lg:sticky lg:top-24 lg:flex lg:flex-col lg:justify-between">
       <div
         aria-hidden
         className="absolute inset-0 bg-[radial-gradient(40rem_24rem_at_100%_0%,color-mix(in_oklch,var(--highlight)_45%,transparent),transparent_70%)]"
       />
-      <CourtLines className="absolute -right-24 -bottom-28 w-[34rem] rotate-[-18deg] text-primary-foreground/15" />
+      <CourtLines className="absolute -right-24 -bottom-28 w-[34rem] rotate-[-18deg] text-brand-foreground/15" />
       <div className="relative">
-        <p className="text-xs font-bold tracking-[0.14em] text-primary-foreground/70 uppercase">
+        <p className="text-xs font-bold tracking-[0.14em] text-brand-foreground/70 uppercase">
           {t("eyebrow")}
         </p>
         <p className="mt-3 max-w-md font-heading text-4xl leading-[1.05] font-bold tracking-tight">
@@ -131,7 +131,7 @@ function BrandPanel() {
             <span className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-highlight text-highlight-foreground">
               <CheckIcon aria-hidden className="size-3.5" />
             </span>
-            <span className="text-primary-foreground/90">{point}</span>
+            <span className="text-brand-foreground/90">{point}</span>
           </li>
         ))}
       </ul>

@@ -192,7 +192,8 @@
     "exportData": "Pobierz moje dane",
     "language": "Język",
     "deleteAccount": "Usuń moje konto",
-    "privacy": "Prywatność"
+    "privacy": "Prywatność",
+    "theme": "Motyw"
   },
   "OfferCard": {
     "byAuthor": "od {name}",
@@ -1269,5 +1270,11 @@
       "title": "Od następnego meczu dzieli Cię jedna wiadomość",
       "subtitle": "Dołącz do graczy z Krakowa, którzy wolą grać niż szukać."
     }
+  },
+  "ThemeSwitcher": {
+    "label": "Motyw",
+    "system": "Systemowy",
+    "light": "Jasny",
+    "dark": "Ciemny"
   }
 }

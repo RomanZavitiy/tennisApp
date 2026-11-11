@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { signOut } from "@/app/auth/actions";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
@@ -75,6 +76,7 @@ export function MobileNav({
             </form>
           )}
         </nav>
+        <ThemeSwitcher className="mt-auto self-start" />
       </SheetContent>
     </Sheet>
   );

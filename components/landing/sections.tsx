@@ -197,17 +197,17 @@ export function FinalCta({
   return (
     <section className="container-page pb-8">
       <Reveal>
-        <div className="relative overflow-hidden rounded-[2rem] bg-primary px-6 py-14 text-center text-primary-foreground shadow-md sm:px-12 sm:py-20">
+        <div className="relative overflow-hidden rounded-[2rem] bg-brand px-6 py-14 text-center text-brand-foreground shadow-md sm:px-12 sm:py-20">
           <div
             aria-hidden
             className="absolute inset-0 bg-[radial-gradient(40rem_24rem_at_100%_0%,color-mix(in_oklch,var(--highlight)_45%,transparent),transparent_70%)]"
           />
-          <CourtLines className="absolute -bottom-40 -left-16 w-[26rem] rotate-[28deg] text-primary-foreground/12" />
+          <CourtLines className="absolute -bottom-40 -left-16 w-[26rem] rotate-[28deg] text-brand-foreground/12" />
           <div className="relative mx-auto max-w-2xl">
             <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
               {t("title")}
             </h2>
-            <p className="mt-4 text-lg text-primary-foreground/85">
+            <p className="mt-4 text-lg text-brand-foreground/85">
               {t("subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -228,7 +228,7 @@ export function FinalCta({
                   size: "lg",
                   variant: "outline",
                   className:
-                    "h-12 border-primary-foreground/30! bg-transparent! px-7 text-base text-primary-foreground! shadow-none hover:bg-primary-foreground/10!",
+                    "h-12 border-brand-foreground/30! bg-transparent! px-7 text-base text-brand-foreground! shadow-none hover:bg-brand-foreground/10!",
                 })}
               >
                 {secondary.label}
