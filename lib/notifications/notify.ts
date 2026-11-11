@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email/send";
 import { renderEmailHtml, renderEmailText } from "@/lib/email/template";
 import type { Locale } from "@/lib/generated/prisma/enums";
+import { appUrl } from "@/lib/notifications/app-url";
 import en from "@/messages/en.json";
 import pl from "@/messages/pl.json";
 import { recordNotification } from "@/lib/notifications/inbox";
@@ -97,15 +98,6 @@ async function claimMessagePushSlot(
     data: { lastMessagePushAt: now },
   });
   return count > 0;
-}
-
-// Vercel sets this for every deployment, preview or production (no env var
-// of our own to set up) — https://<VERCEL_URL> is this deployment's own
-// hostname, the same one a real request to it would have as its origin.
-function appUrl(): string {
-  return process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
 }
 
 export async function notify(
