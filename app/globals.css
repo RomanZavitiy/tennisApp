@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -48,37 +48,49 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Layered depth (UI refresh): a tight contact shadow, a soft ambient one,
+     and a 1px top highlight so surfaces read as lifted, not outlined. */
+  --shadow-xs: 0 1px 2px 0 oklch(0.2 0.02 160 / 0.06);
+  --shadow-sm:
+    0 1px 2px 0 oklch(0.2 0.02 160 / 0.05),
+    0 6px 20px -6px oklch(0.2 0.02 160 / 0.1),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
+  --shadow-md:
+    0 1px 2px 0 oklch(0.2 0.02 160 / 0.06),
+    0 12px 32px -10px oklch(0.2 0.02 160 / 0.18),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.7);
 }
 
 /* Tennis green (slice K3, owner's pick over a clay-orange candidate on
    2026-10-17): deep court green, with tennis-ball yellow as the highlight. */
 :root {
-  --background: oklch(0.985 0.006 150);
-  --foreground: oklch(0.22 0.03 160);
+  --background: oklch(0.982 0.004 150);
+  --foreground: oklch(0.2 0.02 160);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.03 160);
+  --card-foreground: oklch(0.2 0.02 160);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.03 160);
+  --popover-foreground: oklch(0.2 0.02 160);
   --primary: oklch(0.46 0.11 155);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.95 0.03 150);
+  --secondary: oklch(0.95 0.035 150);
   --secondary-foreground: oklch(0.3 0.07 155);
-  --muted: oklch(0.955 0.015 150);
-  --muted-foreground: oklch(0.48 0.03 155);
-  --accent: oklch(0.955 0.015 150);
+  --muted: oklch(0.96 0.006 150);
+  --muted-foreground: oklch(0.52 0.015 160);
+  --accent: oklch(0.96 0.006 150);
   --accent-foreground: oklch(0.3 0.07 155);
   --highlight: oklch(0.92 0.19 118);
   --highlight-foreground: oklch(0.28 0.07 140);
-  --border: oklch(0.91 0.02 150);
-  --input: oklch(0.88 0.025 150);
+  --border: oklch(0.2 0.02 160 / 0.09);
+  --input: oklch(0.2 0.02 160 / 0.14);
   --ring: oklch(0.6 0.12 155);
   --sidebar: oklch(0.975 0.01 150);
-  --sidebar-foreground: oklch(0.22 0.03 160);
+  --sidebar-foreground: oklch(0.2 0.02 160);
   --sidebar-primary: oklch(0.46 0.11 155);
   --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: oklch(0.955 0.015 150);
   --sidebar-accent-foreground: oklch(0.3 0.07 155);
-  --sidebar-border: oklch(0.91 0.02 150);
+  --sidebar-border: oklch(0.2 0.02 160 / 0.09);
   --sidebar-ring: oklch(0.6 0.12 155);
   --destructive: oklch(0.577 0.245 27.325);
   --chart-1: oklch(0.87 0 0);
@@ -131,10 +143,29 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss03";
+  }
+  /* Tight, bold headings (UI refresh): negative tracking is most of what
+     makes a heading look set rather than typed. */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Small uppercase label above a heading (UI refresh). */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
 }
 
 /* Booking grid (slice K v2): a soft diagonal stripe for TAKEN cells —

@@ -132,7 +132,7 @@ export default async function OfferPage({
         {formatLabel(tOfferLabels, offer)}
       </p>
       <div className="flex items-start justify-between gap-3">
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-3xl font-bold tracking-tight">
           <time dateTime={offer.startsAt.toISOString()}>
             {formatKrakowTimeRange(
               format,

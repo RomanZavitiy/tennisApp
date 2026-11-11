@@ -7,6 +7,7 @@ import type { LeaderboardPlayer } from "@/lib/leaderboard/get-leaderboard";
 import type { MyOpenOffer } from "@/lib/offers/my-open-offers";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { reliabilityLabel } from "@/lib/rating/reliability";
+import { cn } from "@/lib/utils";
 
 // One ranked player on the leaderboard (task L.5): rank, avatar + name
 // linking to the public profile, district, ELO, matches played and a
@@ -28,12 +29,19 @@ export function LeaderboardRow({
   const tReliability = useTranslations("Reliability");
 
   return (
-    <div className="space-y-2 rounded-lg border px-4 py-3">
+    <div className="space-y-2 rounded-xl border bg-card px-4 py-3 shadow-sm">
       <Link
         href={`/players/${player.id}`}
         className="flex items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <span className="w-6 shrink-0 text-right text-sm font-medium text-muted-foreground">
+        <span
+          className={cn(
+            "inline-flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold tabular-nums",
+            rank <= 3
+              ? "bg-highlight text-highlight-foreground"
+              : "text-muted-foreground",
+          )}
+        >
           {rank}
         </span>
         <PlayerAvatar
@@ -52,7 +60,7 @@ export function LeaderboardRow({
             {reliabilityLabel(tReliability, player.reliability)}
           </p>
         </div>
-        <span className="shrink-0 font-semibold">
+        <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-sm font-semibold text-secondary-foreground tabular-nums">
           {t("elo", { elo: player.elo })}
         </span>
       </Link>

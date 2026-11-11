@@ -43,7 +43,7 @@ export function IntentCard({
   const tOfferLabels = useTranslations("OfferLabels");
 
   return (
-    <li className="rounded-lg border px-4 py-3">
+    <li className="rounded-xl border bg-card px-4 py-3 shadow-sm">
       <Link
         href={`/players/${intent.user.id}`}
         className="inline-flex items-center gap-1.5 hover:underline"

@@ -2,6 +2,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { ExternalLink } from "@/components/external-link";
+import { PlayerAvatar } from "@/components/player-avatar";
 import type { CoachListing } from "@/lib/coaches/get-coaches";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
@@ -20,12 +21,17 @@ export function CoachCard({ coach }: { coach: CoachListing }) {
       id={coach.slug}
       className="rounded-xl border bg-card p-4 shadow-sm"
     >
-      <h2 className="font-semibold">{coach.name}</h2>
-      {coach.district && (
-        <p className="text-sm text-muted-foreground">
-          {DISTRICT_LABELS[coach.district]}
-        </p>
-      )}
+      <div className="flex items-center gap-3">
+        <PlayerAvatar name={coach.name} avatarPath={null} size={44} />
+        <div className="min-w-0">
+          <h2 className="font-semibold">{coach.name}</h2>
+          {coach.district && (
+            <p className="text-sm text-muted-foreground">
+              {DISTRICT_LABELS[coach.district]}
+            </p>
+          )}
+        </div>
+      </div>
 
       {coach.bio && <p className="mt-2 whitespace-pre-line">{coach.bio}</p>}
 

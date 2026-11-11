@@ -127,7 +127,7 @@ export function MessageThread({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border p-3">
+    <div className="space-y-3 rounded-xl border bg-card p-3 shadow-sm">
       <ul className="max-h-64 space-y-2 overflow-y-auto">
         {messages.length === 0 && (
           <li className="text-sm text-muted-foreground">

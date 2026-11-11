@@ -39,7 +39,7 @@ export async function SiteHeader() {
           is a localStorage flag that outlives sign-out, and a visitor has no
           account to save a subscription to. */}
       {user && <PushSubscribePrompt />}
-      <header className="sticky top-0 z-40 border-b bg-card/90 shadow-sm backdrop-blur">
+      <header className="sticky top-0 z-40 border-b bg-card/80 shadow-xs backdrop-blur-md backdrop-saturate-150">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
           <Link href="/" className="flex shrink-0 items-center">
             {/* The wordmark is part of the image, so the site name is its alt

@@ -75,7 +75,7 @@ export function OfferCard({
     <Link
       href={`/offers/${offer.id}`}
       className={cn(
-        "relative block rounded-lg border px-4 py-3 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+        "relative block rounded-xl border bg-card px-4 py-3 shadow-sm transition-shadow outline-none hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
         isOwn && "border-primary",
       )}
       onClick={
@@ -121,7 +121,7 @@ export function OfferCard({
               {" · "}
               {formatLabel(t, offer)}
             </span>
-            <span className="shrink-0 text-sm font-medium text-primary">
+            <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
               {spotsLabel(t, offer.spotsLeft)}
             </span>
           </div>
