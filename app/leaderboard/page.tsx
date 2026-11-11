@@ -10,9 +10,11 @@ import { ListingLayout, PageHeader, PageShell } from "@/components/page-shell";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { getLeaderboard } from "@/lib/leaderboard/get-leaderboard";
 import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
+import { requireFeature } from "@/lib/require-feature";
 import { parseLeaderboardFilters } from "@/lib/validation/leaderboard";
 
 export async function generateMetadata(): Promise<Metadata> {
+  requireFeature("leaderboard");
   const t = await getTranslations("LeaderboardPage");
   return { title: t("title") };
 }
@@ -26,6 +28,8 @@ export default async function LeaderboardPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // Switched off in lib/features.ts: a 404 for guests and members alike.
+  requireFeature("leaderboard");
   // ELO changes as results are confirmed; never serve a page built earlier.
   await connection();
   const params = await searchParams;

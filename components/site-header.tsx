@@ -10,6 +10,7 @@ import { SiteLogo } from "@/components/site-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { visibleLinks } from "@/lib/features";
 import { countUnreadNotifications } from "@/lib/notifications/inbox";
 
 // Reading the session here makes every page render per request instead of
@@ -22,12 +23,14 @@ export async function SiteHeader() {
 
   // The court search lives at /clubs again (redesign): "/" is the landing
   // page, reached through the logo. Signed-in players also get Profile.
-  const navLinks = [
+  // Sections switched off in lib/features.ts drop out of both the desktop
+  // links and the mobile menu, which share this list.
+  const navLinks = visibleLinks([
     { href: "/offers", label: t("sparring") },
     { href: "/clubs", label: t("courts") },
     { href: "/leaderboard", label: t("leaderboard") },
     { href: "/coaches", label: t("coaches") },
-  ];
+  ]);
   const signIn = { href: "/login", label: t("signIn") };
   const profile = { href: "/profile", label: t("profile") };
   const links = user ? [...navLinks, profile] : navLinks;

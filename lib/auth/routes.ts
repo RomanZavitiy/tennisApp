@@ -1,3 +1,5 @@
+import { isHiddenRoute } from "@/lib/features";
+
 // Which pages need a signed-in user, and where to send them after sign-in.
 // Used by the proxy (proxy.ts) and, from task 1.6, by the login page.
 
@@ -43,6 +45,12 @@ const PUBLIC_ROUTES = [
 ];
 
 export function isPublicRoute(pathname: string) {
+  // A section switched off in lib/features.ts: let everyone through to the
+  // page's own 404, same reasoning as /admin above — otherwise a guest would
+  // be sent to /login for a page a signed-in player sees as missing.
+  if (isHiddenRoute(pathname)) {
+    return true;
+  }
   return PUBLIC_ROUTES.some((route) => route.test(pathname));
 }
 

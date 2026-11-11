@@ -7,6 +7,7 @@ import { z } from "zod";
 import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import { isFeatureEnabled } from "@/lib/features";
 import { canWriteToClubThread } from "@/lib/messages/thread-rules";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
 import {
@@ -42,6 +43,12 @@ export async function sendClubMessage(
 ): Promise<SendClubMessageResult> {
   const user = await requireOnboardedUser();
   const tErrors = await getTranslations("Errors");
+
+  // The action is its own endpoint: with the chat switched off
+  // (lib/features.ts) it refuses even though no page renders the form.
+  if (!isFeatureEnabled("clubChat")) {
+    return { ok: false, message: tErrors("threadNotFound") };
+  }
 
   const blocked = blockedRefusal(tErrors, user);
   if (blocked) {
@@ -108,6 +115,10 @@ export async function reportClubMessage(
   const t = await getTranslations("Errors");
   const tRateLimit = await getTranslations("RateLimit");
   const tReport = await getTranslations("Validation.report");
+
+  if (!isFeatureEnabled("clubChat")) {
+    return { ok: false, message: t("threadNotFound") };
+  }
 
   const id = z.uuid().safeParse(clubId);
   const msgId = z.uuid().safeParse(messageId);

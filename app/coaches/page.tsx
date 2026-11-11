@@ -8,9 +8,11 @@ import { CoachCard } from "@/components/coach-card";
 import { EmptyState } from "@/components/empty-state";
 import { ListingLayout, PageHeader, PageShell } from "@/components/page-shell";
 import { getCoaches } from "@/lib/coaches/get-coaches";
+import { requireFeature } from "@/lib/require-feature";
 import { parseCoachFilters } from "@/lib/validation/coaches-query";
 
 export async function generateMetadata(): Promise<Metadata> {
+  requireFeature("coaches");
   const t = await getTranslations("CoachesPage");
   return { title: t("title") };
 }
@@ -25,6 +27,8 @@ export default async function CoachesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  // Switched off in lib/features.ts: a 404 for guests and members alike.
+  requireFeature("coaches");
   // The directory grows as the owner adds entries; never serve a page
   // built earlier.
   await connection();
