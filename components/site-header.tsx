@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 
 import { signOut } from "@/app/auth/actions";
@@ -7,6 +6,7 @@ import { HeaderNavLinks } from "@/components/header-nav-links";
 import { MobileNav } from "@/components/mobile-nav";
 import { NotificationBell } from "@/components/notification-bell";
 import { PushSubscribePrompt } from "@/components/push-subscribe-prompt";
+import { SiteLogo } from "@/components/site-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
@@ -44,14 +44,7 @@ export async function SiteHeader() {
           <Link href="/" className="flex shrink-0 items-center">
             {/* The wordmark is part of the image, so the site name is its alt
                 text: the link keeps the same accessible name as before. */}
-            <Image
-              src="/brand/spinbuddy-logo.webp"
-              alt={tMetadata("siteName")}
-              width={1661}
-              height={445}
-              priority
-              className="h-10 w-auto dark:brightness-110 dark:hue-rotate-180 dark:invert"
-            />
+            <SiteLogo alt={tMetadata("siteName")} priority className="h-10" />
           </Link>
 
           <div className="flex items-center gap-1">

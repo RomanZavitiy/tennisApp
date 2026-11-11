@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { SiteLogo } from "@/components/site-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export function SiteFooter() {
@@ -35,13 +35,7 @@ export function SiteFooter() {
     <footer className="mt-16 border-t bg-card">
       <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
         <div>
-          <Image
-            src="/brand/spinbuddy-logo.webp"
-            alt=""
-            width={1661}
-            height={445}
-            className="h-9 w-auto dark:brightness-110 dark:hue-rotate-180 dark:invert"
-          />
+          <SiteLogo alt="" className="h-9" />
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
             {t("tagline")}
           </p>
