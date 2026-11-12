@@ -34,9 +34,22 @@ export async function redactAccountData(userId: string): Promise<void> {
     // The bell's list (slice K2a) is only ever the user's own — nothing to
     // keep for anyone else, and the nulled User row means no cascade.
     await tx.notification.deleteMany({ where: { userId } });
+    // onboardingCompletedAt goes too: the users_onboarded_profile_complete
+    // CHECK refuses a finished onboarding without a name and birth date, so
+    // nulling those alone failed for every onboarded player (found by
+    // tests/integration/delete-account.test.ts — the unit test mocks the
+    // database). Not onboarded is also what a redacted row is: the
+    // leaderboard, invite candidates, new-offer pushes and the public
+    // profile all already skip it on that column.
     await tx.user.update({
       where: { id: userId },
-      data: { name: null, email: null, birthDate: null, avatarPath: null },
+      data: {
+        name: null,
+        email: null,
+        birthDate: null,
+        avatarPath: null,
+        onboardingCompletedAt: null,
+      },
     });
   });
 }

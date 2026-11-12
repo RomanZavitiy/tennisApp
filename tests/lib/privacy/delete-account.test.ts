@@ -68,7 +68,13 @@ describe("redactAccountData", () => {
     });
     expect(tx.user.update).toHaveBeenCalledWith({
       where: { id: ME },
-      data: { name: null, email: null, birthDate: null, avatarPath: null },
+      data: {
+        name: null,
+        email: null,
+        birthDate: null,
+        avatarPath: null,
+        onboardingCompletedAt: null,
+      },
     });
   });
 });

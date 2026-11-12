@@ -77,9 +77,14 @@ update users
 set name = null,
     email = null,
     birth_date = null,
-    avatar_path = null
+    avatar_path = null,
+    onboarding_completed_at = null
 where id = '<user_id>';
 ```
+
+`onboarding_completed_at = null` обов'язковий: CHECK `users_onboarded_profile_complete_check`
+не дозволяє завершений онбординг без імені й дати народження, тож без нього запит падає
+(рішення 2026-11-12).
 
 Усе інше (елo, лічильники надійності, налаштування сповіщень, мова) лишається — це не
 персональні дані, і `match_results` зі своїми власними ELO-знімками не залежить від полів
