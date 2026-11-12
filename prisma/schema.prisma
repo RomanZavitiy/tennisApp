@@ -93,11 +93,11 @@ model User {
   // WEEKDAYS, lib/offers/feed-filters.ts's TIMES_OF_DAY), validated by Zod
   // rather than a CHECK, the same reasoning `time` already has as a feed
   // filter with no column of its own before this.
-  preferredDays      String[]   @map("preferred_days")
-  preferredTimes     String[]   @map("preferred_times")
+  preferredDays      String[]   @default([]) @map("preferred_days")
+  preferredTimes     String[]   @default([]) @map("preferred_times")
   /// Districts besides `district` above this player is also open to
   /// playing in. A Postgres enum array, same as Club.surfaces.
-  preferredDistricts District[] @map("preferred_districts")
+  preferredDistricts District[] @default([]) @map("preferred_districts")
 
   // Notification settings (task 5.3, slice H). All default on: push is the
   // main channel (decision 2026-10-14) and starts silent until 5.15 asks for
@@ -174,9 +174,9 @@ model User {
   /// This player's "looking for a game" posts (slice U2).
   playIntents             PlayIntent[]
   /// Feedback this player left about an opponent after a match (slice W).
-  feedbackGiven           MatchFeedback[] @relation("FeedbackGiven")
+  feedbackGiven           MatchFeedback[]    @relation("FeedbackGiven")
   /// Feedback this player received from an opponent after a match (slice W).
-  feedbackReceived        MatchFeedback[] @relation("FeedbackReceived")
+  feedbackReceived        MatchFeedback[]    @relation("FeedbackReceived")
 
   // Discoverability (slice S2, task S2.3, owner decision 2026-11-07): whether
   // this player can appear in another author's "candidates to invite" list
@@ -820,10 +820,10 @@ model MatchResult {
 
   /// ELO snapshots (4.8): null until CONFIRMED, set together, exactly once,
   /// in the same transaction that updates both users' rating.
-  authorEloBefore Int?          @map("author_elo_before")
-  authorEloAfter  Int?          @map("author_elo_after")
-  playerEloBefore Int?          @map("player_elo_before")
-  playerEloAfter  Int?          @map("player_elo_after")
+  authorEloBefore Int?            @map("author_elo_before")
+  authorEloAfter  Int?            @map("author_elo_after")
+  playerEloBefore Int?            @map("player_elo_before")
+  playerEloAfter  Int?            @map("player_elo_after")
   adminActions    AdminAction[]
   /// Post-match feedback either side left about the other (slice W).
   feedback        MatchFeedback[]
@@ -859,11 +859,11 @@ model MatchFeedback {
   /// the Zod schema's job — Postgres CHECK can't de-dupe without a
   /// subquery) — each tag is its own optional checkbox, not a ranked or
   /// required choice.
-  tags FeedbackTag[]
+  tags        FeedbackTag[] @default([])
   /// "This player's level felt higher/lower than their declared NTRP" —
   /// deliberately separate from `tags`: it calibrates NTRP (hint only, once
   /// >=3 givers agree — lib/feedback/level-signal.ts), not a politeness tag.
-  levelSignal LevelSignal? @map("level_signal")
+  levelSignal LevelSignal?  @map("level_signal")
 
   /// One feedback row per giver per match — same reasoning as MatchResult's
   /// own unique offerJoinId, but keyed by giver since a match has two
