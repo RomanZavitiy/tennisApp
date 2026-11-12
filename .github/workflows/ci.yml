@@ -1,5 +1,6 @@
 # The same checks as AGENTS.md §3, on every pull request and every push to main.
-# Needs no secrets: nothing here talks to the database.
+# Needs no secrets: `checks` talks to no database at all, and `database` only
+# to a Postgres container it starts itself.
 name: CI
 
 on:
@@ -39,3 +40,51 @@ jobs:
       - run: pnpm check:i18n-strings
       - run: pnpm check:i18n-keys
       - run: pnpm build
+
+  # Everything `pnpm test` can't see because it mocks the database: that the
+  # migrations replay from nothing, that they still match schema.prisma, and
+  # the RLS / CHECK / EXCLUDE / row-lock behaviour itself (tests/integration).
+  # The database is a throwaway container on the runner -- never Supabase;
+  # scripts/local-db-url.ts refuses any host but localhost.
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: spinbuddy_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Not a secret: the container above, gone when the job ends.
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/spinbuddy_test
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # prisma/bootstrap/supabase-shim.sql, then every migration from scratch.
+      - name: Bootstrap and migrate
+        run: pnpm db:test:setup
+
+      # Red when prisma/schema.prisma and prisma/migrations have drifted apart.
+      - name: Migrations match schema.prisma
+        run: pnpm db:test:check
+
+      # Still runs when the drift check fails, so one push reports both.
+      - name: Integration tests
+        if: ${{ !cancelled() }}
+        run: pnpm test:integration

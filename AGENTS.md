@@ -37,9 +37,10 @@ pnpm dev             # local dev server
 pnpm build           # production build — must pass before any PR is proposed as done
 pnpm lint            # eslint
 pnpm typecheck       # tsc --noEmit
-pnpm test            # vitest (unit/integration)
+pnpm test            # vitest (unit; the database is mocked)
+pnpm test:integration  # vitest against a local Postgres (README §7): RLS, CHECK/EXCLUDE, row locks
 pnpm test:e2e        # playwright (end-to-end)
-pnpm prisma migrate dev      # create/apply a local migration
+pnpm db:test:migrate-dev     # prisma migrate dev against the local test DB (README §8)
 pnpm prisma studio            # inspect local DB
 ```
 
