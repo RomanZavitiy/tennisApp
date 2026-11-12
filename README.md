@@ -143,6 +143,54 @@ pnpm test:e2e
 
 `pnpm test:e2e` сам збирає production-білд і запускає його на порту 3100.
 
+### 7. Інтеграційні тести на справжньому Postgres
+
+`pnpm test` мокає базу, тому RLS, CHECK/EXCLUDE-обмеження і `SELECT … FOR UPDATE` перевіряє
+окремий набір — `tests/integration`, на локальному Postgres у Docker. До спільної бази Supabase
+з `.env.local` він не підключається: скрипти й тести читають лише `TEST_DATABASE_URL` і падають,
+якщо хост не `localhost`/`127.0.0.1`.
+
+Один раз — контейнер (порт 54329, щоб не сваритись з іншим локальним Postgres):
+
+```bash
+docker run -d --name spinbuddy-test-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=spinbuddy_test -p 127.0.0.1:54329:5432 postgres:17
+```
+
+Далі:
+
+```bash
+pnpm db:test:setup       # bootstrap + усі міграції (повторний запуск докочує лише нові)
+pnpm db:test:check       # міграції == schema.prisma? (exit 2 і diff, якщо ні)
+pnpm test:integration
+```
+
+`TEST_DATABASE_URL` задавати не треба — без неї береться саме цей контейнер
+(`postgresql://postgres:postgres@127.0.0.1:54329/spinbuddy_test`). `pnpm db:test:setup --reset`
+стирає тестову базу й накочує все з нуля. Після перезавантаження комп'ютера:
+`docker start spinbuddy-test-db`.
+
+`db:test:setup` спершу виконує `prisma/bootstrap/supabase-shim.sql` — мінімум Supabase, на який
+посилаються міграції (схема `auth` з `auth.uid()`, ролі `anon`/`authenticated`/`service_role`,
+публікація `supabase_realtime`, заглушка `storage`), — і лише потім `prisma migrate deploy`.
+CI робить те саме на кожному PR (job `database` у `.github/workflows/ci.yml`).
+
+### 8. Нова міграція
+
+`pnpm prisma migrate dev` напряму не працює: shadow-база — звичайний Postgres без схеми `auth`,
+і історія падає на `auth.uid()` (міграція `20261012185710_add_messages`). Натомість, після змін
+у `prisma/schema.prisma`:
+
+```bash
+pnpm db:test:setup
+pnpm db:test:migrate-dev --name add_something    # або --create-only, щоб дописати SQL руками
+```
+
+Це той самий `prisma migrate dev`, але проти локальної тестової бази: скрипт кладе bootstrap у
+`template1` локального Postgres, тож кожна shadow-база, яку створює Prisma, уже має все потрібне.
+Новий файл з'являється в `prisma/migrations/` і одразу застосовується локально; RLS, CHECK та
+інше, чого Prisma не вміє, дописуй у нього руками, як і раніше. На спільну базу міграція
+потрапляє окремим свідомим кроком — `pnpm prisma migrate deploy` (AGENTS.md §9).
+
 Тести із залогіненим користувачем (`e2e/session.spec.ts` та інші, що беруть `signIn` з
 `e2e/support/fixtures.ts`) входять без листа через admin API Supabase, тож потребують
 `SUPABASE_SECRET_KEY` у `.env.local`. Тестові користувачі (`e2e-…@example.com`) видаляються

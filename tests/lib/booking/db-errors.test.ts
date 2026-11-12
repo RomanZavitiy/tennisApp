@@ -15,6 +15,27 @@ describe("isExclusionViolation", () => {
     expect(isExclusionViolation({ cause: { code: "23P01" } })).toBe(true);
   });
 
+  it("recognizes the shape Prisma 7's pg driver adapter throws", () => {
+    expect(
+      isExclusionViolation({
+        code: "P2039",
+        meta: {
+          modelName: "Booking",
+          driverAdapterError: {
+            name: "DriverAdapterError",
+            cause: { kind: "postgres", code: "23P01" },
+          },
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isExclusionViolation({
+        code: "P2039",
+        meta: { driverAdapterError: { cause: { code: "23505" } } },
+      }),
+    ).toBe(false);
+  });
+
   it("rejects an unrelated error", () => {
     expect(isExclusionViolation(new Error("connection lost"))).toBe(false);
   });

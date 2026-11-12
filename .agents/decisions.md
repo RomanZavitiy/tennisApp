@@ -2387,3 +2387,61 @@ Zod-парсу нема підключення до бази. `lib/coaches/upser
 самий принцип, що лишає `match_results` недоторканими. `docs/ACCOUNT-DELETION.md` не змінюється:
 видалення користувача й так каскадить на `match_feedback` через FK (`onDelete: Cascade` з обох
 боків), окремого ручного кроку не потрібно.
+
+## 2026-11-12 — Bootstrap-схема для звичайного Postgres: перевірка міграцій та інтеграційні тести
+
+**Рішення:** `prisma/bootstrap/supabase-shim.sql` (поза `prisma/migrations`, на Supabase ніколи не
+виконується) робить чистий Postgres достатньо схожим на Supabase, щоб історія міграцій накочувалась
+з нуля. Перелік — з прочитаних міграцій, не здогад: схема `auth` і `auth.uid()` (те саме тіло, що в
+Supabase: `sub` з `request.jwt.claims`); роль `authenticated` (усі `CREATE POLICY … TO` і `GRANT`);
+публікація `supabase_realtime` (`add_message_type`); заглушка `storage.buckets`/`storage.objects`/
+`storage.foldername()` — `avatars_bucket` сам себе пропускає без схеми `storage`, із заглушкою його
+політики справді виконуються. Понад те, чого вимагають міграції: ролі `anon` і `service_role` та
+ґранти Supabase за замовчуванням на `public` (усі привілеї на таблиці для `anon`/`authenticated`)
+— щоб RLS-тести впирались саме в RLS, а не в «permission denied» через відсутній `GRANT`.
+`gen_random_uuid()` і `btree_gist` — частина самого Postgres, у shim їх немає.
+
+На цьому стоять три речі:
+- **CI job `database`** (Postgres 17 як service container): shim → `prisma migrate deploy` з нуля →
+  `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code`
+  (прапорці Prisma 7; exit 2 = схема й міграції розійшлись = червоний CI) → `pnpm test:integration`.
+- **`tests/integration`** — справжня база; мокаються лише next-intl, `next/cache`,
+  `next/navigation`, сесія (`requireUser`), сповіщення й аналітика.
+- **`pnpm db:test:migrate-dev`** — `prisma migrate dev` проти локальної бази. Shim кладеться в
+  `template1`, тож кожна shadow-база, яку Prisma створює сама, народжується з ним. Заздалегідь
+  створена shadow-база (`shadowDatabaseUrl`) не працює: Prisma скидає в ній лише `public`, і
+  функції в `private` та storage-політики з одного програвання історії конфліктують із наступним
+  (у межах одного `migrate dev` їх кілька). З тієї ж причини «голий» `pnpm prisma migrate dev`
+  проти спільної бази лишається зламаним — і хай: нові міграції пишуться локально, на спільну
+  базу потрапляють через `prisma migrate deploy`. Це замінює обхідний шлях `db execute` +
+  `migrate resolve --applied` (запис 2026-10-14 «Міграція 3.22 застосована напряму»).
+
+**Запобіжник:** усе, що створює, мігрує чи стирає тестову базу, бере URL через
+`scripts/local-db-url.ts` — лише `TEST_DATABASE_URL` (або локальний дефолт), і лише хост
+`localhost`/`127.0.0.1`. `prisma.config.ts` повторює перевірку, коли скрипт викликає CLI
+(`PRISMA_LOCAL_ONLY`). `.env.local` інтеграційні тести не читають узагалі.
+
+**Чому:** усі юніт-тести мокають `@/lib/db`, а CI не мав бази — RLS, CHECK, EXCLUDE і
+`SELECT … FOR UPDATE` не перевіряло ніщо, як і те, що `schema.prisma` збігається з міграціями,
+які з 2026-10-14 застосовувались вручну. Перший же прогін знайшов і розбіжність, і два баги
+(наступний запис і опис PR).
+
+**Межі shim:** це не Supabase. Справжні Storage, Realtime, PostgREST і GoTrue він не відтворює —
+`e2e/rls.spec.ts` проти справжнього Data API лишається потрібним. Версія Postgres у CI (17) може
+відрізнятись від версії проєкту Supabase.
+
+## 2026-11-12 — Видалення акаунта скидає й `onboardingCompletedAt`
+
+**Рішення:** `redactAccountData` (`lib/privacy/delete-account.ts`) разом з `name`/`email`/
+`birthDate`/`avatarPath` обнуляє `onboardingCompletedAt`. Те саме дописано в ручний runbook
+(`docs/ACCOUNT-DELETION.md`, крок 4).
+**Чому:** CHECK `users_onboarded_profile_complete_check` (задача 1.10) забороняє завершений
+онбординг без імені й дати народження, тож попередній `UPDATE` падав для кожного гравця, що
+пройшов онбординг, — тобто для всіх, хто взагалі міг натиснути «Delete my account». Юніт-тест
+цього не бачив (мок бази); знайшов `tests/integration/delete-account.test.ts`. Послабити CHECK
+означало б міграцію й втрату інваріанту; скинути онбординг — ні, і за змістом це правда:
+редагований рядок більше не є профілем гравця.
+**Наслідки:** рядок і далі не видаляється (Restrict на `match_results`, рішення 2026-09-28), ELO й
+лічильники лишаються. Усі читачі `onboardingCompletedAt` уже трактують null як «не показувати»:
+лідерборд, кандидати на запрошення, пуш про нові оферти, публічний профіль (404). Це доповнює
+запис 2026-10-16 «Видалення акаунта: self-service кнопка…», не скасовує його.
