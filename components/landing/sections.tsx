@@ -16,6 +16,7 @@ import { CourtLines } from "@/components/court-lines";
 import { IconTile, type IconTileTone } from "@/components/icon-tile";
 import { Reveal } from "@/components/landing/motion";
 import { buttonVariants } from "@/components/ui/button";
+import { visibleLinks } from "@/lib/features";
 import { cn } from "@/lib/utils";
 
 // The landing page's sections below the hero (redesign). Server components:
@@ -48,7 +49,7 @@ type Feature = {
   icon: ReactNode;
   tone: IconTileTone;
   href: string;
-  /** The first tile is twice as wide on desktop. */
+  /** Twice as wide on desktop. */
   wide?: boolean;
 };
 
@@ -77,6 +78,21 @@ const FEATURES: Feature[] = [
   { key: "alerts", icon: <BellRingIcon />, tone: "green", href: "/install" },
 ];
 
+const GRID_COLUMNS = 3;
+
+/** The tiles whose section is switched on (lib/features.ts). If hiding some
+ * leaves a single empty cell at the end of the desktop grid, the last tile
+ * stretches to fill it. */
+function visibleFeatures(): Feature[] {
+  const tiles = visibleLinks(FEATURES);
+  const cells = tiles.reduce((sum, tile) => sum + (tile.wide ? 2 : 1), 0);
+  const last = tiles.at(-1);
+  if (!last || last.wide || cells % GRID_COLUMNS !== GRID_COLUMNS - 1) {
+    return tiles;
+  }
+  return [...tiles.slice(0, -1), { ...last, wide: true }];
+}
+
 export function Features() {
   const t = useTranslations("LandingPage.features");
 
@@ -88,7 +104,7 @@ export function Features() {
         subtitle={t("subtitle")}
       />
       <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((feature, index) => (
+        {visibleFeatures().map((feature, index) => (
           <li key={feature.key} className={cn(feature.wide && "lg:col-span-2")}>
             <Reveal delay={(index % 3) * 0.08} className="h-full">
               <Link

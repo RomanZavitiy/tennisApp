@@ -21,6 +21,7 @@ import {
   getClub,
   getClubFollowInfo,
 } from "@/lib/clubs/club-details";
+import { isFeatureEnabled } from "@/lib/features";
 import { getClubOffers } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
@@ -48,8 +49,16 @@ export default async function ClubPage({ params }: ClubPageProps) {
   }
   const offers = await getClubOffers(club.id);
   const viewer = await getCurrentUser();
-  const followInfo = await getClubFollowInfo(club.id, viewer?.id ?? null);
-  const coaches = await getCoachesForClub(club.id);
+  // Following only scopes the club's chat, so the button goes away with
+  // it (lib/features.ts).
+  const followInfo = isFeatureEnabled("clubChat")
+    ? await getClubFollowInfo(club.id, viewer?.id ?? null)
+    : null;
+  // "Coaches at this club" only links into /coaches, so it goes away with
+  // that section (lib/features.ts).
+  const coaches = isFeatureEnabled("coaches")
+    ? await getCoachesForClub(club.id)
+    : [];
 
   const t = await getTranslations("ClubPage");
   const tSurface = await getTranslations("Surface");
@@ -111,23 +120,25 @@ export default async function ClubPage({ params }: ClubPageProps) {
         </p>
       )}
 
-      <div className="mt-4">
-        {viewer ? (
-          <FollowClubButton
-            clubId={club.id}
-            initialFollowing={followInfo.viewerFollows}
-            initialFollowerCount={followInfo.followerCount}
-          />
-        ) : (
-          <SignInToFollowLink clubId={club.id} />
-        )}
-        <Link
-          href={`/clubs/${club.id}/chat`}
-          className="mt-1 block text-sm underline-offset-4 hover:underline"
-        >
-          {t("clubChat")}
-        </Link>
-      </div>
+      {followInfo && (
+        <div className="mt-4">
+          {viewer ? (
+            <FollowClubButton
+              clubId={club.id}
+              initialFollowing={followInfo.viewerFollows}
+              initialFollowerCount={followInfo.followerCount}
+            />
+          ) : (
+            <SignInToFollowLink clubId={club.id} />
+          )}
+          <Link
+            href={`/clubs/${club.id}/chat`}
+            className="mt-1 block text-sm underline-offset-4 hover:underline"
+          >
+            {t("clubChat")}
+          </Link>
+        </div>
+      )}
 
       {club.bookingMode === "SPINBUDDY" ? (
         <Link

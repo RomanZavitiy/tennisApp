@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SiteLogo } from "@/components/site-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { visibleLinks } from "@/lib/features";
 
 export function SiteFooter() {
   const t = useTranslations("SiteFooter");
@@ -13,12 +14,12 @@ export function SiteFooter() {
   const columns = [
     {
       title: t("play"),
-      links: [
+      links: visibleLinks([
         { href: "/offers", label: tHeader("sparring") },
         { href: "/clubs", label: tHeader("courts") },
         { href: "/leaderboard", label: tHeader("leaderboard") },
         { href: "/coaches", label: tHeader("coaches") },
-      ],
+      ]),
     },
     {
       title: t("more"),

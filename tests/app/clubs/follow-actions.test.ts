@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { followClub, unfollowClub } from "@/app/clubs/[id]/follow-actions";
+import { features } from "@/lib/features";
 
 // Session and database are replaced: what's under test is who may follow,
 // which write happens, and that following/unfollowing twice is a no-op —
@@ -41,6 +42,39 @@ beforeEach(() => {
   vi.clearAllMocks();
   requireOnboardedUser.mockResolvedValue({ id: ME, blockedAt: null });
   clubFindUnique.mockResolvedValue({ id: CLUB });
+});
+
+// Following ships switched off together with the club chat
+// (lib/features.ts); everything below except the "switched off" block is
+// about how it behaves once it is on.
+const clubChatDefault = features.clubChat;
+beforeEach(() => {
+  features.clubChat = true;
+});
+afterEach(() => {
+  features.clubChat = clubChatDefault;
+});
+
+describe("with the club chat switched off", () => {
+  beforeEach(() => {
+    features.clubChat = false;
+  });
+
+  it("followClub refuses without writing", async () => {
+    const result = await followClub(CLUB);
+
+    expect(result).toEqual({ ok: false, message: "This club doesn't exist." });
+    expect(followCreateMany).not.toHaveBeenCalled();
+    expect(captureEvent).not.toHaveBeenCalled();
+  });
+
+  it("unfollowClub refuses without writing", async () => {
+    const result = await unfollowClub(CLUB);
+
+    expect(result).toEqual({ ok: false, message: "This club doesn't exist." });
+    expect(followDeleteMany).not.toHaveBeenCalled();
+    expect(captureEvent).not.toHaveBeenCalled();
+  });
 });
 
 describe("followClub", () => {

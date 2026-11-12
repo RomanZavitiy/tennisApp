@@ -10,6 +10,7 @@ import { MessageThread } from "@/components/message-thread";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { getClub, getClubFollowInfo } from "@/lib/clubs/club-details";
 import { getClubThread } from "@/lib/messages/thread-data";
+import { requireFeature } from "@/lib/require-feature";
 
 // A club's chat, its own route rather than a section of /clubs/[id] (task
 // O.13): that page is already 166 lines, and this needs its own data load
@@ -22,12 +23,16 @@ type ClubChatPageProps = { params: Promise<{ id: string }> };
 export async function generateMetadata({
   params,
 }: ClubChatPageProps): Promise<Metadata> {
+  requireFeature("clubChat");
   const t = await getTranslations("ClubChatPage");
   const club = await getClub((await params).id);
   return { title: club ? t("title", { club: club.name }) : t("notFound") };
 }
 
 export default async function ClubChatPage({ params }: ClubChatPageProps) {
+  // Switched off in lib/features.ts: a 404 before the session check, so a
+  // guest isn't sent to /login for a page that doesn't exist.
+  requireFeature("clubChat");
   // Chat content changes all the time; never serve a cached page.
   await connection();
   const { id } = await params;

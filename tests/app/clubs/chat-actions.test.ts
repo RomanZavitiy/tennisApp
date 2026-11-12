@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   reportClubMessage,
   sendClubMessage,
 } from "@/app/clubs/[id]/chat-actions";
+import { features } from "@/lib/features";
 
 // Session and database are replaced: what's under test is who may write
 // into a club's chat (followers only), the content and rate-limit rules,
@@ -45,6 +46,47 @@ vi.mock("@/lib/moderation/create-report", () => ({ createReport }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 const createdAt = new Date("2026-11-01T10:00:00Z");
+
+// The chat ships switched off (lib/features.ts); everything below except
+// the "switched off" block is about how it behaves once it is on.
+const clubChatDefault = features.clubChat;
+beforeEach(() => {
+  features.clubChat = true;
+});
+afterEach(() => {
+  features.clubChat = clubChatDefault;
+});
+
+describe("with the club chat switched off", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    features.clubChat = false;
+    requireOnboardedUser.mockResolvedValue({ id: ME, blockedAt: null });
+    followFindUnique.mockResolvedValue({ id: "follow-1" });
+    checkRateLimit.mockResolvedValue({ ok: true });
+  });
+
+  it("sendClubMessage refuses a follower without writing", async () => {
+    await expect(sendClubMessage(CLUB, "hi")).resolves.toEqual({
+      ok: false,
+      message: "This conversation doesn't exist.",
+    });
+    expect(checkRateLimit).not.toHaveBeenCalled();
+    expect(messageCreate).not.toHaveBeenCalled();
+    expect(captureEvent).not.toHaveBeenCalled();
+  });
+
+  it("reportClubMessage refuses without creating a report", async () => {
+    await expect(
+      reportClubMessage(CLUB, MESSAGE, { reason: "SPAM" }),
+    ).resolves.toEqual({
+      ok: false,
+      message: "This conversation doesn't exist.",
+    });
+    expect(messageFindUnique).not.toHaveBeenCalled();
+    expect(createReport).not.toHaveBeenCalled();
+  });
+});
 
 describe("sendClubMessage", () => {
   beforeEach(() => {
