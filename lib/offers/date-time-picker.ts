@@ -5,9 +5,12 @@
 // UTC-date math only, so neither the browser's nor the server's time zone
 // can shift a day.
 
-/** Times offered as chips: every half hour from 06:00 to 22:00. */
-const FIRST_SLOT_MINUTES = 6 * 60;
-const LAST_SLOT_MINUTES = 22 * 60;
+/** Which times are offered as chips, in minutes from midnight. */
+export type SlotRange = { first: number; last: number };
+
+/** An offer's start: every half hour from 06:00 to 22:00. */
+export const OFFER_SLOTS: SlotRange = { first: 6 * 60, last: 22 * 60 };
+
 const SLOT_STEP_MINUTES = 30;
 
 const DATE_FORMAT = /^\d{4}-\d{2}-\d{2}$/;
@@ -56,14 +59,12 @@ export function shiftMonth(
  */
 export function monthGrid(year: number, month: number): (string | null)[][] {
   const first = new Date(Date.UTC(year, month - 1, 1));
-  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const length = daysInMonth(year, month);
   // getUTCDay: Sunday is 0. Monday-first, Sunday becomes 6.
   const leading = (first.getUTCDay() + 6) % 7;
   const cells: (string | null)[] = [
     ...Array<null>(leading).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) =>
-      isoDate(year, month, i + 1),
-    ),
+    ...Array.from({ length }, (_, i) => isoDate(year, month, i + 1)),
   ];
   while (cells.length % 7 !== 0) {
     cells.push(null);
@@ -80,11 +81,14 @@ export function monthGrid(year: number, month: number): (string | null)[][] {
  * "play again" link, an old bookmark) is added in order, so the picker
  * still shows what's selected.
  */
-export function timeSlots(extra?: string | null): string[] {
+export function timeSlots(
+  extra?: string | null,
+  range: SlotRange = OFFER_SLOTS,
+): string[] {
   const slots: string[] = [];
   for (
-    let minutes = FIRST_SLOT_MINUTES;
-    minutes <= LAST_SLOT_MINUTES;
+    let minutes = range.first;
+    minutes <= range.last;
     minutes += SLOT_STEP_MINUTES
   ) {
     slots.push(`${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`);
@@ -114,8 +118,27 @@ export function isPastSlot(
 }
 
 /** A day with no chip left to pick: before today, or today after the last slot. */
-export function isPastDay(date: string, earliest: string): boolean {
-  const slots = timeSlots();
+export function isPastDay(
+  date: string,
+  earliest: string,
+  range: SlotRange = OFFER_SLOTS,
+): boolean {
+  const slots = timeSlots(null, range);
   const last = slots[slots.length - 1] ?? "23:59";
   return isPastSlot(date, last, earliest);
+}
+
+/** "YYYY-MM" of a "YYYY-MM-DD" day, as numbers: the month a calendar opens on. */
+export function monthOf(day: string): { year: number; month: number } {
+  return { year: Number(day.slice(0, 4)), month: Number(day.slice(5, 7)) };
+}
+
+/** A month's position on one scale, to compare months with < and >. */
+export function monthIndex(view: { year: number; month: number }): number {
+  return view.year * 12 + view.month;
+}
+
+/** The number of days in `month` (1-12) of `year`. */
+export function daysInMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
 }

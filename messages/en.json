@@ -251,6 +251,7 @@
     "cancel": "Cancel"
   },
   "OfferFilters": {
+    "anyDay": "Any day",
     "formLabel": "Filter offers",
     "dateLabel": "Date",
     "districtLabel": "District",
@@ -1277,6 +1278,7 @@
     "dark": "Dark"
   },
   "DateTimePicker": {
+    "clearDate": "Clear the date",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "morning": "Morning",
@@ -1285,5 +1287,10 @@
     "pickBoth": "Pick a day and a time.",
     "pickDay": "Now pick a day.",
     "pickTime": "Now pick a time."
+  },
+  "BirthDateSelect": {
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
   }
 }

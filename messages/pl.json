@@ -251,6 +251,7 @@
     "cancel": "Anuluj"
   },
   "OfferFilters": {
+    "anyDay": "Dowolny dzień",
     "formLabel": "Filtruj ogłoszenia",
     "dateLabel": "Data",
     "districtLabel": "Dzielnica",
@@ -1277,6 +1278,7 @@
     "dark": "Ciemny"
   },
   "DateTimePicker": {
+    "clearDate": "Wyczyść datę",
     "previousMonth": "Poprzedni miesiąc",
     "nextMonth": "Następny miesiąc",
     "morning": "Rano",
@@ -1285,5 +1287,10 @@
     "pickBoth": "Wybierz dzień i godzinę.",
     "pickDay": "Teraz wybierz dzień.",
     "pickTime": "Teraz wybierz godzinę."
+  },
+  "BirthDateSelect": {
+    "day": "Dzień",
+    "month": "Miesiąc",
+    "year": "Rok"
   }
 }

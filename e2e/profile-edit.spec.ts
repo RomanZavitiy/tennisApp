@@ -21,7 +21,9 @@ test("a player edits their profile", async ({ page, signIn }) => {
 
   // The form starts from the saved profile.
   await expect(page.getByLabel("Name")).toHaveValue("Ola");
-  await expect(page.getByLabel("Date of birth")).toHaveValue("1995-04-12");
+  await expect(page.getByLabel("Day")).toHaveValue("12");
+  await expect(page.getByLabel("Month")).toHaveValue("4");
+  await expect(page.getByLabel("Year")).toHaveValue("1995");
   await expect(page.getByLabel("Gender")).toHaveValue("FEMALE");
   await expect(page.getByLabel("District")).toHaveValue("KROWODRZA");
   await expect(page.getByLabel("Level (NTRP)")).toHaveValue("3.5");

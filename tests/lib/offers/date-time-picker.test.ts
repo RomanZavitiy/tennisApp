@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  daysInMonth,
   isPastDay,
   isPastSlot,
   joinLocal,
   monthGrid,
+  monthIndex,
+  monthOf,
   partOfDay,
   shiftMonth,
   splitLocal,
@@ -105,5 +108,33 @@ describe("isPastSlot / isPastDay", () => {
     expect(isPastDay("2026-11-13", now)).toBe(true);
     expect(isPastDay("2026-11-14", now)).toBe(false);
     expect(isPastDay("2026-11-14", "2026-11-14T22:00")).toBe(true);
+  });
+});
+
+describe("custom slot ranges", () => {
+  const late = { first: 6 * 60, last: 23 * 60 + 30 };
+
+  it("offers chips up to a later close", () => {
+    expect(timeSlots(null, late).at(-1)).toBe("23:30");
+  });
+
+  it("keeps a day open while its later slots are still ahead", () => {
+    expect(isPastDay("2026-11-14", "2026-11-14T22:30", late)).toBe(false);
+    expect(isPastDay("2026-11-14", "2026-11-14T22:30")).toBe(true);
+  });
+});
+
+describe("month helpers", () => {
+  it("reads the month a day falls in, and orders months", () => {
+    expect(monthOf("2026-11-15")).toEqual({ year: 2026, month: 11 });
+    expect(monthIndex({ year: 2027, month: 1 })).toBeGreaterThan(
+      monthIndex({ year: 2026, month: 12 }),
+    );
+  });
+
+  it("knows each month's length", () => {
+    expect(daysInMonth(2026, 2)).toBe(28);
+    expect(daysInMonth(2028, 2)).toBe(29);
+    expect(daysInMonth(2026, 11)).toBe(30);
   });
 });

@@ -1,17 +1,22 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
+import { DateTimeField } from "@/components/date-field";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
+import type { SlotRange } from "@/lib/offers/date-time-picker";
 
 type AddBlockResult = { ok: true } | { ok: false; message: string };
+
+// Wider than an offer's 06:00-22:00: a block can run to a late close.
+const BLOCK_SLOTS: SlotRange = { first: 6 * 60, last: 23 * 60 + 30 };
 
 // K.17: the staff panel's form for a booking made outside SpinBuddy (phone,
 // twojtenis) or for maintenance — addBlock itself re-validates and re-checks
@@ -20,8 +25,11 @@ export function AddBlockForm({
   courts,
   action,
   labels,
+  earliest,
 }: {
   courts: { id: string; name: string }[];
+  /** Kraków time now, "YYYY-MM-DDTHH:mm": no block in the past. */
+  earliest: string;
   action: (input: unknown) => Promise<AddBlockResult>;
   labels: {
     courtLabel: string;
@@ -33,6 +41,7 @@ export function AddBlockForm({
     done: string;
   };
 }) {
+  const t = useTranslations("DateTimePicker");
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -72,19 +81,28 @@ export function AddBlockForm({
           ))}
         </NativeSelect>
       </div>
-      <div className="flex gap-3">
-        <div className="flex-1 space-y-1">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="min-w-0 flex-1 space-y-1">
           <Label htmlFor="block-starts">{labels.startLabel}</Label>
-          <Input
+          <DateTimeField
             id="block-starts"
             name="startsAt"
-            type="datetime-local"
-            required
+            label={labels.startLabel}
+            earliest={earliest}
+            placeholder={t("pickBoth")}
+            slots={BLOCK_SLOTS}
           />
         </div>
-        <div className="flex-1 space-y-1">
+        <div className="min-w-0 flex-1 space-y-1">
           <Label htmlFor="block-ends">{labels.endLabel}</Label>
-          <Input id="block-ends" name="endsAt" type="datetime-local" required />
+          <DateTimeField
+            id="block-ends"
+            name="endsAt"
+            label={labels.endLabel}
+            earliest={earliest}
+            placeholder={t("pickBoth")}
+            slots={BLOCK_SLOTS}
+          />
         </div>
       </div>
       <div className="space-y-1">

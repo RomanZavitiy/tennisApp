@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { Input } from "@/components/ui/input";
+import { DateField } from "@/components/date-field";
 import { Label } from "@/components/ui/label";
 import {
   NativeSelect,
@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/native-select";
 import { TIMES_OF_DAY, type FeedFilters } from "@/lib/offers/feed-filters";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
+import { todayInKrakow } from "@/lib/validation/profile";
 
 /**
  * "Шукають гру"'s own filters (task U2.2's "ті самі" filters as the offer
@@ -26,13 +27,17 @@ export function IntentFilters({ filters }: { filters: FeedFilters }) {
       aria-label={t("formLabel")}
       className="surface grid grid-cols-2 items-end gap-3 p-4 sm:grid-cols-4 lg:grid-cols-2"
     >
-      <div className="space-y-1">
+      {/* Two columns wide: a picked date ("Fri, 20 Nov") and its clear
+          button don't fit in one. */}
+      <div className="col-span-2 space-y-1">
         <Label htmlFor="intent-filter-date">{t("dateLabel")}</Label>
-        <Input
+        <DateField
           id="intent-filter-date"
           name="date"
-          type="date"
           defaultValue={filters.date}
+          today={todayInKrakow()}
+          placeholder={t("anyDay")}
+          clearable
         />
       </div>
       <div className="space-y-1">
