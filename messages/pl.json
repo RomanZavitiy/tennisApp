@@ -679,7 +679,8 @@
     "detailsFieldLabel": "Szczegóły (opcjonalnie)",
     "detailsPlaceholder": "Dodaj szczegóły (opcjonalnie)",
     "reporting": "Zgłaszanie…",
-    "submit": "Wyślij zgłoszenie"
+    "submit": "Wyślij zgłoszenie",
+    "cancel": "Anuluj"
   },
   "ReportReason": {
     "NO_SHOW": "Nie zjawił się na meczu",

@@ -23,7 +23,14 @@ export function ReportButton({
   const [open, setOpen] = useState(false);
 
   if (open) {
-    return <ReportForm action={action} />;
+    return (
+      <ReportForm
+        action={action}
+        onCancel={() => {
+          setOpen(false);
+        }}
+      />
+    );
   }
   return (
     <button

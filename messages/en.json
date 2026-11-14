@@ -679,7 +679,8 @@
     "detailsFieldLabel": "Details (optional)",
     "detailsPlaceholder": "Add details (optional)",
     "reporting": "Reporting…",
-    "submit": "Submit report"
+    "submit": "Submit report",
+    "cancel": "Cancel"
   },
   "ReportReason": {
     "NO_SHOW": "Didn't show up",

@@ -18,13 +18,17 @@ type ReportActionResult = { ok: true } | { ok: false; message: string };
 // The reason + comment form behind every "Report" button (task 3.19): the
 // offer page, a player's profile, and beside a message in a thread all
 // share this one component, each only supplying where the report goes.
+// `onCancel` closes it again without sending anything: "Report" is easy to
+// hit by accident right next to a message.
 export function ReportForm({
   action,
+  onCancel,
 }: {
   action: (input: {
     reason: ReportReasonType;
     comment?: string;
   }) => Promise<ReportActionResult>;
+  onCancel?: () => void;
 }) {
   const t = useTranslations("ReportForm");
   const tReason = useTranslations("ReportReason");
@@ -90,9 +94,22 @@ export function ReportForm({
           {error}
         </p>
       )}
-      <Button type="submit" size="sm" disabled={pending}>
-        {pending ? t("reporting") : t("submit")}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" disabled={pending}>
+          {pending ? t("reporting") : t("submit")}
+        </Button>
+        {onCancel && (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            disabled={pending}
+            onClick={onCancel}
+          >
+            {t("cancel")}
+          </Button>
+        )}
+      </div>
     </form>
   );
 }
