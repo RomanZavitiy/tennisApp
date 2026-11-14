@@ -1275,5 +1275,15 @@
     "label": "Motyw",
     "light": "Jasny",
     "dark": "Ciemny"
+  },
+  "DateTimePicker": {
+    "previousMonth": "Poprzedni miesiąc",
+    "nextMonth": "Następny miesiąc",
+    "morning": "Rano",
+    "afternoon": "Po południu",
+    "evening": "Wieczorem",
+    "pickBoth": "Wybierz dzień i godzinę.",
+    "pickDay": "Teraz wybierz dzień.",
+    "pickTime": "Teraz wybierz godzinę."
   }
 }

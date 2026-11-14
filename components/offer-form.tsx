@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
+import { DateTimePicker } from "@/components/date-time-picker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   NativeSelect,
@@ -156,15 +156,25 @@ export function OfferForm({
         <ErrorText id="hasPartner" error={errors.hasPartner} />
       </fieldset>
 
-      <Field id="startsAt" label={t("startsAtLabel")} error={errors.startsAt}>
-        <Input
-          id="startsAt"
-          type="datetime-local"
-          min={earliestStart}
-          {...aria("startsAt", errors.startsAt)}
-          {...register("startsAt")}
+      <div className="space-y-2">
+        <p className="text-sm font-medium">{t("startsAtLabel")}</p>
+        <Controller
+          control={control}
+          name="startsAt"
+          render={({ field }) => (
+            <DateTimePicker
+              value={typeof field.value === "string" ? field.value : ""}
+              onChange={field.onChange}
+              earliest={earliestStart}
+              label={t("startsAtLabel")}
+              invalid={Boolean(errors.startsAt)}
+              describedBy={errors.startsAt ? "startsAt-error" : undefined}
+              groupRef={field.ref}
+            />
+          )}
         />
-      </Field>
+        <ErrorText id="startsAt" error={errors.startsAt} />
+      </div>
 
       <Field
         id="durationMinutes"

@@ -1275,5 +1275,15 @@
     "label": "Theme",
     "light": "Light",
     "dark": "Dark"
+  },
+  "DateTimePicker": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "pickBoth": "Pick a day and a time.",
+    "pickDay": "Now pick a day.",
+    "pickTime": "Now pick a time."
   }
 }

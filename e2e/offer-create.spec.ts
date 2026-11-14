@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { toKrakowLocal } from "../lib/offers/krakow-time";
 
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./support/fixtures";
 import {
   completeTestProfile,
@@ -27,6 +29,25 @@ test.beforeAll(async () => {
 
 // The test users — and with them their offers — are gone by now, so the
 // club no longer has offers holding it.
+// The start time picker (components/date-time-picker.tsx): a month
+// calendar, then a time chip. It opens on this month, so a day in the next
+// one needs one click forward first.
+async function pickStart(page: Page, day: string, time: string) {
+  const thisMonth = toKrakowLocal(new Date()).slice(0, 7);
+  const startTime = page.getByRole("group", { name: "Start time" });
+  if (day.slice(0, 7) !== thisMonth) {
+    await startTime.getByRole("button", { name: "Next month" }).click();
+  }
+  const dayLabel = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(`${day}T00:00:00Z`));
+  await startTime.getByRole("button", { name: dayLabel }).click();
+  await startTime.getByRole("button", { name: time }).click();
+}
+
 test.afterAll(async () => {
   const { error } = await admin.from("clubs").delete().eq("id", clubId);
   if (error) throw error;
@@ -41,7 +62,8 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   const startsAt = `${day}T18:00`;
 
   await page.goto("/offers");
-  await page.getByRole("link", { name: "Post an offer" }).click();
+  // The feed's header and an empty "my games" both offer it.
+  await page.getByRole("link", { name: "Post an offer" }).first().click();
   await expect(page).toHaveURL("/offers/new");
 
   // Singles by default; the partner option belongs to doubles only. The
@@ -52,7 +74,7 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
 
   await page.getByLabel("Doubles").check();
   await page.getByLabel("I already have a partner").check();
-  await page.getByLabel("Start time").fill(startsAt);
+  await pickStart(page, day, "18:00");
   // 90 minutes unless changed (slice K5).
   await expect(page.getByLabel("How long")).toHaveValue("90");
   await page.getByLabel("How long").selectOption({ label: "2 h" });
@@ -126,15 +148,22 @@ test("an incomplete offer stays on the form with messages", async ({
   await completeTestProfile(admin, user.id);
 
   await page.goto("/offers/new");
-  await page.getByLabel("Start time").fill("2020-01-01T10:00");
+  // No day or time picked (the picker can't choose a past one at all).
+  await page.getByRole("button", { name: "Post offer" }).click();
+  const alerts = page.getByRole("main").getByRole("alert");
+  await expect(alerts).toHaveText(["Choose the start time."]);
+
+  const tomorrow = toKrakowLocal(new Date(Date.now() + 86_400_000)).slice(
+    0,
+    10,
+  );
+  await pickStart(page, tomorrow, "18:00");
   await page.getByLabel("District").selectOption("");
   await page.getByLabel("Level from (NTRP)").selectOption("5.0");
   await page.getByLabel("Level to (NTRP)").selectOption("3.0");
   await page.getByRole("button", { name: "Post offer" }).click();
 
-  const alerts = page.getByRole("main").getByRole("alert");
   await expect(alerts).toHaveText([
-    "That time has already passed.",
     "Choose a club or a district.",
     "The highest level can't be below the lowest.",
   ]);
