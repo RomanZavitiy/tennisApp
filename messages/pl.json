@@ -1273,7 +1273,6 @@
   },
   "ThemeSwitcher": {
     "label": "Motyw",
-    "system": "Systemowy",
     "light": "Jasny",
     "dark": "Ciemny"
   }

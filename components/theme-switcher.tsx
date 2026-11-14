@@ -1,6 +1,6 @@
 "use client";
 
-import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
@@ -8,19 +8,21 @@ import { useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
 
 const OPTIONS = [
-  { value: "system", icon: MonitorIcon },
   { value: "light", icon: SunIcon },
   { value: "dark", icon: MoonIcon },
 ] as const;
 
 const subscribe = () => () => undefined;
 
-// System / Light / Dark (dark mode). The choice lives in localStorage
-// (next-themes), so the server can't know it: until the page has hydrated
-// no option is marked as pressed, rather than marking the wrong one.
+// Light / Dark, nothing else: a third "System" option only confused people.
+// Until the player picks one, the site still follows the device setting
+// (ThemeProvider), and the button for whatever that resolved to is shown as
+// pressed. The choice lives in localStorage (next-themes), so the server
+// can't know it: until the page has hydrated no option is marked as
+// pressed, rather than marking the wrong one.
 export function ThemeSwitcher({ className }: { className?: string }) {
   const t = useTranslations("ThemeSwitcher");
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const hydrated = useSyncExternalStore(
     subscribe,
     () => true,
@@ -37,7 +39,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
       )}
     >
       {OPTIONS.map(({ value, icon: Icon }) => {
-        const active = hydrated && theme === value;
+        const active = hydrated && resolvedTheme === value;
         return (
           <button
             key={value}
