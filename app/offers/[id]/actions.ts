@@ -96,7 +96,9 @@ export async function requestToJoin(
   // still be WITHDRAWN. A truly new join also opens its private thread
   // (decision 3.1: the thread exists from the moment of the request) with a
   // welcome note — reopening a withdrawn one reuses the same thread, so it
-  // doesn't get a second welcome.
+  // doesn't get a second welcome. The new row and its welcome are one
+  // transaction: if the welcome can't be written, there's no request either,
+  // so trying again really tries again instead of finding a half-made join.
   if (existing) {
     const { count } = await db.offerJoin.updateMany({
       where: { id: existing.id, status: "WITHDRAWN" },
@@ -106,20 +108,26 @@ export async function requestToJoin(
       return { ok: false, message: tJoinRefusal("ALREADY_REQUESTED") };
     }
   } else {
-    const created = (
-      await db.offerJoin.createManyAndReturn({
-        data: [{ offerId: id.data, userId: player.id }],
-        select: { id: true },
-        skipDuplicates: true,
-      })
-    ).at(0);
+    const created = await db.$transaction(async (tx) => {
+      const row = (
+        await tx.offerJoin.createManyAndReturn({
+          data: [{ offerId: id.data, userId: player.id }],
+          select: { id: true },
+          skipDuplicates: true,
+        })
+      ).at(0);
+      if (row) {
+        await postSystemMessage(
+          { offerJoinId: row.id },
+          THREAD_WELCOME_MESSAGE,
+          tx,
+        );
+      }
+      return row;
+    });
     if (!created) {
       return { ok: false, message: tJoinRefusal("ALREADY_REQUESTED") };
     }
-    await postSystemMessage(
-      { offerJoinId: created.id },
-      THREAD_WELCOME_MESSAGE,
-    );
   }
 
   // Task 5.16: "new join request", to the author — on a reopened request

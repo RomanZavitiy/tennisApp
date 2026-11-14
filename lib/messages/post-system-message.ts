@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import type { SystemMessageKey } from "@/lib/messages/system-message-keys";
 
 export type { SystemMessageKey } from "@/lib/messages/system-message-keys";
@@ -20,11 +21,14 @@ export type ThreadRef = { offerJoinId: string } | { offerId: string };
 // sentence instead (never rewritten, decision 2026-10-15) —
 // isSystemMessageKey() is how the renderer tells the two apart, falling
 // back to showing a pre-1.20 row exactly as it always has.
+// `client` lets a caller file the notice inside its own transaction, so the
+// write it belongs to and the notice land together or not at all.
 export async function postSystemMessage(
   thread: ThreadRef,
   key: SystemMessageKey,
+  client: Prisma.TransactionClient = db,
 ): Promise<void> {
-  await db.message.create({
+  await client.message.create({
     data: { type: "SYSTEM", content: key, ...thread },
   });
 }

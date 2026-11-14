@@ -1035,6 +1035,9 @@
     "body": "Twoje konto i dane osobowe zostały usunięte. Dziękujemy za korzystanie z SpinBuddy.",
     "home": "Wróć na stronę główną"
   },
+  "OfferActionButton": {
+    "failed": "Nie udało się. Spróbuj ponownie za chwilę."
+  },
   "ErrorPage": {
     "title": "Coś poszło nie tak",
     "body": "Nie udało się tego wczytać. Jeśli przed chwilą coś zrobiłeś (wysłałeś prośbę, zaakceptowałeś gracza), najpierw odśwież stronę — mogło się już zapisać.",
