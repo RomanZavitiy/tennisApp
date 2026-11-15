@@ -26,3 +26,29 @@ export function magicLinkRequestSchema(t: ValidationT) {
     next: z.string().max(2048),
   });
 }
+
+// The one-time code from the same email, typed into the tab the player
+// started in. Spaces are dropped ("123 456" is how people copy it). The
+// length is a range, not exactly 6: Supabase's "Email OTP length" setting
+// decides it, and the form shouldn't break if that setting changes.
+export function loginCodeSchema(t: ValidationT) {
+  return z.object({
+    code: z
+      .string()
+      .transform((value) => value.replace(/\s/g, ""))
+      .pipe(
+        z
+          .string()
+          .min(1, t("codeRequired"))
+          .regex(/^\d{6,10}$/, t("codeInvalid")),
+      ),
+  });
+}
+
+export type LoginCodeValues = z.input<ReturnType<typeof loginCodeSchema>>;
+
+// What verifyLoginCode receives: who the code was sent to, the code, and
+// where to go afterwards.
+export function loginCodeRequestSchema(t: ValidationT) {
+  return magicLinkRequestSchema(t).extend(loginCodeSchema(t).shape);
+}

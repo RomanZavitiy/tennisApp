@@ -707,6 +707,8 @@
     "invalidRequest": "Nieprawidłowe żądanie.",
     "tooManySignInEmails": "Za dużo e-maili logowania. Poczekaj minutę i spróbuj ponownie.",
     "couldNotSendSignInLink": "Nie udało się wysłać linku logowania. Spróbuj za minutę.",
+    "codeRejected": "Ten kod jest błędny lub wygasł. Sprawdź go albo poproś o nowy e-mail.",
+    "tooManyCodeAttempts": "Za dużo prób. Poczekaj chwilę i poproś o nowy e-mail.",
     "blocked": "Twoje konto jest zablokowane do czasu decyzji administratora. Nie możesz tworzyć ofert, zgłoszeń ani wiadomości, dopóki administrator nie podejmie decyzji.",
     "tooManyActiveOffers": "Masz już {max} aktywnych ofert. Odwołaj jedną, aby dodać kolejną.",
     "clubNotFound": "Wybierz klub z listy.",
@@ -779,7 +781,9 @@
   "Validation": {
     "login": {
       "emailRequired": "Podaj swój adres e-mail.",
-      "emailInvalid": "Podaj prawidłowy adres e-mail."
+      "emailInvalid": "Podaj prawidłowy adres e-mail.",
+      "codeRequired": "Wpisz kod z e-maila.",
+      "codeInvalid": "Kod składa się z samych cyfr — sprawdź e-mail."
     },
     "message": {
       "required": "Napisz wiadomość.",
@@ -981,7 +985,11 @@
     "sending": "Wysyłanie…",
     "submit": "Wyślij mi link logowania",
     "checkEmailTitle": "Sprawdź e-mail",
-    "checkEmailBody": "Wysłaliśmy link logowania na adres <strong>{email}</strong>. Otwórz go na dowolnym urządzeniu, aby się zalogować."
+    "checkEmailBody": "Wysłaliśmy e-mail na adres <strong>{email}</strong>. Wpisz tutaj kod z wiadomości, aby zostać w tym oknie — albo użyj przycisku w e-mailu.",
+    "codeLabel": "Kod z e-maila",
+    "verify": "Zaloguj się",
+    "verifying": "Logowanie…",
+    "differentEmail": "Użyj innego adresu e-mail"
   },
   "ExportDataPage": {
     "title": "Pobierz moje dane",
