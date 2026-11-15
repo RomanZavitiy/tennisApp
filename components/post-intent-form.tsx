@@ -4,10 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
+import { DateField } from "@/components/date-field";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   NativeSelect,
@@ -52,6 +52,7 @@ export function PostIntentForm({
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<PlayIntentInput>({
     resolver: zodResolver(playIntentSchema(tValidation)),
@@ -89,7 +90,22 @@ export function PostIntentForm({
       className="space-y-5"
     >
       <Field id="date" label={t("dateLabel")} error={errors.date}>
-        <Input id="date" type="date" {...register("date")} />
+        <Controller
+          control={control}
+          name="date"
+          render={({ field }) => (
+            <DateField
+              id="date"
+              value={field.value}
+              onChange={field.onChange}
+              triggerRef={field.ref}
+              today={defaultDate}
+              placeholder={t("dateLabel")}
+              invalid={Boolean(errors.date)}
+              describedBy={errors.date ? "date-error" : undefined}
+            />
+          )}
+        />
       </Field>
 
       <Field id="times" label={t("timesLabel")} error={errors.times}>

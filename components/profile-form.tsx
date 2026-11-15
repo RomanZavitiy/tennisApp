@@ -4,9 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useForm, type FieldError } from "react-hook-form";
+import { Controller, useForm, type FieldError } from "react-hook-form";
 import { z } from "zod";
 
+import { BirthDateSelect } from "@/components/birth-date-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import { Gender } from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
 import {
   profileSchema,
+  todayInKrakow,
   type ProfileInput,
   type SaveProfileResult,
 } from "@/lib/validation/profile";
@@ -56,6 +58,7 @@ export function ProfileForm({
     register,
     handleSubmit,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(schema),
@@ -91,12 +94,20 @@ export function ProfileForm({
         hint={t("birthDateHint")}
         error={errors.birthDate}
       >
-        <Input
-          id="birthDate"
-          type="date"
-          autoComplete="bday"
-          {...aria("birthDate", errors.birthDate)}
-          {...register("birthDate")}
+        <Controller
+          control={control}
+          name="birthDate"
+          render={({ field }) => (
+            <BirthDateSelect
+              id="birthDate"
+              value={field.value}
+              onChange={field.onChange}
+              dayRef={field.ref}
+              today={todayInKrakow()}
+              invalid={Boolean(errors.birthDate)}
+              describedBy={errors.birthDate ? "birthDate-error" : undefined}
+            />
+          )}
         />
       </Field>
 

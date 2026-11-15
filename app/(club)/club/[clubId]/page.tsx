@@ -22,6 +22,7 @@ import { db } from "@/lib/db";
 import {
   formatKrakowTime,
   formatKrakowTimeRange,
+  toKrakowLocal,
 } from "@/lib/offers/krakow-time";
 import { todayInKrakow } from "@/lib/validation/profile";
 
@@ -227,6 +228,7 @@ export default async function ClubPanelPage({
           <AddBlockForm
             courts={todayDay.courts}
             action={addBlock}
+            earliest={toKrakowLocal(new Date())}
             labels={{
               courtLabel: tBookPage("courtLabel"),
               startLabel: t("blockStartLabel"),

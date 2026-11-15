@@ -251,6 +251,7 @@
     "cancel": "Anuluj"
   },
   "OfferFilters": {
+    "anyDay": "Dowolny dzień",
     "formLabel": "Filtruj ogłoszenia",
     "dateLabel": "Data",
     "districtLabel": "Dzielnica",
@@ -678,7 +679,8 @@
     "detailsFieldLabel": "Szczegóły (opcjonalnie)",
     "detailsPlaceholder": "Dodaj szczegóły (opcjonalnie)",
     "reporting": "Zgłaszanie…",
-    "submit": "Wyślij zgłoszenie"
+    "submit": "Wyślij zgłoszenie",
+    "cancel": "Anuluj"
   },
   "ReportReason": {
     "NO_SHOW": "Nie zjawił się na meczu",
@@ -1273,8 +1275,23 @@
   },
   "ThemeSwitcher": {
     "label": "Motyw",
-    "system": "Systemowy",
     "light": "Jasny",
     "dark": "Ciemny"
+  },
+  "DateTimePicker": {
+    "clearDate": "Wyczyść datę",
+    "previousMonth": "Poprzedni miesiąc",
+    "nextMonth": "Następny miesiąc",
+    "morning": "Rano",
+    "afternoon": "Po południu",
+    "evening": "Wieczorem",
+    "pickBoth": "Wybierz dzień i godzinę.",
+    "pickDay": "Teraz wybierz dzień.",
+    "pickTime": "Teraz wybierz godzinę."
+  },
+  "BirthDateSelect": {
+    "day": "Dzień",
+    "month": "Miesiąc",
+    "year": "Rok"
   }
 }

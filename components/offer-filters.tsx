@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DateField } from "@/components/date-field";
 import { Label } from "@/components/ui/label";
 import {
   NativeSelect,
@@ -15,6 +15,7 @@ import {
   type FeedFilters,
 } from "@/lib/offers/feed-filters";
 import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
+import { todayInKrakow } from "@/lib/validation/profile";
 
 // The feed's filters (task 3.7): a plain GET form, so the browser puts them
 // in the URL itself and no client JavaScript is needed. Submitting drops
@@ -34,13 +35,17 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
       aria-label={t("formLabel")}
       className="surface grid grid-cols-2 items-end gap-3 p-4 sm:grid-cols-4 lg:grid-cols-2"
     >
-      <div className="space-y-1">
+      {/* Two columns wide: a picked date ("Fri, 20 Nov") and its clear
+          button don't fit in one. */}
+      <div className="col-span-2 space-y-1">
         <Label htmlFor="filter-date">{t("dateLabel")}</Label>
-        <Input
+        <DateField
           id="filter-date"
           name="date"
-          type="date"
           defaultValue={filters.date}
+          today={todayInKrakow()}
+          placeholder={t("anyDay")}
+          clearable
         />
       </div>
       <div className="space-y-1">

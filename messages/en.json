@@ -251,6 +251,7 @@
     "cancel": "Cancel"
   },
   "OfferFilters": {
+    "anyDay": "Any day",
     "formLabel": "Filter offers",
     "dateLabel": "Date",
     "districtLabel": "District",
@@ -678,7 +679,8 @@
     "detailsFieldLabel": "Details (optional)",
     "detailsPlaceholder": "Add details (optional)",
     "reporting": "Reporting…",
-    "submit": "Submit report"
+    "submit": "Submit report",
+    "cancel": "Cancel"
   },
   "ReportReason": {
     "NO_SHOW": "Didn't show up",
@@ -1273,8 +1275,23 @@
   },
   "ThemeSwitcher": {
     "label": "Theme",
-    "system": "System",
     "light": "Light",
     "dark": "Dark"
+  },
+  "DateTimePicker": {
+    "clearDate": "Clear the date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "pickBoth": "Pick a day and a time.",
+    "pickDay": "Now pick a day.",
+    "pickTime": "Now pick a time."
+  },
+  "BirthDateSelect": {
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
   }
 }

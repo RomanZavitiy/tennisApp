@@ -8,7 +8,9 @@ test("a new player fills in the profile", async ({ page, signIn }) => {
   const user = await signIn("/onboarding");
 
   await page.getByLabel("Name").fill("Ola");
-  await page.getByLabel("Date of birth").fill("1995-04-12");
+  await page.getByLabel("Day").selectOption("12");
+  await page.getByLabel("Month").selectOption("April");
+  await page.getByLabel("Year").selectOption("1995");
   await page.getByLabel("Gender").selectOption("Female");
   await page.getByLabel("District").selectOption("Łagiewniki-Borek Fałęcki");
   await page.getByLabel("Level (NTRP)").selectOption("3.5");
@@ -46,7 +48,12 @@ test("an empty form shows a message for every field without saving", async ({
   await signIn("/onboarding");
   const posts: string[] = [];
   page.on("request", (request) => {
-    if (request.method() === "POST") posts.push(request.url());
+    // The header bell counts unread notifications through a no-argument
+    // server action ("[]") right after the page mounts. Only a save, which
+    // carries the form's values, matters here.
+    if (request.method() === "POST" && request.postData() !== "[]") {
+      posts.push(request.url());
+    }
   });
 
   await page.getByRole("button", { name: "Save profile" }).click();
@@ -69,7 +76,11 @@ test("a player under 18 is turned away by the form", async ({
   await signIn("/onboarding");
 
   await page.getByLabel("Name").fill("Kid");
-  await page.getByLabel("Date of birth").fill("2015-06-01");
+  // The youngest year on offer, but a birthday still ahead this year.
+  const youngest = new Date().getFullYear() - 18;
+  await page.getByLabel("Day").selectOption("31");
+  await page.getByLabel("Month").selectOption("December");
+  await page.getByLabel("Year").selectOption(String(youngest));
   await page.getByRole("button", { name: "Save profile" }).click();
 
   await expect(
