@@ -1188,6 +1188,40 @@
       "clubTitle": "Korty ziemne · Krowodrza",
       "clubMeta": "3 graczy szuka partnera"
     },
+    "why": {
+      "eyebrow": "Dlaczego SpinBuddy",
+      "title": "Twój czas na korcie jest cenny",
+      "subtitle": "Większość tablic kończy się na liście nazwisk. Tu widzisz, kto gra na Twoim poziomie — i kto naprawdę przychodzi.",
+      "level": {
+        "title": "Partner na Twoim poziomie, na Twoich warunkach",
+        "text": "Oferty są ułożone według tego, jak bliski Twojemu jest ranking autora, a każda od razu podaje termin, dzielnicę, nawierzchnię i zakres poziomu."
+      },
+      "punctual": {
+        "title": "Ludzie, którzy przychodzą",
+        "text": "Każdy gracz ma wskaźnik wiarygodności zbudowany na prawdziwych meczach. Niestawienie się go obniża, a widzisz go, zanim powiesz „tak”."
+      },
+      "lastMinute": {
+        "title": "Bez odwoływania w ostatniej chwili",
+        "text": "Rezygnacja na mniej niż 12 godzin przed grą obniża wiarygodność. Plany się zmieniają — ale partner dowiaduje się o tym na czas."
+      },
+      "chat": {
+        "title": "Plan B na czacie",
+        "text": "Po akceptacji otwiera się czat. Zapowiada się deszcz? Umówcie się na kort pod balonem, zanim ktokolwiek wyjdzie z domu."
+      },
+      "demo": {
+        "initials": "MK",
+        "offerTime": "Sob. 18:00–19:30 · Singiel",
+        "offerMeta": "Krowodrza · NTRP 3.5–4.0 · mączka",
+        "reliability": "Wiarygodność 98%",
+        "ask": "Poproś o dołączenie",
+        "sent": "Prośba wysłana",
+        "accepted": "Marta zaakceptowała · czat otwarty",
+        "rain": "W sobotę ma padać 🌧️",
+        "indoor": "To weźmy kort pod balonem — zarezerwuję",
+        "deal": "Stoi. Punkt 18:00!",
+        "booked": "Zmiana kortu · kryty · sob. 18:00"
+      }
+    },
     "features": {
       "eyebrow": "Co dostajesz",
       "title": "Wszystko między „zagrałbym” a pierwszym serwisem",

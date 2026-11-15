@@ -1188,6 +1188,40 @@
       "clubTitle": "Clay courts · Krowodrza",
       "clubMeta": "3 players looking for a partner"
     },
+    "why": {
+      "eyebrow": "Why SpinBuddy",
+      "title": "Your time on court is worth protecting",
+      "subtitle": "Most boards stop at a list of names. Here you see who plays at your level — and who actually turns up.",
+      "level": {
+        "title": "A partner at your level, on your terms",
+        "text": "Offers are sorted by how close the author's rating is to yours, and each one states the time, district, surface and level range up front."
+      },
+      "punctual": {
+        "title": "People who show up",
+        "text": "Every player carries a reliability score built from real matches. A no-show lowers it, and you see it before you say yes."
+      },
+      "lastMinute": {
+        "title": "No last-minute bailing",
+        "text": "Backing out less than 12 hours before the start counts against your reliability. Plans change — but your partner hears about it in time."
+      },
+      "chat": {
+        "title": "Plan B in the chat",
+        "text": "Once you're accepted, a chat opens. Rain on the way? Agree on a court under the dome before anyone leaves home."
+      },
+      "demo": {
+        "initials": "MK",
+        "offerTime": "Sat 18:00–19:30 · Singles",
+        "offerMeta": "Krowodrza · NTRP 3.5–4.0 · clay",
+        "reliability": "Reliable 98%",
+        "ask": "Ask to join",
+        "sent": "Request sent",
+        "accepted": "Marta accepted · chat is open",
+        "rain": "Forecast says rain on Saturday 🌧️",
+        "indoor": "Let's take the court under the dome — I'll book it",
+        "deal": "Deal. 18:00 sharp!",
+        "booked": "Court changed · indoor · Sat 18:00"
+      }
+    },
     "features": {
       "eyebrow": "What you get",
       "title": "Everything between “I'd like to play” and the first serve",

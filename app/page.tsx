@@ -12,6 +12,7 @@ import {
   HowItWorks,
   SectionHeading,
 } from "@/components/landing/sections";
+import { WhySpinBuddy } from "@/components/landing/why";
 import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
@@ -140,6 +141,7 @@ export default async function Home() {
         </section>
       )}
 
+      <WhySpinBuddy />
       <Features />
       <HowItWorks />
 

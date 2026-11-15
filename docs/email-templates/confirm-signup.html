@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>SpinBuddy</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f3f7f4; -webkit-text-size-adjust: 100%;">
+    <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: #f3f7f4;">
+      Confirm your e-mail and find a partner at your level · Potwierdź e-mail i znajdź partnera na swoim poziomie
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f7f4;">
+      <tr>
+        <td align="center" style="padding: 32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px; background-color: #ffffff; border: 1px solid #e3ebe6; border-radius: 20px; overflow: hidden;">
+            <tr>
+              <td style="background-color: #1b6e42; padding: 22px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="width: 14px; font-size: 0; line-height: 0;"><div style="width: 14px; height: 14px; background-color: #ddf247; border-radius: 50%; font-size: 0; line-height: 0;"></div></td>
+                    <td style="padding-left: 10px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; color: #ffffff;">SpinBuddy</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 36px 32px 8px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #18251e;">
+                <h1 style="margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700; letter-spacing: -0.4px;">Welcome to SpinBuddy</h1>
+                <p style="margin: 14px 0 0; font-size: 16px; line-height: 1.55; color: #44524a;">
+                  Confirm your e-mail to finish signing up. It takes one tap — no password.
+                </p>
+                <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: #6b786f;">
+                  Potwierdź swój e-mail, aby dokończyć rejestrację. Jedno kliknięcie, bez hasła.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 24px 32px 8px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background-color: #1b6e42; border-radius: 999px;">
+                      <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email" style="display: inline-block; padding: 14px 30px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none;">Confirm e-mail · Potwierdź e-mail</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px 32px 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.55; color: #6b786f;">
+                The link works once and expires soon. · Link działa raz i wkrótce wygaśnie.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 28px 32px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e3ebe6;">
+                  <tr>
+                    <td style="padding: 22px 0 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #1b6e42;">
+                      What's waiting inside · Co czeka w środku
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.55; color: #44524a;">
+                      <strong style="color: #18251e;">Partners at your level.</strong> Offers sorted by how close the rating is to yours.<br />
+                      <span style="color: #6b786f;">Partnerzy na Twoim poziomie — oferty ułożone według rankingu.</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.55; color: #44524a;">
+                      <strong style="color: #18251e;">People who show up.</strong> Every player has a reliability score.<br />
+                      <span style="color: #6b786f;">Ludzie, którzy przychodzą — każdy gracz ma wskaźnik wiarygodności.</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 0 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.55; color: #44524a;">
+                      <strong style="color: #18251e;">Every Kraków court on one map.</strong><br />
+                      <span style="color: #6b786f;">Wszystkie krakowskie korty na jednej mapie.</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 24px 32px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f7f4; border-radius: 12px;">
+                  <tr>
+                    <td style="padding: 14px 16px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #6b786f;">
+                      Button not working? Copy this link into your browser:<br />
+                      <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email" style="color: #1b6e42; word-break: break-all;">{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 24px 32px 32px; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.55; color: #6b786f;">
+                Didn't sign up? Ignore this e-mail — no account is created without the link.<br />
+                To nie Ty? Zignoruj tę wiadomość — bez linku konto nie powstanie.
+              </td>
+            </tr>
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px;">
+            <tr>
+              <td align="center" style="padding: 20px 16px 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #8a968e;">
+                SpinBuddy · Tennis partners in Kraków ·
+                <a href="{{ .SiteURL }}" style="color: #8a968e;">{{ .SiteURL }}</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
