@@ -36,35 +36,44 @@ const {
   checkRateLimit,
   isBlockedEitherWay,
   tx,
-} = vi.hoisted(() => ({
-  requireOnboardedUser: vi.fn(),
-  offerFindUnique: vi.fn(),
-  offerFindFirst: vi.fn(),
-  offerUpdate: vi.fn(),
-  joinFindUnique: vi.fn(),
-  joinFindMany: vi.fn(),
-  joinCreateManyAndReturn: vi.fn(),
-  joinUpdateMany: vi.fn(),
-  recordLateCancellation: vi.fn(),
-  recordScheduledMatch: vi.fn(),
-  postSystemMessage: vi.fn(),
-  notify: vi.fn(),
-  checkRateLimit: vi.fn(),
-  isBlockedEitherWay: vi.fn(),
-  // What the status-change transaction (3.12) sees.
-  tx: {
-    $queryRaw: vi.fn(),
-    offerJoin: { findUnique: vi.fn(), update: vi.fn(), upsert: vi.fn() },
-    sparringOffer: {
-      findFirst: vi.fn(),
-      findUniqueOrThrow: vi.fn(),
-      update: vi.fn(),
+} = vi.hoisted(() => {
+  const joinCreateManyAndReturn = vi.fn();
+  return {
+    requireOnboardedUser: vi.fn(),
+    offerFindUnique: vi.fn(),
+    offerFindFirst: vi.fn(),
+    offerUpdate: vi.fn(),
+    joinFindUnique: vi.fn(),
+    joinFindMany: vi.fn(),
+    joinCreateManyAndReturn,
+    joinUpdateMany: vi.fn(),
+    recordLateCancellation: vi.fn(),
+    recordScheduledMatch: vi.fn(),
+    postSystemMessage: vi.fn(),
+    notify: vi.fn(),
+    checkRateLimit: vi.fn(),
+    isBlockedEitherWay: vi.fn(),
+    // What the status-change transaction (3.12) sees.
+    tx: {
+      $queryRaw: vi.fn(),
+      offerJoin: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+        upsert: vi.fn(),
+        // requestToJoin files a new row and its welcome in one transaction.
+        createManyAndReturn: joinCreateManyAndReturn,
+      },
+      sparringOffer: {
+        findFirst: vi.fn(),
+        findUniqueOrThrow: vi.fn(),
+        update: vi.fn(),
+      },
+      // T.3: promoteNextWaitlistEntry's own reads/writes, inside this same
+      // transaction.
+      offerWaitlist: { findFirst: vi.fn(), delete: vi.fn() },
     },
-    // T.3: promoteNextWaitlistEntry's own reads/writes, inside this same
-    // transaction.
-    offerWaitlist: { findFirst: vi.fn(), delete: vi.fn() },
-  },
-}));
+  };
+});
 
 vi.mock("@/lib/auth/require-onboarded-user", () => ({ requireOnboardedUser }));
 vi.mock("@/lib/db", () => ({
@@ -77,7 +86,6 @@ vi.mock("@/lib/db", () => ({
     offerJoin: {
       findUnique: joinFindUnique,
       findMany: joinFindMany,
-      createManyAndReturn: joinCreateManyAndReturn,
       updateMany: joinUpdateMany,
     },
     $transaction: (run: (client: typeof tx) => Promise<unknown>) => run(tx),
@@ -179,9 +187,11 @@ describe("requestToJoin", () => {
       select: { id: true },
       skipDuplicates: true,
     });
+    // Same transaction as the row: no request without its welcome.
     expect(postSystemMessage).toHaveBeenCalledWith(
       { offerJoinId: JOIN },
       THREAD_WELCOME_MESSAGE,
+      tx,
     );
     expect(notify).toHaveBeenCalledWith(AUTHOR, {
       kind: "JOIN_REQUESTED",
@@ -284,6 +294,13 @@ describe("requestToJoin", () => {
       message: "You have already asked to join.",
     });
     expect(postSystemMessage).not.toHaveBeenCalled();
+  });
+
+  it("fails the whole request, unannounced, when its welcome can't be written", async () => {
+    postSystemMessage.mockRejectedValueOnce(new Error("column does not exist"));
+
+    await expect(requestToJoin(OFFER)).rejects.toThrow("column does not exist");
+    expect(notify).not.toHaveBeenCalled();
   });
 
   it("answers without anyone's details", async () => {

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { unstable_rethrow, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +31,8 @@ export function OfferActionButton({
    * client-only function like markMeaningfulAction as a prop. */
   trackMeaningfulAction?: boolean;
 }) {
+  const t = useTranslations("OfferActionButton");
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -45,7 +49,20 @@ export function OfferActionButton({
             return;
           }
           startTransition(async () => {
-            const result = await action();
+            let result: Awaited<ReturnType<typeof action>>;
+            try {
+              result = await action();
+            } catch (error) {
+              // A redirect (e.g. the session ended) is Next's to handle.
+              unstable_rethrow(error);
+              // Anything else (a DB hiccup) stays on this button instead of
+              // replacing the whole page with app/error.tsx. The refresh
+              // shows whatever did get saved, so the player never has to
+              // reload to find out. The server side already reached Sentry.
+              setMessage(t("failed"));
+              router.refresh();
+              return;
+            }
             setMessage(result.ok ? null : result.message);
             if (result.ok && trackMeaningfulAction) {
               markMeaningfulAction();
