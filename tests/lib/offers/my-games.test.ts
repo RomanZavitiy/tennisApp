@@ -19,6 +19,7 @@ const NOW = new Date("2026-10-17T10:00:00Z");
 function offer(id: string, startsAt: string) {
   return {
     id,
+    sport: "TENNIS",
     startsAt: new Date(startsAt),
     durationMinutes: 90,
     district: "PODGORZE",
@@ -68,5 +69,29 @@ describe("getMyUpcomingGames", () => {
       ["mine", "AUTHOR", 2],
       ["asked", "REQUESTED", 0],
     ]);
+  });
+
+  // Slice PD2: the list mixes both sports, so each game carries its own.
+  it("keeps each game's sport and asks the query for it", async () => {
+    offerFindMany.mockResolvedValue([
+      {
+        ...offer("padel", "2026-10-20T16:00:00Z"),
+        sport: "PADEL",
+        _count: { joins: 0 },
+      },
+    ]);
+    joinFindMany.mockResolvedValue([
+      { status: "ACCEPTED", offer: offer("tennis", "2026-10-21T16:00:00Z") },
+    ]);
+
+    const games = await getMyUpcomingGames(ME, NOW);
+
+    expect(games.map((g) => [g.offerId, g.sport])).toEqual([
+      ["padel", "PADEL"],
+      ["tennis", "TENNIS"],
+    ]);
+    expect(offerFindMany.mock.calls[0]?.[0]).toMatchObject({
+      select: { sport: true },
+    });
   });
 });

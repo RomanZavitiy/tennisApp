@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import type { District } from "@/lib/generated/prisma/enums";
+import type { District, Sport } from "@/lib/generated/prisma/enums";
 
 // "My games" on the player's own profile (slice K6): every upcoming game the
 // player is part of, in one list — offers they posted (with how many
@@ -12,6 +12,8 @@ export type MyGameRole = "AUTHOR" | "ACCEPTED" | "REQUESTED";
 export type MyGame = {
   offerId: string;
   role: MyGameRole;
+  /** Slice PD2: the list mixes both sports, so each row names its own. */
+  sport: Sport;
   startsAt: Date;
   durationMinutes: number;
   district: District | null;
@@ -22,6 +24,7 @@ export type MyGame = {
 
 const offerSelect = {
   id: true,
+  sport: true,
   startsAt: true,
   durationMinutes: true,
   district: true,

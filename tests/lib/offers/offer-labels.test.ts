@@ -8,6 +8,7 @@ import {
   offerShareTitle,
   placeLabel,
   spotsLabel,
+  withSportName,
   type LabelT,
 } from "@/lib/offers/offer-labels";
 import { testTranslator } from "@/tests/helpers/translator";
@@ -95,6 +96,15 @@ describe("offerShareTitle", () => {
         district: null,
       }),
     ).toBe("Sparring, Tue, Oct 20, 18:00, Any level");
+  });
+});
+
+describe("withSportName", () => {
+  it("names padel and leaves a tennis line as it was", () => {
+    expect(withSportName("New message", "PADEL", "Padel")).toBe(
+      "Padel · New message",
+    );
+    expect(withSportName("New message", "TENNIS", "Padel")).toBe("New message");
   });
 });
 
