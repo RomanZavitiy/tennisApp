@@ -11,6 +11,7 @@ import { PageHeader, PageShell } from "@/components/page-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { clubsHref, parseClubFilters } from "@/lib/clubs/club-filters";
 import { searchClubs } from "@/lib/clubs/club-search";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ClubsPage");
@@ -28,7 +29,11 @@ export default async function ClubsPage({
   // Read on each request: clubs and their open offers change without a deploy.
   await connection();
   const filters = parseClubFilters(await searchParams);
-  const clubs = await searchClubs(filters);
+  // Slice PD1: only the clubs of the header switcher's sport.
+  const clubs = await searchClubs({
+    ...filters,
+    sport: await getCurrentSport(),
+  });
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("ClubsPage");
 

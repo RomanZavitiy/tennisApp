@@ -125,6 +125,11 @@ export function OfferCard({
               {spotsLabel(t, offer.spotsLeft)}
             </span>
           </div>
+          {offer.sport === "PADEL" && (
+            <span className="mt-1 mr-1 inline-block rounded-full border px-2 py-0.5 text-xs font-medium">
+              {t("padel.badge")}
+            </span>
+          )}
           {isOwn && (
             <span className="mt-1 inline-block rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
               {tCard("yourOffer")}
@@ -137,7 +142,7 @@ export function OfferCard({
             )}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {levelLabel(t, offer.ntrpMin, offer.ntrpMax)}
+            {levelLabel(t, offer.ntrpMin, offer.ntrpMax, offer.sport)}
             {offer.surface && ` · ${tSurface(offer.surface)}`}
             {" · "}
             {tCourtStatus(offer.courtStatus)}

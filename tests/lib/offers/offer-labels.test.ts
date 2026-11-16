@@ -8,6 +8,7 @@ import {
   offerShareTitle,
   placeLabel,
   spotsLabel,
+  type LabelT,
 } from "@/lib/offers/offer-labels";
 import { testTranslator } from "@/tests/helpers/translator";
 
@@ -94,5 +95,25 @@ describe("offerShareTitle", () => {
         district: null,
       }),
     ).toBe("Sparring, Tue, Oct 20, 18:00, Any level");
+  });
+});
+
+describe("levelLabel for padel (PD1)", () => {
+  const keys: LabelT = (key) => key;
+
+  it("uses the padel wording, which doesn't say NTRP", () => {
+    expect(levelLabel(keys, 2, 3, "PADEL")).toBe("padel.levelRange");
+    expect(levelLabel(keys, 2, 2, "PADEL")).toBe("padel.levelExact");
+    expect(levelLabel(keys, 2, null, "PADEL")).toBe("padel.levelAtLeast");
+    expect(levelLabel(keys, null, 3, "PADEL")).toBe("padel.levelUpTo");
+  });
+
+  it("keeps one 'any level' for both sports", () => {
+    expect(levelLabel(keys, null, null, "PADEL")).toBe("anyLevel");
+  });
+
+  it("stays NTRP for tennis and when no sport is given", () => {
+    expect(levelLabel(keys, 2, 3)).toBe("levelRange");
+    expect(levelLabel(keys, 2, 3, "TENNIS")).toBe("levelRange");
   });
 });

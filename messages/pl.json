@@ -223,7 +223,9 @@
     "commentLabel": "Komentarz",
     "commentHint": "Opcjonalnie, maksymalnie {max} znaków.",
     "posting": "Publikowanie…",
-    "submit": "Opublikuj ogłoszenie"
+    "submit": "Opublikuj ogłoszenie",
+    "padelPlayersLabel": "Gracze",
+    "padelFormat": "W padla gra się dwóch na dwóch: mecz wymaga czterech graczy."
   },
   "OffersPage": {
     "title": "Oferty sparingowe",
@@ -243,12 +245,15 @@
     "backToFeed": "Wróć do listy",
     "eyebrow": "Tablica sparingowa",
     "subtitle": "Gracze szukający partnera w Krakowie. Po zalogowaniu najpierw widzisz tych najbliższych Twojemu poziomowi.",
-    "shortcutsLabel": "Skróty"
+    "shortcutsLabel": "Skróty",
+    "titlePadel": "Mecze padla",
+    "subtitlePadel": "Otwarte mecze padla w Krakowie. Dołącz albo dodaj własny i zbierz czwórkę."
   },
   "NewOfferPage": {
     "title": "Dodaj ogłoszenie sparingowe",
     "subtitle": "Napisz, kiedy i gdzie chcesz zagrać — inni zawodnicy się zgłoszą.",
-    "cancel": "Anuluj"
+    "cancel": "Anuluj",
+    "titlePadel": "Nowy mecz padla"
   },
   "OfferFilters": {
     "anyDay": "Dowolny dzień",
@@ -267,7 +272,8 @@
     "durationLabel": "Jak długo",
     "courtBookedLabel": "Kort już zarezerwowany",
     "submit": "Filtruj",
-    "clear": "Wyczyść"
+    "clear": "Wyczyść",
+    "padelLevelLabel": "Mój poziom (1–7)"
   },
   "OfferPage": {
     "title": "Oferta sparingowa",
@@ -394,7 +400,14 @@
     "levelRange": "NTRP {min, number, ::.0}–{max, number, ::.0}",
     "levelAtLeast": "NTRP {min, number, ::.0}+",
     "levelUpTo": "NTRP do {max, number, ::.0}",
-    "anyLevel": "Każdy poziom"
+    "anyLevel": "Każdy poziom",
+    "padel": {
+      "badge": "Padel",
+      "levelExact": "Poziom {min, number, ::.0}",
+      "levelRange": "Poziom {min, number, ::.0}–{max, number, ::.0}",
+      "levelAtLeast": "Poziom {min, number, ::.0}+",
+      "levelUpTo": "Poziom do {max, number, ::.0}"
+    }
   },
   "Surface": {
     "CLAY": "Ziemna",
@@ -813,7 +826,8 @@
       "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków.",
       "partnerNeedsDoubles": "Partnera można dodać tylko do gry deblowej.",
       "clubOrDistrictRequired": "Wybierz klub albo dzielnicę.",
-      "levelRangeInverted": "Najwyższy poziom nie może być niższy od najniższego."
+      "levelRangeInverted": "Najwyższy poziom nie może być niższy od najniższego.",
+      "padelNeedsDoubles": "Mecz padla to zawsze debel."
     },
     "matchResult": {
       "gamesRequired": "Podaj liczbę wygranych gemów.",
@@ -1335,5 +1349,12 @@
     "day": "Dzień",
     "month": "Miesiąc",
     "year": "Rok"
+  },
+  "SportSwitcher": {
+    "label": "Sport",
+    "names": {
+      "TENNIS": "Tenis",
+      "PADEL": "Padel"
+    }
   }
 }

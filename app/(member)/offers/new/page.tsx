@@ -11,7 +11,8 @@ import { db } from "@/lib/db";
 import { District, OfferFormat } from "@/lib/generated/prisma/enums";
 import { isOfferDuration } from "@/lib/offers/duration";
 import { toKrakowLocal } from "@/lib/offers/krakow-time";
-import { NTRP_LEVELS } from "@/lib/profile/options";
+import { getCurrentSport } from "@/lib/sport/current-sport";
+import { levelsFor } from "@/lib/sport/sport";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("NewOfferPage");
@@ -26,7 +27,12 @@ export default async function NewOfferPage({
 }) {
   const t = await getTranslations("NewOfferPage");
   const player = await requireOnboardedUser();
+  // Slice PD1: the game is in the sport the header switcher shows, at one
+  // of that sport's clubs.
+  const sport = await getCurrentSport();
+  const levels = levelsFor(sport);
   const clubs = await db.club.findMany({
+    where: { sports: { has: sport } },
     select: { id: true, name: true, district: true },
     orderBy: { name: "asc" },
   });
@@ -52,10 +58,13 @@ export default async function NewOfferPage({
 
   return (
     <SplitShell>
-      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+      <h1 className="text-3xl font-bold tracking-tight">
+        {t(sport === "PADEL" ? "titlePadel" : "title")}
+      </h1>
       <p className="mt-2 mb-6 text-muted-foreground">{t("subtitle")}</p>
       <OfferForm
         action={createOffer}
+        sport={sport}
         clubs={clubs}
         defaultDistrict={
           Object.values(District).includes(district as District)
@@ -71,8 +80,8 @@ export default async function NewOfferPage({
         defaultDurationMinutes={
           isOfferDuration(durationMinutes) ? durationMinutes : undefined
         }
-        defaultNtrpMin={NTRP_LEVELS.includes(ntrpMin) ? ntrpMin : undefined}
-        defaultNtrpMax={NTRP_LEVELS.includes(ntrpMax) ? ntrpMax : undefined}
+        defaultNtrpMin={levels.includes(ntrpMin) ? ntrpMin : undefined}
+        defaultNtrpMax={levels.includes(ntrpMax) ? ntrpMax : undefined}
         defaultStartsAt={startsAt}
         defaultInviteeId={inviteeId}
         earliestStart={toKrakowLocal(new Date())}

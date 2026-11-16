@@ -7,17 +7,20 @@ import { MobileNav } from "@/components/mobile-nav";
 import { NotificationBell } from "@/components/notification-bell";
 import { PushSubscribePrompt } from "@/components/push-subscribe-prompt";
 import { SiteLogo } from "@/components/site-logo";
+import { SportSwitcher } from "@/components/sport-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { visibleLinks } from "@/lib/features";
 import { countUnreadNotifications } from "@/lib/notifications/inbox";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 
 // Reading the session here makes every page render per request instead of
 // being prerendered: the header differs for signed-in users on every page.
 export async function SiteHeader() {
   const user = await getCurrentUser();
   const unread = user ? await countUnreadNotifications(user.id) : 0;
+  const sport = await getCurrentSport();
   const t = await getTranslations("SiteHeader");
   const tMetadata = await getTranslations("Metadata");
 
@@ -51,6 +54,10 @@ export async function SiteHeader() {
                 text: the link keeps the same accessible name as before. */}
             <SiteLogo alt={tMetadata("siteName")} priority className="h-9" />
           </Link>
+
+          {/* Tennis or padel (slice PD1): on every screen size, next to
+              the logo, because it changes what every list shows. */}
+          <SportSwitcher sport={sport} />
 
           <div className="flex items-center gap-1">
             <nav

@@ -66,6 +66,15 @@ model User {
   // 4.1) and re-set when NTRP changes, until the first confirmed match;
   // from then on only confirmed results move it (4.8). CHECKs in the
   // migration: positive, and set for every onboarded user.
+  // Padel (slice PD1, docs/PADEL-PLAN.md). Both optional: a tennis-only
+  // player never fills them in, and a padel offer simply doesn't match a
+  // player without a level (lib/notifications/new-offer.ts).
+  /// Self-declared padel level, 1.0–7.0 in steps of 0.5 (CHECK in the
+  /// migration) — the scale padel apps in Poland use, not NTRP.
+  padelLevel Float?     @map("padel_level")
+  /// Which side of the court this player prefers in padel.
+  padelSide  PadelSide? @map("padel_side")
+
   elo           Int?
   /// Confirmed matches played; 0 means the ELO is still the starting one.
   matchesPlayed Int  @default(0) @map("matches_played")
@@ -247,6 +256,9 @@ model Club {
   /// hours and requests (below) are live, and `bookingUrl` stops being shown
   /// (decision 2026-10-21, slice K).
   bookingMode BookingMode   @default(EXTERNAL_LINK) @map("booking_mode")
+  /// Which sports can be played here (slice PD1); never empty (CHECK in
+  /// the migration). Every club loaded before padel existed is tennis.
+  sports      Sport[]       @default([TENNIS])
   /// When the owner last checked these details at the source. Shown on the
   /// club page so players can tell how fresh the price and phone are.
   verifiedAt  DateTime      @map("verified_at") @db.Date
@@ -489,6 +501,9 @@ model SparringOffer {
   // combinations are CHECKs in the migration; the offer schema (3.3)
   // validates first. How many players an offer needs is not stored —
   // playersNeeded() in lib/offers computes it from format and hasPartner.
+  /// Which sport this game is (slice PD1). A padel offer is always DOUBLES
+  /// (CHECK in the migration): padel is played two against two.
+  sport           Sport       @default(TENNIS)
   format          OfferFormat @default(SINGLES)
   /// Doubles only: the author brings their own partner (a mark, not an account).
   hasPartner      Boolean     @default(false) @map("has_partner")
@@ -500,7 +515,9 @@ model SparringOffer {
   /// Set together with a club or on its own; at least one of the two is set.
   /// Empty for an offer at a club outside the city limits.
   district        District?
-  /// Wanted NTRP level, 1.5–7.0 in steps of 0.5. Empty — any level.
+  /// Wanted level in steps of 0.5; empty — any level. Tennis: NTRP,
+  /// 1.5–7.0. Padel: the padel scale, 1.0–7.0 (slice PD1) — the column
+  /// names stay "ntrp" from before padel existed.
   ntrpMin         Float?      @map("ntrp_min")
   ntrpMax         Float?      @map("ntrp_max")
   /// Empty — any surface.
@@ -1129,6 +1146,24 @@ enum BookingStatus {
   CANCELLED
 
   @@map("booking_status")
+}
+
+/// The sports the app covers (slice PD1). The active one comes from the
+/// SB_SPORT cookie (lib/sport), never from a column on the user.
+enum Sport {
+  TENNIS
+  PADEL
+
+  @@map("sport")
+}
+
+/// A padel player's preferred side of the court (slice PD1).
+enum PadelSide {
+  LEFT
+  RIGHT
+  BOTH
+
+  @@map("padel_side")
 }
 
 enum OfferFormat {

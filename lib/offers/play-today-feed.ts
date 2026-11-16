@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { levelMatches } from "@/lib/matching/offer-interest";
 import { blockedCounterpartIds } from "@/lib/moderation/personal-block";
+import type { Sport } from "@/lib/generated/prisma/enums";
 import type { FeedFilters } from "@/lib/offers/feed-filters";
 import {
   feedOfferSelect,
@@ -30,12 +31,16 @@ export async function getPlayTodayFeed(
   viewerId: string,
   viewerNtrp: number | null,
   now: Date = new Date(),
+  // Slice PD1: `viewerNtrp` is the viewer's level in this sport. Intents
+  // have no sport yet (PD2) — they are tennis, so padel shows none.
+  sport: Sport = "TENNIS",
 ): Promise<PlayTodayFeed> {
   const blockedIds = await blockedCounterpartIds(viewerId);
 
   const rows = await db.sparringOffer.findMany({
     where: {
       status: "OPEN",
+      sport,
       authorId: { notIn: [viewerId, ...blockedIds] },
       startsAt: {
         gt: now,
@@ -54,7 +59,10 @@ export async function getPlayTodayFeed(
     date: todayInKrakow(now),
     ...(viewerNtrp !== null ? { ntrp: viewerNtrp } : {}),
   };
-  const intents = await getPlayIntentFeed(viewerId, todayFilters, now);
+  const intents =
+    sport === "TENNIS"
+      ? await getPlayIntentFeed(viewerId, todayFilters, now)
+      : [];
 
   return { offers, intents };
 }

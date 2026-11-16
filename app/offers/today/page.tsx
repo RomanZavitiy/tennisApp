@@ -18,6 +18,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
 import { getPlayTodayFeed } from "@/lib/offers/play-today-feed";
+import { getCurrentSport } from "@/lib/sport/current-sport";
+import { playerLevel } from "@/lib/sport/sport";
 import { todayInKrakow } from "@/lib/validation/profile";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,8 +34,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PlayTodayPage() {
   await connection();
   const viewer = await requireOnboardedUser();
+  // Slice PD1: today's games in the header switcher's sport, against the
+  // viewer's level in that sport.
+  const sport = await getCurrentSport();
   const [feed, myOpenOffers] = await Promise.all([
-    getPlayTodayFeed(viewer.id, viewer.selfRatedNtrp),
+    getPlayTodayFeed(viewer.id, playerLevel(viewer, sport), new Date(), sport),
     getMyOpenOffers(viewer.id),
   ]);
   const t = await getTranslations("PlayTodayPage");

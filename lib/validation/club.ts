@@ -4,6 +4,7 @@ import {
   BookingMode,
   District,
   IndoorCourts,
+  Sport,
   Surface,
 } from "@/lib/generated/prisma/enums";
 import { todayInKrakow } from "@/lib/validation/profile";
@@ -87,6 +88,16 @@ export const clubSchema = z.strictObject({
       "List each surface once.",
     ),
   indoor: z.enum(IndoorCourts).nullable(),
+  // Slice PD1: which sports the club has. Left out of the file — tennis,
+  // what every club was before padel existed.
+  sports: z
+    .array(z.enum(Sport))
+    .min(1)
+    .refine(
+      (sports) => new Set(sports).size === sports.length,
+      "List each sport once.",
+    )
+    .default(["TENNIS"]),
   priceInfo: z.string().trim().min(1).max(300).nullable(),
   phone: z.string().trim().min(1).max(30).nullable(),
   websiteUrl: httpUrl.max(500).nullable(),

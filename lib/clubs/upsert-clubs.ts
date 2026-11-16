@@ -29,6 +29,7 @@ export async function upsertClubs(
       courtCount: club.courtCount,
       surfaces: club.surfaces,
       indoor: club.indoor,
+      sports: club.sports,
       priceInfo: club.priceInfo,
       phone: club.phone,
       websiteUrl: club.websiteUrl,

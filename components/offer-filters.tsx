@@ -14,13 +14,26 @@ import {
   TIMES_OF_DAY,
   type FeedFilters,
 } from "@/lib/offers/feed-filters";
-import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
+import type { Sport } from "@/lib/generated/prisma/enums";
+import { DISTRICT_LABELS } from "@/lib/profile/options";
+import { levelsFor } from "@/lib/sport/sport";
 import { todayInKrakow } from "@/lib/validation/profile";
 
 // The feed's filters (task 3.7): a plain GET form, so the browser puts them
 // in the URL itself and no client JavaScript is needed. Submitting drops
 // ?page, so new filters start from the first page.
-export function OfferFilters({ filters }: { filters: FeedFilters }) {
+//
+// `sport` (slice PD1) comes from the header switcher, not from this form:
+// it decides the level scale, and hides the format for padel, which is
+// always doubles.
+export function OfferFilters({
+  filters,
+  sport,
+}: {
+  filters: FeedFilters;
+  sport: Sport;
+}) {
+  const isPadel = sport === "PADEL";
   const t = useTranslations("OfferFilters");
   const tOfferLabels = useTranslations("OfferLabels");
   const active = Object.keys(filters).length > 0;
@@ -65,7 +78,9 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
         </NativeSelect>
       </div>
       <div className="space-y-1">
-        <Label htmlFor="filter-ntrp">{t("ntrpLabel")}</Label>
+        <Label htmlFor="filter-ntrp">
+          {t(isPadel ? "padelLevelLabel" : "ntrpLabel")}
+        </Label>
         <NativeSelect
           id="filter-ntrp"
           name="ntrp"
@@ -73,30 +88,32 @@ export function OfferFilters({ filters }: { filters: FeedFilters }) {
           defaultValue={filters.ntrp?.toFixed(1) ?? ""}
         >
           <NativeSelectOption value="">{t("any")}</NativeSelectOption>
-          {NTRP_LEVELS.map((level) => (
+          {levelsFor(sport).map((level) => (
             <NativeSelectOption key={level} value={level.toFixed(1)}>
               {level.toFixed(1)}
             </NativeSelectOption>
           ))}
         </NativeSelect>
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="filter-format">{t("formatLabel")}</Label>
-        <NativeSelect
-          id="filter-format"
-          name="format"
-          className="w-full"
-          defaultValue={filters.format ?? ""}
-        >
-          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
-          <NativeSelectOption value="SINGLES">
-            {tOfferLabels("singles")}
-          </NativeSelectOption>
-          <NativeSelectOption value="DOUBLES">
-            {tOfferLabels("doubles")}
-          </NativeSelectOption>
-        </NativeSelect>
-      </div>
+      {!isPadel && (
+        <div className="space-y-1">
+          <Label htmlFor="filter-format">{t("formatLabel")}</Label>
+          <NativeSelect
+            id="filter-format"
+            name="format"
+            className="w-full"
+            defaultValue={filters.format ?? ""}
+          >
+            <NativeSelectOption value="">{t("any")}</NativeSelectOption>
+            <NativeSelectOption value="SINGLES">
+              {tOfferLabels("singles")}
+            </NativeSelectOption>
+            <NativeSelectOption value="DOUBLES">
+              {tOfferLabels("doubles")}
+            </NativeSelectOption>
+          </NativeSelect>
+        </div>
+      )}
       <div className="space-y-1">
         <Label htmlFor="filter-time">{t("timeLabel")}</Label>
         <NativeSelect

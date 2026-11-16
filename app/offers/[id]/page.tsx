@@ -116,7 +116,12 @@ export default async function OfferPage({
     },
     {
       label: t("levelLabel"),
-      value: levelLabel(tOfferLabels, offer.ntrpMin, offer.ntrpMax),
+      value: levelLabel(
+        tOfferLabels,
+        offer.ntrpMin,
+        offer.ntrpMax,
+        offer.sport,
+      ),
     },
     ...(offer.surface
       ? [{ label: t("surfaceLabel"), value: tSurface(offer.surface) }]

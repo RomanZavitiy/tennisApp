@@ -218,3 +218,30 @@ describe("matchesTimeOfDay", () => {
     }
   });
 });
+
+describe("sport (PD1)", () => {
+  it("is never read from the URL", () => {
+    expect(parseFeedFilters({ sport: "PADEL" })).toEqual({});
+  });
+
+  it("narrows the feed to one sport", () => {
+    expect(feedWhere({ sport: "PADEL" }, NOW)).toEqual({
+      AND: [...BASE, { sport: "PADEL" }],
+    });
+  });
+
+  it("leaves both sports in when unset", () => {
+    expect(feedWhere({}, NOW)).toEqual({ AND: BASE });
+  });
+
+  it("is not written into feed links", () => {
+    expect(feedHref({ sport: "PADEL", district: "KROWODRZA" })).toBe(
+      "/offers?district=KROWODRZA",
+    );
+  });
+
+  it("accepts the padel scale's level 1.0 as a filter", () => {
+    expect(parseFeedFilters({ ntrp: "1.0" })).toEqual({ ntrp: 1 });
+    expect(parseFeedFilters({ ntrp: "0.5" })).toEqual({});
+  });
+});

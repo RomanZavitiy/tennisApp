@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { searchClubs } from "@/lib/clubs/club-search";
 import { getOfferFeed } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 
 // How many live offers the landing page previews.
 const OFFER_PREVIEW = 3;
@@ -37,10 +38,12 @@ const STAT_BLOCKS = [
 // at /clubs. Its numbers are real: clubs and offers are read per request.
 export default async function Home() {
   await connection();
+  // Slice PD1: the clubs and offers of the header switcher's sport.
+  const sport = await getCurrentSport();
   const [viewer, clubs, feed, t] = await Promise.all([
     getCurrentUser(),
-    searchClubs({}),
-    getOfferFeed(1, {}, null, new Date(), false),
+    searchClubs({ sport }),
+    getOfferFeed(1, { sport }, null, new Date(), false),
     getTranslations("LandingPage"),
   ]);
   const offers = feed.offers.slice(0, OFFER_PREVIEW);

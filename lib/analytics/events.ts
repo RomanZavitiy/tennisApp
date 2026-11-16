@@ -8,10 +8,11 @@ import type { AchievementId } from "@/lib/achievements/achievements";
 
 export type OfferFormat = "SINGLES" | "DOUBLES";
 export type OutboundTarget = "URL" | "PHONE";
+export type Sport = "TENNIS" | "PADEL";
 
 type EventProperties = {
   signup_completed: Record<string, never>;
-  offer_created: { format: OfferFormat; hasClub: boolean };
+  offer_created: { sport: Sport; format: OfferFormat; hasClub: boolean };
   join_requested: { format: OfferFormat };
   join_accepted: { format: OfferFormat };
   message_sent: Record<string, never>;

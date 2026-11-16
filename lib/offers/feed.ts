@@ -4,6 +4,7 @@ import type {
   CourtStatus,
   District,
   OfferFormat,
+  Sport,
   Surface,
 } from "@/lib/generated/prisma/enums";
 import { rankByEloCloseness } from "@/lib/matching/elo-rank";
@@ -30,6 +31,7 @@ export const FEED_PAGE_SIZE = 20;
 
 export type FeedOffer = {
   id: string;
+  sport: Sport;
   format: OfferFormat;
   hasPartner: boolean;
   startsAt: Date;
@@ -69,6 +71,7 @@ export function parsePage(value: string | string[] | undefined): number {
  * (an 8h window, not the full filtered feed) and no pagination/ranking. */
 export const feedOfferSelect = {
   id: true,
+  sport: true,
   format: true,
   hasPartner: true,
   startsAt: true,

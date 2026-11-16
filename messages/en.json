@@ -223,7 +223,9 @@
     "commentLabel": "Comment",
     "commentHint": "Optional, up to {max} characters.",
     "posting": "Posting…",
-    "submit": "Post offer"
+    "submit": "Post offer",
+    "padelPlayersLabel": "Players",
+    "padelFormat": "Padel is played two against two: the game needs four players."
   },
   "OffersPage": {
     "title": "Sparring offers",
@@ -243,12 +245,15 @@
     "backToFeed": "Back to feed",
     "eyebrow": "Sparring board",
     "subtitle": "Players looking for a partner in Kraków. Signed in, you see the ones closest to your level first.",
-    "shortcutsLabel": "Shortcuts"
+    "shortcutsLabel": "Shortcuts",
+    "titlePadel": "Padel games",
+    "subtitlePadel": "Open padel games in Kraków. Join one, or post your own and fill the four."
   },
   "NewOfferPage": {
     "title": "Post a sparring offer",
     "subtitle": "Say when and where you want to play; other players ask to join.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "titlePadel": "New padel game"
   },
   "OfferFilters": {
     "anyDay": "Any day",
@@ -267,7 +272,8 @@
     "durationLabel": "How long",
     "courtBookedLabel": "Court already booked",
     "submit": "Filter",
-    "clear": "Clear"
+    "clear": "Clear",
+    "padelLevelLabel": "My level (1–7)"
   },
   "OfferPage": {
     "title": "Sparring offer",
@@ -394,7 +400,14 @@
     "levelRange": "NTRP {min, number, ::.0}–{max, number, ::.0}",
     "levelAtLeast": "NTRP {min, number, ::.0}+",
     "levelUpTo": "NTRP up to {max, number, ::.0}",
-    "anyLevel": "Any level"
+    "anyLevel": "Any level",
+    "padel": {
+      "badge": "Padel",
+      "levelExact": "Level {min, number, ::.0}",
+      "levelRange": "Level {min, number, ::.0}–{max, number, ::.0}",
+      "levelAtLeast": "Level {min, number, ::.0}+",
+      "levelUpTo": "Level up to {max, number, ::.0}"
+    }
   },
   "Surface": {
     "CLAY": "Clay",
@@ -813,7 +826,8 @@
       "commentTooLong": "Keep the comment under {max} characters.",
       "partnerNeedsDoubles": "A partner can only be added to a doubles game.",
       "clubOrDistrictRequired": "Choose a club or a district.",
-      "levelRangeInverted": "The highest level can't be below the lowest."
+      "levelRangeInverted": "The highest level can't be below the lowest.",
+      "padelNeedsDoubles": "A padel game is always doubles."
     },
     "matchResult": {
       "gamesRequired": "Enter the games won.",
@@ -1335,5 +1349,12 @@
     "day": "Day",
     "month": "Month",
     "year": "Year"
+  },
+  "SportSwitcher": {
+    "label": "Sport",
+    "names": {
+      "TENNIS": "Tennis",
+      "PADEL": "Padel"
+    }
   }
 }

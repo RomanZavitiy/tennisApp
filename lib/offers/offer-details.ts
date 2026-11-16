@@ -90,6 +90,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
     select: {
       id: true,
       status: true,
+      sport: true,
       format: true,
       hasPartner: true,
       startsAt: true,
