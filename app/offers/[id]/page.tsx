@@ -123,6 +123,14 @@ export default async function OfferPage({
         offer.sport,
       ),
     },
+    ...(offer.matchGender !== "ANY"
+      ? [
+          {
+            label: t("matchGenderLabel"),
+            value: tOfferLabels(`matchGender.${offer.matchGender}`),
+          },
+        ]
+      : []),
     ...(offer.surface
       ? [{ label: t("surfaceLabel"), value: tSurface(offer.surface) }]
       : []),
@@ -320,6 +328,7 @@ function PlayerView({
           existingJoin: viewerJoin,
           alreadyWaitlisted: details.viewerWaitlistPosition !== null,
           now: new Date(),
+          fitsGender: details.viewerFitsGender,
         })}
       />
     );
@@ -330,6 +339,7 @@ function PlayerView({
     playerId: viewerId,
     existing: viewerJoin,
     now: new Date(),
+    fitsGender: details.viewerFitsGender,
   });
   if (refusal) {
     return <p className="text-muted-foreground">{tJoinRefusal(refusal)}</p>;

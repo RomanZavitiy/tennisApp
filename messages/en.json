@@ -205,6 +205,7 @@
   },
   "OfferForm": {
     "formatLabel": "Format",
+    "matchGenderLabel": "Who is it for",
     "singles": "Singles",
     "doubles": "Doubles",
     "hasPartner": "I already have a partner",
@@ -267,6 +268,7 @@
     "any": "Any",
     "ntrpLabel": "My level (NTRP)",
     "formatLabel": "Format",
+    "genderLabel": "Match type",
     "timeLabel": "Time of day",
     "time": {
       "morning": "Morning (before 12:00)",
@@ -287,6 +289,7 @@
     "whereLabel": "Where",
     "levelLabel": "Level",
     "surfaceLabel": "Surface",
+    "matchGenderLabel": "Match type",
     "courtLabel": "Court",
     "statusCancelled": "Cancelled",
     "statusStarted": "Already started",
@@ -395,6 +398,12 @@
     "resultAnnulled": "An admin reviewed the dispute and annulled this result ({score})."
   },
   "OfferLabels": {
+    "matchGender": {
+      "ANY": "Anyone",
+      "MEN": "Men only",
+      "WOMEN": "Women only",
+      "MIXED": "Mixed"
+    },
     "duration": "{hours, number} h",
     "singles": "Singles",
     "doubles": "Doubles",
@@ -780,6 +789,7 @@
     "BLOCKED": "You can't join this offer.",
     "STARTED": "This game has already started.",
     "NOT_OPEN": "This offer is no longer taking players.",
+    "WRONG_GENDER": "This game is for players of another gender.",
     "ALREADY_REQUESTED": "You have already asked to join.",
     "DECLINED": "The author has declined your request."
   },
@@ -834,6 +844,9 @@
       "courtStatusRequired": "Choose the court status.",
       "commentTooLong": "Keep the comment under {max} characters.",
       "partnerNeedsDoubles": "A partner can only be added to a doubles game.",
+      "matchGenderRequired": "Choose who the game is for.",
+      "mixedNeedsDoubles": "A mixed game is always doubles.",
+      "matchGenderNotYours": "You can only post a men's or women's game you could play in yourself.",
       "clubOrDistrictRequired": "Choose a club or a district.",
       "levelRangeInverted": "The highest level can't be below the lowest.",
       "padelNeedsDoubles": "A padel game is always doubles."
@@ -1063,6 +1076,7 @@
     "BLOCKED": "You can't invite this player.",
     "STARTED": "This game has already started.",
     "NOT_OPEN": "This offer is no longer taking players.",
+    "WRONG_GENDER": "This game isn't open to this player's gender.",
     "ALREADY_JOINED": "This player already has a request on this offer.",
     "ALREADY_INVITED": "This player is already invited.",
     "DECLINED": "This player already declined an invite to this offer."
@@ -1097,6 +1111,7 @@
     "BLOCKED": "You can't join this offer's reserve list.",
     "STARTED": "This game has already started.",
     "NOT_FULL": "This offer still has places — ask to join instead.",
+    "WRONG_GENDER": "This game is for players of another gender.",
     "ALREADY_JOINED": "You already have a request on this offer.",
     "ALREADY_WAITLISTED": "You're already on the reserve list.",
     "DECLINED": "The author has declined your request."

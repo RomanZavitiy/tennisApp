@@ -130,6 +130,11 @@ export function OfferCard({
               {t("padel.badge")}
             </span>
           )}
+          {offer.matchGender !== "ANY" && (
+            <span className="mt-1 mr-1 inline-block rounded-full border px-2 py-0.5 text-xs font-medium">
+              {t(`matchGender.${offer.matchGender}`)}
+            </span>
+          )}
           {isOwn && (
             <span className="mt-1 inline-block rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
               {tCard("yourOffer")}

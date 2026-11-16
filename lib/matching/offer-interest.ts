@@ -1,4 +1,8 @@
-import type { District, Sport } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  MatchGender,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import { matchesTimeOfDay, type TimeOfDay } from "@/lib/offers/feed-filters";
 
 // "Who's interested in this offer" (task 5.16): the push that tells a player
@@ -47,6 +51,10 @@ export type NewOfferInfo = {
    * caller puts that level in `selfRatedNtrp` (lib/sport's playerLevel).
    * Left out — tennis. */
   sport?: Sport;
+  /** Slice PD3: a men's or women's game is only announced to players it
+   * is for — narrowed in the query (lib/notifications/new-offer.ts), not
+   * in isInterestedIn. Left out — anyone. */
+  matchGender?: MatchGender;
   district: District | null;
   /** Null bound means "any level" on that side (same as feedWhere's ntrp filter). */
   ntrpMin: number | null;

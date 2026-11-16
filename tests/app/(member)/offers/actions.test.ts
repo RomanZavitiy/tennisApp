@@ -56,7 +56,7 @@ describe("createOffer", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-11T10:00:00Z"));
-    requireOnboardedUser.mockResolvedValue({ id: ME });
+    requireOnboardedUser.mockResolvedValue({ id: ME, gender: "MALE" });
     offerCount.mockResolvedValue(0);
     offerCreate.mockResolvedValue({ id: OFFER });
     notifyInterestedPlayers.mockResolvedValue(undefined);
@@ -119,6 +119,7 @@ describe("createOffer", () => {
       data: {
         sport: "TENNIS",
         format: "SINGLES",
+        matchGender: "ANY",
         hasPartner: false,
         startsAt: new Date("2026-10-20T16:00:00Z"),
         durationMinutes: 90,
@@ -134,11 +135,25 @@ describe("createOffer", () => {
       offerId: OFFER,
       authorId: ME,
       sport: "TENNIS",
+      matchGender: "ANY",
       district: "KROWODRZA",
       ntrpMin: null,
       ntrpMax: null,
       startsAt: new Date("2026-10-20T16:00:00.000Z"),
     });
+  });
+
+  // Slice PD3, task PD3.1.
+  it("lets a man post a men's game but not a women's one", async () => {
+    const refused = await createOffer({ ...valid, matchGender: "WOMEN" });
+
+    expect(refused).toMatchObject({ ok: false });
+    expect(refused.fieldErrors).toHaveProperty("matchGender");
+    expect(offerCreate).not.toHaveBeenCalled();
+
+    await createOffer({ ...valid, matchGender: "MEN" });
+
+    expect(offerCreate.mock.calls[0]?.[0].data.matchGender).toBe("MEN");
   });
 
   it("takes the author from the session, not from the request", async () => {

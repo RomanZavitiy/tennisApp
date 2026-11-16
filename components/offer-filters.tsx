@@ -16,6 +16,7 @@ import {
 } from "@/lib/offers/feed-filters";
 import type { Sport } from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
+import { MATCH_GENDERS } from "@/lib/offers/match-gender";
 import { levelsFor } from "@/lib/sport/sport";
 import { todayInKrakow } from "@/lib/validation/profile";
 
@@ -114,6 +115,22 @@ export function OfferFilters({
           </NativeSelect>
         </div>
       )}
+      <div className="space-y-1">
+        <Label htmlFor="filter-gender">{t("genderLabel")}</Label>
+        <NativeSelect
+          id="filter-gender"
+          name="gender"
+          className="w-full"
+          defaultValue={filters.gender ?? ""}
+        >
+          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
+          {MATCH_GENDERS.filter((option) => option !== "ANY").map((option) => (
+            <NativeSelectOption key={option} value={option}>
+              {tOfferLabels(`matchGender.${option}`)}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </div>
       <div className="space-y-1">
         <Label htmlFor="filter-time">{t("timeLabel")}</Label>
         <NativeSelect

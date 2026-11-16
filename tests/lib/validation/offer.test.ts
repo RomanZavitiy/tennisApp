@@ -46,12 +46,25 @@ describe("offerSchema", () => {
     expect(result).toEqual({
       sport: "TENNIS",
       format: "SINGLES",
+      matchGender: "ANY",
       hasPartner: false,
       startsAt: new Date("2026-10-20T16:00:00Z"),
       durationMinutes: 90,
       district: "KROWODRZA",
       courtStatus: "WILL_BOOK",
     });
+  });
+
+  // Slice PD3, task PD3.1.
+  it("takes who the game is for, and keeps mixed to doubles", () => {
+    expect(parse({ matchGender: "WOMEN" }).data?.matchGender).toBe("WOMEN");
+    expect(
+      parse({ matchGender: "MIXED", format: "DOUBLES" }).data?.matchGender,
+    ).toBe("MIXED");
+    expect(errorsFor({ matchGender: "MIXED" })).toEqual([
+      { path: "matchGender", message: "A mixed game is always doubles." },
+    ]);
+    expect(parse({ matchGender: "EVERYONE" }).success).toBe(false);
   });
 
   it("takes the duration from a select's string, and only the offered ones", () => {

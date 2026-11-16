@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import type {
   District,
+  Gender,
   OfferFormat,
   Sport,
 } from "@/lib/generated/prisma/enums";
@@ -10,6 +11,7 @@ import {
 } from "@/lib/matching/intent-interest";
 import { warsawDateString } from "@/lib/matching/offer-interest";
 import { notify } from "@/lib/notifications/notify";
+import { matchGendersOpenTo } from "@/lib/offers/match-gender";
 import type { TimeOfDay } from "@/lib/offers/feed-filters";
 
 // "Push авторам відкритих оферт, які підходять під намір" (task U2.4):
@@ -62,6 +64,10 @@ export async function notifyMatchingOfferAuthors(
     format: OfferFormat;
     sport: Sport;
     level: number | null;
+    /** Slice PD3: the poster's own gender — a men's or women's game they
+     * couldn't join isn't told about them. Left out — unrestricted games
+     * only. */
+    gender?: Gender;
   },
   now: Date = new Date(),
 ): Promise<void> {
@@ -77,6 +83,7 @@ export async function notifyMatchingOfferAuthors(
       district: { in: [...intent.districts] },
       format: intent.format,
       sport: intent.sport,
+      matchGender: { in: matchGendersOpenTo(intent.gender) },
       author: { notifyNewOffers: true },
     },
     select: {

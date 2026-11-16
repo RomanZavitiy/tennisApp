@@ -13,6 +13,7 @@ import {
   activeOffersWhere,
   MAX_ACTIVE_OFFERS,
 } from "@/lib/offers/active-offers";
+import { genderFits } from "@/lib/offers/match-gender";
 import { sendOfferInvite } from "@/lib/offers/send-invite";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import {
@@ -38,6 +39,15 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   const parsed = offerSchema(t).safeParse(input);
   if (!parsed.success) {
     return offerFieldErrors(parsed.error);
+  }
+
+  // Slice PD3: a man can't post a women's game he couldn't play in himself
+  // (and the other way round). The form only offers the author's own.
+  if (!genderFits(parsed.data.matchGender, author.gender)) {
+    return {
+      ok: false,
+      fieldErrors: { matchGender: t("matchGenderNotYours") },
+    };
   }
 
   // Limits (tasks 6.17, 6.16, decision 2026-10-14): the active-offer count
@@ -94,6 +104,7 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
     offerId: created.id,
     authorId: author.id,
     sport: offer.sport,
+    matchGender: offer.matchGender,
     district: place.district ?? null,
     ntrpMin: offer.ntrpMin ?? null,
     ntrpMax: offer.ntrpMax ?? null,

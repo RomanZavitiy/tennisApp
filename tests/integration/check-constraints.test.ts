@@ -125,6 +125,26 @@ describe("sparring_offers", () => {
   });
 });
 
+describe("sparring_offers match gender (PD3, migration 20261117090000_add_match_gender)", () => {
+  it("is open to anyone by default", async () => {
+    const author = await createPlayer();
+    expect((await createOffer(author.id)).matchGender).toBe("ANY");
+  });
+
+  it("refuses mixed singles, allows mixed doubles", async () => {
+    const author = await createPlayer();
+    await expectDbRejection(createOffer(author.id, { matchGender: "MIXED" }), {
+      code: PG.checkViolation,
+      mentions: "sparring_offers_mixed_doubles_check",
+    });
+    const offer = await createOffer(author.id, {
+      matchGender: "MIXED",
+      format: "DOUBLES",
+    });
+    expect(offer.matchGender).toBe("MIXED");
+  });
+});
+
 describe("play_intents (PD2, migration 20261116210000_add_play_intent_sport)", () => {
   const intent = (userId: string, date: string) => ({
     userId,

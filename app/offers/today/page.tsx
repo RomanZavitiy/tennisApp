@@ -39,7 +39,13 @@ export default async function PlayTodayPage() {
   const sport = await getCurrentSport();
   const now = new Date();
   const [feed, myOpenOffers] = await Promise.all([
-    getPlayTodayFeed(viewer.id, playerLevel(viewer, sport), now, sport),
+    getPlayTodayFeed(
+      viewer.id,
+      playerLevel(viewer, sport),
+      now,
+      sport,
+      viewer.gender,
+    ),
     getMyOpenOffers(viewer.id, now, sport),
   ]);
   const t = await getTranslations("PlayTodayPage");

@@ -245,3 +245,17 @@ describe("sport (PD1)", () => {
     expect(parseFeedFilters({ ntrp: "0.5" })).toEqual({});
   });
 });
+
+// Slice PD3, task PD3.1: the "match type" filter.
+describe("the gender filter", () => {
+  it("reads ?gender=, ignoring a value that isn't a match type", () => {
+    expect(parseFeedFilters({ gender: "WOMEN" })).toEqual({ gender: "WOMEN" });
+    expect(parseFeedFilters({ gender: "FEMALE" })).toEqual({});
+  });
+
+  it("narrows the query to that match type and survives in the link", () => {
+    const where = feedWhere({ gender: "MIXED" }, new Date("2026-11-17T10:00Z"));
+    expect(where.AND).toContainEqual({ matchGender: "MIXED" });
+    expect(feedHref({ gender: "MIXED" })).toBe("/offers?gender=MIXED");
+  });
+});

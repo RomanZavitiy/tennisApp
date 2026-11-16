@@ -65,6 +65,7 @@ export default async function NewOfferPage({
       <OfferForm
         action={createOffer}
         sport={sport}
+        authorGender={player.gender}
         clubs={clubs}
         defaultDistrict={
           Object.values(District).includes(district as District)

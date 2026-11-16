@@ -49,6 +49,20 @@ describe("notifyInterestedPlayers", () => {
     expect(userFindMany).not.toHaveBeenCalled();
   });
 
+  // Slice PD3, task PD3.1.
+  it("asks only for women when the game is a women's one, anyone otherwise", async () => {
+    userFindMany.mockResolvedValue([]);
+
+    await notifyInterestedPlayers({ ...OFFER, matchGender: "WOMEN" }, NOW);
+    await notifyInterestedPlayers({ ...OFFER, matchGender: "MIXED" }, NOW);
+
+    const wheres = userFindMany.mock.calls.map(
+      ([args]) => (args as { where: Record<string, unknown> }).where,
+    );
+    expect(wheres[0]).toMatchObject({ gender: "FEMALE" });
+    expect(wheres[1]).not.toHaveProperty("gender");
+  });
+
   it("notifies a matching candidate and starts their daily count at 1", async () => {
     userFindMany.mockResolvedValue([candidateRow()]);
 

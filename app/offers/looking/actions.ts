@@ -82,6 +82,7 @@ export async function postPlayIntent(
     format,
     sport,
     level: playerLevel(player, sport),
+    gender: player.gender,
   }).catch((error: unknown) => {
     console.error("Intent-match notification failed:", error);
   });

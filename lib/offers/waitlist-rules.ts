@@ -9,6 +9,7 @@ export type WaitlistJoinRefusal =
   | "BLOCKED"
   | "STARTED"
   | "NOT_FULL"
+  | "WRONG_GENDER"
   | "ALREADY_JOINED"
   | "ALREADY_WAITLISTED"
   | "DECLINED";
@@ -21,6 +22,7 @@ export function waitlistJoinRefusal({
   alreadyWaitlisted,
   now,
   blocked = false,
+  fitsGender = true,
 }: {
   offer: { authorId: string; status: OfferStatus; startsAt: Date };
   playerId: string;
@@ -30,6 +32,8 @@ export function waitlistJoinRefusal({
   now: Date;
   /** Either side has personally blocked the other (slice R). */
   blocked?: boolean;
+  /** Same as joinRefusal's (slice PD3). */
+  fitsGender?: boolean;
 }): WaitlistJoinRefusal | null {
   if (offer.authorId === playerId) {
     return "OWN_OFFER";
@@ -44,6 +48,9 @@ export function waitlistJoinRefusal({
   // one opens, the normal "ask to join" flow applies instead.
   if (offer.status !== "FULL") {
     return "NOT_FULL";
+  }
+  if (!fitsGender) {
+    return "WRONG_GENDER";
   }
   if (
     existingJoin?.status === "REQUESTED" ||

@@ -99,8 +99,21 @@ describe("notifyMatchingOfferAuthors", () => {
       district: { in: ["STARE_MIASTO"] },
       format: "SINGLES",
       sport: "TENNIS",
+      // No gender given: unrestricted and mixed games only.
+      matchGender: { in: ["ANY", "MIXED"] },
       author: { notifyNewOffers: true },
     });
+  });
+
+  it("includes women's games for a woman's post, never men's (PD3)", async () => {
+    offerFindMany.mockResolvedValue([]);
+
+    await notifyMatchingOfferAuthors({ ...INTENT, gender: "FEMALE" }, NOW);
+
+    const [args] = offerFindMany.mock.calls[0] as [
+      { where: { matchGender: { in: string[] } } },
+    ];
+    expect(args.where.matchGender.in).toEqual(["ANY", "WOMEN", "MIXED"]);
   });
 
   it("asks for padel offers when the intent is padel (PD2)", async () => {

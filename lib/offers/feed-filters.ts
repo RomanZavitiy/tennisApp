@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import {
   District,
+  MatchGender,
   OfferFormat,
   type Sport,
 } from "@/lib/generated/prisma/enums";
@@ -30,6 +31,9 @@ export type FeedFilters = {
   /** The player's level: offers whose wanted range includes it. */
   ntrp?: number;
   format?: OfferFormat;
+  /** Who the game is for (slice PD3): `?gender=WOMEN` shows women's games
+   * only. Unset — every kind. */
+  gender?: MatchGender;
   /** Only offers whose court is already booked (task 3.22). */
   courtBooked?: boolean;
   /** How long the game is (slice K5). */
@@ -48,6 +52,7 @@ const fields = {
   // offers.
   ntrp: z.coerce.number().refine((level) => PADEL_LEVELS.includes(level)),
   format: z.enum(OfferFormat),
+  gender: z.enum(MatchGender),
   duration: z.coerce.number().refine(isOfferDuration),
   time: z.enum(TIMES_OF_DAY),
 };
@@ -122,6 +127,9 @@ export function feedWhere(
   if (filters.format) {
     conditions.push({ format: filters.format });
   }
+  if (filters.gender) {
+    conditions.push({ matchGender: filters.gender });
+  }
   if (filters.courtBooked) {
     conditions.push({ courtStatus: "BOOKED" });
   }
@@ -160,6 +168,7 @@ export function feedHref(
   if (filters.district) params.set("district", filters.district);
   if (filters.ntrp !== undefined) params.set("ntrp", filters.ntrp.toFixed(1));
   if (filters.format) params.set("format", filters.format);
+  if (filters.gender) params.set("gender", filters.gender);
   if (filters.courtBooked) params.set("courtBooked", "1");
   if (filters.duration) params.set("duration", String(filters.duration));
   if (filters.time) params.set("time", filters.time);

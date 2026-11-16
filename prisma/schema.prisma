@@ -508,6 +508,10 @@ model SparringOffer {
   /// (CHECK in the migration): padel is played two against two.
   sport           Sport       @default(TENNIS)
   format          OfferFormat @default(SINGLES)
+  /// Who the game is for (slice PD3): anyone, men, women, or mixed doubles.
+  /// MEN / WOMEN are enforced when a player asks to join or is invited
+  /// (lib/offers/match-gender.ts); MIXED is doubles-only (CHECK).
+  matchGender     MatchGender @default(ANY) @map("match_gender")
   /// Doubles only: the author brings their own partner (a mark, not an account).
   hasPartner      Boolean     @default(false) @map("has_partner")
   /// Stored in UTC, shown in Europe/Warsaw.
@@ -1162,6 +1166,16 @@ enum Sport {
   PADEL
 
   @@map("sport")
+}
+
+/// Who a game is for (slice PD3, task PD3.1), both sports.
+enum MatchGender {
+  ANY
+  MEN
+  WOMEN
+  MIXED
+
+  @@map("match_gender")
 }
 
 /// A padel player's preferred side of the court (slice PD1).

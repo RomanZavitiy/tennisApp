@@ -1,13 +1,14 @@
 import { db } from "@/lib/db";
 import { levelMatches } from "@/lib/matching/offer-interest";
 import { blockedCounterpartIds } from "@/lib/moderation/personal-block";
-import type { Sport } from "@/lib/generated/prisma/enums";
+import type { Gender, Sport } from "@/lib/generated/prisma/enums";
 import type { FeedFilters } from "@/lib/offers/feed-filters";
 import {
   feedOfferSelect,
   toFeedOffer,
   type FeedOffer,
 } from "@/lib/offers/feed";
+import { matchGendersOpenTo } from "@/lib/offers/match-gender";
 import { PLAY_TODAY_WINDOW_HOURS } from "@/lib/offers/play-today";
 import {
   getPlayIntentFeed,
@@ -33,6 +34,9 @@ export async function getPlayTodayFeed(
   now: Date = new Date(),
   // Slice PD1: `viewerNtrp` is the viewer's level in this sport.
   sport: Sport = "TENNIS",
+  // Slice PD3: leaves out men's or women's games the viewer couldn't join.
+  // Left out — unrestricted and mixed games only.
+  viewerGender?: Gender,
 ): Promise<PlayTodayFeed> {
   const blockedIds = await blockedCounterpartIds(viewerId);
 
@@ -40,6 +44,7 @@ export async function getPlayTodayFeed(
     where: {
       status: "OPEN",
       sport,
+      matchGender: { in: matchGendersOpenTo(viewerGender) },
       authorId: { notIn: [viewerId, ...blockedIds] },
       startsAt: {
         gt: now,

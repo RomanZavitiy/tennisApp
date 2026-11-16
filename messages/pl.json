@@ -205,6 +205,7 @@
   },
   "OfferForm": {
     "formatLabel": "Format",
+    "matchGenderLabel": "Dla kogo",
     "singles": "Singiel",
     "doubles": "Debel",
     "hasPartner": "Mam już partnera",
@@ -267,6 +268,7 @@
     "any": "Każdy",
     "ntrpLabel": "Mój poziom (NTRP)",
     "formatLabel": "Format",
+    "genderLabel": "Typ meczu",
     "timeLabel": "Pora dnia",
     "time": {
       "morning": "Rano (przed 12:00)",
@@ -287,6 +289,7 @@
     "whereLabel": "Gdzie",
     "levelLabel": "Poziom",
     "surfaceLabel": "Nawierzchnia",
+    "matchGenderLabel": "Typ meczu",
     "courtLabel": "Kort",
     "statusCancelled": "Odwołane",
     "statusStarted": "Już się zaczęło",
@@ -395,6 +398,12 @@
     "resultAnnulled": "Administrator rozpatrzył sprzeciw i unieważnił ten wynik ({score})."
   },
   "OfferLabels": {
+    "matchGender": {
+      "ANY": "Dla wszystkich",
+      "MEN": "Tylko mężczyźni",
+      "WOMEN": "Tylko kobiety",
+      "MIXED": "Mikst"
+    },
     "duration": "{hours, number} godz.",
     "singles": "Singiel",
     "doubles": "Debel",
@@ -780,6 +789,7 @@
     "BLOCKED": "Nie możesz dołączyć do tej oferty.",
     "STARTED": "Ta gra już się zaczęła.",
     "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
+    "WRONG_GENDER": "Ta gra jest dla zawodników innej płci.",
     "ALREADY_REQUESTED": "Zgłoszenie do tej gry zostało już wysłane.",
     "DECLINED": "Autor odrzucił to zgłoszenie."
   },
@@ -834,6 +844,9 @@
       "courtStatusRequired": "Wybierz status kortu.",
       "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków.",
       "partnerNeedsDoubles": "Partnera można dodać tylko do gry deblowej.",
+      "matchGenderRequired": "Wybierz, dla kogo jest gra.",
+      "mixedNeedsDoubles": "Mikst to zawsze debel.",
+      "matchGenderNotYours": "Możesz dodać mecz tylko dla mężczyzn lub tylko dla kobiet, w którym sam(a) możesz zagrać.",
       "clubOrDistrictRequired": "Wybierz klub albo dzielnicę.",
       "levelRangeInverted": "Najwyższy poziom nie może być niższy od najniższego.",
       "padelNeedsDoubles": "Mecz padla to zawsze debel."
@@ -1063,6 +1076,7 @@
     "BLOCKED": "Nie możesz zaprosić tego zawodnika.",
     "STARTED": "Ta gra już się zaczęła.",
     "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
+    "WRONG_GENDER": "Ta gra nie jest dla zawodników tej płci.",
     "ALREADY_JOINED": "Ten zawodnik ma już zgłoszenie do tej oferty.",
     "ALREADY_INVITED": "Ten zawodnik jest już zaproszony.",
     "DECLINED": "Ten zawodnik odrzucił już zaproszenie do tej oferty."
@@ -1097,6 +1111,7 @@
     "BLOCKED": "Nie możesz dołączyć do rezerwy tej oferty.",
     "STARTED": "Ta gra już się zaczęła.",
     "NOT_FULL": "Ta oferta ma jeszcze wolne miejsca — zgłoś się normalnie.",
+    "WRONG_GENDER": "Ta gra jest dla zawodników innej płci.",
     "ALREADY_JOINED": "Masz już zgłoszenie na tę ofertę.",
     "ALREADY_WAITLISTED": "Jesteś już na liście rezerwowej.",
     "DECLINED": "Autor odrzucił Twoje zgłoszenie."
