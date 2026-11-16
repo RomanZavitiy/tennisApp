@@ -14,6 +14,7 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
+import type { Sport } from "@/lib/generated/prisma/enums";
 import { TIMES_OF_DAY } from "@/lib/offers/feed-filters";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import {
@@ -34,12 +35,17 @@ type FieldErrorLike = { message?: string | undefined } | undefined;
  * whatever postPlayIntent still rejects comes back as per-field messages.
  * Posting again just replaces today's — or any day's — intent, so this
  * never needs a "cancel" state, only a "posted" one.
+ *
+ * `sport` (slice PD2) is the header switcher's: the post is for that sport.
+ * Padel is always doubles, so its form has no format to choose.
  */
 export function PostIntentForm({
   action,
+  sport,
   defaultDate,
 }: {
   action: (values: PlayIntentInput) => Promise<PostPlayIntentResult>;
+  sport: Sport;
   /** Kraków "today", as "YYYY-MM-DD". */
   defaultDate: string;
 }) {
@@ -47,6 +53,7 @@ export function PostIntentForm({
   const tOfferFilters = useTranslations("OfferFilters");
   const tOfferLabels = useTranslations("OfferLabels");
   const tValidation = useTranslations("Validation.playIntent");
+  const isPadel = sport === "PADEL";
   const [posted, setPosted] = useState(false);
   const {
     register,
@@ -57,10 +64,11 @@ export function PostIntentForm({
   } = useForm<PlayIntentInput>({
     resolver: zodResolver(playIntentSchema(tValidation)),
     defaultValues: {
+      sport,
       date: defaultDate,
       times: [],
       districts: [],
-      format: "SINGLES",
+      format: isPadel ? "DOUBLES" : "SINGLES",
       note: "",
     },
   });
@@ -89,6 +97,7 @@ export function PostIntentForm({
       onSubmit={(event) => void handleSubmit(onSubmit)(event)}
       className="space-y-5"
     >
+      <input type="hidden" {...register("sport")} />
       <Field id="date" label={t("dateLabel")} error={errors.date}>
         <Controller
           control={control}
@@ -134,16 +143,23 @@ export function PostIntentForm({
         </div>
       </Field>
 
-      <Field id="format" label={t("formatLabel")} error={errors.format}>
-        <NativeSelect id="format" className="w-full" {...register("format")}>
-          <NativeSelectOption value="SINGLES">
-            {tOfferLabels("singles")}
-          </NativeSelectOption>
-          <NativeSelectOption value="DOUBLES">
-            {tOfferLabels("doubles")}
-          </NativeSelectOption>
-        </NativeSelect>
-      </Field>
+      {isPadel ? (
+        <>
+          <input type="hidden" {...register("format")} />
+          <ErrorText id="format" error={errors.format} />
+        </>
+      ) : (
+        <Field id="format" label={t("formatLabel")} error={errors.format}>
+          <NativeSelect id="format" className="w-full" {...register("format")}>
+            <NativeSelectOption value="SINGLES">
+              {tOfferLabels("singles")}
+            </NativeSelectOption>
+            <NativeSelectOption value="DOUBLES">
+              {tOfferLabels("doubles")}
+            </NativeSelectOption>
+          </NativeSelect>
+        </Field>
+      )}
 
       <Field
         id="note"

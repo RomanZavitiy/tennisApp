@@ -700,6 +700,9 @@ model PlayIntent {
   /// Districts this player would play in for this intent, at least one.
   districts District[]
   format    OfferFormat @default(SINGLES)
+  /// Slice PD2: which sport the player wants to play. A padel intent is
+  /// always doubles (CHECK in the migration), same rule as a padel offer.
+  sport     Sport       @default(TENNIS)
   /// Free text, e.g. "flexible on time" — the only optional field.
   note      String?     @db.VarChar(200)
   /// Midnight Europe/Warsaw after `date` (task U2.1) — the hourly cron
@@ -707,9 +710,10 @@ model PlayIntent {
   /// query (lib/offers/play-intent-feed.ts) filters live ones out by date.
   expiresAt DateTime    @map("expires_at") @db.Timestamptz
 
-  /// At most one active intent per day per player (task U2.1): posting
-  /// again for the same date replaces it rather than adding a second row.
-  @@unique([userId, date])
+  /// At most one active intent per day per player and sport (task U2.1,
+  /// slice PD2): posting again for the same date replaces it rather than
+  /// adding a second row; a tennis and a padel intent can share a day.
+  @@unique([userId, sport, date])
   /// The feed's own query shape: live intents for one calendar day.
   @@index([date])
   @@map("play_intents")

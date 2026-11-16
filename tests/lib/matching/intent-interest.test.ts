@@ -19,6 +19,7 @@ const MATCHING_OFFER: OpenOfferForIntent = {
   ntrpMin: 3.5,
   ntrpMax: 4.0,
   format: "SINGLES",
+  sport: "TENNIS",
   startsAt: new Date("2026-11-10T17:00:00Z"),
   notifyNewOffers: true,
   offerPushSentOn: null,
@@ -31,7 +32,8 @@ const INTENT: PlayIntentInfo = {
   times: ["evening"],
   districts: ["STARE_MIASTO"],
   format: "SINGLES",
-  selfRatedNtrp: 3.5,
+  sport: "TENNIS",
+  level: 3.5,
 };
 
 // Noon Europe/Warsaw — well outside quiet hours.
@@ -70,9 +72,32 @@ describe("offerMatchesIntent", () => {
 
   it("skips a level outside the offer's range", () => {
     expect(
+      offerMatchesIntent(MATCHING_OFFER, { ...INTENT, level: 1.5 }, NOW),
+    ).toBe(false);
+  });
+
+  // Slice PD2: an intent only ever matches a game in its own sport.
+  it("skips an offer in the other sport", () => {
+    const padelOffer = {
+      ...MATCHING_OFFER,
+      sport: "PADEL" as const,
+      format: "DOUBLES" as const,
+    };
+    expect(offerMatchesIntent(padelOffer, INTENT, NOW)).toBe(false);
+    expect(
       offerMatchesIntent(
-        MATCHING_OFFER,
-        { ...INTENT, selfRatedNtrp: 1.5 },
+        padelOffer,
+        { ...INTENT, sport: "PADEL", format: "DOUBLES" },
+        NOW,
+      ),
+    ).toBe(true);
+  });
+
+  it("skips a levelled padel offer for a player with no padel level", () => {
+    expect(
+      offerMatchesIntent(
+        { ...MATCHING_OFFER, sport: "PADEL", format: "DOUBLES" },
+        { ...INTENT, sport: "PADEL", format: "DOUBLES", level: null },
         NOW,
       ),
     ).toBe(false);

@@ -881,7 +881,8 @@
       "datePast": "Wybierz dzisiejszą lub późniejszą datę.",
       "timesRequired": "Wybierz co najmniej jedną porę dnia.",
       "districtsRequired": "Wybierz co najmniej jedną dzielnicę.",
-      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków."
+      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków.",
+      "padelNeedsDoubles": "Mecz padla to zawsze debel."
     }
   },
   "OnboardingPage": {
@@ -1127,6 +1128,7 @@
   },
   "LookingForGamePage": {
     "title": "Szukają gry",
+    "titlePadel": "Szukają gry w padla",
     "subtitle": "Dodaj czego szukasz albo przeglądaj, czego szukają inni zawodnicy.",
     "backToFeed": "Wróć do ofert",
     "postYours": "Dodaj czego szukasz",
@@ -1146,6 +1148,8 @@
   "IntentCard": {
     "aPlayer": "Zawodnik",
     "summary": "{date} · {districts} · {times} · {format}",
+    "summaryPadel": "{date} · {districts} · {times}",
+    "padelLevel": "poziom {level, number, ::.0}",
     "createAndInvite": "Stwórz grę i zaproś"
   },
   "PlayTodayPage": {

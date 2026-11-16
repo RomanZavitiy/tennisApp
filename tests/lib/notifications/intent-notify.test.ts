@@ -22,7 +22,8 @@ const INTENT = {
   times: ["evening"] as const,
   districts: ["STARE_MIASTO"] as const,
   format: "SINGLES" as const,
-  selfRatedNtrp: 3.5,
+  sport: "TENNIS" as const,
+  level: 3.5,
 };
 const NOW = new Date("2026-11-10T11:00:00Z"); // noon Europe/Warsaw
 
@@ -34,6 +35,7 @@ function offerRow(over: Partial<Record<string, unknown>> = {}) {
     ntrpMin: 3.5,
     ntrpMax: 4.0,
     format: "SINGLES" as const,
+    sport: "TENNIS" as const,
     startsAt: new Date("2026-11-10T17:00:00Z"),
     author: {
       notifyNewOffers: true,
@@ -84,7 +86,7 @@ describe("notifyMatchingOfferAuthors", () => {
     expect(userUpdate).not.toHaveBeenCalled();
   });
 
-  it("queries only open, upcoming offers in a wanted district and format", async () => {
+  it("queries only open, upcoming offers in a wanted district, format and sport", async () => {
     offerFindMany.mockResolvedValue([]);
 
     await notifyMatchingOfferAuthors(INTENT, NOW);
@@ -96,7 +98,22 @@ describe("notifyMatchingOfferAuthors", () => {
       startsAt: { gt: NOW },
       district: { in: ["STARE_MIASTO"] },
       format: "SINGLES",
+      sport: "TENNIS",
       author: { notifyNewOffers: true },
     });
+  });
+
+  it("asks for padel offers when the intent is padel (PD2)", async () => {
+    offerFindMany.mockResolvedValue([]);
+
+    await notifyMatchingOfferAuthors(
+      { ...INTENT, sport: "PADEL", format: "DOUBLES", level: 4 },
+      NOW,
+    );
+
+    const [args] = offerFindMany.mock.calls[0] as [
+      { where: { sport: string } },
+    ];
+    expect(args.where.sport).toBe("PADEL");
   });
 });

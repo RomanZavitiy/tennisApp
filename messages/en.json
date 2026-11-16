@@ -881,7 +881,8 @@
       "datePast": "Choose today or a later date.",
       "timesRequired": "Choose at least one time of day.",
       "districtsRequired": "Choose at least one district.",
-      "noteTooLong": "Keep the note under {max} characters."
+      "noteTooLong": "Keep the note under {max} characters.",
+      "padelNeedsDoubles": "A padel game is always doubles."
     }
   },
   "OnboardingPage": {
@@ -1127,6 +1128,7 @@
   },
   "LookingForGamePage": {
     "title": "Looking for a game",
+    "titlePadel": "Looking for a padel game",
     "subtitle": "Post what you're after, or browse what other players are looking for.",
     "backToFeed": "Back to offers",
     "postYours": "Post what you're looking for",
@@ -1146,6 +1148,8 @@
   "IntentCard": {
     "aPlayer": "A player",
     "summary": "{date} · {districts} · {times} · {format}",
+    "summaryPadel": "{date} · {districts} · {times}",
+    "padelLevel": "level {level, number, ::.0}",
     "createAndInvite": "Create a game and invite"
   },
   "PlayTodayPage": {

@@ -38,7 +38,7 @@ type EventProperties = {
   waitlist_spot_offered: Record<string, never>;
   waitlist_spot_taken: Record<string, never>;
   waitlist_spot_passed: Record<string, never>;
-  intent_posted: Record<string, never>;
+  intent_posted: { sport: Sport };
   intent_invited: Record<string, never>;
   intent_converted: Record<string, never>;
   play_today_viewed: Record<string, never>;

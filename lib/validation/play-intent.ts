@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import { District, OfferFormat, Sport } from "@/lib/generated/prisma/enums";
 import { TIMES_OF_DAY } from "@/lib/offers/feed-filters";
 import { zodFieldErrors } from "@/lib/validation/field-errors";
 import { todayInKrakow } from "@/lib/validation/profile";
@@ -19,22 +19,37 @@ const emptyToUndefined = (value: unknown) =>
 
 /** `t` is a translator for the "Validation.playIntent" namespace (task 1.20). */
 export function playIntentSchema(t: ValidationT) {
-  return z.object({
-    date: z.iso
-      .date(t("dateRequired"))
-      .refine((date) => date >= todayInKrakow(), t("datePast")),
-    times: z.enum(TIMES_OF_DAY).array().min(1, t("timesRequired")),
-    districts: z.enum(District).array().min(1, t("districtsRequired")),
-    format: z.enum(OfferFormat).default("SINGLES"),
-    note: z.preprocess(
-      emptyToUndefined,
-      z
-        .string()
-        .trim()
-        .max(NOTE_MAX, t("noteTooLong", { max: NOTE_MAX }))
-        .optional(),
-    ),
-  });
+  return z
+    .object({
+      // Slice PD2. The form sends the sport the header switcher shows; a
+      // request without one is tennis, as every intent was before padel.
+      sport: z.enum(Sport).default("TENNIS"),
+      date: z.iso
+        .date(t("dateRequired"))
+        .refine((date) => date >= todayInKrakow(), t("datePast")),
+      times: z.enum(TIMES_OF_DAY).array().min(1, t("timesRequired")),
+      districts: z.enum(District).array().min(1, t("districtsRequired")),
+      format: z.enum(OfferFormat).default("SINGLES"),
+      note: z.preprocess(
+        emptyToUndefined,
+        z
+          .string()
+          .trim()
+          .max(NOTE_MAX, t("noteTooLong", { max: NOTE_MAX }))
+          .optional(),
+      ),
+    })
+    .superRefine((intent, ctx) => {
+      // Padel is two against two (CHECK in the migration), same rule as
+      // offerSchema.
+      if (intent.sport === "PADEL" && intent.format !== "DOUBLES") {
+        ctx.addIssue({
+          code: "custom",
+          path: ["format"],
+          message: t("padelNeedsDoubles"),
+        });
+      }
+    });
 }
 
 export type PlayIntentInput = z.input<ReturnType<typeof playIntentSchema>>;
@@ -49,6 +64,7 @@ export type PostPlayIntentResult =
     };
 
 const PLAY_INTENT_FIELDS: (keyof PlayIntentInput)[] = [
+  "sport",
   "date",
   "times",
   "districts",

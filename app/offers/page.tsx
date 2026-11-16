@@ -199,13 +199,9 @@ export default async function OffersPage({
                   <SideLink href="/offers/today" icon={<ZapIcon />}>
                     {t("playToday")}
                   </SideLink>
-                  {/* "Looking for a game" posts have no sport yet (PD2):
-                      they are tennis. */}
-                  {!isPadel && (
-                    <SideLink href="/offers/looking" icon={<UsersIcon />}>
-                      {t("lookingForGame")}
-                    </SideLink>
-                  )}
+                  <SideLink href="/offers/looking" icon={<UsersIcon />}>
+                    {t("lookingForGame")}
+                  </SideLink>
                   <SideLink href="/offers?show=hidden" icon={<EyeOffIcon />}>
                     {t("showHidden")}
                   </SideLink>

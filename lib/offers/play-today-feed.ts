@@ -23,7 +23,7 @@ export type PlayTodayFeed = {
 /**
  * "Грати сьогодні" (task U3.1): open offers starting within the next
  * PLAY_TODAY_WINDOW_HOURS that match the viewer's own level, plus today's
- * intents (slice U2) — no pagination or ELO ranking, same "stays small
+ * intents (slice U2), both in one sport (slices PD1, PD2) — no pagination or ELO ranking, same "stays small
  * enough" assumption as getClubOffers. The viewer's own offers are left
  * out: there's nothing to join on your own game here.
  */
@@ -31,8 +31,7 @@ export async function getPlayTodayFeed(
   viewerId: string,
   viewerNtrp: number | null,
   now: Date = new Date(),
-  // Slice PD1: `viewerNtrp` is the viewer's level in this sport. Intents
-  // have no sport yet (PD2) — they are tennis, so padel shows none.
+  // Slice PD1: `viewerNtrp` is the viewer's level in this sport.
   sport: Sport = "TENNIS",
 ): Promise<PlayTodayFeed> {
   const blockedIds = await blockedCounterpartIds(viewerId);
@@ -56,13 +55,11 @@ export async function getPlayTodayFeed(
     .filter((offer) => levelMatches(viewerNtrp, offer.ntrpMin, offer.ntrpMax));
 
   const todayFilters: FeedFilters = {
+    sport,
     date: todayInKrakow(now),
     ...(viewerNtrp !== null ? { ntrp: viewerNtrp } : {}),
   };
-  const intents =
-    sport === "TENNIS"
-      ? await getPlayIntentFeed(viewerId, todayFilters, now)
-      : [];
+  const intents = await getPlayIntentFeed(viewerId, todayFilters, now);
 
   return { offers, intents };
 }

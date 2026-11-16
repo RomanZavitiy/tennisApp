@@ -124,6 +124,62 @@ describe("sparring_offers", () => {
   });
 });
 
+describe("play_intents (PD2, migration 20261116210000_add_play_intent_sport)", () => {
+  const intent = (userId: string, date: string) => ({
+    userId,
+    date: new Date(`${date}T00:00:00Z`),
+    times: ["evening"],
+    districts: ["KROWODRZA" as const],
+    expiresAt: hoursFromNow(24),
+  });
+
+  it("makes an intent tennis by default", async () => {
+    const player = await createPlayer();
+    const row = await db.playIntent.create({
+      data: intent(player.id, "2030-01-10"),
+    });
+    expect(row.sport).toBe("TENNIS");
+  });
+
+  it("refuses padel singles, allows padel doubles", async () => {
+    const player = await createPlayer();
+    await expectDbRejection(
+      db.playIntent.create({
+        data: { ...intent(player.id, "2030-01-10"), sport: "PADEL" },
+      }),
+      {
+        code: PG.checkViolation,
+        mentions: "play_intents_padel_doubles_check",
+      },
+    );
+    const row = await db.playIntent.create({
+      data: {
+        ...intent(player.id, "2030-01-10"),
+        sport: "PADEL",
+        format: "DOUBLES",
+      },
+    });
+    expect(row.sport).toBe("PADEL");
+  });
+
+  it("allows one intent per day per sport, not two in the same sport", async () => {
+    const player = await createPlayer();
+    await db.playIntent.create({ data: intent(player.id, "2030-01-10") });
+    await db.playIntent.create({
+      data: {
+        ...intent(player.id, "2030-01-10"),
+        sport: "PADEL",
+        format: "DOUBLES",
+      },
+    });
+    // Prisma's own code for a unique violation (the new index on user,
+    // sport and date).
+    await expect(
+      db.playIntent.create({ data: intent(player.id, "2030-01-10") }),
+    ).rejects.toMatchObject({ code: "P2002" });
+  });
+});
+
 describe("padel profile and clubs (PD1)", () => {
   it.each([0.5, 2.25, 7.5])("refuses padel level %s", async (padelLevel) => {
     await expectDbRejection(createPlayer({ padelLevel }), {
