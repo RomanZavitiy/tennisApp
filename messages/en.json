@@ -153,7 +153,8 @@
     "level": "Level (NTRP)",
     "reliability": "Reliability",
     "record": "Won–lost",
-    "played": "{count, plural, one {# match} other {# matches}} played"
+    "played": "{count, plural, one {# match} other {# matches}} played",
+    "padel": "Padel: level {level, number, ::.0}"
   },
   "MyGames": {
     "none": "No upcoming games. Find one on the board, or post your own.",
@@ -193,7 +194,8 @@
     "language": "Language",
     "deleteAccount": "Delete my account",
     "privacy": "Privacy",
-    "theme": "Theme"
+    "theme": "Theme",
+    "padelProfile": "My padel"
   },
   "OfferCard": {
     "byAuthor": "by {name}",
@@ -247,7 +249,9 @@
     "subtitle": "Players looking for a partner in Kraków. Signed in, you see the ones closest to your level first.",
     "shortcutsLabel": "Shortcuts",
     "titlePadel": "Padel games",
-    "subtitlePadel": "Open padel games in Kraków. Join one, or post your own and fill the four."
+    "subtitlePadel": "Open padel games in Kraków. Join one, or post your own and fill the four.",
+    "padelLevelHint": "Add your padel level to hear about new games at your level and to be suggested to organisers.",
+    "padelLevelAction": "Add padel level"
   },
   "NewOfferPage": {
     "title": "Post a sparring offer",
@@ -322,7 +326,8 @@
     "joinWaitlist": "Join the reserve list",
     "joiningWaitlist": "Joining…",
     "leaveWaitlist": "Leave the reserve list",
-    "leavingWaitlist": "Leaving…"
+    "leavingWaitlist": "Leaving…",
+    "padelLevel": "level {level, number, ::.0}"
   },
   "AdminActionForm": {
     "done": "Done.",
@@ -453,7 +458,9 @@
     "eyebrow": "Tennis · Kraków",
     "subtitle": "Pick a club, book it there, and find someone to play with.",
     "browseOffers": "Browse sparring offers",
-    "suggestClub": "Suggest a club"
+    "suggestClub": "Suggest a club",
+    "eyebrowPadel": "Padel · Kraków",
+    "browseOffersPadel": "Browse padel games"
   },
   "ClubsView": {
     "list": "List",
@@ -1075,7 +1082,8 @@
     "noneYet": "No matching players yet.",
     "reason": "NTRP {ntrp}, your district · reliability {reliability}",
     "invite": "Invite",
-    "inviting": "Inviting…"
+    "inviting": "Inviting…",
+    "reasonPadel": "Padel {ntrp}, your district · reliability {reliability}"
   },
   "DiscoverableToggle": {
     "label": "Show me in \"Who to invite\"",
@@ -1356,5 +1364,25 @@
       "TENNIS": "Tennis",
       "PADEL": "Padel"
     }
+  },
+  "PadelProfilePage": {
+    "title": "My padel",
+    "subtitle": "Optional. Padel games are matched by this level, not by your tennis NTRP.",
+    "backToProfile": "Back to profile"
+  },
+  "PadelProfileForm": {
+    "levelLabel": "Padel level (1–7)",
+    "noLevel": "I don't play padel",
+    "levelHint": "1.0 is a first game, 7.0 is a professional. Not sure? Pick the lower one.",
+    "sideLabel": "Preferred side",
+    "noSide": "No preference yet",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved"
+  },
+  "PadelSide": {
+    "LEFT": "Left side",
+    "RIGHT": "Right side",
+    "BOTH": "Both sides"
   }
 }

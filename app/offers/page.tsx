@@ -17,6 +17,7 @@ import { OfferFilters } from "@/components/offer-filters";
 import { ListingLayout, PageHeader, PageShell } from "@/components/page-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { db } from "@/lib/db";
 import { getOfferFeed, parsePage } from "@/lib/offers/feed";
 import { feedHref, parseFeedFilters } from "@/lib/offers/feed-filters";
 import { getCurrentSport } from "@/lib/sport/current-sport";
@@ -54,6 +55,17 @@ export default async function OffersPage({
   // Slice PD1: the feed shows one sport, the one in the header switcher.
   const sport = await getCurrentSport();
   const isPadel = sport === "PADEL";
+  // Slice PD2: a signed-in player browsing padel without a padel level
+  // gets no "new game" pushes and isn't suggested to authors — say so.
+  const needsPadelLevel =
+    isPadel && viewer !== null
+      ? (
+          await db.user.findUnique({
+            where: { id: viewer.id },
+            select: { padelLevel: true },
+          })
+        )?.padelLevel == null
+      : false;
   const feed = await getOfferFeed(
     parsePage(params.page),
     { ...filters, sport },
@@ -153,6 +165,18 @@ export default async function OffersPage({
           )
         }
       />
+
+      {needsPadelLevel && !showHidden && (
+        <p className="surface mt-6 flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
+          <span>{t("padelLevelHint")}</span>
+          <Link
+            href="/profile/padel"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            {t("padelLevelAction")}
+          </Link>
+        </p>
+      )}
 
       {showHidden ? (
         <div className="mt-6">

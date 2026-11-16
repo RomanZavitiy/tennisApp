@@ -137,6 +137,9 @@ export default async function ProfilePage() {
               <SettingsLink href="/profile/edit">
                 {t("editProfile")}
               </SettingsLink>
+              <SettingsLink href="/profile/padel">
+                {t("padelProfile")}
+              </SettingsLink>
               <SettingsLink href="/profile/preferences">
                 {t("playPreferences")}
               </SettingsLink>

@@ -16,6 +16,7 @@ const playerSelect = {
   name: true,
   avatarPath: true,
   selfRatedNtrp: true,
+  padelLevel: true,
   scheduledMatches: true,
   noShows: true,
   lateCancellations: true,
@@ -26,6 +27,8 @@ export type OfferPlayer = {
   name: string | null;
   avatarPath: string | null;
   selfRatedNtrp: number | null;
+  /** Slice PD2: shown instead of NTRP on a padel offer (PlayerLink). */
+  padelLevel?: number | null;
   reliability: Reliability;
 };
 
@@ -34,6 +37,7 @@ function toOfferPlayer(row: {
   name: string | null;
   avatarPath: string | null;
   selfRatedNtrp: number | null;
+  padelLevel: number | null;
   scheduledMatches: number;
   noShows: number;
   lateCancellations: number;

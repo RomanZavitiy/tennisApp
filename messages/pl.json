@@ -153,7 +153,8 @@
     "level": "Poziom (NTRP)",
     "reliability": "Rzetelność",
     "record": "Wygrane–przegrane",
-    "played": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}"
+    "played": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}",
+    "padel": "Padel: poziom {level, number, ::.0}"
   },
   "MyGames": {
     "none": "Brak nadchodzących gier. Znajdź grę na tablicy albo dodaj własną ofertę.",
@@ -193,7 +194,8 @@
     "language": "Język",
     "deleteAccount": "Usuń moje konto",
     "privacy": "Prywatność",
-    "theme": "Motyw"
+    "theme": "Motyw",
+    "padelProfile": "Mój padel"
   },
   "OfferCard": {
     "byAuthor": "od {name}",
@@ -247,7 +249,9 @@
     "subtitle": "Gracze szukający partnera w Krakowie. Po zalogowaniu najpierw widzisz tych najbliższych Twojemu poziomowi.",
     "shortcutsLabel": "Skróty",
     "titlePadel": "Mecze padla",
-    "subtitlePadel": "Otwarte mecze padla w Krakowie. Dołącz albo dodaj własny i zbierz czwórkę."
+    "subtitlePadel": "Otwarte mecze padla w Krakowie. Dołącz albo dodaj własny i zbierz czwórkę.",
+    "padelLevelHint": "Dodaj swój poziom w padlu, aby dostawać powiadomienia o nowych meczach na Twoim poziomie i być polecanym organizatorom.",
+    "padelLevelAction": "Dodaj poziom w padlu"
   },
   "NewOfferPage": {
     "title": "Dodaj ogłoszenie sparingowe",
@@ -322,7 +326,8 @@
     "joinWaitlist": "Dołącz do rezerwy",
     "joiningWaitlist": "Dołączanie…",
     "leaveWaitlist": "Opuść rezerwę",
-    "leavingWaitlist": "Opuszczanie…"
+    "leavingWaitlist": "Opuszczanie…",
+    "padelLevel": "poziom {level, number, ::.0}"
   },
   "AdminActionForm": {
     "done": "Gotowe.",
@@ -453,7 +458,9 @@
     "eyebrow": "Tenis · Kraków",
     "subtitle": "Wybierz klub, zarezerwuj kort u niego i znajdź partnera do gry.",
     "browseOffers": "Przeglądaj oferty sparingów",
-    "suggestClub": "Zaproponuj klub"
+    "suggestClub": "Zaproponuj klub",
+    "eyebrowPadel": "Padel · Kraków",
+    "browseOffersPadel": "Przeglądaj mecze padla"
   },
   "ClubsView": {
     "list": "Lista",
@@ -1075,7 +1082,8 @@
     "noneYet": "Jeszcze nie ma odpowiednich zawodników.",
     "reason": "NTRP {ntrp}, Twoja dzielnica · wiarygodność {reliability}",
     "invite": "Zaproś",
-    "inviting": "Zapraszanie…"
+    "inviting": "Zapraszanie…",
+    "reasonPadel": "Padel {ntrp}, Twoja dzielnica · wiarygodność {reliability}"
   },
   "DiscoverableToggle": {
     "label": "Pokazuj mnie w sekcji \"Kogo zaprosić\"",
@@ -1356,5 +1364,25 @@
       "TENNIS": "Tenis",
       "PADEL": "Padel"
     }
+  },
+  "PadelProfilePage": {
+    "title": "Mój padel",
+    "subtitle": "Opcjonalne. Mecze padla dobieramy według tego poziomu, a nie Twojego tenisowego NTRP.",
+    "backToProfile": "Wróć do profilu"
+  },
+  "PadelProfileForm": {
+    "levelLabel": "Poziom w padlu (1–7)",
+    "noLevel": "Nie gram w padla",
+    "levelHint": "1.0 to pierwszy mecz, 7.0 to zawodowiec. Nie masz pewności? Wybierz niższy.",
+    "sideLabel": "Ulubiona strona",
+    "noSide": "Jeszcze bez preferencji",
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano"
+  },
+  "PadelSide": {
+    "LEFT": "Lewa strona",
+    "RIGHT": "Prawa strona",
+    "BOTH": "Obie strony"
   }
 }

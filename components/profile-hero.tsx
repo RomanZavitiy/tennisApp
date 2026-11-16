@@ -20,6 +20,7 @@ export function ProfileHero({
 }) {
   const t = useTranslations("ProfileHero");
   const tReliability = useTranslations("Reliability");
+  const tSide = useTranslations("PadelSide");
 
   const stats = [
     { label: t("elo"), value: String(profile.elo) },
@@ -51,6 +52,13 @@ export function ProfileHero({
         <p className="text-muted-foreground">
           {t("age", { age: profile.age })} · {DISTRICT_LABELS[profile.district]}
         </p>
+        {/* Slice PD2: only for a player who declared a padel level. */}
+        {profile.padelLevel !== null && (
+          <p className="mt-1 text-sm font-medium">
+            {t("padel", { level: profile.padelLevel })}
+            {profile.padelSide && ` · ${tSide(profile.padelSide)}`}
+          </p>
+        )}
         <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((stat) => (
             <div

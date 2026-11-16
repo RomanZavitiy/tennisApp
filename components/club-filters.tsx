@@ -8,13 +8,22 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { clubsHref, type ClubFilters } from "@/lib/clubs/club-filters";
-import { Surface } from "@/lib/generated/prisma/enums";
+import { Surface, type Sport } from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
 // The court search's filters (slice K4): a plain GET form, like the offer
 // feed's (components/offer-filters.tsx), so the URL holds them and no client
 // JavaScript is needed.
-export function ClubFiltersForm({ filters }: { filters: ClubFilters }) {
+//
+// `sport` (slice PD2) is the header switcher's: padel courts all have the
+// same surface, so that filter is tennis-only.
+export function ClubFiltersForm({
+  filters,
+  sport,
+}: {
+  filters: ClubFilters;
+  sport: Sport;
+}) {
   const t = useTranslations("ClubFilters");
   const tSurface = useTranslations("Surface");
   const active = Object.keys(filters).length > 0;
@@ -45,22 +54,24 @@ export function ClubFiltersForm({ filters }: { filters: ClubFilters }) {
           ))}
         </NativeSelect>
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="club-filter-surface">{t("surfaceLabel")}</Label>
-        <NativeSelect
-          id="club-filter-surface"
-          name="surface"
-          className="w-full"
-          defaultValue={filters.surface ?? ""}
-        >
-          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
-          {Object.values(Surface).map((surface) => (
-            <NativeSelectOption key={surface} value={surface}>
-              {tSurface(surface)}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-      </div>
+      {sport !== "PADEL" && (
+        <div className="space-y-1">
+          <Label htmlFor="club-filter-surface">{t("surfaceLabel")}</Label>
+          <NativeSelect
+            id="club-filter-surface"
+            name="surface"
+            className="w-full"
+            defaultValue={filters.surface ?? ""}
+          >
+            <NativeSelectOption value="">{t("any")}</NativeSelectOption>
+            {Object.values(Surface).map((surface) => (
+              <NativeSelectOption key={surface} value={surface}>
+                {tSurface(surface)}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </div>
+      )}
       <div className="flex items-center gap-2 pb-2">
         <input
           id="club-filter-indoor"

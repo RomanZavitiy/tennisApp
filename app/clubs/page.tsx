@@ -30,17 +30,16 @@ export default async function ClubsPage({
   await connection();
   const filters = parseClubFilters(await searchParams);
   // Slice PD1: only the clubs of the header switcher's sport.
-  const clubs = await searchClubs({
-    ...filters,
-    sport: await getCurrentSport(),
-  });
+  const sport = await getCurrentSport();
+  const isPadel = sport === "PADEL";
+  const clubs = await searchClubs({ ...filters, sport });
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("ClubsPage");
 
   return (
     <PageShell>
       <PageHeader
-        eyebrow={t("eyebrow")}
+        eyebrow={t(isPadel ? "eyebrowPadel" : "eyebrow")}
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
@@ -55,13 +54,13 @@ export default async function ClubsPage({
               href="/offers"
               className={buttonVariants({ variant: "secondary" })}
             >
-              {t("browseOffers")}
+              {t(isPadel ? "browseOffersPadel" : "browseOffers")}
             </Link>
           </>
         }
       />
 
-      <ClubFiltersForm filters={filters} />
+      <ClubFiltersForm filters={filters} sport={sport} />
 
       <ClubsView
         list={<ClubList clubs={clubs} filtered={filtered} />}

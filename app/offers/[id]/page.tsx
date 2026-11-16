@@ -173,7 +173,7 @@ export default async function OfferPage({
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">{t("postedBy")}</dt>
               <dd className="text-right font-medium">
-                <PlayerLink player={offer.author} />
+                <PlayerLink player={offer.author} sport={offer.sport} />
               </dd>
             </div>
           </dl>

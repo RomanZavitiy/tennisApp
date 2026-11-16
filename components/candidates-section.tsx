@@ -1,3 +1,4 @@
+import type { Sport } from "@/lib/generated/prisma/enums";
 import { useTranslations } from "next-intl";
 
 import { inviteToOffer } from "@/app/offers/[id]/invite-actions";
@@ -15,11 +16,16 @@ import { reliabilityLabel } from "@/lib/rating/reliability";
  */
 export function CandidatesSection({
   offerId,
+  sport,
   candidates,
 }: {
   offerId: string;
+  /** Slice PD2: on a padel offer a candidate's `selfRatedNtrp` already
+   * holds their padel level (lib/offers/offer-candidates.ts). */
+  sport: Sport;
   candidates: Candidate[];
 }) {
+  const isPadel = sport === "PADEL";
   const t = useTranslations("CandidatesSection");
   const tReliability = useTranslations("Reliability");
 
@@ -37,9 +43,16 @@ export function CandidatesSection({
               className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
             >
               <div>
-                <PlayerLink player={candidate} />
+                <PlayerLink
+                  player={
+                    isPadel
+                      ? { ...candidate, padelLevel: candidate.selfRatedNtrp }
+                      : candidate
+                  }
+                  sport={sport}
+                />
                 <p className="text-xs text-muted-foreground">
-                  {t("reason", {
+                  {t(isPadel ? "reasonPadel" : "reason", {
                     ntrp: candidate.selfRatedNtrp ?? 0,
                     reliability: reliabilityLabel(
                       tReliability,

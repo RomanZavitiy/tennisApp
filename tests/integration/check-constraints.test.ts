@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import { db } from "@/lib/db";
@@ -147,12 +149,12 @@ describe("padel profile and clubs (PD1)", () => {
       verifiedAt: new Date("2026-11-16"),
     };
     const created = await db.club.create({
-      data: { ...club, slug: "pd1-default-sport" },
+      data: { ...club, slug: `pd1-default-sport-${randomUUID()}` },
     });
     expect(created.sports).toEqual(["TENNIS"]);
     await expectDbRejection(
       db.club.create({
-        data: { ...club, slug: "pd1-no-sport", sports: [] },
+        data: { ...club, slug: `pd1-no-sport-${randomUUID()}`, sports: [] },
       }),
       { code: PG.checkViolation, mentions: "clubs_sports_not_empty_check" },
     );
