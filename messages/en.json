@@ -1,7 +1,7 @@
 {
   "Metadata": {
     "siteName": "SpinBuddy",
-    "description": "Find a sparring partner and a court in Kraków."
+    "description": "Find a tennis or padel partner and a court in Kraków."
   },
   "LanguageSwitcher": {
     "label": "Language",
@@ -11,7 +11,7 @@
     }
   },
   "SiteFooter": {
-    "tagline": "The tennis sparring board for Kraków: partners at your level, every court on one map, and a rating built from real matches.",
+    "tagline": "The tennis and padel sparring board for Kraków: partners at your level, every court on one map, and a rating built from real matches.",
     "terms": "Terms",
     "privacy": "Privacy",
     "play": "Play",
@@ -1192,16 +1192,16 @@
   },
   "BrandPanel": {
     "eyebrow": "SpinBuddy · Kraków",
-    "title": "Less searching. More tennis.",
+    "title": "Less searching. More playing.",
     "point1": "Partners at your level, ranked by how close your ratings are",
     "point2": "Every Kraków club on one map, with a way to book",
     "point3": "A rating that moves only when a real match is confirmed"
   },
   "LandingPage": {
-    "eyebrow": "Tennis in Kraków · free to use",
-    "title": "Find a tennis partner",
+    "eyebrow": "Tennis and padel in Kraków · free to use",
+    "title": "Find a tennis or padel partner",
     "titleAccent": "at your level.",
-    "subtitle": "SpinBuddy is the sparring board for Kraków. Say when you want to play, meet players as good as you, pick a court on the map and build a rating from real matches.",
+    "subtitle": "SpinBuddy is the tennis and padel sparring board for Kraków. Say when you want to play, meet players as good as you, pick a court on the map and build a rating from real matches.",
     "join": "Join for free",
     "browseOffers": "Browse sparring offers",
     "findCourt": "Find a court",
@@ -1322,6 +1322,10 @@
       "rating": {
         "question": "How does the rating work?",
         "answer": "You start from the NTRP level you pick yourself. After a match one player enters the score and the other confirms it — only then does the ELO of both players change. The more matches you log, the more accurate it gets."
+      },
+      "padel": {
+        "question": "Is it for tennis or for padel?",
+        "answer": "Both. The Tennis / Padel switch at the top of the page changes the offers, the clubs and the level scale. A padel game is always for four players, and you set your padel level (1–7) in your profile. The rating from confirmed matches is tennis-only for now."
       },
       "booking": {
         "question": "Can I book a court here?",

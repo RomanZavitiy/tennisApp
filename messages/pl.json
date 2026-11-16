@@ -1,7 +1,7 @@
 {
   "Metadata": {
     "siteName": "SpinBuddy",
-    "description": "Znajdź partnera do sparingu i kort w Krakowie."
+    "description": "Znajdź partnera do tenisa lub padla i kort w Krakowie."
   },
   "LanguageSwitcher": {
     "label": "Język",
@@ -11,7 +11,7 @@
     }
   },
   "SiteFooter": {
-    "tagline": "Tablica sparingowa dla Krakowa: partnerzy na Twoim poziomie, wszystkie korty na jednej mapie i ranking oparty na prawdziwych meczach.",
+    "tagline": "Tablica sparingowa tenisa i padla dla Krakowa: partnerzy na Twoim poziomie, wszystkie korty na jednej mapie i ranking oparty na prawdziwych meczach.",
     "terms": "Regulamin",
     "privacy": "Prywatność",
     "play": "Gra",
@@ -1192,16 +1192,16 @@
   },
   "BrandPanel": {
     "eyebrow": "SpinBuddy · Kraków",
-    "title": "Mniej szukania. Więcej tenisa.",
+    "title": "Mniej szukania. Więcej grania.",
     "point1": "Partnerzy na Twoim poziomie, ułożeni według bliskości rankingu",
     "point2": "Wszystkie krakowskie kluby na jednej mapie, z rezerwacją",
     "point3": "Ranking, który zmienia się tylko po potwierdzonym meczu"
   },
   "LandingPage": {
-    "eyebrow": "Tenis w Krakowie · za darmo",
-    "title": "Znajdź partnera do tenisa",
+    "eyebrow": "Tenis i padel w Krakowie · za darmo",
+    "title": "Znajdź partnera do tenisa lub padla",
     "titleAccent": "na swoim poziomie.",
-    "subtitle": "SpinBuddy to tablica sparingowa dla Krakowa. Napisz, kiedy chcesz grać, poznaj graczy na swoim poziomie, wybierz kort na mapie i buduj ranking na podstawie prawdziwych meczów.",
+    "subtitle": "SpinBuddy to tablica sparingowa tenisa i padla dla Krakowa. Napisz, kiedy chcesz grać, poznaj graczy na swoim poziomie, wybierz kort na mapie i buduj ranking na podstawie prawdziwych meczów.",
     "join": "Dołącz za darmo",
     "browseOffers": "Przeglądaj oferty sparingów",
     "findCourt": "Znajdź kort",
@@ -1322,6 +1322,10 @@
       "rating": {
         "question": "Jak działa ranking?",
         "answer": "Zaczynasz od poziomu NTRP, który wybierasz samodzielnie. Po meczu jeden gracz wpisuje wynik, a drugi go potwierdza — dopiero wtedy zmienia się ELO obu graczy. Im więcej meczów zapiszesz, tym jest dokładniejszy."
+      },
+      "padel": {
+        "question": "To dla tenisa czy dla padla?",
+        "answer": "Dla obu. Przełącznik Tenis / Padel u góry strony zmienia oferty, kluby i skalę poziomu. W padla gra się zawsze we czwórkę, a swój poziom padla (1–7) ustawiasz w profilu. Ranking z potwierdzonych meczów działa na razie tylko w tenisie."
       },
       "booking": {
         "question": "Czy mogę tu zarezerwować kort?",
