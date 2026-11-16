@@ -33,13 +33,11 @@ export function SiteFooter() {
   ];
 
   return (
-    <footer className="mt-16 border-t bg-card">
-      <div className="container-page grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
+    <footer className="mt-20 border-t bg-card">
+      <div className="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
         <div>
           <SiteLogo alt="" className="h-9" />
-          <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-            {t("tagline")}
-          </p>
+          <p className="mt-5 max-w-sm text-muted-foreground">{t("tagline")}</p>
         </div>
         {columns.map((column) => (
           <nav key={column.title} aria-label={column.title}>
@@ -49,7 +47,7 @@ export function SiteFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
+                    className="font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
                   >
                     {link.label}
                   </Link>

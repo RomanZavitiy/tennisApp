@@ -2,17 +2,14 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-// A small tinted square that holds an icon (UI refresh): the colour shows up
-// in a little dose next to the content instead of across whole surfaces.
+// A small solid block that holds an icon (redesign): one loud colour per
+// tile, flat — no tint, no ring.
 const TONES = {
-  green:
-    "bg-emerald-500/10 text-emerald-700 ring-emerald-600/10 dark:text-emerald-400",
-  ball: "bg-highlight/40 text-highlight-foreground ring-lime-600/15 dark:bg-highlight/15 dark:text-highlight",
-  blue: "bg-sky-500/10 text-sky-700 ring-sky-600/10 dark:text-sky-400",
-  violet:
-    "bg-violet-500/10 text-violet-700 ring-violet-600/10 dark:text-violet-400",
-  orange:
-    "bg-orange-500/10 text-orange-700 ring-orange-600/10 dark:text-orange-400",
+  green: "bg-brand text-highlight",
+  ball: "bg-highlight text-highlight-foreground",
+  blue: "bg-sky-300 text-sky-950",
+  violet: "bg-violet-300 text-violet-950",
+  orange: "bg-orange-300 text-orange-950",
 } as const;
 
 export type IconTileTone = keyof typeof TONES;
@@ -30,7 +27,7 @@ export function IconTile({
     <span
       aria-hidden="true"
       className={cn(
-        "inline-flex size-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset [&_svg:not([class*='size-'])]:size-4",
+        "inline-flex size-9 shrink-0 items-center justify-center rounded-xl [&_svg:not([class*='size-'])]:size-4",
         TONES[tone],
         className,
       )}

@@ -153,7 +153,8 @@
     "level": "Level (NTRP)",
     "reliability": "Reliability",
     "record": "Won–lost",
-    "played": "{count, plural, one {# match} other {# matches}} played"
+    "played": "{count, plural, one {# match} other {# matches}} played",
+    "padel": "Padel: level {level, number, ::.0}"
   },
   "MyGames": {
     "none": "No upcoming games. Find one on the board, or post your own.",
@@ -193,7 +194,8 @@
     "language": "Language",
     "deleteAccount": "Delete my account",
     "privacy": "Privacy",
-    "theme": "Theme"
+    "theme": "Theme",
+    "padelProfile": "My padel"
   },
   "OfferCard": {
     "byAuthor": "by {name}",
@@ -223,7 +225,9 @@
     "commentLabel": "Comment",
     "commentHint": "Optional, up to {max} characters.",
     "posting": "Posting…",
-    "submit": "Post offer"
+    "submit": "Post offer",
+    "padelPlayersLabel": "Players",
+    "padelFormat": "Padel is played two against two: the game needs four players."
   },
   "OffersPage": {
     "title": "Sparring offers",
@@ -243,12 +247,17 @@
     "backToFeed": "Back to feed",
     "eyebrow": "Sparring board",
     "subtitle": "Players looking for a partner in Kraków. Signed in, you see the ones closest to your level first.",
-    "shortcutsLabel": "Shortcuts"
+    "shortcutsLabel": "Shortcuts",
+    "titlePadel": "Padel games",
+    "subtitlePadel": "Open padel games in Kraków. Join one, or post your own and fill the four.",
+    "padelLevelHint": "Add your padel level to hear about new games at your level and to be suggested to organisers.",
+    "padelLevelAction": "Add padel level"
   },
   "NewOfferPage": {
     "title": "Post a sparring offer",
     "subtitle": "Say when and where you want to play; other players ask to join.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "titlePadel": "New padel game"
   },
   "OfferFilters": {
     "anyDay": "Any day",
@@ -267,7 +276,8 @@
     "durationLabel": "How long",
     "courtBookedLabel": "Court already booked",
     "submit": "Filter",
-    "clear": "Clear"
+    "clear": "Clear",
+    "padelLevelLabel": "My level (1–7)"
   },
   "OfferPage": {
     "title": "Sparring offer",
@@ -316,7 +326,8 @@
     "joinWaitlist": "Join the reserve list",
     "joiningWaitlist": "Joining…",
     "leaveWaitlist": "Leave the reserve list",
-    "leavingWaitlist": "Leaving…"
+    "leavingWaitlist": "Leaving…",
+    "padelLevel": "level {level, number, ::.0}"
   },
   "AdminActionForm": {
     "done": "Done.",
@@ -394,7 +405,14 @@
     "levelRange": "NTRP {min, number, ::.0}–{max, number, ::.0}",
     "levelAtLeast": "NTRP {min, number, ::.0}+",
     "levelUpTo": "NTRP up to {max, number, ::.0}",
-    "anyLevel": "Any level"
+    "anyLevel": "Any level",
+    "padel": {
+      "badge": "Padel",
+      "levelExact": "Level {min, number, ::.0}",
+      "levelRange": "Level {min, number, ::.0}–{max, number, ::.0}",
+      "levelAtLeast": "Level {min, number, ::.0}+",
+      "levelUpTo": "Level up to {max, number, ::.0}"
+    }
   },
   "Surface": {
     "CLAY": "Clay",
@@ -440,7 +458,9 @@
     "eyebrow": "Tennis · Kraków",
     "subtitle": "Pick a club, book it there, and find someone to play with.",
     "browseOffers": "Browse sparring offers",
-    "suggestClub": "Suggest a club"
+    "suggestClub": "Suggest a club",
+    "eyebrowPadel": "Padel · Kraków",
+    "browseOffersPadel": "Browse padel games"
   },
   "ClubsView": {
     "list": "List",
@@ -707,6 +727,8 @@
     "invalidRequest": "Invalid request.",
     "tooManySignInEmails": "Too many sign-in emails. Wait a minute and try again.",
     "couldNotSendSignInLink": "Couldn't send the sign-in link. Try again in a minute.",
+    "codeRejected": "That code is wrong or has expired. Check it, or ask for a new email.",
+    "tooManyCodeAttempts": "Too many attempts. Wait a bit, then ask for a new email.",
     "blocked": "Your account is blocked pending a review. You can't create offers, join requests or messages until an admin makes a decision.",
     "tooManyActiveOffers": "You already have {max} offers out there. Cancel one before posting another.",
     "clubNotFound": "Choose a club from the list.",
@@ -779,7 +801,9 @@
   "Validation": {
     "login": {
       "emailRequired": "Enter your email address.",
-      "emailInvalid": "Enter a valid email address."
+      "emailInvalid": "Enter a valid email address.",
+      "codeRequired": "Enter the code from the email.",
+      "codeInvalid": "The code is digits only — check the email."
     },
     "message": {
       "required": "Write a message.",
@@ -809,7 +833,8 @@
       "commentTooLong": "Keep the comment under {max} characters.",
       "partnerNeedsDoubles": "A partner can only be added to a doubles game.",
       "clubOrDistrictRequired": "Choose a club or a district.",
-      "levelRangeInverted": "The highest level can't be below the lowest."
+      "levelRangeInverted": "The highest level can't be below the lowest.",
+      "padelNeedsDoubles": "A padel game is always doubles."
     },
     "matchResult": {
       "gamesRequired": "Enter the games won.",
@@ -981,7 +1006,11 @@
     "sending": "Sending…",
     "submit": "Email me a sign-in link",
     "checkEmailTitle": "Check your email",
-    "checkEmailBody": "We sent a sign-in link to <strong>{email}</strong>. Open it on any device to sign in."
+    "checkEmailBody": "We sent an email to <strong>{email}</strong>. Type the code from it here to stay in this window — or use the button in the email.",
+    "codeLabel": "Code from the email",
+    "verify": "Sign in",
+    "verifying": "Signing in…",
+    "differentEmail": "Use a different email"
   },
   "ExportDataPage": {
     "title": "Download my data",
@@ -1053,7 +1082,8 @@
     "noneYet": "No matching players yet.",
     "reason": "NTRP {ntrp}, your district · reliability {reliability}",
     "invite": "Invite",
-    "inviting": "Inviting…"
+    "inviting": "Inviting…",
+    "reasonPadel": "Padel {ntrp}, your district · reliability {reliability}"
   },
   "DiscoverableToggle": {
     "label": "Show me in \"Who to invite\"",
@@ -1188,6 +1218,40 @@
       "clubTitle": "Clay courts · Krowodrza",
       "clubMeta": "3 players looking for a partner"
     },
+    "why": {
+      "eyebrow": "Why SpinBuddy",
+      "title": "Your time on court is worth protecting",
+      "subtitle": "Most boards stop at a list of names. Here you see who plays at your level — and who actually turns up.",
+      "level": {
+        "title": "A partner at your level, on your terms",
+        "text": "Offers are sorted by how close the author's rating is to yours, and each one states the time, district, surface and level range up front."
+      },
+      "punctual": {
+        "title": "People who show up",
+        "text": "Every player carries a reliability score built from real matches. A no-show lowers it, and you see it before you say yes."
+      },
+      "lastMinute": {
+        "title": "No last-minute bailing",
+        "text": "Backing out less than 12 hours before the start counts against your reliability. Plans change — but your partner hears about it in time."
+      },
+      "chat": {
+        "title": "Plan B in the chat",
+        "text": "Once you're accepted, a chat opens. Rain on the way? Agree on a court under the dome before anyone leaves home."
+      },
+      "demo": {
+        "initials": "MK",
+        "offerTime": "Sat 18:00–19:30 · Singles",
+        "offerMeta": "Krowodrza · NTRP 3.5–4.0 · clay",
+        "reliability": "Reliable 98%",
+        "ask": "Ask to join",
+        "sent": "Request sent",
+        "accepted": "Marta accepted · chat is open",
+        "rain": "Forecast says rain on Saturday 🌧️",
+        "indoor": "Let's take the court under the dome — I'll book it",
+        "deal": "Deal. 18:00 sharp!",
+        "booked": "Court changed · indoor · Sat 18:00"
+      }
+    },
     "features": {
       "eyebrow": "What you get",
       "title": "Everything between “I'd like to play” and the first serve",
@@ -1293,5 +1357,32 @@
     "day": "Day",
     "month": "Month",
     "year": "Year"
+  },
+  "SportSwitcher": {
+    "label": "Sport",
+    "names": {
+      "TENNIS": "Tennis",
+      "PADEL": "Padel"
+    }
+  },
+  "PadelProfilePage": {
+    "title": "My padel",
+    "subtitle": "Optional. Padel games are matched by this level, not by your tennis NTRP.",
+    "backToProfile": "Back to profile"
+  },
+  "PadelProfileForm": {
+    "levelLabel": "Padel level (1–7)",
+    "noLevel": "I don't play padel",
+    "levelHint": "1.0 is a first game, 7.0 is a professional. Not sure? Pick the lower one.",
+    "sideLabel": "Preferred side",
+    "noSide": "No preference yet",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved"
+  },
+  "PadelSide": {
+    "LEFT": "Left side",
+    "RIGHT": "Right side",
+    "BOTH": "Both sides"
   }
 }

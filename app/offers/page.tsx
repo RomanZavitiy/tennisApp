@@ -17,8 +17,10 @@ import { OfferFilters } from "@/components/offer-filters";
 import { ListingLayout, PageHeader, PageShell } from "@/components/page-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { db } from "@/lib/db";
 import { getOfferFeed, parsePage } from "@/lib/offers/feed";
 import { feedHref, parseFeedFilters } from "@/lib/offers/feed-filters";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 
 export async function generateMetadata({
   searchParams,
@@ -50,9 +52,23 @@ export default async function OffersPage({
   const filters = parseFeedFilters(params);
   const showHidden = params.show === "hidden";
   const viewer = await getCurrentUser();
+  // Slice PD1: the feed shows one sport, the one in the header switcher.
+  const sport = await getCurrentSport();
+  const isPadel = sport === "PADEL";
+  // Slice PD2: a signed-in player browsing padel without a padel level
+  // gets no "new game" pushes and isn't suggested to authors — say so.
+  const needsPadelLevel =
+    isPadel && viewer !== null
+      ? (
+          await db.user.findUnique({
+            where: { id: viewer.id },
+            select: { padelLevel: true },
+          })
+        )?.padelLevel == null
+      : false;
   const feed = await getOfferFeed(
     parsePage(params.page),
-    filters,
+    { ...filters, sport },
     viewer?.id ?? null,
     new Date(),
     showHidden,
@@ -125,8 +141,14 @@ export default async function OffersPage({
     <PageShell>
       <PageHeader
         eyebrow={t("eyebrow")}
-        title={showHidden ? t("hiddenTitle") : t("title")}
-        subtitle={showHidden ? viewer && t("hiddenIntro") : t("subtitle")}
+        title={
+          showHidden ? t("hiddenTitle") : t(isPadel ? "titlePadel" : "title")
+        }
+        subtitle={
+          showHidden
+            ? viewer && t("hiddenIntro")
+            : t(isPadel ? "subtitlePadel" : "subtitle")
+        }
         actions={
           showHidden ? (
             <Link
@@ -144,6 +166,18 @@ export default async function OffersPage({
         }
       />
 
+      {needsPadelLevel && !showHidden && (
+        <p className="surface mt-6 flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
+          <span>{t("padelLevelHint")}</span>
+          <Link
+            href="/profile/padel"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            {t("padelLevelAction")}
+          </Link>
+        </p>
+      )}
+
       {showHidden ? (
         <div className="mt-6">
           {results}
@@ -153,7 +187,7 @@ export default async function OffersPage({
         <ListingLayout
           sidebar={
             <>
-              <OfferFilters filters={filters} />
+              <OfferFilters filters={filters} sport={sport} />
               {/* "Шукають гру" (U2.2), "Грати сьогодні" (U3.1) and the
                   hidden offers: signed-in players only — a guest sees none
                   of these links, same gate the pages enforce themselves. */}
@@ -165,9 +199,13 @@ export default async function OffersPage({
                   <SideLink href="/offers/today" icon={<ZapIcon />}>
                     {t("playToday")}
                   </SideLink>
-                  <SideLink href="/offers/looking" icon={<UsersIcon />}>
-                    {t("lookingForGame")}
-                  </SideLink>
+                  {/* "Looking for a game" posts have no sport yet (PD2):
+                      they are tennis. */}
+                  {!isPadel && (
+                    <SideLink href="/offers/looking" icon={<UsersIcon />}>
+                      {t("lookingForGame")}
+                    </SideLink>
+                  )}
                   <SideLink href="/offers?show=hidden" icon={<EyeOffIcon />}>
                     {t("showHidden")}
                   </SideLink>

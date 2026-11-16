@@ -34,7 +34,7 @@ function useShortDateFormat(): Intl.DateTimeFormat {
 }
 
 const TRIGGER_CLASS =
-  "flex h-9 w-full min-w-0 items-center gap-2 rounded-lg border border-input bg-card px-3 text-left text-base shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30";
+  "flex h-10 w-full min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-input bg-card px-3.5 text-left text-base transition-colors hover:border-foreground/35 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30";
 
 /** A day, "YYYY-MM-DD" or "" for none. */
 export function DateField({
@@ -124,7 +124,7 @@ export function DateField({
           onClick={() => {
             change("");
           }}
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-xl text-muted-foreground outline-none hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
           <XIcon className="size-4" />
         </button>

@@ -1,6 +1,10 @@
 import type { useFormatter } from "next-intl";
 
-import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  OfferFormat,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
@@ -34,22 +38,25 @@ export function spotsLabel(t: LabelT, spotsLeft: number): string {
   return t("spotsLeft", { count: spotsLeft });
 }
 
-/** "NTRP 3.0–4.5", "NTRP 3.0+", "NTRP up to 4.5" or "Any level". */
+/** "NTRP 3.0–4.5", "NTRP 3.0+", "NTRP up to 4.5" or "Any level". A padel
+ * offer (slice PD1) reads "Level 3.0–4.5" instead: its scale isn't NTRP. */
 export function levelLabel(
   t: LabelT,
   ntrpMin: number | null,
   ntrpMax: number | null,
+  sport: Sport = "TENNIS",
 ): string {
+  const key = (name: string) => (sport === "PADEL" ? `padel.${name}` : name);
   if (ntrpMin !== null && ntrpMax !== null) {
     return ntrpMin === ntrpMax
-      ? t("levelExact", { min: ntrpMin })
-      : t("levelRange", { min: ntrpMin, max: ntrpMax });
+      ? t(key("levelExact"), { min: ntrpMin })
+      : t(key("levelRange"), { min: ntrpMin, max: ntrpMax });
   }
   if (ntrpMin !== null) {
-    return t("levelAtLeast", { min: ntrpMin });
+    return t(key("levelAtLeast"), { min: ntrpMin });
   }
   if (ntrpMax !== null) {
-    return t("levelUpTo", { max: ntrpMax });
+    return t(key("levelUpTo"), { max: ntrpMax });
   }
   return t("anyLevel");
 }
@@ -74,6 +81,7 @@ export function offerShareTitle(
   tOfferLabels: LabelT,
   format: Formatter,
   offer: {
+    sport?: Sport;
     startsAt: Date;
     ntrpMin: number | null;
     ntrpMax: number | null;
@@ -82,7 +90,12 @@ export function offerShareTitle(
   },
 ): string {
   const time = formatKrakowTime(format, offer.startsAt);
-  const level = levelLabel(tOfferLabels, offer.ntrpMin, offer.ntrpMax);
+  const level = levelLabel(
+    tOfferLabels,
+    offer.ntrpMin,
+    offer.ntrpMax,
+    offer.sport,
+  );
   const place = placeLabel(
     offer,
     offer.district ? DISTRICT_LABELS[offer.district] : null,

@@ -19,12 +19,12 @@ export function CoachCard({ coach }: { coach: CoachListing }) {
   return (
     <article
       id={coach.slug}
-      className="rounded-xl border bg-card p-4 shadow-sm"
+      className="rounded-2xl border bg-card p-5 shadow-xs"
     >
       <div className="flex items-center gap-3">
-        <PlayerAvatar name={coach.name} avatarPath={null} size={44} />
+        <PlayerAvatar name={coach.name} avatarPath={null} size={52} />
         <div className="min-w-0">
-          <h2 className="font-semibold">{coach.name}</h2>
+          <h2 className="text-xl font-bold">{coach.name}</h2>
           {coach.district && (
             <p className="text-sm text-muted-foreground">
               {DISTRICT_LABELS[coach.district]}

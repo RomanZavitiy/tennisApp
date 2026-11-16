@@ -53,7 +53,7 @@ export function AuthorView({
           <ul className="mt-2 space-y-2">
             {accepted.map((join) => (
               <li key={join.id}>
-                <PlayerLink player={join.user} />
+                <PlayerLink player={join.user} sport={details.offer.sport} />
                 <JoinThread
                   offerJoinId={join.id}
                   viewerId={viewerId}
@@ -73,7 +73,11 @@ export function AuthorView({
         )}
       </div>
       {details.offer.status === "OPEN" && (
-        <CandidatesSection offerId={details.offer.id} candidates={candidates} />
+        <CandidatesSection
+          offerId={details.offer.id}
+          sport={details.offer.sport}
+          candidates={candidates}
+        />
       )}
       <div>
         <h2 className="font-semibold">
@@ -89,7 +93,10 @@ export function AuthorView({
               <li key={join.id} className="px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <PlayerLink player={join.user} />
+                    <PlayerLink
+                      player={join.user}
+                      sport={details.offer.sport}
+                    />
                     {join.fromWaitlist && (
                       <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs font-medium">
                         {t("fromWaitlistLabel")}

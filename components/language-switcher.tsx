@@ -43,9 +43,9 @@ export function LanguageSwitcher() {
             choose(option);
           }}
           className={cn(
-            "rounded-md px-2 py-1 text-sm font-medium disabled:opacity-50",
+            "cursor-pointer rounded-full px-3 py-1.5 text-sm font-semibold transition-colors disabled:opacity-50",
             option === locale
-              ? "bg-muted text-foreground"
+              ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:text-foreground",
           )}
         >

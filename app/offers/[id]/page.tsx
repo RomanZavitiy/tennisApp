@@ -116,7 +116,12 @@ export default async function OfferPage({
     },
     {
       label: t("levelLabel"),
-      value: levelLabel(tOfferLabels, offer.ntrpMin, offer.ntrpMax),
+      value: levelLabel(
+        tOfferLabels,
+        offer.ntrpMin,
+        offer.ntrpMax,
+        offer.sport,
+      ),
     },
     ...(offer.surface
       ? [{ label: t("surfaceLabel"), value: tSurface(offer.surface) }]
@@ -168,7 +173,7 @@ export default async function OfferPage({
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">{t("postedBy")}</dt>
               <dd className="text-right font-medium">
-                <PlayerLink player={offer.author} />
+                <PlayerLink player={offer.author} sport={offer.sport} />
               </dd>
             </div>
           </dl>

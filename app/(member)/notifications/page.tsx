@@ -47,7 +47,7 @@ export default async function NotificationsPage() {
                 <Link
                   href={`/offers/${offer.id}`}
                   className={cn(
-                    "flex gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm transition-shadow outline-none hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
+                    "flex gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm transition-shadow outline-none hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
                     unread && "border-primary bg-muted/50",
                   )}
                 >

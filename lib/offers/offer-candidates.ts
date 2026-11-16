@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { blockedCounterpartIds } from "@/lib/moderation/personal-block";
 import { rankCandidates, type Candidate } from "@/lib/matching/candidates";
+import { playerLevel } from "@/lib/sport/sport";
 
 // "Kого запросити" (task S2.2): loads the pool for one open offer, already
 // narrowed to people the author could plausibly invite, then hands it to
@@ -20,6 +21,7 @@ export async function getOfferCandidates(
     where: { id: offerId },
     select: {
       authorId: true,
+      sport: true,
       district: true,
       ntrpMin: true,
       ntrpMax: true,
@@ -65,6 +67,7 @@ export async function getOfferCandidates(
       avatarPath: true,
       district: true,
       selfRatedNtrp: true,
+      padelLevel: true,
       elo: true,
       scheduledMatches: true,
       noShows: true,
@@ -74,7 +77,15 @@ export async function getOfferCandidates(
   });
 
   return rankCandidates(
-    pool,
+    // Slice PD1: each player's level in the offer's own sport, so a padel
+    // offer only suggests players who declared a padel level.
+    pool.map(({ padelLevel, ...player }) => ({
+      ...player,
+      selfRatedNtrp: playerLevel(
+        { selfRatedNtrp: player.selfRatedNtrp, padelLevel },
+        offer.sport,
+      ),
+    })),
     {
       authorId: offer.authorId,
       district: offer.district,

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import type { Prisma } from "@/lib/generated/prisma/client";
-import { District, Surface } from "@/lib/generated/prisma/enums";
+import { District, Surface, type Sport } from "@/lib/generated/prisma/enums";
 
 // Court search filters on /clubs (slice K4; back at /clubs since the
 // redesign made "/" the landing page). Same approach as the
@@ -10,6 +10,9 @@ import { District, Surface } from "@/lib/generated/prisma/enums";
 // a value that doesn't parse is ignored rather than an error.
 
 export type ClubFilters = {
+  /** Clubs where this sport is played (slice PD1). Like the feed's: from
+   * the header switcher's cookie, never from the URL. */
+  sport?: Sport;
   district?: District;
   /** Clubs that have at least one court of this surface. */
   surface?: Surface;
@@ -50,6 +53,9 @@ export function parseClubFilters(params: SearchParams): ClubFilters {
 
 export function clubWhere(filters: ClubFilters): Prisma.ClubWhereInput {
   const conditions: Prisma.ClubWhereInput[] = [];
+  if (filters.sport) {
+    conditions.push({ sports: { has: filters.sport } });
+  }
   if (filters.district) {
     conditions.push({ district: filters.district });
   }

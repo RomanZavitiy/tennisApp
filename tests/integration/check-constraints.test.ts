@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import { db } from "@/lib/db";
@@ -78,6 +80,84 @@ describe("sparring_offers", () => {
       code: PG.checkViolation,
       mentions: constraint,
     });
+  });
+
+  // Slice PD1 (migration 20261116120000_add_sport).
+  const padel = { sport: "PADEL", format: "DOUBLES" } as const;
+
+  it("is tennis unless told otherwise", async () => {
+    const author = await createPlayer();
+    expect((await createOffer(author.id)).sport).toBe("TENNIS");
+  });
+
+  it("refuses padel singles, allows padel doubles", async () => {
+    const author = await createPlayer();
+    await expectDbRejection(createOffer(author.id, { sport: "PADEL" }), {
+      code: PG.checkViolation,
+      mentions: "sparring_offers_padel_doubles_check",
+    });
+    expect((await createOffer(author.id, padel)).sport).toBe("PADEL");
+  });
+
+  it("lets a padel offer start its level range at 1.0, not below", async () => {
+    const author = await createPlayer();
+    const offer = await createOffer(author.id, {
+      ...padel,
+      ntrpMin: 1,
+      ntrpMax: 1,
+    });
+    expect(offer.ntrpMin).toBe(1);
+    await expectDbRejection(
+      createOffer(author.id, { ...padel, ntrpMin: 0.5 }),
+      {
+        code: PG.checkViolation,
+        mentions: "sparring_offers_ntrp_min_check",
+      },
+    );
+    await expectDbRejection(
+      createOffer(author.id, { ...padel, ntrpMax: 7.5 }),
+      {
+        code: PG.checkViolation,
+        mentions: "sparring_offers_ntrp_max_check",
+      },
+    );
+  });
+});
+
+describe("padel profile and clubs (PD1)", () => {
+  it.each([0.5, 2.25, 7.5])("refuses padel level %s", async (padelLevel) => {
+    await expectDbRejection(createPlayer({ padelLevel }), {
+      code: PG.checkViolation,
+      mentions: "users_padel_level_check",
+    });
+  });
+
+  it("allows padel levels 1.0 and 7.0, and none at all", async () => {
+    expect((await createPlayer({ padelLevel: 1 })).padelLevel).toBe(1);
+    expect((await createPlayer({ padelLevel: 7 })).padelLevel).toBe(7);
+    expect((await createPlayer()).padelLevel).toBeNull();
+  });
+
+  it("makes a club tennis by default and refuses one with no sport", async () => {
+    const club = {
+      name: "Padel test club",
+      address: "ul. Testowa 1, Kraków",
+      latitude: 50.06,
+      longitude: 19.94,
+      courtCount: 2,
+      surfaces: ["ARTIFICIAL_GRASS" as const],
+      verifiedAt: new Date("2026-11-16"),
+    };
+    const created = await db.club.create({
+      data: { ...club, slug: `pd1-default-sport-${randomUUID()}` },
+    });
+    expect(created.sports).toEqual(["TENNIS"]);
+    await expectDbRejection(
+      db.club.create({
+        data: { ...club, slug: `pd1-no-sport-${randomUUID()}`, sports: [] },
+      }),
+      { code: PG.checkViolation, mentions: "clubs_sports_not_empty_check" },
+    );
   });
 });
 

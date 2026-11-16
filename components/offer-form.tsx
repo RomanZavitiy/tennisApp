@@ -13,10 +13,15 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
-import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  OfferFormat,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import { CourtStatus, Surface } from "@/lib/generated/prisma/enums";
 import { DEFAULT_OFFER_DURATION, OFFER_DURATIONS } from "@/lib/offers/duration";
-import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
+import { DISTRICT_LABELS } from "@/lib/profile/options";
+import { levelsFor } from "@/lib/sport/sport";
 import {
   COMMENT_MAX,
   offerSchema,
@@ -41,6 +46,7 @@ export type ClubOption = {
 // string, not the Date the schema turns it into.
 export function OfferForm({
   action,
+  sport,
   clubs,
   defaultDistrict,
   defaultClubId,
@@ -53,6 +59,9 @@ export function OfferForm({
   earliestStart,
 }: {
   action: (values: OfferInput) => Promise<CreateOfferResult>;
+  /** Slice PD1: the sport the header switcher shows. Padel is always
+   * doubles, on its own level scale, with no surface to pick. */
+  sport: Sport;
   clubs: ClubOption[];
   defaultDistrict: District;
   /** Pre-selected from "Create an offer at this club" (task 2.10). */
@@ -75,6 +84,8 @@ export function OfferForm({
   const tSurface = useTranslations("Surface");
   const tCourtStatus = useTranslations("CourtStatus");
   const tValidation = useTranslations("Validation.offer");
+  const isPadel = sport === "PADEL";
+  const levels = levelsFor(sport);
   const presetClub = clubs.find((c) => c.id === defaultClubId);
   const {
     register,
@@ -86,7 +97,8 @@ export function OfferForm({
   } = useForm<OfferInput>({
     resolver: zodResolver(offerSchema(tValidation), undefined, { raw: true }),
     defaultValues: {
-      format: defaultFormat ?? "SINGLES",
+      sport,
+      format: isPadel ? "DOUBLES" : (defaultFormat ?? "SINGLES"),
       startsAt: defaultStartsAt ?? "",
       durationMinutes: String(defaultDurationMinutes ?? DEFAULT_OFFER_DURATION),
       clubId: presetClub?.id ?? "",
@@ -129,9 +141,15 @@ export function OfferForm({
       onSubmit={(event) => void handleSubmit(onSubmit)(event)}
       className="space-y-5"
     >
+      <input type="hidden" {...register("sport")} />
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">{t("formatLabel")}</legend>
-        <div className="flex gap-6">
+        <legend className="text-sm font-medium">
+          {t(isPadel ? "padelPlayersLabel" : "formatLabel")}
+        </legend>
+        {isPadel && (
+          <p className="text-sm text-muted-foreground">{t("padelFormat")}</p>
+        )}
+        <div className={isPadel ? "hidden" : "flex gap-6"}>
           <label className="flex items-center gap-2 text-sm">
             <input type="radio" value="SINGLES" {...register("format")} />
             {t("singles")}
@@ -254,6 +272,7 @@ export function OfferForm({
             id="ntrpMin"
             error={errors.ntrpMin}
             anyLabel={t("anyLevel")}
+            levels={levels}
             {...register("ntrpMin", { setValueAs: ntrpValue })}
           />
         </Field>
@@ -262,26 +281,30 @@ export function OfferForm({
             id="ntrpMax"
             error={errors.ntrpMax}
             anyLabel={t("anyLevel")}
+            levels={levels}
             {...register("ntrpMax", { setValueAs: ntrpValue })}
           />
         </Field>
       </div>
 
-      <Field id="surface" label={t("surfaceLabel")} error={errors.surface}>
-        <NativeSelect
-          id="surface"
-          className="w-full"
-          {...aria("surface", errors.surface)}
-          {...register("surface")}
-        >
-          <NativeSelectOption value="">{t("anySurface")}</NativeSelectOption>
-          {Object.values(Surface).map((value) => (
-            <NativeSelectOption key={value} value={value}>
-              {tSurface(value)}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-      </Field>
+      {/* Padel courts all have the same surface — nothing to choose. */}
+      {!isPadel && (
+        <Field id="surface" label={t("surfaceLabel")} error={errors.surface}>
+          <NativeSelect
+            id="surface"
+            className="w-full"
+            {...aria("surface", errors.surface)}
+            {...register("surface")}
+          >
+            <NativeSelectOption value="">{t("anySurface")}</NativeSelectOption>
+            {Object.values(Surface).map((value) => (
+              <NativeSelectOption key={value} value={value}>
+                {tSurface(value)}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+        </Field>
+      )}
 
       <Field
         id="courtStatus"
@@ -331,14 +354,18 @@ function NtrpSelect({
   id,
   error,
   anyLabel,
+  levels,
   ...props
-}: { id: string; error: FieldErrorLike; anyLabel: string } & ComponentProps<
-  typeof NativeSelect
->) {
+}: {
+  id: string;
+  error: FieldErrorLike;
+  anyLabel: string;
+  levels: number[];
+} & ComponentProps<typeof NativeSelect>) {
   return (
     <NativeSelect id={id} className="w-full" {...aria(id, error)} {...props}>
       <NativeSelectOption value="">{anyLabel}</NativeSelectOption>
-      {NTRP_LEVELS.map((level) => (
+      {levels.map((level) => (
         <NativeSelectOption key={level} value={level}>
           {level.toFixed(1)}
         </NativeSelectOption>

@@ -1,10 +1,14 @@
 import { z } from "zod";
 
 import type { Prisma } from "@/lib/generated/prisma/client";
-import { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import {
+  District,
+  OfferFormat,
+  type Sport,
+} from "@/lib/generated/prisma/enums";
 import { isOfferDuration, type OfferDuration } from "@/lib/offers/duration";
 import { krakowHour, krakowLocalToDate } from "@/lib/offers/krakow-time";
-import { NTRP_LEVELS } from "@/lib/profile/options";
+import { PADEL_LEVELS } from "@/lib/sport/sport";
 
 // Feed filters (task 3.7). They live in the URL (/offers?date=…&district=…),
 // so a filtered feed can be shared and "back" works; the server reads them
@@ -16,10 +20,14 @@ export const TIMES_OF_DAY = ["morning", "afternoon", "evening"] as const;
 export type TimeOfDay = (typeof TIMES_OF_DAY)[number];
 
 export type FeedFilters = {
+  /** Tennis or padel (slice PD1). Not a URL filter: the page takes it
+   * from the header switcher's cookie, so parseFeedFilters never sets it
+   * and feedHref never writes it. Unset — both sports. */
+  sport?: Sport;
   /** A Kraków calendar day, "YYYY-MM-DD". */
   date?: string;
   district?: District;
-  /** The player's level: offers whose NTRP range includes it. */
+  /** The player's level: offers whose wanted range includes it. */
   ntrp?: number;
   format?: OfferFormat;
   /** Only offers whose court is already booked (task 3.22). */
@@ -35,7 +43,10 @@ type SearchParams = Record<string, string | string[] | undefined>;
 const fields = {
   date: z.iso.date(),
   district: z.enum(District),
-  ntrp: z.coerce.number().refine((level) => NTRP_LEVELS.includes(level)),
+  // The padel scale (1.0–7.0) contains every NTRP level, so one check
+  // serves both sports; a level a sport doesn't have just matches fewer
+  // offers.
+  ntrp: z.coerce.number().refine((level) => PADEL_LEVELS.includes(level)),
   format: z.enum(OfferFormat),
   duration: z.coerce.number().refine(isOfferDuration),
   time: z.enum(TIMES_OF_DAY),
@@ -86,6 +97,9 @@ export function feedWhere(
     { startsAt: { gt: now } },
   ];
 
+  if (filters.sport) {
+    conditions.push({ sport: filters.sport });
+  }
   if (filters.date) {
     // Midnight always exists in Kraków (clocks change at 2–3 a.m.), so
     // these never come back null for a valid date.

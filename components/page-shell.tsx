@@ -30,7 +30,7 @@ export function PageShell({
   return (
     <main
       className={cn(
-        "mx-auto w-full flex-1 px-4 py-8 sm:px-6 sm:py-10 lg:px-8",
+        "mx-auto w-full flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:px-8",
         WIDTHS[width],
         className,
       )}
@@ -56,11 +56,13 @@ export function PageHeader({
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
         {eyebrow && <p className="eyebrow mb-2">{eyebrow}</p>}
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <h1 className="text-4xl leading-[1.05] font-extrabold sm:text-5xl">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-2 max-w-2xl text-muted-foreground">{subtitle}</p>
+          <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
+            {subtitle}
+          </p>
         )}
       </div>
       {actions && (
@@ -111,17 +113,18 @@ function BrandPanel() {
   const points = [t("point1"), t("point2"), t("point3")];
 
   return (
-    <aside className="relative hidden min-h-[30rem] overflow-hidden rounded-3xl bg-brand p-10 text-brand-foreground shadow-md lg:sticky lg:top-24 lg:flex lg:flex-col lg:justify-between">
+    <aside className="relative hidden min-h-[30rem] overflow-hidden rounded-[2rem] bg-brand p-10 text-brand-foreground lg:sticky lg:top-24 lg:flex lg:flex-col lg:justify-between">
+      {/* The ball: one flat lime disc, cut off by the panel's corner. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(40rem_24rem_at_100%_0%,color-mix(in_oklch,var(--highlight)_45%,transparent),transparent_70%)]"
+        className="absolute -top-24 -right-24 size-72 rounded-full bg-highlight"
       />
       <CourtLines className="absolute -right-24 -bottom-28 w-[34rem] rotate-[-18deg] text-brand-foreground/15" />
       <div className="relative">
-        <p className="text-xs font-bold tracking-[0.14em] text-brand-foreground/70 uppercase">
+        <p className="text-xs font-extrabold tracking-[0.14em] text-highlight uppercase">
           {t("eyebrow")}
         </p>
-        <p className="mt-3 max-w-md font-heading text-4xl leading-[1.05] font-bold tracking-tight">
+        <p className="mt-3 max-w-sm font-heading text-5xl leading-[1.02] font-extrabold tracking-tight">
           {t("title")}
         </p>
       </div>

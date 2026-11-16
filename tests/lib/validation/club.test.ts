@@ -17,6 +17,7 @@ const valid: ClubRecord = {
   courtCount: 9,
   surfaces: ["CLAY", "HARD"],
   indoor: "WINTER_BUBBLE",
+  sports: ["TENNIS"],
   priceInfo: "60–90 zł/h",
   phone: "+48 12 000 00 00",
   websiteUrl: "https://example.com/",
@@ -235,5 +236,30 @@ describe("parseClubFile", () => {
     );
 
     expect(parseClubFile(data).length).toBeGreaterThan(0);
+  });
+});
+
+describe("clubSchema sports (PD1)", () => {
+  const withoutSports: Partial<ClubRecord> = { ...valid };
+  delete withoutSports.sports;
+
+  it("is tennis when the file leaves the field out", () => {
+    expect(clubSchema.parse(withoutSports).sports).toEqual(["TENNIS"]);
+  });
+
+  it("accepts a club with both sports", () => {
+    expect(
+      clubSchema.parse({ ...valid, sports: ["TENNIS", "PADEL"] }).sports,
+    ).toEqual(["TENNIS", "PADEL"]);
+  });
+
+  it("rejects an empty list, a repeat and an unknown sport", () => {
+    expect(clubSchema.safeParse({ ...valid, sports: [] }).success).toBe(false);
+    expect(
+      clubSchema.safeParse({ ...valid, sports: ["PADEL", "PADEL"] }).success,
+    ).toBe(false);
+    expect(clubSchema.safeParse({ ...valid, sports: ["SQUASH"] }).success).toBe(
+      false,
+    );
   });
 });

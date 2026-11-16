@@ -22,6 +22,7 @@ export const requireOnboardedUser = cache(async () => {
       gender: true,
       district: true,
       selfRatedNtrp: true,
+      padelLevel: true,
       onboardingCompletedAt: true,
       avatarPath: true,
       blockedAt: true,
@@ -52,6 +53,8 @@ export const requireOnboardedUser = cache(async () => {
     gender: profile.gender,
     district: profile.district,
     selfRatedNtrp: profile.selfRatedNtrp,
+    // Slice PD1: null until the player declares one (profile form, PD2).
+    padelLevel: profile.padelLevel,
     avatarPath: profile.avatarPath,
     // Blocked (task 6.4): callers that create offers, join requests or
     // messages check this themselves (lib/moderation/block-rules.ts) — kept

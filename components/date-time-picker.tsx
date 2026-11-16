@@ -85,7 +85,7 @@ export function DateTimePicker({
       aria-describedby={describedBy}
       className={cn(
         "space-y-4 outline-none",
-        !bare && "rounded-xl border bg-card p-3 sm:p-4",
+        !bare && "rounded-2xl border bg-card p-3 sm:p-4",
         invalid && "border-destructive",
       )}
     >

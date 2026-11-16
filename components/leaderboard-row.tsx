@@ -29,17 +29,17 @@ export function LeaderboardRow({
   const tReliability = useTranslations("Reliability");
 
   return (
-    <div className="space-y-2 rounded-xl border bg-card px-4 py-3 shadow-sm">
+    <div className="block-lift space-y-2 rounded-2xl border bg-card px-4 py-3">
       <Link
         href={`/players/${player.id}`}
         className="flex items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span
           className={cn(
-            "inline-flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold tabular-nums",
+            "inline-flex size-9 shrink-0 items-center justify-center rounded-xl font-heading text-base font-extrabold tabular-nums",
             rank <= 3
               ? "bg-highlight text-highlight-foreground"
-              : "text-muted-foreground",
+              : "bg-muted text-muted-foreground",
           )}
         >
           {rank}
@@ -50,7 +50,7 @@ export function LeaderboardRow({
           size={40}
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium hover:underline">
+          <p className="truncate font-heading text-lg leading-tight font-bold tracking-tight">
             {player.name ?? t("aPlayer")}
           </p>
           <p className="mt-0.5 truncate text-sm text-muted-foreground">
@@ -60,7 +60,7 @@ export function LeaderboardRow({
             {reliabilityLabel(tReliability, player.reliability)}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-sm font-semibold text-secondary-foreground tabular-nums">
+        <span className="shrink-0 rounded-full bg-primary px-3 py-1 text-sm font-bold text-primary-foreground tabular-nums">
           {t("elo", { elo: player.elo })}
         </span>
       </Link>

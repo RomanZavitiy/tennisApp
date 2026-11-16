@@ -200,6 +200,7 @@ describe("getOfferDetails", () => {
         name: true,
         avatarPath: true,
         selfRatedNtrp: true,
+        padelLevel: true,
         scheduledMatches: true,
         noShows: true,
         lateCancellations: true,

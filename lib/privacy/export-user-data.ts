@@ -17,6 +17,8 @@ export type UserDataExport = {
     gender: string | null;
     district: string | null;
     selfRatedNtrp: number | null;
+    padelLevel: number | null;
+    padelSide: string | null;
     elo: number | null;
     matchesPlayed: number;
     locale: string;
@@ -78,6 +80,8 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
           gender: true,
           district: true,
           selfRatedNtrp: true,
+          padelLevel: true,
+          padelSide: true,
           elo: true,
           matchesPlayed: true,
           locale: true,

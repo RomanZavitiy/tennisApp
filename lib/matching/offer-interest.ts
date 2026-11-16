@@ -1,4 +1,4 @@
-import type { District } from "@/lib/generated/prisma/enums";
+import type { District, Sport } from "@/lib/generated/prisma/enums";
 import { matchesTimeOfDay, type TimeOfDay } from "@/lib/offers/feed-filters";
 
 // "Who's interested in this offer" (task 5.16): the push that tells a player
@@ -43,6 +43,10 @@ export function warsawDateString(now: Date): string {
 
 export type NewOfferInfo = {
   authorId: string;
+  /** Slice PD1: decides which of the candidate's levels is compared — the
+   * caller puts that level in `selfRatedNtrp` (lib/sport's playerLevel).
+   * Left out — tennis. */
+  sport?: Sport;
   district: District | null;
   /** Null bound means "any level" on that side (same as feedWhere's ntrp filter). */
   ntrpMin: number | null;

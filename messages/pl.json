@@ -153,7 +153,8 @@
     "level": "Poziom (NTRP)",
     "reliability": "Rzetelność",
     "record": "Wygrane–przegrane",
-    "played": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}"
+    "played": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}",
+    "padel": "Padel: poziom {level, number, ::.0}"
   },
   "MyGames": {
     "none": "Brak nadchodzących gier. Znajdź grę na tablicy albo dodaj własną ofertę.",
@@ -193,7 +194,8 @@
     "language": "Język",
     "deleteAccount": "Usuń moje konto",
     "privacy": "Prywatność",
-    "theme": "Motyw"
+    "theme": "Motyw",
+    "padelProfile": "Mój padel"
   },
   "OfferCard": {
     "byAuthor": "od {name}",
@@ -223,7 +225,9 @@
     "commentLabel": "Komentarz",
     "commentHint": "Opcjonalnie, maksymalnie {max} znaków.",
     "posting": "Publikowanie…",
-    "submit": "Opublikuj ogłoszenie"
+    "submit": "Opublikuj ogłoszenie",
+    "padelPlayersLabel": "Gracze",
+    "padelFormat": "W padla gra się dwóch na dwóch: mecz wymaga czterech graczy."
   },
   "OffersPage": {
     "title": "Oferty sparingowe",
@@ -243,12 +247,17 @@
     "backToFeed": "Wróć do listy",
     "eyebrow": "Tablica sparingowa",
     "subtitle": "Gracze szukający partnera w Krakowie. Po zalogowaniu najpierw widzisz tych najbliższych Twojemu poziomowi.",
-    "shortcutsLabel": "Skróty"
+    "shortcutsLabel": "Skróty",
+    "titlePadel": "Mecze padla",
+    "subtitlePadel": "Otwarte mecze padla w Krakowie. Dołącz albo dodaj własny i zbierz czwórkę.",
+    "padelLevelHint": "Dodaj swój poziom w padlu, aby dostawać powiadomienia o nowych meczach na Twoim poziomie i być polecanym organizatorom.",
+    "padelLevelAction": "Dodaj poziom w padlu"
   },
   "NewOfferPage": {
     "title": "Dodaj ogłoszenie sparingowe",
     "subtitle": "Napisz, kiedy i gdzie chcesz zagrać — inni zawodnicy się zgłoszą.",
-    "cancel": "Anuluj"
+    "cancel": "Anuluj",
+    "titlePadel": "Nowy mecz padla"
   },
   "OfferFilters": {
     "anyDay": "Dowolny dzień",
@@ -267,7 +276,8 @@
     "durationLabel": "Jak długo",
     "courtBookedLabel": "Kort już zarezerwowany",
     "submit": "Filtruj",
-    "clear": "Wyczyść"
+    "clear": "Wyczyść",
+    "padelLevelLabel": "Mój poziom (1–7)"
   },
   "OfferPage": {
     "title": "Oferta sparingowa",
@@ -316,7 +326,8 @@
     "joinWaitlist": "Dołącz do rezerwy",
     "joiningWaitlist": "Dołączanie…",
     "leaveWaitlist": "Opuść rezerwę",
-    "leavingWaitlist": "Opuszczanie…"
+    "leavingWaitlist": "Opuszczanie…",
+    "padelLevel": "poziom {level, number, ::.0}"
   },
   "AdminActionForm": {
     "done": "Gotowe.",
@@ -394,7 +405,14 @@
     "levelRange": "NTRP {min, number, ::.0}–{max, number, ::.0}",
     "levelAtLeast": "NTRP {min, number, ::.0}+",
     "levelUpTo": "NTRP do {max, number, ::.0}",
-    "anyLevel": "Każdy poziom"
+    "anyLevel": "Każdy poziom",
+    "padel": {
+      "badge": "Padel",
+      "levelExact": "Poziom {min, number, ::.0}",
+      "levelRange": "Poziom {min, number, ::.0}–{max, number, ::.0}",
+      "levelAtLeast": "Poziom {min, number, ::.0}+",
+      "levelUpTo": "Poziom do {max, number, ::.0}"
+    }
   },
   "Surface": {
     "CLAY": "Ziemna",
@@ -440,7 +458,9 @@
     "eyebrow": "Tenis · Kraków",
     "subtitle": "Wybierz klub, zarezerwuj kort u niego i znajdź partnera do gry.",
     "browseOffers": "Przeglądaj oferty sparingów",
-    "suggestClub": "Zaproponuj klub"
+    "suggestClub": "Zaproponuj klub",
+    "eyebrowPadel": "Padel · Kraków",
+    "browseOffersPadel": "Przeglądaj mecze padla"
   },
   "ClubsView": {
     "list": "Lista",
@@ -707,6 +727,8 @@
     "invalidRequest": "Nieprawidłowe żądanie.",
     "tooManySignInEmails": "Za dużo e-maili logowania. Poczekaj minutę i spróbuj ponownie.",
     "couldNotSendSignInLink": "Nie udało się wysłać linku logowania. Spróbuj za minutę.",
+    "codeRejected": "Ten kod jest błędny lub wygasł. Sprawdź go albo poproś o nowy e-mail.",
+    "tooManyCodeAttempts": "Za dużo prób. Poczekaj chwilę i poproś o nowy e-mail.",
     "blocked": "Twoje konto jest zablokowane do czasu decyzji administratora. Nie możesz tworzyć ofert, zgłoszeń ani wiadomości, dopóki administrator nie podejmie decyzji.",
     "tooManyActiveOffers": "Masz już {max} aktywnych ofert. Odwołaj jedną, aby dodać kolejną.",
     "clubNotFound": "Wybierz klub z listy.",
@@ -779,7 +801,9 @@
   "Validation": {
     "login": {
       "emailRequired": "Podaj swój adres e-mail.",
-      "emailInvalid": "Podaj prawidłowy adres e-mail."
+      "emailInvalid": "Podaj prawidłowy adres e-mail.",
+      "codeRequired": "Wpisz kod z e-maila.",
+      "codeInvalid": "Kod składa się z samych cyfr — sprawdź e-mail."
     },
     "message": {
       "required": "Napisz wiadomość.",
@@ -809,7 +833,8 @@
       "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków.",
       "partnerNeedsDoubles": "Partnera można dodać tylko do gry deblowej.",
       "clubOrDistrictRequired": "Wybierz klub albo dzielnicę.",
-      "levelRangeInverted": "Najwyższy poziom nie może być niższy od najniższego."
+      "levelRangeInverted": "Najwyższy poziom nie może być niższy od najniższego.",
+      "padelNeedsDoubles": "Mecz padla to zawsze debel."
     },
     "matchResult": {
       "gamesRequired": "Podaj liczbę wygranych gemów.",
@@ -981,7 +1006,11 @@
     "sending": "Wysyłanie…",
     "submit": "Wyślij mi link logowania",
     "checkEmailTitle": "Sprawdź e-mail",
-    "checkEmailBody": "Wysłaliśmy link logowania na adres <strong>{email}</strong>. Otwórz go na dowolnym urządzeniu, aby się zalogować."
+    "checkEmailBody": "Wysłaliśmy e-mail na adres <strong>{email}</strong>. Wpisz tutaj kod z wiadomości, aby zostać w tym oknie — albo użyj przycisku w e-mailu.",
+    "codeLabel": "Kod z e-maila",
+    "verify": "Zaloguj się",
+    "verifying": "Logowanie…",
+    "differentEmail": "Użyj innego adresu e-mail"
   },
   "ExportDataPage": {
     "title": "Pobierz moje dane",
@@ -1053,7 +1082,8 @@
     "noneYet": "Jeszcze nie ma odpowiednich zawodników.",
     "reason": "NTRP {ntrp}, Twoja dzielnica · wiarygodność {reliability}",
     "invite": "Zaproś",
-    "inviting": "Zapraszanie…"
+    "inviting": "Zapraszanie…",
+    "reasonPadel": "Padel {ntrp}, Twoja dzielnica · wiarygodność {reliability}"
   },
   "DiscoverableToggle": {
     "label": "Pokazuj mnie w sekcji \"Kogo zaprosić\"",
@@ -1188,6 +1218,40 @@
       "clubTitle": "Korty ziemne · Krowodrza",
       "clubMeta": "3 graczy szuka partnera"
     },
+    "why": {
+      "eyebrow": "Dlaczego SpinBuddy",
+      "title": "Twój czas na korcie jest cenny",
+      "subtitle": "Większość tablic kończy się na liście nazwisk. Tu widzisz, kto gra na Twoim poziomie — i kto naprawdę przychodzi.",
+      "level": {
+        "title": "Partner na Twoim poziomie, na Twoich warunkach",
+        "text": "Oferty są ułożone według tego, jak bliski Twojemu jest ranking autora, a każda od razu podaje termin, dzielnicę, nawierzchnię i zakres poziomu."
+      },
+      "punctual": {
+        "title": "Ludzie, którzy przychodzą",
+        "text": "Każdy gracz ma wskaźnik wiarygodności zbudowany na prawdziwych meczach. Niestawienie się go obniża, a widzisz go, zanim powiesz „tak”."
+      },
+      "lastMinute": {
+        "title": "Bez odwoływania w ostatniej chwili",
+        "text": "Rezygnacja na mniej niż 12 godzin przed grą obniża wiarygodność. Plany się zmieniają — ale partner dowiaduje się o tym na czas."
+      },
+      "chat": {
+        "title": "Plan B na czacie",
+        "text": "Po akceptacji otwiera się czat. Zapowiada się deszcz? Umówcie się na kort pod balonem, zanim ktokolwiek wyjdzie z domu."
+      },
+      "demo": {
+        "initials": "MK",
+        "offerTime": "Sob. 18:00–19:30 · Singiel",
+        "offerMeta": "Krowodrza · NTRP 3.5–4.0 · mączka",
+        "reliability": "Wiarygodność 98%",
+        "ask": "Poproś o dołączenie",
+        "sent": "Prośba wysłana",
+        "accepted": "Marta zaakceptowała · czat otwarty",
+        "rain": "W sobotę ma padać 🌧️",
+        "indoor": "To weźmy kort pod balonem — zarezerwuję",
+        "deal": "Stoi. Punkt 18:00!",
+        "booked": "Zmiana kortu · kryty · sob. 18:00"
+      }
+    },
     "features": {
       "eyebrow": "Co dostajesz",
       "title": "Wszystko między „zagrałbym” a pierwszym serwisem",
@@ -1293,5 +1357,32 @@
     "day": "Dzień",
     "month": "Miesiąc",
     "year": "Rok"
+  },
+  "SportSwitcher": {
+    "label": "Sport",
+    "names": {
+      "TENNIS": "Tenis",
+      "PADEL": "Padel"
+    }
+  },
+  "PadelProfilePage": {
+    "title": "Mój padel",
+    "subtitle": "Opcjonalne. Mecze padla dobieramy według tego poziomu, a nie Twojego tenisowego NTRP.",
+    "backToProfile": "Wróć do profilu"
+  },
+  "PadelProfileForm": {
+    "levelLabel": "Poziom w padlu (1–7)",
+    "noLevel": "Nie gram w padla",
+    "levelHint": "1.0 to pierwszy mecz, 7.0 to zawodowiec. Nie masz pewności? Wybierz niższy.",
+    "sideLabel": "Ulubiona strona",
+    "noSide": "Jeszcze bez preferencji",
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano"
+  },
+  "PadelSide": {
+    "LEFT": "Lewa strona",
+    "RIGHT": "Prawa strona",
+    "BOTH": "Obie strony"
   }
 }

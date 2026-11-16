@@ -4,11 +4,12 @@ import {
   CourtStatus,
   District,
   OfferFormat,
+  Sport,
   Surface,
 } from "@/lib/generated/prisma/enums";
 import { DEFAULT_OFFER_DURATION, isOfferDuration } from "@/lib/offers/duration";
 import { krakowLocalToDate } from "@/lib/offers/krakow-time";
-import { NTRP_LEVELS } from "@/lib/profile/options";
+import { levelsFor, PADEL_LEVELS } from "@/lib/sport/sport";
 import { zodFieldErrors } from "@/lib/validation/field-errors";
 
 // A sparring offer: one schema for the form (3.5) and for the createOffer
@@ -31,12 +32,17 @@ export function offerSchema(t: ValidationT) {
     emptyToUndefined,
     z
       .number(t("levelRequired"))
-      .refine((level) => NTRP_LEVELS.includes(level), t("levelRequired"))
+      // The widest scale here; superRefine below narrows it to the
+      // offer's own sport.
+      .refine((level) => PADEL_LEVELS.includes(level), t("levelRequired"))
       .optional(),
   );
 
   return z
     .object({
+      // Slice PD1. The form sends the sport the header switcher shows; a
+      // request without one is tennis, as every offer was before padel.
+      sport: z.enum(Sport).default("TENNIS"),
       format: z.enum(OfferFormat, t("formatRequired")).default("SINGLES"),
       hasPartner: z.boolean().default(false),
       // Kraków wall-clock time from <input type="datetime-local">, stored as
@@ -98,6 +104,31 @@ export function offerSchema(t: ValidationT) {
         .catch(undefined),
     })
     .superRefine((offer, ctx) => {
+      // Padel is two against two (slice PD1; CHECK in the migration).
+      if (offer.sport === "PADEL" && offer.format !== "DOUBLES") {
+        ctx.addIssue({
+          code: "custom",
+          path: ["format"],
+          message: t("padelNeedsDoubles"),
+        });
+      }
+      const levels = levelsFor(offer.sport);
+      for (const field of ["ntrpMin", "ntrpMax"] as const) {
+        const level = offer[field];
+        // Only a level the other sport has: one off both scales already
+        // failed the field's own check above.
+        if (
+          level !== undefined &&
+          PADEL_LEVELS.includes(level) &&
+          !levels.includes(level)
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            path: [field],
+            message: t("levelRequired"),
+          });
+        }
+      }
       if (offer.hasPartner && offer.format !== "DOUBLES") {
         ctx.addIssue({
           code: "custom",
@@ -142,6 +173,7 @@ export type CreateOfferResult = {
 // The schema is now a function (it needs a translator), so this can't read
 // `.shape` off it any more; the field set is static anyway.
 const OFFER_FIELDS: (keyof OfferInput)[] = [
+  "sport",
   "format",
   "hasPartner",
   "startsAt",

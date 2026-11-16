@@ -44,6 +44,7 @@ describe("offerSchema", () => {
   it("accepts a minimal offer and defaults to singles without a partner", () => {
     const result = offerSchema(t).parse(valid);
     expect(result).toEqual({
+      sport: "TENNIS",
       format: "SINGLES",
       hasPartner: false,
       startsAt: new Date("2026-10-20T16:00:00Z"),
@@ -195,5 +196,45 @@ describe("offerSchema", () => {
     expect(errorsFor({ surface: "ICE" })).toEqual([
       { path: "surface", message: "Choose a surface." },
     ]);
+  });
+});
+
+describe("offerSchema sport (PD1)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-11T10:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const padel = { sport: "PADEL", format: "DOUBLES" };
+
+  it("is tennis when no sport is sent", () => {
+    const result = parse({});
+    expect(result.success && result.data.sport).toBe("TENNIS");
+  });
+
+  it("accepts a padel game as doubles, with or without a partner", () => {
+    expect(parse(padel).success).toBe(true);
+    expect(parse({ ...padel, hasPartner: true }).success).toBe(true);
+  });
+
+  it("rejects padel singles", () => {
+    expect(errorsFor({ sport: "PADEL" })).toEqual([
+      { path: "format", message: t("padelNeedsDoubles") },
+    ]);
+  });
+
+  it("allows level 1.0 for padel but not for tennis", () => {
+    expect(parse({ ...padel, ntrpMin: 1, ntrpMax: 2 }).success).toBe(true);
+    expect(errorsFor({ ntrpMin: 1 })).toEqual([
+      { path: "ntrpMin", message: t("levelRequired") },
+    ]);
+  });
+
+  it("rejects an unknown sport", () => {
+    expect(parse({ sport: "SQUASH" }).success).toBe(false);
   });
 });

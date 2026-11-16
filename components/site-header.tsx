@@ -7,17 +7,20 @@ import { MobileNav } from "@/components/mobile-nav";
 import { NotificationBell } from "@/components/notification-bell";
 import { PushSubscribePrompt } from "@/components/push-subscribe-prompt";
 import { SiteLogo } from "@/components/site-logo";
+import { SportSwitcher } from "@/components/sport-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
 import { visibleLinks } from "@/lib/features";
 import { countUnreadNotifications } from "@/lib/notifications/inbox";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 
 // Reading the session here makes every page render per request instead of
 // being prerendered: the header differs for signed-in users on every page.
 export async function SiteHeader() {
   const user = await getCurrentUser();
   const unread = user ? await countUnreadNotifications(user.id) : 0;
+  const sport = await getCurrentSport();
   const t = await getTranslations("SiteHeader");
   const tMetadata = await getTranslations("Metadata");
 
@@ -42,13 +45,19 @@ export async function SiteHeader() {
           is a localStorage flag that outlives sign-out, and a visitor has no
           account to save a subscription to. */}
       {user && <PushSubscribePrompt />}
-      <header className="sticky top-0 z-40 border-b bg-card/75 shadow-xs backdrop-blur-lg backdrop-saturate-150">
-        <div className="container-page flex h-16 items-center justify-between gap-4">
+      {/* A floating pill (redesign): the bar hovers over the page instead
+          of closing it off with a full-width line. */}
+      <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 rounded-full border bg-card/85 pr-2 pl-4 shadow-sm backdrop-blur-lg backdrop-saturate-150 sm:pl-5">
           <Link href="/" className="flex shrink-0 items-center">
             {/* The wordmark is part of the image, so the site name is its alt
                 text: the link keeps the same accessible name as before. */}
-            <SiteLogo alt={tMetadata("siteName")} priority className="h-10" />
+            <SiteLogo alt={tMetadata("siteName")} priority className="h-9" />
           </Link>
+
+          {/* Tennis or padel (slice PD1): on every screen size, next to
+              the logo, because it changes what every list shows. */}
+          <SportSwitcher sport={sport} />
 
           <div className="flex items-center gap-1">
             <nav

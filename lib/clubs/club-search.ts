@@ -36,7 +36,10 @@ export async function searchClubs(
   const counts = await db.sparringOffer.groupBy({
     by: ["clubId"],
     where: {
-      AND: [feedWhere({}, now), { clubId: { in: clubs.map((c) => c.id) } }],
+      AND: [
+        feedWhere(filters.sport ? { sport: filters.sport } : {}, now),
+        { clubId: { in: clubs.map((c) => c.id) } },
+      ],
     },
     _count: { _all: true },
   });

@@ -32,14 +32,15 @@ export function SectionHeading({
   subtitle?: string;
 }) {
   return (
-    <Reveal className="mx-auto max-w-2xl text-center">
-      <p className="eyebrow text-primary">{eyebrow}</p>
-      <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+    <Reveal className="max-w-3xl">
+      <p className="eyebrow inline-flex items-center gap-2 text-current">
+        <span aria-hidden className="h-0.5 w-6 rounded-full bg-current" />
+        {eyebrow}
+      </p>
+      <h2 className="mt-4 text-4xl leading-[1.05] font-extrabold sm:text-6xl">
         {title}
       </h2>
-      {subtitle && (
-        <p className="mt-3 text-lg text-muted-foreground">{subtitle}</p>
-      )}
+      {subtitle && <p className="mt-4 text-lg opacity-75">{subtitle}</p>}
     </Reveal>
   );
 }
@@ -51,22 +52,33 @@ type Feature = {
   href: string;
   /** Twice as wide on desktop. */
   wide?: boolean;
+  /** A solid colour block instead of a white card. */
+  block?: keyof typeof BLOCKS;
 };
+
+// The bento grid's colour blocks (redesign): most tiles are white cards, a
+// few are solid forest or lime, so the grid reads as blocks, not as a list.
+const BLOCKS = {
+  forest: "border-transparent bg-brand text-brand-foreground",
+  lime: "border-transparent bg-highlight text-highlight-foreground",
+} as const;
 
 const FEATURES: Feature[] = [
   {
     key: "sparring",
     icon: <UsersIcon />,
-    tone: "green",
+    tone: "ball",
     href: "/offers",
     wide: true,
+    block: "forest",
   },
   { key: "courts", icon: <MapPinnedIcon />, tone: "blue", href: "/clubs" },
   {
     key: "rating",
     icon: <TrendingUpIcon />,
-    tone: "ball",
+    tone: "green",
     href: "/leaderboard",
+    block: "lime",
   },
   { key: "today", icon: <ZapIcon />, tone: "orange", href: "/offers/today" },
   {
@@ -109,25 +121,33 @@ export function Features() {
             <Reveal delay={(index % 3) * 0.08} className="h-full">
               <Link
                 href={feature.href}
-                className="group surface flex h-full flex-col p-6 transition-all outline-none hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+                className={cn(
+                  "group block-lift flex h-full min-h-56 flex-col rounded-3xl border bg-card p-6 outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-7",
+                  feature.block && BLOCKS[feature.block],
+                )}
               >
                 <IconTile
                   tone={feature.tone}
-                  className="size-11 rounded-xl [&_svg]:size-5"
+                  className="size-12 rounded-2xl [&_svg]:size-5"
                 >
                   {feature.icon}
                 </IconTile>
-                <h3 className="mt-5 text-lg font-semibold">
+                <h3
+                  className={cn(
+                    "mt-6 text-2xl font-bold",
+                    feature.wide && "sm:text-3xl",
+                  )}
+                >
                   {t(`${feature.key}.title`)}
                 </h3>
-                <p className="mt-2 flex-1 text-muted-foreground">
+                <p className="mt-2 max-w-xl flex-1 opacity-75">
                   {t(`${feature.key}.text`)}
                 </p>
-                <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold">
                   {t(`${feature.key}.link`)}
                   <ArrowRightIcon
                     aria-hidden
-                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                    className="size-4 transition-transform group-hover:translate-x-1"
                   />
                 </span>
               </Link>
@@ -145,20 +165,23 @@ export function HowItWorks() {
   const t = useTranslations("LandingPage.steps");
 
   return (
-    <section className="border-y bg-card/70">
+    <section className="bg-highlight text-highlight-foreground">
       <div className="container-page py-16 sm:py-24">
         <SectionHeading eyebrow={t("eyebrow")} title={t("title")} />
-        <ol className="mt-12 grid gap-6 lg:grid-cols-3">
+        <ol className="mt-12 grid gap-4 lg:grid-cols-3">
           {STEPS.map((step, index) => (
             <li key={step}>
-              <Reveal delay={index * 0.1} className="relative h-full">
-                <span className="font-heading text-6xl leading-none font-bold text-primary/15 tabular-nums">
+              <Reveal
+                delay={index * 0.1}
+                className="relative h-full rounded-3xl bg-brand p-6 text-brand-foreground sm:p-8"
+              >
+                <span className="font-heading text-7xl leading-none font-extrabold text-highlight tabular-nums">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-3 text-xl font-semibold">
+                <h3 className="mt-6 text-2xl font-bold">
                   {t(`${step}.title`)}
                 </h3>
-                <p className="mt-2 text-muted-foreground">
+                <p className="mt-2 text-brand-foreground/80">
                   {t(`${step}.text`)}
                 </p>
               </Reveal>
@@ -178,16 +201,16 @@ export function Faq() {
   return (
     <section className="container-page py-16 sm:py-24">
       <SectionHeading eyebrow={t("eyebrow")} title={t("title")} />
-      <Reveal className="mx-auto mt-10 max-w-3xl">
-        <div className="surface divide-y">
+      <Reveal className="mt-10 max-w-3xl">
+        <div className="surface divide-y overflow-hidden rounded-3xl">
           {QUESTIONS.map((question) => (
             // Native <details>: an accordion with no JavaScript.
             <details key={question} className="group px-5 sm:px-6">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-heading text-lg font-bold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
                 {t(`${question}.question`)}
                 <ChevronDownIcon
                   aria-hidden
-                  className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                  className="size-8 shrink-0 rounded-full bg-muted p-2 transition-all group-open:rotate-180 group-open:bg-highlight group-open:text-highlight-foreground"
                 />
               </summary>
               <p className="pb-5 text-muted-foreground">
@@ -213,14 +236,15 @@ export function FinalCta({
   return (
     <section className="container-page pb-8">
       <Reveal>
-        <div className="relative overflow-hidden rounded-[2rem] bg-brand px-6 py-14 text-center text-brand-foreground shadow-md sm:px-12 sm:py-20">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-brand px-6 py-16 text-center text-brand-foreground sm:px-12 sm:py-24">
+          {/* The ball, flat, cut off by the corner. */}
           <div
             aria-hidden
-            className="absolute inset-0 bg-[radial-gradient(40rem_24rem_at_100%_0%,color-mix(in_oklch,var(--highlight)_45%,transparent),transparent_70%)]"
+            className="absolute -top-20 -right-16 size-56 rounded-full bg-highlight sm:size-72"
           />
           <CourtLines className="absolute -bottom-40 -left-16 w-[26rem] rotate-[28deg] text-brand-foreground/12" />
-          <div className="relative mx-auto max-w-2xl">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
+          <div className="relative mx-auto max-w-3xl">
+            <h2 className="text-4xl leading-[1.03] font-extrabold sm:text-7xl">
               {t("title")}
             </h2>
             <p className="mt-4 text-lg text-brand-foreground/85">

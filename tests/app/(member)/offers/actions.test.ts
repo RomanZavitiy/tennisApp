@@ -117,6 +117,7 @@ describe("createOffer", () => {
 
     expect(offerCreate).toHaveBeenCalledWith({
       data: {
+        sport: "TENNIS",
         format: "SINGLES",
         hasPartner: false,
         startsAt: new Date("2026-10-20T16:00:00Z"),
@@ -132,6 +133,7 @@ describe("createOffer", () => {
     expect(notifyInterestedPlayers).toHaveBeenCalledWith({
       offerId: OFFER,
       authorId: ME,
+      sport: "TENNIS",
       district: "KROWODRZA",
       ntrpMin: null,
       ntrpMax: null,
@@ -181,7 +183,10 @@ describe("createOffer", () => {
   });
 
   it("uses the club's district instead of the one sent", async () => {
-    clubFindUnique.mockResolvedValue({ district: "DEBNIKI" });
+    clubFindUnique.mockResolvedValue({
+      district: "DEBNIKI",
+      sports: ["TENNIS"],
+    });
 
     await createOffer({ ...valid, clubId: CLUB });
 
@@ -192,7 +197,7 @@ describe("createOffer", () => {
   });
 
   it("leaves the district empty for a club outside the city", async () => {
-    clubFindUnique.mockResolvedValue({ district: null });
+    clubFindUnique.mockResolvedValue({ district: null, sports: ["TENNIS"] });
 
     await createOffer({ startsAt: valid.startsAt, clubId: CLUB });
 

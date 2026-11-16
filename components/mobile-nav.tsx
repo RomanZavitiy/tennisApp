@@ -53,7 +53,9 @@ export function MobileNav({
               }}
               className={buttonVariants({
                 variant: "ghost",
-                className: "justify-start",
+                size: "lg",
+                className:
+                  "justify-start font-heading text-xl font-bold tracking-tight",
               })}
             >
               {link.label}
@@ -69,7 +71,8 @@ export function MobileNav({
               <Button
                 type="submit"
                 variant="ghost"
-                className="w-full justify-start"
+                size="lg"
+                className="w-full justify-start text-muted-foreground"
               >
                 {t("signOut")}
               </Button>

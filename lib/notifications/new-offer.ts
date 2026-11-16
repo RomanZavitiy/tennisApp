@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import type { District } from "@/lib/generated/prisma/enums";
+import type { District, Sport } from "@/lib/generated/prisma/enums";
 import {
   interestedCandidates,
   warsawDateString,
@@ -8,26 +8,33 @@ import {
 } from "@/lib/matching/offer-interest";
 import { notify } from "@/lib/notifications/notify";
 import type { TimeOfDay } from "@/lib/offers/feed-filters";
+import { playerLevel } from "@/lib/sport/sport";
 
 // "New offer for my level" (task 5.16): called once, right after createOffer
 // (3.5) saves the row. Narrows by district in the query — the rest of the
 // matching rule (level, the daily cap, quiet hours, never the author) is
 // lib/matching/offer-interest.ts, pure and already tested there.
 
-function toCandidate(row: {
-  id: string;
-  district: District | null;
-  selfRatedNtrp: number | null;
-  notifyNewOffers: boolean;
-  offerPushSentOn: Date | null;
-  offerPushSentCount: number;
-  preferredDistricts: District[];
-  preferredTimes: string[];
-}): OfferPushCandidate {
+function toCandidate(
+  sport: Sport,
+  row: {
+    id: string;
+    district: District | null;
+    selfRatedNtrp: number | null;
+    padelLevel: number | null;
+    notifyNewOffers: boolean;
+    offerPushSentOn: Date | null;
+    offerPushSentCount: number;
+    preferredDistricts: District[];
+    preferredTimes: string[];
+  },
+): OfferPushCandidate {
   return {
     userId: row.id,
     district: row.district,
-    selfRatedNtrp: row.selfRatedNtrp,
+    // The level in the offer's own sport (slice PD1): a padel offer never
+    // reaches a player who hasn't declared a padel level.
+    selfRatedNtrp: playerLevel(row, sport),
     notifyNewOffers: row.notifyNewOffers,
     offerPushSentOn: row.offerPushSentOn
       ? row.offerPushSentOn.toISOString().slice(0, 10)
@@ -67,6 +74,7 @@ export async function notifyInterestedPlayers(
       id: true,
       district: true,
       selfRatedNtrp: true,
+      padelLevel: true,
       notifyNewOffers: true,
       offerPushSentOn: true,
       offerPushSentCount: true,
@@ -76,7 +84,11 @@ export async function notifyInterestedPlayers(
   });
 
   const today = warsawDateString(now);
-  const matches = interestedCandidates(rows.map(toCandidate), offer, now);
+  const matches = interestedCandidates(
+    rows.map((row) => toCandidate(offer.sport ?? "TENNIS", row)),
+    offer,
+    now,
+  );
 
   for (const match of matches) {
     await notify(

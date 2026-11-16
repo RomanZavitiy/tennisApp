@@ -64,15 +64,17 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   // A club's district wins over the one sent: the form fills it in from the
   // club (3.5), and the server keeps the two consistent even when a request
   // skips the form. A club outside the city has no district.
+  // Slice PD1: a padel game can't be placed at a tennis-only club (and
+  // the other way round) — the form only lists the sport's own clubs.
   let place: { clubId?: string; district?: typeof district | null } = {
     district,
   };
   if (clubId) {
     const club = await db.club.findUnique({
       where: { id: clubId },
-      select: { district: true },
+      select: { district: true, sports: true },
     });
-    if (!club) {
+    if (!club?.sports.includes(offer.sport)) {
       return {
         ok: false,
         fieldErrors: { clubId: tErrors("clubNotFound") },
@@ -91,6 +93,7 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   await notifyInterestedPlayers({
     offerId: created.id,
     authorId: author.id,
+    sport: offer.sport,
     district: place.district ?? null,
     ntrpMin: offer.ntrpMin ?? null,
     ntrpMax: offer.ntrpMax ?? null,
@@ -98,6 +101,7 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   });
 
   await captureEvent("offer_created", author.id, {
+    sport: offer.sport,
     format: offer.format,
     hasClub: place.clubId != null,
   });

@@ -11,6 +11,7 @@ import { PageHeader, PageShell } from "@/components/page-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { clubsHref, parseClubFilters } from "@/lib/clubs/club-filters";
 import { searchClubs } from "@/lib/clubs/club-search";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ClubsPage");
@@ -28,14 +29,17 @@ export default async function ClubsPage({
   // Read on each request: clubs and their open offers change without a deploy.
   await connection();
   const filters = parseClubFilters(await searchParams);
-  const clubs = await searchClubs(filters);
+  // Slice PD1: only the clubs of the header switcher's sport.
+  const sport = await getCurrentSport();
+  const isPadel = sport === "PADEL";
+  const clubs = await searchClubs({ ...filters, sport });
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("ClubsPage");
 
   return (
     <PageShell>
       <PageHeader
-        eyebrow={t("eyebrow")}
+        eyebrow={t(isPadel ? "eyebrowPadel" : "eyebrow")}
         title={t("title")}
         subtitle={t("subtitle")}
         actions={
@@ -50,13 +54,13 @@ export default async function ClubsPage({
               href="/offers"
               className={buttonVariants({ variant: "secondary" })}
             >
-              {t("browseOffers")}
+              {t(isPadel ? "browseOffersPadel" : "browseOffers")}
             </Link>
           </>
         }
       />
 
-      <ClubFiltersForm filters={filters} />
+      <ClubFiltersForm filters={filters} sport={sport} />
 
       <ClubsView
         list={<ClubList clubs={clubs} filtered={filtered} />}
