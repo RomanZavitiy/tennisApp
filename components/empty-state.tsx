@@ -14,8 +14,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed bg-card/60 px-6 py-14 text-center">
-      <IconTile tone="ball" className="size-12 rounded-xl [&_svg]:size-5">
+    <div className="flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed bg-card/60 px-6 py-16 text-center">
+      <IconTile tone="ball" className="size-14 rounded-2xl [&_svg]:size-6">
         {icon}
       </IconTile>
       <p className="max-w-md text-muted-foreground">{children}</p>

@@ -43,15 +43,15 @@ export function IntentCard({
   const tOfferLabels = useTranslations("OfferLabels");
 
   return (
-    <li className="rounded-xl border bg-card px-4 py-3 shadow-sm">
+    <li className="rounded-2xl border bg-card p-4 shadow-xs">
       <Link
         href={`/players/${intent.user.id}`}
-        className="inline-flex items-center gap-1.5 hover:underline"
+        className="inline-flex items-center gap-2 font-semibold hover:underline"
       >
         <PlayerAvatar
           name={intent.user.name ?? t("aPlayer")}
           avatarPath={intent.user.avatarPath}
-          size={24}
+          size={32}
         />
         <span>
           {intent.user.name ?? t("aPlayer")}

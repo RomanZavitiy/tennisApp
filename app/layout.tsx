@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Outfit, Work_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
@@ -10,15 +10,16 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
 
-// Inter with latin-ext: Polish letters (ą, ę, ł, ś, ż…) come from the same
-// font instead of a system fallback.
-const inter = Inter({
-  variable: "--font-inter",
+// The "Geometric Modern" pairing from the ui-ux-pro-max design system
+// (redesign 2026-11-16): Work Sans for body text, Outfit for headings. Both
+// with latin-ext, so Polish letters (ą, ę, ł, ś, ż…) come from the same font
+// instead of a system fallback.
+const body = Work_Sans({
+  variable: "--font-body",
   subsets: ["latin", "latin-ext"],
 });
 
-// Headings only (redesign): a display face with more character than Inter.
-const display = Bricolage_Grotesque({
+const display = Outfit({
   variable: "--font-display",
   subsets: ["latin", "latin-ext"],
 });
@@ -44,10 +45,10 @@ export async function generateMetadata(): Promise<Metadata> {
 // metadata object in Next 14+).
 export const viewport: Viewport = {
   // The browser's own chrome follows the system setting (it can't see the
-  // in-app theme switch): court green in light, the page background in dark.
+  // in-app theme switch): the page background of each theme.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0a693c" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e1512" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f8ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a120e" },
   ],
 };
 
@@ -63,7 +64,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       lang={locale}
       // next-themes sets the theme class on <html> before React hydrates.
       suppressHydrationWarning
-      className={`${inter.variable} ${display.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${body.variable} ${display.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>

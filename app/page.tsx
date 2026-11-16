@@ -16,12 +16,20 @@ import { WhySpinBuddy } from "@/components/landing/why";
 import { OfferCard } from "@/components/offer-card";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/require-user";
+import { cn } from "@/lib/utils";
 import { searchClubs } from "@/lib/clubs/club-search";
 import { getOfferFeed } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 
 // How many live offers the landing page previews.
 const OFFER_PREVIEW = 3;
+
+// The hero's stat blocks, in order (redesign).
+const STAT_BLOCKS = [
+  "bg-brand text-brand-foreground [&_dd]:text-highlight",
+  "bg-highlight text-highlight-foreground",
+  "border bg-card",
+] as const;
 
 // The landing page (redesign): says what SpinBuddy is before asking a
 // visitor to use it — hero, the clubs on the map, features, how it works,
@@ -53,18 +61,20 @@ export default async function Home() {
     <main className="flex-1">
       <section className="relative overflow-hidden">
         <div aria-hidden className="bg-grid-fade absolute inset-0 -z-10" />
-        <div className="container-page grid items-center gap-12 py-12 sm:py-16 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-16 lg:py-24">
+        <div className="container-page grid items-center gap-12 py-12 sm:py-16 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:gap-16 lg:py-20">
           {/* No scroll-in animation up here: the hero is the first paint. */}
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-sm font-medium shadow-xs">
-              <span className="size-2 rounded-full bg-highlight ring-2 ring-highlight/40" />
+            <p className="inline-flex items-center gap-2 rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground">
+              <span className="size-2 rounded-full bg-current" />
               {t("eyebrow")}
             </p>
-            <h1 className="mt-6 text-5xl leading-[1.02] font-bold tracking-tight sm:text-6xl xl:text-7xl">
+            <h1 className="mt-6 text-[2.75rem] leading-[1.04] font-extrabold sm:text-7xl xl:text-[5.25rem]">
               {t("title")}{" "}
-              <span className="text-primary">{t("titleAccent")}</span>
+              <span className="marker inline-block -rotate-1">
+                {t("titleAccent")}
+              </span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground sm:text-xl">
+            <p className="mt-7 max-w-xl text-lg text-muted-foreground sm:text-xl">
               {t("subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -89,16 +99,23 @@ export default async function Home() {
                 {secondary.label}
               </Link>
             </div>
-            <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t pt-8">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <dd className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+            {/* Three blocks, three colours: forest, lime, white. */}
+            <dl className="mt-12 grid max-w-xl grid-cols-3 gap-3">
+              {stats.map((stat, index) => (
+                <div
+                  key={stat.label}
+                  className={cn(
+                    "flex flex-col-reverse justify-end rounded-2xl p-4 sm:p-5",
+                    STAT_BLOCKS[index % STAT_BLOCKS.length],
+                  )}
+                >
+                  <dt className="mt-1 text-sm font-medium opacity-80">
+                    {stat.label}
+                  </dt>
+                  <dd className="font-heading text-3xl font-extrabold tracking-tight sm:text-5xl">
                     <NumberTicker value={stat.value} />
                     {stat.suffix && ` ${stat.suffix}`}
                   </dd>
-                  <dt className="mt-1 text-sm text-muted-foreground">
-                    {stat.label}
-                  </dt>
                 </div>
               ))}
             </dl>
@@ -110,9 +127,11 @@ export default async function Home() {
       {clubs.length > 0 && (
         <section
           aria-label={t("clubsStrip")}
-          className="border-y bg-card/70 py-6"
+          className="bg-brand py-7 text-brand-foreground"
         >
-          <p className="eyebrow text-center">{t("clubsStrip")}</p>
+          <p className="eyebrow text-center text-brand-foreground/70">
+            {t("clubsStrip")}
+          </p>
           {/* The list twice, the second copy hidden from assistive tech: the
               track slides by one copy, so the loop has no seam. */}
           <div className="mt-4 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
@@ -121,14 +140,14 @@ export default async function Home() {
                 <ul
                   key={String(copy)}
                   aria-hidden={copy}
-                  className="flex shrink-0 gap-6"
+                  className="flex shrink-0 items-center gap-6 [&>li]:flex [&>li]:items-center [&>li]:gap-6 [&>li]:after:size-2 [&>li]:after:rounded-full [&>li]:after:bg-highlight"
                 >
                   {clubs.map((club) => (
                     <li key={club.id}>
                       <Link
                         href={`/clubs/${club.id}`}
                         tabIndex={copy ? -1 : undefined}
-                        className="font-heading text-lg font-semibold whitespace-nowrap text-muted-foreground transition-colors hover:text-primary"
+                        className="font-heading text-2xl font-bold tracking-tight whitespace-nowrap transition-colors hover:text-highlight"
                       >
                         {club.name}
                       </Link>
@@ -158,7 +177,7 @@ export default async function Home() {
               </li>
             ))}
           </ul>
-          <p className="mt-8 text-center">
+          <p className="mt-8">
             <Link
               href="/offers"
               className={buttonVariants({ variant: "secondary", size: "lg" })}

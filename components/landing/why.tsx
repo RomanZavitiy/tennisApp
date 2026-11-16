@@ -59,12 +59,12 @@ export function WhySpinBuddy() {
               <Reveal delay={index * 0.08} className="flex gap-4">
                 <IconTile
                   tone={point.tone}
-                  className="size-11 rounded-xl [&_svg]:size-5"
+                  className="size-12 rounded-2xl [&_svg]:size-5"
                 >
                   {point.icon}
                 </IconTile>
                 <div>
-                  <h3 className="text-lg font-semibold">
+                  <h3 className="text-xl font-bold">
                     {t(`${point.key}.title`)}
                   </h3>
                   <p className="mt-1 text-muted-foreground">

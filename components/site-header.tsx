@@ -42,12 +42,14 @@ export async function SiteHeader() {
           is a localStorage flag that outlives sign-out, and a visitor has no
           account to save a subscription to. */}
       {user && <PushSubscribePrompt />}
-      <header className="sticky top-0 z-40 border-b bg-card/75 shadow-xs backdrop-blur-lg backdrop-saturate-150">
-        <div className="container-page flex h-16 items-center justify-between gap-4">
+      {/* A floating pill (redesign): the bar hovers over the page instead
+          of closing it off with a full-width line. */}
+      <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 rounded-full border bg-card/85 pr-2 pl-4 shadow-sm backdrop-blur-lg backdrop-saturate-150 sm:pl-5">
           <Link href="/" className="flex shrink-0 items-center">
             {/* The wordmark is part of the image, so the site name is its alt
                 text: the link keeps the same accessible name as before. */}
-            <SiteLogo alt={tMetadata("siteName")} priority className="h-10" />
+            <SiteLogo alt={tMetadata("siteName")} priority className="h-9" />
           </Link>
 
           <div className="flex items-center gap-1">

@@ -75,8 +75,8 @@ export function OfferCard({
     <Link
       href={`/offers/${offer.id}`}
       className={cn(
-        "relative block rounded-xl border bg-card px-4 py-3 shadow-sm transition-shadow outline-none hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
-        isOwn && "border-primary",
+        "block-lift relative block h-full rounded-2xl border bg-card p-4 outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        isOwn && "border-2 border-primary",
       )}
       onClick={
         onResultSelected
@@ -105,12 +105,12 @@ export function OfferCard({
           <PlayerAvatar
             name={offer.author.name}
             avatarPath={offer.author.avatarPath}
-            size={40}
+            size={44}
           />
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-3">
-            <span className="font-medium">
+            <span className="font-heading text-lg leading-tight font-bold tracking-tight">
               <time dateTime={offer.startsAt.toISOString()}>
                 {formatKrakowTimeRange(
                   format,
@@ -121,7 +121,7 @@ export function OfferCard({
               {" · "}
               {formatLabel(t, offer)}
             </span>
-            <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+            <span className="shrink-0 rounded-full bg-highlight px-2.5 py-1 text-xs font-bold text-highlight-foreground">
               {spotsLabel(t, offer.spotsLeft)}
             </span>
           </div>

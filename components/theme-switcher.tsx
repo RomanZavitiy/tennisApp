@@ -51,9 +51,9 @@ export function ThemeSwitcher({ className }: { className?: string }) {
               setTheme(value);
             }}
             className={cn(
-              "inline-flex size-7 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "inline-flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
               active
-                ? "bg-secondary text-secondary-foreground"
+                ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >

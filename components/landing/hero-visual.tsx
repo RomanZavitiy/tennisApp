@@ -13,11 +13,10 @@ export function HeroVisual() {
 
   return (
     <div aria-hidden className="relative mx-auto w-full max-w-lg lg:max-w-none">
-      <div className="relative aspect-[5/6] overflow-hidden rounded-[2rem] bg-brand shadow-md sm:aspect-[4/3] lg:aspect-[5/6]">
-        <div className="absolute inset-0 bg-[radial-gradient(34rem_22rem_at_100%_0%,color-mix(in_oklch,var(--highlight)_50%,transparent),transparent_70%)]" />
+      <div className="relative aspect-[5/6] overflow-hidden rounded-[2.5rem] bg-brand sm:aspect-[4/3] lg:aspect-[5/6]">
         <CourtLines className="absolute top-1/2 left-1/2 h-[125%] -translate-x-1/2 -translate-y-1/2 rotate-[24deg] text-brand-foreground/20" />
         {/* The ball. */}
-        <div className="absolute top-[16%] right-[18%] size-10 rounded-full bg-highlight shadow-[0_10px_30px_-6px_oklch(0.2_0.05_155/0.6)]" />
+        <div className="absolute -top-[8%] -right-[10%] aspect-square w-[46%] rounded-full bg-highlight" />
       </div>
 
       <Float className="absolute top-[12%] -left-2 w-[78%] sm:-left-6 sm:w-[62%] lg:-left-10 lg:w-[80%]">
@@ -38,7 +37,7 @@ export function HeroVisual() {
               </p>
             </div>
           </div>
-          <div className="mt-3 flex h-8 items-center justify-center rounded-full bg-primary text-[0.8125rem] font-semibold text-primary-foreground">
+          <div className="mt-3 flex h-9 items-center justify-center rounded-full bg-primary text-[0.8125rem] font-semibold text-primary-foreground">
             {t("offerAction")}
           </div>
         </div>
@@ -56,7 +55,7 @@ export function HeroVisual() {
             <span className="font-heading text-3xl font-bold tracking-tight tabular-nums">
               1532
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-2 py-0.5 text-xs font-bold text-highlight-foreground">
               <TrendingUpIcon className="size-3" />
               +18
             </span>
@@ -66,7 +65,7 @@ export function HeroVisual() {
               <span
                 key={index}
                 style={{ height: `${String(height)}%` }}
-                className="flex-1 rounded-sm bg-primary/25 last:bg-primary"
+                className="flex-1 rounded-sm bg-primary/20 last:bg-highlight"
               />
             ))}
           </div>
@@ -78,7 +77,7 @@ export function HeroVisual() {
         className="absolute bottom-[6%] left-[6%] w-[64%] sm:w-[46%] lg:w-[62%]"
       >
         <div className="surface flex items-center gap-3 p-3.5">
-          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-highlight/50 text-highlight-foreground dark:bg-highlight/15 dark:text-highlight">
+          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-highlight text-highlight-foreground">
             <MapPinIcon className="size-4" />
           </span>
           <div className="min-w-0">

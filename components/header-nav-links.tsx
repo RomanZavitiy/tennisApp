@@ -29,7 +29,8 @@ export function HeaderNavLinks({ links }: { links: NavLink[] }) {
         aria-current={active ? "page" : undefined}
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          active && "bg-secondary text-secondary-foreground hover:bg-secondary",
+          active &&
+            "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary",
         )}
       >
         {link.label}
