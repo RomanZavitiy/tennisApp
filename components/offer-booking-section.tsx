@@ -8,7 +8,11 @@ import { markCourtBooked } from "@/app/offers/[id]/actions";
 import { BookingLink } from "@/components/booking-link";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { buttonVariants } from "@/components/ui/button";
-import type { BookingMode, CourtStatus } from "@/lib/generated/prisma/enums";
+import type {
+  BookingMode,
+  CourtStatus,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import { toKrakowLocal } from "@/lib/offers/krakow-time";
 import { isBookingDuration } from "@/lib/validation/booking";
 
@@ -20,9 +24,11 @@ import { isBookingDuration } from "@/lib/validation/booking";
 // grid (K.8), prefilled with this offer's own date and duration so the slot
 // they already agreed to is a click away; requestBooking (K.21) stores the
 // link back, and confirmBooking is what flips courtStatus this time, so
-// there's no manual "mark as booked" banner here.
+// there's no manual "mark as booked" banner here. The link also names the
+// offer's sport (slice PD2), so a club with both opens on the right courts.
 export function OfferBookingSection({
   offerId,
+  sport,
   club,
   isAuthor,
   courtStatus,
@@ -30,6 +36,7 @@ export function OfferBookingSection({
   durationMinutes,
 }: {
   offerId: string;
+  sport: Sport;
   club: {
     id: string;
     name: string;
@@ -62,6 +69,7 @@ export function OfferBookingSection({
       date: toKrakowLocal(startsAt).slice(0, 10),
       duration: String(duration),
       offerId,
+      sport,
     }).toString()}`;
 
     return (

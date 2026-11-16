@@ -263,3 +263,30 @@ describe("clubSchema sports (PD1)", () => {
     );
   });
 });
+
+describe("clubSchema court sports (PD2)", () => {
+  const court = { name: "Court 1", surface: "CLAY", indoor: false };
+
+  it("makes a court tennis when the file names no sport", () => {
+    const club = clubSchema.parse({ ...valid, courts: [court] });
+    expect(club.courts[0]?.sport).toBe("TENNIS");
+  });
+
+  it("accepts a padel court at a club that lists padel", () => {
+    const club = clubSchema.parse({
+      ...valid,
+      sports: ["TENNIS", "PADEL"],
+      courts: [court, { ...court, name: "Padel 1", sport: "PADEL" }],
+    });
+    expect(club.courts.map((c) => c.sport)).toEqual(["TENNIS", "PADEL"]);
+  });
+
+  it("rejects a court whose sport the club doesn't list", () => {
+    const result = clubSchema.safeParse({
+      ...valid,
+      courts: [{ ...court, sport: "PADEL" }],
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["courts", 0, "sport"]);
+  });
+});

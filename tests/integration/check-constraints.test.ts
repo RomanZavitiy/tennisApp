@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { db } from "@/lib/db";
 import {
+  createBookableClub,
   createJoin,
   createOffer,
   createPlayedMatch,
@@ -177,6 +178,22 @@ describe("play_intents (PD2, migration 20261116210000_add_play_intent_sport)", (
     await expect(
       db.playIntent.create({ data: intent(player.id, "2030-01-10") }),
     ).rejects.toMatchObject({ code: "P2002" });
+  });
+});
+
+describe("courts (PD2, migration 20261116220000_add_court_sport)", () => {
+  it("makes a court tennis by default and keeps a padel one", async () => {
+    const { club, court } = await createBookableClub();
+    expect(court.sport).toBe("TENNIS");
+    const padel = await db.court.create({
+      data: {
+        clubId: club.id,
+        name: "Padel 1",
+        surface: "ARTIFICIAL_GRASS",
+        sport: "PADEL",
+      },
+    });
+    expect(padel.sport).toBe("PADEL");
   });
 });
 

@@ -180,6 +180,7 @@ export default async function OfferPage({
           {offer.club && (
             <OfferBookingSection
               offerId={offer.id}
+              sport={offer.sport}
               club={offer.club}
               isAuthor={details.isAuthor}
               courtStatus={offer.courtStatus}

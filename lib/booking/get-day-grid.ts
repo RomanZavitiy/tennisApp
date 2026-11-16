@@ -8,8 +8,9 @@ import {
   type CourtHoursInput,
 } from "@/lib/booking/availability";
 import { db } from "@/lib/db";
-import type { Surface } from "@/lib/generated/prisma/enums";
+import type { Sport, Surface } from "@/lib/generated/prisma/enums";
 import { krakowLocalToDate } from "@/lib/offers/krakow-time";
+import { isSport, SPORTS } from "@/lib/sport/sport";
 
 // The booking grid page's one server loader (slice K): a club/day's courts,
 // hours, bookings and blocks, already folded into buildDayGrid's output.
@@ -19,6 +20,7 @@ import { krakowLocalToDate } from "@/lib/offers/krakow-time";
 export type DayGridCourt = {
   id: string;
   name: string;
+  sport: Sport;
   surface: Surface;
   indoor: boolean;
   pricePerHourPln: number | null;
@@ -29,6 +31,43 @@ export type DayGrid = {
   courts: DayGridCourt[];
   grid: CourtDayGrid[];
 };
+
+/** The sports the club has bookable courts for, tennis first (slice PD2). */
+export function gridSports(day: DayGrid): Sport[] {
+  return SPORTS.filter((sport) =>
+    day.courts.some((court) => court.sport === sport),
+  );
+}
+
+/**
+ * Which sport's courts the booking page shows (slice PD2): the one the URL
+ * asks for, else the header switcher's, else the club's first — each only
+ * if the club has courts for it. Null when the club has no courts at all.
+ */
+export function pickGridSport(
+  available: readonly Sport[],
+  requested: unknown,
+  current: Sport,
+): Sport | null {
+  if (isSport(requested) && available.includes(requested)) {
+    return requested;
+  }
+  if (available.includes(current)) {
+    return current;
+  }
+  return available[0] ?? null;
+}
+
+/** `day` narrowed to one sport's courts — what the grid draws. */
+export function dayGridForSport(day: DayGrid, sport: Sport): DayGrid {
+  const courts = day.courts.filter((court) => court.sport === sport);
+  const courtIds = new Set(courts.map((court) => court.id));
+  return {
+    club: day.club,
+    courts,
+    grid: day.grid.filter((court) => courtIds.has(court.courtId)),
+  };
+}
 
 const BLOCKING_BOOKING_STATUSES: ("PENDING" | "CONFIRMED")[] = [
   "PENDING",
@@ -66,6 +105,7 @@ export async function getDayGrid(
         select: {
           id: true,
           name: true,
+          sport: true,
           surface: true,
           indoor: true,
           pricePerHourPln: true,

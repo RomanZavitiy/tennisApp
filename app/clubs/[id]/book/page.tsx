@@ -9,8 +9,15 @@ import { connection } from "next/server";
 import { BookingGrid } from "@/components/booking-grid";
 import { BookingSummaryCard } from "@/components/booking-summary-card";
 import { canFit, type SlotStatus } from "@/lib/booking/availability";
-import { getDayGrid, type DayGridCourt } from "@/lib/booking/get-day-grid";
+import {
+  dayGridForSport,
+  getDayGrid,
+  gridSports,
+  pickGridSport,
+  type DayGridCourt,
+} from "@/lib/booking/get-day-grid";
 import { visibleRange } from "@/lib/booking/grid-layout";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 import {
   BOOKING_DURATIONS,
   isBookingDuration,
@@ -24,7 +31,9 @@ import { todayInKrakow } from "@/lib/validation/profile";
 // for the "Send request" button itself (BookingSummaryCard, K.11). The grid
 // itself (courts as columns, time as rows) lives in BookingGrid; this page
 // is URL parsing, data loading, and the "closed this day" / "no courts"
-// branches around it.
+// branches around it. A club with courts for both sports (slice PD2) gets
+// a Tennis / Padel choice above the grid, also in the URL (`sport`); without
+// it the grid opens on the header switcher's sport.
 
 type BookPageProps = {
   params: Promise<{ id: string }>;
@@ -66,6 +75,7 @@ type Params = {
   start?: string;
   tab?: string;
   offerId?: string;
+  sport?: string;
 };
 
 function hrefWith(current: Params, overrides: Partial<Params>): string {
@@ -78,6 +88,7 @@ function hrefWith(current: Params, overrides: Partial<Params>): string {
     "start",
     "tab",
     "offerId",
+    "sport",
   ] as const) {
     const value = merged[key];
     if (value) qs.set(key, value);
@@ -110,13 +121,21 @@ export default async function BookPage({
   const duration = parseDuration(rawParams.duration);
 
   const now = new Date();
-  const day = await getDayGrid(id, date, now);
-  if (!day) {
+  const allCourts = await getDayGrid(id, date, now);
+  if (!allCourts) {
     notFound();
   }
+  const sports = gridSports(allCourts);
+  const sport = pickGridSport(
+    sports,
+    single(rawParams.sport),
+    await getCurrentSport(),
+  );
+  const day = sport ? dayGridForSport(allCourts, sport) : allCourts;
 
   const t = await getTranslations("BookPage");
   const tSurface = await getTranslations("Surface");
+  const tSport = await getTranslations("SportSwitcher");
   const format = await getFormatter();
 
   const current: Params = {
@@ -126,6 +145,8 @@ export default async function BookPage({
     start: single(rawParams.start),
     tab: single(rawParams.tab),
     offerId: single(rawParams.offerId),
+    // Only in the URL when there is a choice to remember.
+    sport: sport && sports.length > 1 ? sport : undefined,
   };
 
   const selectedCourt = current.court
@@ -195,6 +216,32 @@ export default async function BookPage({
       <h1 className="mt-4 text-3xl font-bold tracking-tight">
         {t("title", { club: day.club.name })}
       </h1>
+
+      {sports.length > 1 && (
+        <nav aria-label={t("sportLabel")} className="mt-4 flex gap-1 text-sm">
+          {sports.map((option) => (
+            <Link
+              key={option}
+              // Another sport's courts: the picked court and time go.
+              href={hrefWith(current, {
+                sport: option,
+                court: undefined,
+                start: undefined,
+                tab: undefined,
+              })}
+              aria-current={option === sport ? "true" : undefined}
+              className={cn(
+                "rounded-md border px-3 py-1.5 font-medium",
+                option === sport
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border hover:bg-muted",
+              )}
+            >
+              {tSport(`names.${option}`)}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <nav
         aria-label={t("dateLabel")}

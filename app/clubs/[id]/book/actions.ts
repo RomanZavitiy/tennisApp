@@ -13,6 +13,7 @@ import { getDayGrid } from "@/lib/booking/get-day-grid";
 import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
+import type { Sport } from "@/lib/generated/prisma/enums";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
 import {
   notifyBookingCancelled,
@@ -60,13 +61,15 @@ export async function requestBooking(
   // actually its author — a borrowed id from someone else's offer (the URL
   // a non-author could still reach the grid with) never gets stored.
   let offerId: string | undefined;
+  let offerSport: Sport | undefined;
   if (parsed.data.offerId) {
     const linkedOffer = await db.sparringOffer.findUnique({
       where: { id: parsed.data.offerId },
-      select: { authorId: true },
+      select: { authorId: true, sport: true },
     });
     if (linkedOffer?.authorId === player.id) {
       offerId = parsed.data.offerId;
+      offerSport = linkedOffer.sport;
     }
   }
 
@@ -90,10 +93,15 @@ export async function requestBooking(
 
   const court = await db.court.findUnique({
     where: { id: courtId },
-    select: { id: true, name: true, active: true, clubId: true },
+    select: { id: true, name: true, active: true, clubId: true, sport: true },
   });
   if (!court || !court.active) {
     return { ok: false, message: tErrors("courtNotFound") };
+  }
+  // Slice PD2: a court booked for a game is a court of that game's sport —
+  // confirming it marks the game's court as booked.
+  if (offerSport && court.sport !== offerSport) {
+    return { ok: false, message: tErrors("courtWrongSport") };
   }
 
   // The slot the player saw on the grid a moment ago, re-read now.

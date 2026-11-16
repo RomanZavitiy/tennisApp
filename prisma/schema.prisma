@@ -293,6 +293,9 @@ model Court {
 
   /// "Court 1", "Kort A" — whatever the club itself calls it.
   name            String  @db.VarChar(60)
+  /// Slice PD2: which sport this court is for. A club with both sports
+  /// (Club.sports) has courts of each; the booking grid shows one sport.
+  sport           Sport   @default(TENNIS)
   surface         Surface
   indoor          Boolean @default(false)
   /// Null means unknown — never invented; shown as "price unknown" rather
