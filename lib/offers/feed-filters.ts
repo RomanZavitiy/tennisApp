@@ -28,6 +28,8 @@ export type FeedFilters = {
   /** A Kraków calendar day, "YYYY-MM-DD". */
   date?: string;
   district?: District;
+  /** Games at one club (slice PD3, task PD3.5): the club's id. */
+  club?: string;
   /** The player's level: offers whose wanted range includes it. */
   ntrp?: number;
   format?: OfferFormat;
@@ -47,6 +49,7 @@ type SearchParams = Record<string, string | string[] | undefined>;
 const fields = {
   date: z.iso.date(),
   district: z.enum(District),
+  club: z.uuid(),
   // The padel scale (1.0–7.0) contains every NTRP level, so one check
   // serves both sports; a level a sport doesn't have just matches fewer
   // offers.
@@ -120,6 +123,9 @@ export function feedWhere(
   if (filters.district) {
     conditions.push({ district: filters.district });
   }
+  if (filters.club) {
+    conditions.push({ clubId: filters.club });
+  }
   if (filters.ntrp !== undefined) {
     // An empty bound means "any level" on that side.
     conditions.push(
@@ -169,6 +175,7 @@ export function feedHref(
   const params = new URLSearchParams();
   if (filters.date) params.set("date", filters.date);
   if (filters.district) params.set("district", filters.district);
+  if (filters.club) params.set("club", filters.club);
   if (filters.ntrp !== undefined) params.set("ntrp", filters.ntrp.toFixed(1));
   if (filters.format) params.set("format", filters.format);
   if (filters.gender) params.set("gender", filters.gender);

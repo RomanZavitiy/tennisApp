@@ -264,3 +264,19 @@ describe("the gender filter", () => {
     expect(feedHref({ gender: "MIXED" })).toBe("/offers?gender=MIXED");
   });
 });
+
+// Slice PD3, task PD3.5: games at one club.
+describe("the club filter", () => {
+  const CLUB = "11111111-1111-4111-8111-111111111111";
+
+  it("reads ?club= only when it is a club id", () => {
+    expect(parseFeedFilters({ club: CLUB })).toEqual({ club: CLUB });
+    expect(parseFeedFilters({ club: "olsza" })).toEqual({});
+  });
+
+  it("narrows the query to that club and survives in the link", () => {
+    const where = feedWhere({ club: CLUB }, new Date("2026-11-17T10:00Z"));
+    expect(where.AND).toContainEqual({ clubId: CLUB });
+    expect(feedHref({ club: CLUB })).toBe(`/offers?club=${CLUB}`);
+  });
+});
