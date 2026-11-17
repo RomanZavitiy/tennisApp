@@ -8,6 +8,7 @@ import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
+import { notifyFavoriters } from "@/lib/notifications/favorite-offer";
 import { notifyInterestedPlayers } from "@/lib/notifications/new-offer";
 import {
   activeOffersWhere,
@@ -103,7 +104,7 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   // A private game (slice PD3) is announced to nobody: its link is how
   // players find it.
   if (offer.visibility === "PUBLIC") {
-    await notifyInterestedPlayers({
+    const reached = await notifyInterestedPlayers({
       offerId: created.id,
       authorId: author.id,
       sport: offer.sport,
@@ -112,6 +113,18 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
       ntrpMin: offer.ntrpMin ?? null,
       ntrpMax: offer.ntrpMax ?? null,
       startsAt: offer.startsAt,
+    });
+    // PD3.4: players who keep the author as a favourite hear about it too.
+    // Best-effort, like the invite below — the offer is already saved.
+    await notifyFavoriters(
+      {
+        offerId: created.id,
+        authorId: author.id,
+        matchGender: offer.matchGender,
+      },
+      reached,
+    ).catch((error: unknown) => {
+      console.error("Favourite-offer notification failed:", error);
     });
   }
 

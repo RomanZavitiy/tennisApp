@@ -10,6 +10,8 @@ import {
   createReport,
   type CreateReportResult,
 } from "@/lib/moderation/create-report";
+import { isBlockedEitherWay } from "@/lib/moderation/personal-block";
+import { addFavoriteRefusal, countFavorites } from "@/lib/players/favorites";
 import { reportInputSchema } from "@/lib/validation/report";
 
 /** "Report" on a player's profile page (task 3.19) — a direct report, no offer or message context. */
@@ -103,6 +105,73 @@ export async function unblockPlayer(
   // blockPlayer's insert, no existence check is needed first.
   await db.userBlock.deleteMany({
     where: { blockerId: viewer.id, blockedId: id.data },
+  });
+
+  revalidatePath(`/players/${id.data}`);
+  revalidatePath("/profile");
+  return { ok: true };
+}
+
+export type FavoritePlayerResult =
+  { ok: true } | { ok: false; message: string };
+
+// "Add to favourites" on a player's profile (slice PD3, task PD3.4): the
+// viewer's own private list — the other player is never told. Who may be
+// added is lib/players/favorites.ts's addFavoriteRefusal.
+export async function addFavorite(
+  targetUserId: unknown,
+): Promise<FavoritePlayerResult> {
+  const viewer = await requireOnboardedUser();
+  const t = await getTranslations("Errors");
+
+  const id = z.uuid().safeParse(targetUserId);
+  if (!id.success) {
+    return { ok: false, message: t("playerNotFound") };
+  }
+  const exists = await db.user.findUnique({
+    where: { id: id.data },
+    select: { id: true },
+  });
+  if (!exists) {
+    return { ok: false, message: t("playerNotFound") };
+  }
+
+  const refusal = addFavoriteRefusal({
+    userId: viewer.id,
+    favoriteId: id.data,
+    blocked: await isBlockedEitherWay(viewer.id, id.data),
+    count: await countFavorites(viewer.id),
+  });
+  if (refusal) {
+    const tRefusal = await getTranslations("FavoriteRefusal");
+    return { ok: false, message: tRefusal(refusal) };
+  }
+
+  // ON CONFLICT DO NOTHING on the (user, favourite) pair: adding twice is a
+  // no-op, same idiom as blockPlayer above.
+  await db.playerFavorite.createMany({
+    data: [{ userId: viewer.id, favoriteId: id.data }],
+    skipDuplicates: true,
+  });
+
+  revalidatePath(`/players/${id.data}`);
+  revalidatePath("/profile");
+  return { ok: true };
+}
+
+export async function removeFavorite(
+  targetUserId: unknown,
+): Promise<FavoritePlayerResult> {
+  const viewer = await requireOnboardedUser();
+  const t = await getTranslations("Errors");
+
+  const id = z.uuid().safeParse(targetUserId);
+  if (!id.success) {
+    return { ok: false, message: t("playerNotFound") };
+  }
+
+  await db.playerFavorite.deleteMany({
+    where: { userId: viewer.id, favoriteId: id.data },
   });
 
   revalidatePath(`/players/${id.data}`);

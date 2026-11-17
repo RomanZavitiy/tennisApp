@@ -174,6 +174,10 @@ model User {
   blocksMade              UserBlock[]        @relation("BlocksMade")
   /// Players who have personally blocked this player (slice R).
   blocksReceived          UserBlock[]        @relation("BlocksReceived")
+  /// Players this player keeps as favourites (slice PD3).
+  favoritesMade           PlayerFavorite[]   @relation("FavoritesMade")
+  /// Players who keep this player as a favourite (slice PD3).
+  favoritesReceived       PlayerFavorite[]   @relation("FavoritesReceived")
   /// Invites this player sent, as an offer's author (slice S1).
   invitesSent             OfferInvite[]      @relation("InvitesSent")
   /// Invites this player received (slice S1).
@@ -744,6 +748,28 @@ model UserBlock {
   /// same reasoning as OfferDismissal's unique index above.
   @@unique([blockerId, blockedId])
   @@map("user_blocks")
+}
+
+/// A player's own list of people they like playing with (slice PD3, task
+/// PD3.4): "invite my favourites" on their own game, and a push when a
+/// favourite posts one. One-directional and never shown to the favourite.
+/// RLS is enabled with no policy, same as user_blocks: only the server
+/// reads and writes it.
+model PlayerFavorite {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation("FavoritesMade", fields: [userId], references: [id], onDelete: Cascade)
+
+  favoriteId String @map("favorite_id") @db.Uuid
+  favorite   User   @relation("FavoritesReceived", fields: [favoriteId], references: [id], onDelete: Cascade)
+
+  /// Leads with userId: "who are this player's favourites".
+  @@unique([userId, favoriteId])
+  /// "Who keeps this author as a favourite" — the push on a new offer.
+  @@index([favoriteId])
+  @@map("player_favorites")
 }
 
 /// A player following a club (task O.1-O.2): free, instant, no approval.
@@ -1363,6 +1389,9 @@ enum NotificationKind {
   /// Slice U2 (task U2.4): a new "looking for a game" post matches one of
   /// this player's open offers.
   INTENT_FOR_YOUR_OFFER
+  /// Slice PD3 (task PD3.4): a player this one keeps as a favourite posted
+  /// a game.
+  FAVORITE_POSTED_OFFER
 
   @@map("notification_kind")
 }

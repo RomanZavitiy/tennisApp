@@ -16,6 +16,7 @@ const {
   offerCreate,
   redirect,
   notifyInterestedPlayers,
+  notifyFavoriters,
   checkRateLimit,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
@@ -30,6 +31,7 @@ const {
     >(),
   redirect: vi.fn(),
   notifyInterestedPlayers: vi.fn(),
+  notifyFavoriters: vi.fn(),
   checkRateLimit: vi.fn(),
 }));
 
@@ -42,6 +44,7 @@ vi.mock("@/lib/db", () => ({
 }));
 // The matching push is its own concern (lib/notifications/new-offer.test.ts).
 vi.mock("@/lib/notifications/new-offer", () => ({ notifyInterestedPlayers }));
+vi.mock("@/lib/notifications/favorite-offer", () => ({ notifyFavoriters }));
 // Rate limiting (6.16-6.18) is its own concern
 // (lib/rate-limit/check-rate-limit.test.ts); here only that a limit refuses
 // the post matters (tested explicitly below).
@@ -59,7 +62,8 @@ describe("createOffer", () => {
     requireOnboardedUser.mockResolvedValue({ id: ME, gender: "MALE" });
     offerCount.mockResolvedValue(0);
     offerCreate.mockResolvedValue({ id: OFFER });
-    notifyInterestedPlayers.mockResolvedValue(undefined);
+    notifyInterestedPlayers.mockResolvedValue([]);
+    notifyFavoriters.mockResolvedValue([]);
     checkRateLimit.mockResolvedValue({ ok: true });
   });
 
@@ -150,6 +154,28 @@ describe("createOffer", () => {
 
     expect(offerCreate.mock.calls[0]?.[0].data.visibility).toBe("PRIVATE");
     expect(notifyInterestedPlayers).not.toHaveBeenCalled();
+    expect(notifyFavoriters).not.toHaveBeenCalled();
+  });
+
+  // Slice PD3, task PD3.4.
+  it("tells the author's fans, minus those the level push reached", async () => {
+    notifyInterestedPlayers.mockResolvedValue(["neighbour"]);
+
+    await createOffer(valid);
+
+    expect(notifyFavoriters).toHaveBeenCalledWith(
+      { offerId: OFFER, authorId: ME, matchGender: "ANY" },
+      ["neighbour"],
+    );
+  });
+
+  it("still opens the offer when the favourites push fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    notifyFavoriters.mockRejectedValue(new Error("boom"));
+
+    await createOffer(valid);
+
+    expect(redirect).toHaveBeenCalledWith(`/offers/${OFFER}?created=1`);
   });
 
   // Slice PD3, task PD3.1.

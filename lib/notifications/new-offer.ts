@@ -53,10 +53,12 @@ function toCandidate(
 export async function notifyInterestedPlayers(
   offer: NewOfferInfo & { offerId: string },
   now: Date = new Date(),
-): Promise<void> {
+  // The players it reached — the favourites push (PD3.4) skips them, so
+  // nobody hears about one offer twice.
+): Promise<string[]> {
   // No district, no match (lib/matching's own rule) — skip the query too.
   if (!offer.district) {
-    return;
+    return [];
   }
 
   // Slice PD3: a men's or women's game only reaches players it is for.
@@ -111,4 +113,5 @@ export async function notifyInterestedPlayers(
             },
     });
   }
+  return matches.map((match) => match.userId);
 }

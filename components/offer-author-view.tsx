@@ -7,6 +7,7 @@ import {
   declineJoin,
 } from "@/app/offers/[id]/actions";
 import { CandidatesSection } from "@/components/candidates-section";
+import { InviteFavoritesButton } from "@/components/invite-favorites-button";
 import { JoinThread } from "@/components/join-thread";
 import { OfferActionButton } from "@/components/offer-action-button";
 import { PlayerLink } from "@/components/player-link";
@@ -25,12 +26,15 @@ export function AuthorView({
   started,
   viewerId,
   candidates,
+  hasFavorites,
 }: {
   details: OfferDetails;
   started: boolean;
   viewerId: string;
   /** "Кого запросити" (task S2.2) — empty while the offer isn't OPEN. */
   candidates: Candidate[];
+  /** PD3.4: the author keeps favourite players — offer to invite them. */
+  hasFavorites: boolean;
 }) {
   const t = useTranslations("OfferPage");
   const tReliability = useTranslations("Reliability");
@@ -72,6 +76,9 @@ export function AuthorView({
           </ul>
         )}
       </div>
+      {canAccept && hasFavorites && (
+        <InviteFavoritesButton offerId={details.offer.id} />
+      )}
       {details.offer.status === "OPEN" && (
         <CandidatesSection
           offerId={details.offer.id}

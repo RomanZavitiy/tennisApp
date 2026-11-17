@@ -108,6 +108,10 @@
     "INTENT_FOR_YOUR_OFFER": {
       "title": "Ktoś szuka gry jak Twoja",
       "body": "Zawodnik dodał ogłoszenie \"szukam gry\", które pasuje do jednej z Twoich otwartych ofert."
+    },
+    "FAVORITE_POSTED_OFFER": {
+      "title": "Ulubiony gracz dodał grę",
+      "body": "Gracz z Twoich ulubionych szuka partnerów."
     }
   },
   "SystemMessages": {
@@ -186,6 +190,7 @@
     "myBookings": "Moje rezerwacje",
     "matchHistory": "Historia meczów",
     "blockedPlayers": "Zablokowani zawodnicy",
+    "favoritePlayers": "Ulubieni gracze",
     "account": "Konto",
     "photo": "Zdjęcie profilowe",
     "editProfile": "Edytuj profil",
@@ -625,6 +630,24 @@
     "notFound": "Zawodnik nie znaleziony",
     "matchHistory": "Historia meczów",
     "reportThisPlayer": "Zgłoś tego zawodnika"
+  },
+  "FavoritePlayerButton": {
+    "add": "Dodaj do ulubionych",
+    "remove": "W ulubionych"
+  },
+  "FavoritePlayersList": {
+    "none": "Nie masz jeszcze ulubionych graczy. Dodaj kogoś z jego profilu.",
+    "aPlayer": "Zawodnik"
+  },
+  "FavoriteRefusal": {
+    "SELF": "Nie możesz dodać siebie.",
+    "BLOCKED": "Nie możesz dodać tego zawodnika.",
+    "TOO_MANY": "Lista ulubionych jest pełna (20 graczy)."
+  },
+  "InviteFavoritesButton": {
+    "invite": "Zaproś ulubionych",
+    "inviting": "Zapraszanie…",
+    "invited": "{count, plural, =0 {Nie ma już kogo zaprosić z ulubionych.} one {Zaproszono # gracza.} few {Zaproszono # graczy.} many {Zaproszono # graczy.} other {Zaproszono # gracza.}}"
   },
   "BlockPlayerButton": {
     "block": "Zablokuj",

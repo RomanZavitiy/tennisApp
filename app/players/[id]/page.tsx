@@ -15,6 +15,8 @@ import { getCurrentUser } from "@/lib/auth/require-user";
 import { getPublicBadges } from "@/lib/feedback/badges";
 import { isBlocked } from "@/lib/moderation/personal-block";
 import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
+import { isFavorite } from "@/lib/players/favorites";
+import { FavoritePlayerButton } from "@/components/favorite-player-button";
 import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
 import { getPublicProfile } from "@/lib/players/public-profile";
 
@@ -49,6 +51,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   const isOwnProfile = viewer?.id === profile.id;
   const alreadyBlocked =
     viewer && !isOwnProfile ? await isBlocked(viewer.id, profile.id) : false;
+  // PD3.4: whether this player is among the viewer's favourites.
+  const alreadyFavorite =
+    viewer && !isOwnProfile ? await isFavorite(viewer.id, profile.id) : false;
   // "Invite to game" (task S1.4): the viewer's own open offers to invite
   // this player into.
   const myOpenOffers =
@@ -74,6 +79,10 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
                 targetUserId={profile.id}
                 offers={myOpenOffers ?? []}
                 source="profile"
+              />
+              <FavoritePlayerButton
+                targetUserId={profile.id}
+                initialFavorite={alreadyFavorite}
               />
               <div className="flex flex-wrap items-center gap-3">
                 <ReportButton

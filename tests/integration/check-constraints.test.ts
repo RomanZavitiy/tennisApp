@@ -145,6 +145,36 @@ describe("sparring_offers match gender (PD3, migration 20261117090000_add_match_
   });
 });
 
+describe("player_favorites (PD3, migration 20261117110000_add_player_favorites)", () => {
+  it("keeps one row per pair and refuses a player as their own favourite", async () => {
+    const [me, them] = await Promise.all([createPlayer(), createPlayer()]);
+    await db.playerFavorite.create({
+      data: { userId: me.id, favoriteId: them.id },
+    });
+    await expect(
+      db.playerFavorite.create({
+        data: { userId: me.id, favoriteId: them.id },
+      }),
+    ).rejects.toMatchObject({ code: "P2002" });
+    await expectDbRejection(
+      db.playerFavorite.create({ data: { userId: me.id, favoriteId: me.id } }),
+      {
+        code: PG.checkViolation,
+        mentions: "player_favorites_not_self_check",
+      },
+    );
+  });
+
+  it("goes away with either player", async () => {
+    const [me, them] = await Promise.all([createPlayer(), createPlayer()]);
+    await db.playerFavorite.create({
+      data: { userId: me.id, favoriteId: them.id },
+    });
+    await db.user.delete({ where: { id: them.id } });
+    expect(await db.playerFavorite.count({ where: { userId: me.id } })).toBe(0);
+  });
+});
+
 describe("play_intents (PD2, migration 20261116210000_add_play_intent_sport)", () => {
   const intent = (userId: string, date: string) => ({
     userId,

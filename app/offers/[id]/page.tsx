@@ -26,6 +26,7 @@ import { joinRefusal } from "@/lib/offers/join-rules";
 import { waitlistJoinRefusal } from "@/lib/offers/waitlist-rules";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
 import { getOfferCandidates } from "@/lib/offers/offer-candidates";
+import { countFavorites } from "@/lib/players/favorites";
 import { getOfferDetails, type OfferDetails } from "@/lib/offers/offer-details";
 import {
   formatLabel,
@@ -106,6 +107,11 @@ export default async function OfferPage({
     offer.visibility === "PUBLIC"
       ? await getOfferCandidates(offer.id)
       : [];
+
+  // PD3.4: "Invite my favourites" is only worth showing to an author who
+  // has some.
+  const hasFavorites =
+    details.isAuthor && viewer ? (await countFavorites(viewer.id)) > 0 : false;
 
   const t = await getTranslations("OfferPage");
   const tOfferLabels = await getTranslations("OfferLabels");
@@ -223,6 +229,7 @@ export default async function OfferPage({
                 started={started}
                 viewerId={viewer.id}
                 candidates={candidates}
+                hasFavorites={hasFavorites}
               />
             ) : (
               <PlayerView details={details} viewerId={viewer.id} />

@@ -10,6 +10,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { submitFeedback } from "@/app/(member)/profile/feedback-actions";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { BlockedPlayersList } from "@/components/blocked-players-list";
+import { FavoritePlayersList } from "@/components/favorite-players-list";
 import { DiscoverableToggle } from "@/components/discoverable-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { LevelHint } from "@/components/level-hint";
@@ -27,6 +28,7 @@ import { getPublicBadges } from "@/lib/feedback/badges";
 import { getLevelHint } from "@/lib/feedback/level-signal";
 import { getPendingFeedback } from "@/lib/feedback/match-feedback";
 import { getBlockedPlayers } from "@/lib/moderation/personal-block";
+import { getFavoritePlayers } from "@/lib/players/favorites";
 import { getMyUpcomingGames } from "@/lib/offers/my-games";
 import { getMatchHistory, summarizeMatches } from "@/lib/players/match-history";
 import { getPublicProfile } from "@/lib/players/public-profile";
@@ -51,6 +53,7 @@ export default async function ProfilePage() {
     games,
     bookings,
     blockedPlayers,
+    favoritePlayers,
     settings,
     achievements,
     feedbackBadges,
@@ -61,6 +64,7 @@ export default async function ProfilePage() {
     getMyUpcomingGames(player.id),
     getMyBookings(player.id),
     getBlockedPlayers(player.id),
+    getFavoritePlayers(player.id),
     db.user.findUniqueOrThrow({
       where: { id: player.id },
       select: { discoverable: true },
@@ -119,6 +123,10 @@ export default async function ProfilePage() {
             feedbackBadges={feedbackBadges}
           />
           <LevelHint hint={levelHint} />
+
+          <Card title={t("favoritePlayers")}>
+            <FavoritePlayersList players={favoritePlayers} />
+          </Card>
 
           <Card title={t("blockedPlayers")}>
             <BlockedPlayersList players={blockedPlayers} />

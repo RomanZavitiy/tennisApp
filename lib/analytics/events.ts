@@ -51,7 +51,13 @@ type EventProperties = {
 // Where "Invite to game" (slice S1) was clicked from. "playAgain" is Q.2's
 // own trigger; "intent" is U2.3's "Invite to my game" on a PlayIntent card.
 export type InviteSource =
-  "profile" | "leaderboard" | "candidates" | "playAgain" | "intent";
+  | "profile"
+  | "leaderboard"
+  | "candidates"
+  | "playAgain"
+  | "intent"
+  // PD3.4: "invite my favourites" on the author's own offer.
+  | "favorites";
 
 export type AnalyticsEvent = keyof EventProperties;
 

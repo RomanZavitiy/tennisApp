@@ -42,7 +42,8 @@ export type NotificationEvent =
   | { kind: "INVITE_RECEIVED"; offerId: string }
   | { kind: "INVITE_ACCEPTED"; offerId: string }
   | { kind: "SPOT_OPENED"; offerId: string }
-  | { kind: "INTENT_FOR_YOUR_OFFER"; offerId: string };
+  | { kind: "INTENT_FOR_YOUR_OFFER"; offerId: string }
+  | { kind: "FAVORITE_POSTED_OFFER"; offerId: string };
 
 type Kind = NotificationEvent["kind"];
 
@@ -66,6 +67,9 @@ const CATEGORY: Record<Kind, "matches" | "newOffers"> = {
   // share its category too — notify()'s own gate and the pre-filtering in
   // lib/notifications/intent-notify.ts must check the same toggle.
   INTENT_FOR_YOUR_OFFER: "newOffers",
+  // PD3.4: the same toggle and daily cap as the two above
+  // (lib/notifications/favorite-offer.ts).
+  FAVORITE_POSTED_OFFER: "newOffers",
 };
 
 // Decision 2026-10-14: email fallback exists only for "new join request,
