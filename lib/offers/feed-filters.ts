@@ -89,8 +89,10 @@ export function nextDay(date: string): string {
 }
 
 /**
- * The feed's query: open offers that haven't started, narrowed by the
- * filters. A signed-in viewer's own offers stay in (slice K1): an author
+ * The feed's query: open, public offers that haven't started, narrowed by
+ * the filters. A private game (slice PD3) is never listed — not in the
+ * feed, on a club's page or in a club's "players looking" count, which all
+ * build on this. A signed-in viewer's own offers stay in (slice K1): an author
  * who can't find the offer they just posted assumes it was lost.
  */
 export function feedWhere(
@@ -100,6 +102,7 @@ export function feedWhere(
   const conditions: Prisma.SparringOfferWhereInput[] = [
     { status: "OPEN" },
     { startsAt: { gt: now } },
+    { visibility: "PUBLIC" },
   ];
 
   if (filters.sport) {

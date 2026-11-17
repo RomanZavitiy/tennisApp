@@ -98,6 +98,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
       sport: true,
       format: true,
       matchGender: true,
+      visibility: true,
       hasPartner: true,
       startsAt: true,
       durationMinutes: true,

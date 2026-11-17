@@ -100,16 +100,20 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
 
   // Task 5.16: "new offer for my level", to players nearby and at a
   // matching level — never blocks the redirect below on itself failing.
-  await notifyInterestedPlayers({
-    offerId: created.id,
-    authorId: author.id,
-    sport: offer.sport,
-    matchGender: offer.matchGender,
-    district: place.district ?? null,
-    ntrpMin: offer.ntrpMin ?? null,
-    ntrpMax: offer.ntrpMax ?? null,
-    startsAt: offer.startsAt,
-  });
+  // A private game (slice PD3) is announced to nobody: its link is how
+  // players find it.
+  if (offer.visibility === "PUBLIC") {
+    await notifyInterestedPlayers({
+      offerId: created.id,
+      authorId: author.id,
+      sport: offer.sport,
+      matchGender: offer.matchGender,
+      district: place.district ?? null,
+      ntrpMin: offer.ntrpMin ?? null,
+      ntrpMax: offer.ntrpMax ?? null,
+      startsAt: offer.startsAt,
+    });
+  }
 
   await captureEvent("offer_created", author.id, {
     sport: offer.sport,

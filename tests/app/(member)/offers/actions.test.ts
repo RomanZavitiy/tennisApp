@@ -120,6 +120,7 @@ describe("createOffer", () => {
         sport: "TENNIS",
         format: "SINGLES",
         matchGender: "ANY",
+        visibility: "PUBLIC",
         hasPartner: false,
         startsAt: new Date("2026-10-20T16:00:00Z"),
         durationMinutes: 90,
@@ -141,6 +142,14 @@ describe("createOffer", () => {
       ntrpMax: null,
       startsAt: new Date("2026-10-20T16:00:00.000Z"),
     });
+  });
+
+  // Slice PD3, task PD3.2: a private game is found by its link only.
+  it("saves a private game without announcing it to anyone", async () => {
+    await createOffer({ ...valid, visibility: "PRIVATE" });
+
+    expect(offerCreate.mock.calls[0]?.[0].data.visibility).toBe("PRIVATE");
+    expect(notifyInterestedPlayers).not.toHaveBeenCalled();
   });
 
   // Slice PD3, task PD3.1.

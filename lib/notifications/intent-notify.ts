@@ -79,6 +79,8 @@ export async function notifyMatchingOfferAuthors(
     where: {
       authorId: { not: intent.userId },
       status: "OPEN",
+      // Slice PD3: a private game is filled by its link, not by strangers.
+      visibility: "PUBLIC",
       startsAt: { gt: now },
       district: { in: [...intent.districts] },
       format: intent.format,

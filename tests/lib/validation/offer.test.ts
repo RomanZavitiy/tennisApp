@@ -47,12 +47,19 @@ describe("offerSchema", () => {
       sport: "TENNIS",
       format: "SINGLES",
       matchGender: "ANY",
+      visibility: "PUBLIC",
       hasPartner: false,
       startsAt: new Date("2026-10-20T16:00:00Z"),
       durationMinutes: 90,
       district: "KROWODRZA",
       courtStatus: "WILL_BOOK",
     });
+  });
+
+  // Slice PD3, task PD3.2.
+  it("takes a private game, and nothing else for visibility", () => {
+    expect(parse({ visibility: "PRIVATE" }).data?.visibility).toBe("PRIVATE");
+    expect(parse({ visibility: "SECRET" }).success).toBe(false);
   });
 
   // Slice PD3, task PD3.1.

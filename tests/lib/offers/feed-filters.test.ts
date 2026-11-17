@@ -8,7 +8,12 @@ import {
 } from "@/lib/offers/feed-filters";
 
 const NOW = new Date("2026-10-11T10:00:00Z");
-const BASE = [{ status: "OPEN" }, { startsAt: { gt: NOW } }];
+// A private game (slice PD3) is never in the feed, whatever the filters.
+const BASE = [
+  { status: "OPEN" },
+  { startsAt: { gt: NOW } },
+  { visibility: "PUBLIC" },
+];
 
 describe("parseFeedFilters", () => {
   it("reads every filter from the URL", () => {

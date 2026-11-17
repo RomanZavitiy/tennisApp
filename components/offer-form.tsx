@@ -106,6 +106,7 @@ export function OfferForm({
       sport,
       format: isPadel ? "DOUBLES" : (defaultFormat ?? "SINGLES"),
       matchGender: "ANY",
+      visibility: "PUBLIC",
       startsAt: defaultStartsAt ?? "",
       durationMinutes: String(defaultDurationMinutes ?? DEFAULT_OFFER_DURATION),
       clubId: presetClub?.id ?? "",
@@ -350,6 +351,27 @@ export function OfferForm({
               {tCourtStatus(value)}
             </NativeSelectOption>
           ))}
+        </NativeSelect>
+      </Field>
+
+      <Field
+        id="visibility"
+        label={t("visibilityLabel")}
+        hint={t("visibilityHint")}
+        error={errors.visibility}
+      >
+        <NativeSelect
+          id="visibility"
+          className="w-full"
+          {...aria("visibility", errors.visibility)}
+          {...register("visibility")}
+        >
+          <NativeSelectOption value="PUBLIC">
+            {t("visibilityPublic")}
+          </NativeSelectOption>
+          <NativeSelectOption value="PRIVATE">
+            {t("visibilityPrivate")}
+          </NativeSelectOption>
         </NativeSelect>
       </Field>
 

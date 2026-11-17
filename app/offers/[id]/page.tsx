@@ -74,6 +74,10 @@ export async function generateMetadata({
     description,
     openGraph: { title, description },
     twitter: { title, description },
+    // Slice PD3: a private game is for people who were given its link.
+    ...(offer.visibility === "PRIVATE"
+      ? { robots: { index: false, follow: false } }
+      : {}),
   };
 }
 
@@ -96,7 +100,10 @@ export default async function OfferPage({
   const started = offer.startsAt <= new Date();
   // "Кого запросити" (task S2.2): only for the author, only while OPEN.
   const candidates =
-    details.isAuthor && offer.status === "OPEN"
+    details.isAuthor &&
+    offer.status === "OPEN" &&
+    // A private game (slice PD3) is filled by its link, not by suggestions.
+    offer.visibility === "PUBLIC"
       ? await getOfferCandidates(offer.id)
       : [];
 
@@ -148,6 +155,7 @@ export default async function OfferPage({
         <div className="surface p-6 sm:p-8">
           <p className="text-sm text-muted-foreground">
             {formatLabel(tOfferLabels, offer)}
+            {offer.visibility === "PRIVATE" && ` · ${t("privateGame")}`}
           </p>
           <div className="flex items-start justify-between gap-3">
             <h1 className="mt-1 text-3xl font-bold tracking-tight">

@@ -512,6 +512,10 @@ model SparringOffer {
   /// MEN / WOMEN are enforced when a player asks to join or is invited
   /// (lib/offers/match-gender.ts); MIXED is doubles-only (CHECK).
   matchGender     MatchGender @default(ANY) @map("match_gender")
+  /// Slice PD3: a PRIVATE game is left out of every list and push — the
+  /// feed, a club's page, "play today", "new offer" pushes, invite
+  /// candidates — and is reached only through its link.
+  visibility      OfferVisibility @default(PUBLIC)
   /// Doubles only: the author brings their own partner (a mark, not an account).
   hasPartner      Boolean     @default(false) @map("has_partner")
   /// Stored in UTC, shown in Europe/Warsaw.
@@ -1166,6 +1170,14 @@ enum Sport {
   PADEL
 
   @@map("sport")
+}
+
+/// Who can find a game (slice PD3, task PD3.2).
+enum OfferVisibility {
+  PUBLIC
+  PRIVATE
+
+  @@map("offer_visibility")
 }
 
 /// Who a game is for (slice PD3, task PD3.1), both sports.

@@ -61,6 +61,7 @@ export function MyGames({ games }: { games: MyGame[] }) {
                   game.sport,
                   tOfferLabels("padel.badge"),
                 )}
+                {game.visibility === "PRIVATE" && ` · ${t("private")}`}
               </span>
             </span>
             <span

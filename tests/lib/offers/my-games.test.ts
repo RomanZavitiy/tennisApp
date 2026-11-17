@@ -20,6 +20,7 @@ function offer(id: string, startsAt: string) {
   return {
     id,
     sport: "TENNIS",
+    visibility: "PUBLIC",
     startsAt: new Date(startsAt),
     durationMinutes: 90,
     district: "PODGORZE",

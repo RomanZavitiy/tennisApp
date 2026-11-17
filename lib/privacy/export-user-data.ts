@@ -93,7 +93,10 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
         select: {
           id: true,
           status: true,
+          sport: true,
           format: true,
+          matchGender: true,
+          visibility: true,
           startsAt: true,
           district: true,
           clubId: true,

@@ -43,6 +43,7 @@ export async function getPlayTodayFeed(
   const rows = await db.sparringOffer.findMany({
     where: {
       status: "OPEN",
+      visibility: "PUBLIC",
       sport,
       matchGender: { in: matchGendersOpenTo(viewerGender) },
       authorId: { notIn: [viewerId, ...blockedIds] },

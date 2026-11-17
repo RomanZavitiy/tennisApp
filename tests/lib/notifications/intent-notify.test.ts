@@ -95,6 +95,7 @@ describe("notifyMatchingOfferAuthors", () => {
     expect(args.where).toEqual({
       authorId: { not: INTENT_OWNER },
       status: "OPEN",
+      visibility: "PUBLIC",
       startsAt: { gt: NOW },
       district: { in: ["STARE_MIASTO"] },
       format: "SINGLES",

@@ -5,6 +5,7 @@ import {
   District,
   MatchGender,
   OfferFormat,
+  OfferVisibility,
   Sport,
   Surface,
 } from "@/lib/generated/prisma/enums";
@@ -48,6 +49,10 @@ export function offerSchema(t: ValidationT) {
       // Slice PD3: who the game is for. Whether the author is one of
       // them is createOffer's check — the schema doesn't know the author.
       matchGender: z.enum(MatchGender, t("matchGenderRequired")).default("ANY"),
+      // Slice PD3: PRIVATE keeps the game out of every list and push.
+      visibility: z
+        .enum(OfferVisibility, t("visibilityRequired"))
+        .default("PUBLIC"),
       hasPartner: z.boolean().default(false),
       // Kraków wall-clock time from <input type="datetime-local">, stored as
       // the UTC instant it means.
@@ -188,6 +193,7 @@ const OFFER_FIELDS: (keyof OfferInput)[] = [
   "sport",
   "format",
   "matchGender",
+  "visibility",
   "hasPartner",
   "startsAt",
   "durationMinutes",
