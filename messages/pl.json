@@ -304,6 +304,8 @@
     "courtLabel": "Kort",
     "statusCancelled": "Odwołane",
     "privateGame": "Gra prywatna",
+    "invitedByLink": "{author} zaprasza Cię do tej gry.",
+    "takeThePlace": "Zajmij miejsce",
     "statusStarted": "Już się zaczęło",
     "postedBy": "Dodane przez",
     "signInToJoin": "Zaloguj się, aby się zgłosić",
@@ -726,6 +728,27 @@
   },
   "ReportButton": {
     "defaultLabel": "Zgłoś"
+  },
+  "InviteLinkSection": {
+    "title": "Link z zaproszeniem",
+    "onHint": "Każdy, komu wyślesz ten link, od razu zajmuje wolne miejsce, bez Twojej akceptacji. Link przestaje działać, gdy gra jest pełna albo gdy go wyłączysz lub utworzysz nowy.",
+    "offHint": "Włącz link dla znajomych: kto go otworzy i się zaloguje, od razu zajmuje wolne miejsce.",
+    "turnOn": "Włącz link z zaproszeniem",
+    "copy": "Kopiuj link",
+    "copied": "Link skopiowany!",
+    "replace": "Utwórz nowy link",
+    "turnOff": "Wyłącz"
+  },
+  "InviteLinkRefusal": {
+    "INVALID_LINK": "Ten link z zaproszeniem już nie działa. Poproś autora o nowy.",
+    "OWN_OFFER": "To Twoja własna oferta.",
+    "BLOCKED": "Nie możesz dołączyć do tej oferty.",
+    "STARTED": "Ta gra już się zaczęła.",
+    "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
+    "WRONG_GENDER": "Ta gra jest dla zawodników innej płci.",
+    "FULL": "Ta gra jest już pełna.",
+    "ALREADY_IN": "Już grasz w tej grze.",
+    "DECLINED": "Autor odrzucił Twoje zgłoszenie."
   },
   "ShareOfferButton": {
     "share": "Udostępnij",

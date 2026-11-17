@@ -304,6 +304,8 @@
     "courtLabel": "Court",
     "statusCancelled": "Cancelled",
     "privateGame": "Private game",
+    "invitedByLink": "{author} invited you to this game.",
+    "takeThePlace": "Take the place",
     "statusStarted": "Already started",
     "postedBy": "Posted by",
     "signInToJoin": "Sign in to join",
@@ -726,6 +728,27 @@
   },
   "ReportButton": {
     "defaultLabel": "Report"
+  },
+  "InviteLinkSection": {
+    "title": "Invite link",
+    "onHint": "Anyone you send this link to takes a free place straight away, without your accept. It stops working when the game is full, or when you turn it off or make a new one.",
+    "offHint": "Turn on a link to send to friends: whoever opens it and signs in takes a free place straight away.",
+    "turnOn": "Turn on the invite link",
+    "copy": "Copy the link",
+    "copied": "Link copied!",
+    "replace": "Make a new link",
+    "turnOff": "Turn off"
+  },
+  "InviteLinkRefusal": {
+    "INVALID_LINK": "This invite link doesn't work any more. Ask the author for a new one.",
+    "OWN_OFFER": "This is your own offer.",
+    "BLOCKED": "You can't join this offer.",
+    "STARTED": "This game has already started.",
+    "NOT_OPEN": "This offer is no longer taking players.",
+    "WRONG_GENDER": "This game is for players of another gender.",
+    "FULL": "This game is already full.",
+    "ALREADY_IN": "You're already in this game.",
+    "DECLINED": "The author has declined your request."
   },
   "ShareOfferButton": {
     "share": "Share",

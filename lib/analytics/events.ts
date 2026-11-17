@@ -32,6 +32,8 @@ type EventProperties = {
   invite_accepted: Record<string, never>;
   invite_declined: Record<string, never>;
   invite_expired: Record<string, never>;
+  /** PD3.3: a player took a place through an offer's invite link. */
+  invite_link_joined: Record<string, never>;
   candidates_viewed: { count: number };
   candidate_invited: { rank: number };
   waitlist_joined: Record<string, never>;

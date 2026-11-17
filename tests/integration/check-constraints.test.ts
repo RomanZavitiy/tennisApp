@@ -175,6 +175,26 @@ describe("player_favorites (PD3, migration 20261117110000_add_player_favorites)"
   });
 });
 
+describe("sparring_offers invite token (PD3, migration 20261117120000_add_offer_invite_token)", () => {
+  it("has no link by default and never gives two offers the same token", async () => {
+    const author = await createPlayer();
+    const first = await createOffer(author.id);
+    expect(first.inviteToken).toBeNull();
+
+    const token = `pd3-${randomUUID()}`;
+    await db.sparringOffer.update({
+      where: { id: first.id },
+      data: { inviteToken: token },
+    });
+    await expect(
+      createOffer(author.id, { inviteToken: token }),
+    ).rejects.toMatchObject({ code: "P2002" });
+    // Any number of offers can have the link off.
+    await createOffer(author.id);
+    await createOffer(author.id);
+  });
+});
+
 describe("play_intents (PD2, migration 20261116210000_add_play_intent_sport)", () => {
   const intent = (userId: string, date: string) => ({
     userId,

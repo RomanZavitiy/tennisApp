@@ -25,7 +25,9 @@ import { getCurrentUser } from "@/lib/auth/require-user";
 import { joinRefusal } from "@/lib/offers/join-rules";
 import { waitlistJoinRefusal } from "@/lib/offers/waitlist-rules";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
+import { getInviteToken, inviteLinkIsValid } from "@/lib/offers/invite-link";
 import { getOfferCandidates } from "@/lib/offers/offer-candidates";
+import { joinByInviteLink } from "@/app/offers/[id]/invite-link-actions";
 import { countFavorites } from "@/lib/players/favorites";
 import { getOfferDetails, type OfferDetails } from "@/lib/offers/offer-details";
 import {
@@ -46,7 +48,7 @@ import { DISTRICT_LABELS } from "@/lib/profile/options";
 // Typed by hand, like /players/[id]: generated PageProps need `next typegen`.
 type OfferPageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; invite?: string }>;
 };
 
 export async function generateMetadata({
@@ -91,7 +93,8 @@ export default async function OfferPage({
   const { id } = await params;
   // createOffer (3.4) redirects here with ?created=1 — "the first offer
   // created" (task 5.15), flagged client-side below.
-  const { created } = await searchParams;
+  // ?invite=<token> is the game's invite link (slice PD3, task PD3.3).
+  const { created, invite } = await searchParams;
   const viewer = await getCurrentUser();
   const details = await getOfferDetails(id, viewer?.id ?? null);
   if (!details) {
@@ -107,6 +110,20 @@ export default async function OfferPage({
     offer.visibility === "PUBLIC"
       ? await getOfferCandidates(offer.id)
       : [];
+
+  // PD3.3. The author sees their own link; anyone else who came through a
+  // link that is still the current one gets "Take the place" instead of
+  // "Ask to join". The token itself is only ever sent to the author.
+  const inviteToken = details.isAuthor ? await getInviteToken(offer.id) : null;
+  const linkToken =
+    !details.isAuthor &&
+    invite !== undefined &&
+    (await inviteLinkIsValid(offer.id, invite))
+      ? invite
+      : undefined;
+  const loginNext = linkToken
+    ? `/offers/${offer.id}?invite=${linkToken}`
+    : `/offers/${offer.id}`;
 
   // PD3.4: "Invite my favourites" is only worth showing to an author who
   // has some.
@@ -218,7 +235,7 @@ export default async function OfferPage({
           <section>
             {!viewer ? (
               <Link
-                href={`/login?next=${encodeURIComponent(`/offers/${offer.id}`)}`}
+                href={`/login?next=${encodeURIComponent(loginNext)}`}
                 className={buttonVariants()}
               >
                 {t("signInToJoin")}
@@ -230,9 +247,14 @@ export default async function OfferPage({
                 viewerId={viewer.id}
                 candidates={candidates}
                 hasFavorites={hasFavorites}
+                inviteToken={inviteToken}
               />
             ) : (
-              <PlayerView details={details} viewerId={viewer.id} />
+              <PlayerView
+                details={details}
+                viewerId={viewer.id}
+                inviteLinkToken={linkToken}
+              />
             )}
           </section>
           {viewer && !details.isAuthor && (
@@ -252,9 +274,12 @@ export default async function OfferPage({
 function PlayerView({
   details,
   viewerId,
+  inviteLinkToken,
 }: {
   details: OfferDetails;
   viewerId: string;
+  /** PD3.3: set when the viewer opened the game's current invite link. */
+  inviteLinkToken?: string | undefined;
 }) {
   const t = useTranslations("OfferPage");
   const tJoinRefusal = useTranslations("JoinRefusal");
@@ -326,6 +351,33 @@ function PlayerView({
             variant="outline"
           />
         </div>
+      </div>
+    );
+  }
+
+  // PD3.3: the link is the author's "yes" — a free place is taken at once,
+  // no request to wait on. joinByInviteLink re-checks everything.
+  if (
+    inviteLinkToken &&
+    offer.status === "OPEN" &&
+    offer.startsAt > new Date() &&
+    details.spotsLeft > 0 &&
+    details.viewerFitsGender &&
+    viewerJoin?.status !== "DECLINED"
+  ) {
+    return (
+      <div className="space-y-3">
+        <p className="font-medium">
+          {t("invitedByLink", {
+            author: offer.author.name ?? t("defaultAuthorName"),
+          })}
+        </p>
+        <OfferActionButton
+          action={joinByInviteLink.bind(null, offer.id, inviteLinkToken)}
+          label={t("takeThePlace")}
+          pendingLabel={t("accepting")}
+          trackMeaningfulAction
+        />
       </div>
     );
   }

@@ -520,6 +520,11 @@ model SparringOffer {
   /// feed, a club's page, "play today", "new offer" pushes, invite
   /// candidates — and is reached only through its link.
   visibility      OfferVisibility @default(PUBLIC)
+  /// The secret of this game's invite link (slice PD3, task PD3.3), null
+  /// while the author has it turned off. A signed-in player who opens the
+  /// link takes an accepted place without waiting for the author. Never
+  /// selected for anyone but the author (lib/offers/invite-link.ts).
+  inviteToken     String?         @unique @map("invite_token") @db.VarChar(64)
   /// Doubles only: the author brings their own partner (a mark, not an account).
   hasPartner      Boolean     @default(false) @map("has_partner")
   /// Stored in UTC, shown in Europe/Warsaw.
