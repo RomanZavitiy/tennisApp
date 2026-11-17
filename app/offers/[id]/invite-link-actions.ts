@@ -176,6 +176,16 @@ export async function joinByInviteLink(
             select: { id: true },
           })
         ).id;
+    // A truly new join opens its private thread with a welcome note, same as
+    // requestToJoin and acceptInvite — inside this transaction (#130), so a
+    // failed welcome leaves no half-made place behind.
+    if (!existingJoin) {
+      await postSystemMessage(
+        { offerJoinId: joinId },
+        THREAD_WELCOME_MESSAGE,
+        tx,
+      );
+    }
 
     // A singles join reaching ACCEPTED is a newly scheduled match for both
     // sides (4.11-4.12), same as acceptInvite's own.
@@ -192,21 +202,11 @@ export async function joinByInviteLink(
     return {
       ok: true as const,
       authorId: offer.authorId,
-      joinId,
-      isNewJoin: !existingJoin,
     };
   });
 
   if (!result.ok) {
     return { ok: false, message: tRefusal(result.refusal) };
-  }
-  // A truly new join opens its private thread with a welcome note, same as
-  // requestToJoin and acceptInvite.
-  if (result.isNewJoin) {
-    await postSystemMessage(
-      { offerJoinId: result.joinId },
-      THREAD_WELCOME_MESSAGE,
-    );
   }
   await notify(result.authorId, {
     kind: "INVITE_ACCEPTED",

@@ -133,9 +133,11 @@ describe("joinByInviteLink", () => {
       data: { offerId: OFFER, userId: "player", status: "ACCEPTED" },
       select: { id: true },
     });
+    // The welcome is written in the same transaction as the place (#130).
     expect(postSystemMessage).toHaveBeenCalledWith(
       { offerJoinId: "join-1" },
       "welcome",
+      tx,
     );
     expect(notify).toHaveBeenCalledWith("author", {
       kind: "INVITE_ACCEPTED",
