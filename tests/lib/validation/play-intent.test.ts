@@ -45,6 +45,42 @@ describe("playIntentSchema", () => {
     expect(result.data?.format).toBe("SINGLES");
   });
 
+  // Slice PD2.
+  it("is tennis unless the form says padel", () => {
+    const result = schema.safeParse({
+      date: "2026-11-10",
+      times: ["morning"],
+      districts: ["PODGORZE"],
+    });
+    expect(result.data?.sport).toBe("TENNIS");
+  });
+
+  it("accepts padel doubles and refuses padel singles", () => {
+    const padel = {
+      sport: "PADEL",
+      date: "2026-11-10",
+      times: ["morning"],
+      districts: ["PODGORZE"],
+    };
+    expect(schema.safeParse({ ...padel, format: "DOUBLES" }).success).toBe(
+      true,
+    );
+    const singles = schema.safeParse(padel);
+    expect(singles.success).toBe(false);
+    expect(singles.error?.issues[0]?.path).toEqual(["format"]);
+  });
+
+  it("rejects an unknown sport", () => {
+    expect(
+      schema.safeParse({
+        sport: "SQUASH",
+        date: "2026-11-10",
+        times: ["morning"],
+        districts: ["PODGORZE"],
+      }).success,
+    ).toBe(false);
+  });
+
   it("rejects a date in the past", () => {
     const result = schema.safeParse({
       date: "2026-11-09",

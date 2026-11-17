@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import {
   District,
+  MatchGender,
   OfferFormat,
   type Sport,
 } from "@/lib/generated/prisma/enums";
@@ -27,9 +28,14 @@ export type FeedFilters = {
   /** A Kraków calendar day, "YYYY-MM-DD". */
   date?: string;
   district?: District;
+  /** Games at one club (slice PD3, task PD3.5): the club's id. */
+  club?: string;
   /** The player's level: offers whose wanted range includes it. */
   ntrp?: number;
   format?: OfferFormat;
+  /** Who the game is for (slice PD3): `?gender=WOMEN` shows women's games
+   * only. Unset — every kind. */
+  gender?: MatchGender;
   /** Only offers whose court is already booked (task 3.22). */
   courtBooked?: boolean;
   /** How long the game is (slice K5). */
@@ -43,11 +49,13 @@ type SearchParams = Record<string, string | string[] | undefined>;
 const fields = {
   date: z.iso.date(),
   district: z.enum(District),
+  club: z.uuid(),
   // The padel scale (1.0–7.0) contains every NTRP level, so one check
   // serves both sports; a level a sport doesn't have just matches fewer
   // offers.
   ntrp: z.coerce.number().refine((level) => PADEL_LEVELS.includes(level)),
   format: z.enum(OfferFormat),
+  gender: z.enum(MatchGender),
   duration: z.coerce.number().refine(isOfferDuration),
   time: z.enum(TIMES_OF_DAY),
 };
@@ -84,8 +92,10 @@ export function nextDay(date: string): string {
 }
 
 /**
- * The feed's query: open offers that haven't started, narrowed by the
- * filters. A signed-in viewer's own offers stay in (slice K1): an author
+ * The feed's query: open, public offers that haven't started, narrowed by
+ * the filters. A private game (slice PD3) is never listed — not in the
+ * feed, on a club's page or in a club's "players looking" count, which all
+ * build on this. A signed-in viewer's own offers stay in (slice K1): an author
  * who can't find the offer they just posted assumes it was lost.
  */
 export function feedWhere(
@@ -95,6 +105,7 @@ export function feedWhere(
   const conditions: Prisma.SparringOfferWhereInput[] = [
     { status: "OPEN" },
     { startsAt: { gt: now } },
+    { visibility: "PUBLIC" },
   ];
 
   if (filters.sport) {
@@ -112,6 +123,9 @@ export function feedWhere(
   if (filters.district) {
     conditions.push({ district: filters.district });
   }
+  if (filters.club) {
+    conditions.push({ clubId: filters.club });
+  }
   if (filters.ntrp !== undefined) {
     // An empty bound means "any level" on that side.
     conditions.push(
@@ -121,6 +135,9 @@ export function feedWhere(
   }
   if (filters.format) {
     conditions.push({ format: filters.format });
+  }
+  if (filters.gender) {
+    conditions.push({ matchGender: filters.gender });
   }
   if (filters.courtBooked) {
     conditions.push({ courtStatus: "BOOKED" });
@@ -158,8 +175,10 @@ export function feedHref(
   const params = new URLSearchParams();
   if (filters.date) params.set("date", filters.date);
   if (filters.district) params.set("district", filters.district);
+  if (filters.club) params.set("club", filters.club);
   if (filters.ntrp !== undefined) params.set("ntrp", filters.ntrp.toFixed(1));
   if (filters.format) params.set("format", filters.format);
+  if (filters.gender) params.set("gender", filters.gender);
   if (filters.courtBooked) params.set("courtBooked", "1");
   if (filters.duration) params.set("duration", String(filters.duration));
   if (filters.time) params.set("time", filters.time);

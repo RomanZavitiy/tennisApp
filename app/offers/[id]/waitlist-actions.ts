@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
 import { isBlockedEitherWay } from "@/lib/moderation/personal-block";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
+import { genderFits } from "@/lib/offers/match-gender";
 import { waitlistJoinRefusal } from "@/lib/offers/waitlist-rules";
 
 export type WaitlistActionResult =
@@ -45,7 +46,12 @@ export async function joinWaitlist(
 
   const offer = await db.sparringOffer.findUnique({
     where: { id: id.data },
-    select: { authorId: true, status: true, startsAt: true },
+    select: {
+      authorId: true,
+      status: true,
+      startsAt: true,
+      matchGender: true,
+    },
   });
   if (!offer) {
     return { ok: false, message: tErrors("offerNotFound") };
@@ -70,6 +76,7 @@ export async function joinWaitlist(
     alreadyWaitlisted: existingWaitlist !== null,
     now: new Date(),
     blocked: await isBlockedEitherWay(player.id, offer.authorId),
+    fitsGender: genderFits(offer.matchGender, player.gender),
   });
   if (refusal) {
     return { ok: false, message: tWaitlistRefusal(refusal) };

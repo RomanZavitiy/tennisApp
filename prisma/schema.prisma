@@ -174,6 +174,10 @@ model User {
   blocksMade              UserBlock[]        @relation("BlocksMade")
   /// Players who have personally blocked this player (slice R).
   blocksReceived          UserBlock[]        @relation("BlocksReceived")
+  /// Players this player keeps as favourites (slice PD3).
+  favoritesMade           PlayerFavorite[]   @relation("FavoritesMade")
+  /// Players who keep this player as a favourite (slice PD3).
+  favoritesReceived       PlayerFavorite[]   @relation("FavoritesReceived")
   /// Invites this player sent, as an offer's author (slice S1).
   invitesSent             OfferInvite[]      @relation("InvitesSent")
   /// Invites this player received (slice S1).
@@ -293,6 +297,9 @@ model Court {
 
   /// "Court 1", "Kort A" — whatever the club itself calls it.
   name            String  @db.VarChar(60)
+  /// Slice PD2: which sport this court is for. A club with both sports
+  /// (Club.sports) has courts of each; the booking grid shows one sport.
+  sport           Sport   @default(TENNIS)
   surface         Surface
   indoor          Boolean @default(false)
   /// Null means unknown — never invented; shown as "price unknown" rather
@@ -505,6 +512,19 @@ model SparringOffer {
   /// (CHECK in the migration): padel is played two against two.
   sport           Sport       @default(TENNIS)
   format          OfferFormat @default(SINGLES)
+  /// Who the game is for (slice PD3): anyone, men, women, or mixed doubles.
+  /// MEN / WOMEN are enforced when a player asks to join or is invited
+  /// (lib/offers/match-gender.ts); MIXED is doubles-only (CHECK).
+  matchGender     MatchGender @default(ANY) @map("match_gender")
+  /// Slice PD3: a PRIVATE game is left out of every list and push — the
+  /// feed, a club's page, "play today", "new offer" pushes, invite
+  /// candidates — and is reached only through its link.
+  visibility      OfferVisibility @default(PUBLIC)
+  /// The secret of this game's invite link (slice PD3, task PD3.3), null
+  /// while the author has it turned off. A signed-in player who opens the
+  /// link takes an accepted place without waiting for the author. Never
+  /// selected for anyone but the author (lib/offers/invite-link.ts).
+  inviteToken     String?         @unique @map("invite_token") @db.VarChar(64)
   /// Doubles only: the author brings their own partner (a mark, not an account).
   hasPartner      Boolean     @default(false) @map("has_partner")
   /// Stored in UTC, shown in Europe/Warsaw.
@@ -700,6 +720,9 @@ model PlayIntent {
   /// Districts this player would play in for this intent, at least one.
   districts District[]
   format    OfferFormat @default(SINGLES)
+  /// Slice PD2: which sport the player wants to play. A padel intent is
+  /// always doubles (CHECK in the migration), same rule as a padel offer.
+  sport     Sport       @default(TENNIS)
   /// Free text, e.g. "flexible on time" — the only optional field.
   note      String?     @db.VarChar(200)
   /// Midnight Europe/Warsaw after `date` (task U2.1) — the hourly cron
@@ -707,9 +730,10 @@ model PlayIntent {
   /// query (lib/offers/play-intent-feed.ts) filters live ones out by date.
   expiresAt DateTime    @map("expires_at") @db.Timestamptz
 
-  /// At most one active intent per day per player (task U2.1): posting
-  /// again for the same date replaces it rather than adding a second row.
-  @@unique([userId, date])
+  /// At most one active intent per day per player and sport (task U2.1,
+  /// slice PD2): posting again for the same date replaces it rather than
+  /// adding a second row; a tennis and a padel intent can share a day.
+  @@unique([userId, sport, date])
   /// The feed's own query shape: live intents for one calendar day.
   @@index([date])
   @@map("play_intents")
@@ -729,6 +753,28 @@ model UserBlock {
   /// same reasoning as OfferDismissal's unique index above.
   @@unique([blockerId, blockedId])
   @@map("user_blocks")
+}
+
+/// A player's own list of people they like playing with (slice PD3, task
+/// PD3.4): "invite my favourites" on their own game, and a push when a
+/// favourite posts one. One-directional and never shown to the favourite.
+/// RLS is enabled with no policy, same as user_blocks: only the server
+/// reads and writes it.
+model PlayerFavorite {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation("FavoritesMade", fields: [userId], references: [id], onDelete: Cascade)
+
+  favoriteId String @map("favorite_id") @db.Uuid
+  favorite   User   @relation("FavoritesReceived", fields: [favoriteId], references: [id], onDelete: Cascade)
+
+  /// Leads with userId: "who are this player's favourites".
+  @@unique([userId, favoriteId])
+  /// "Who keeps this author as a favourite" — the push on a new offer.
+  @@index([favoriteId])
+  @@map("player_favorites")
 }
 
 /// A player following a club (task O.1-O.2): free, instant, no approval.
@@ -1157,6 +1203,24 @@ enum Sport {
   @@map("sport")
 }
 
+/// Who can find a game (slice PD3, task PD3.2).
+enum OfferVisibility {
+  PUBLIC
+  PRIVATE
+
+  @@map("offer_visibility")
+}
+
+/// Who a game is for (slice PD3, task PD3.1), both sports.
+enum MatchGender {
+  ANY
+  MEN
+  WOMEN
+  MIXED
+
+  @@map("match_gender")
+}
+
 /// A padel player's preferred side of the court (slice PD1).
 enum PadelSide {
   LEFT
@@ -1330,6 +1394,9 @@ enum NotificationKind {
   /// Slice U2 (task U2.4): a new "looking for a game" post matches one of
   /// this player's open offers.
   INTENT_FOR_YOUR_OFFER
+  /// Slice PD3 (task PD3.4): a player this one keeps as a favourite posted
+  /// a game.
+  FAVORITE_POSTED_OFFER
 
   @@map("notification_kind")
 }

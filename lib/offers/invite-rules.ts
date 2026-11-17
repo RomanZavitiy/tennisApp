@@ -15,6 +15,7 @@ export type InviteRefusal =
   | "BLOCKED"
   | "STARTED"
   | "NOT_OPEN"
+  | "WRONG_GENDER"
   | "ALREADY_JOINED"
   | "ALREADY_INVITED"
   | "DECLINED";
@@ -31,6 +32,7 @@ export function inviteRefusal({
   existingJoin,
   now,
   blocked = false,
+  fitsGender = true,
 }: {
   offer: { authorId: string; status: OfferStatus; startsAt: Date };
   inviterId: string;
@@ -42,6 +44,9 @@ export function inviteRefusal({
   now: Date;
   /** Either side has personally blocked the other (slice R). */
   blocked?: boolean;
+  /** The invitee may play in a game of this offer's matchGender (slice
+   * PD3, lib/offers/match-gender.ts's genderFits). */
+  fitsGender?: boolean;
 }): InviteRefusal | null {
   if (offer.authorId !== inviterId) {
     return "NOT_AUTHOR";
@@ -57,6 +62,9 @@ export function inviteRefusal({
   }
   if (offer.status !== "OPEN") {
     return "NOT_OPEN";
+  }
+  if (!fitsGender) {
+    return "WRONG_GENDER";
   }
   if (
     existingJoin?.status === "REQUESTED" ||

@@ -49,11 +49,13 @@ export async function upsertClubs(
         create: {
           clubId: row.id,
           name: court.name,
+          sport: court.sport,
           surface: court.surface,
           indoor: court.indoor,
           pricePerHourPln: court.pricePerHourPln ?? null,
         },
         update: {
+          sport: court.sport,
           surface: court.surface,
           indoor: court.indoor,
           pricePerHourPln: court.pricePerHourPln ?? null,

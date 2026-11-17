@@ -10,6 +10,7 @@ export type JoinRefusal =
   | "BLOCKED"
   | "STARTED"
   | "NOT_OPEN"
+  | "WRONG_GENDER"
   | "ALREADY_REQUESTED"
   | "DECLINED";
 
@@ -24,6 +25,7 @@ export function joinRefusal({
   existing,
   now,
   blocked = false,
+  fitsGender = true,
 }: {
   offer: { authorId: string; status: OfferStatus; startsAt: Date };
   playerId: string;
@@ -32,6 +34,9 @@ export function joinRefusal({
   now: Date;
   /** Either side has personally blocked the other (slice R, task R.2). */
   blocked?: boolean;
+  /** The player may play in a game of this offer's matchGender (slice PD3,
+   * lib/offers/match-gender.ts's genderFits). */
+  fitsGender?: boolean;
 }): JoinRefusal | null {
   if (offer.authorId === playerId) {
     return "OWN_OFFER";
@@ -44,6 +49,9 @@ export function joinRefusal({
   }
   if (offer.status !== "OPEN") {
     return "NOT_OPEN";
+  }
+  if (!fitsGender) {
+    return "WRONG_GENDER";
   }
   if (existing?.status === "REQUESTED" || existing?.status === "ACCEPTED") {
     return "ALREADY_REQUESTED";

@@ -47,7 +47,13 @@ describe("searchClubs", () => {
       by: ["clubId"],
       where: {
         AND: [
-          { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+          {
+            AND: [
+              { status: "OPEN" },
+              { startsAt: { gt: NOW } },
+              { visibility: "PUBLIC" },
+            ],
+          },
           { clubId: { in: ["a", "b"] } },
         ],
       },

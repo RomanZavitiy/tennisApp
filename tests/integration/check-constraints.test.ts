@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { db } from "@/lib/db";
 import {
+  createBookableClub,
   createJoin,
   createOffer,
   createPlayedMatch,
@@ -121,6 +122,148 @@ describe("sparring_offers", () => {
         mentions: "sparring_offers_ntrp_max_check",
       },
     );
+  });
+});
+
+describe("sparring_offers match gender (PD3, migration 20261117090000_add_match_gender)", () => {
+  it("is open to anyone by default", async () => {
+    const author = await createPlayer();
+    expect((await createOffer(author.id)).matchGender).toBe("ANY");
+  });
+
+  it("refuses mixed singles, allows mixed doubles", async () => {
+    const author = await createPlayer();
+    await expectDbRejection(createOffer(author.id, { matchGender: "MIXED" }), {
+      code: PG.checkViolation,
+      mentions: "sparring_offers_mixed_doubles_check",
+    });
+    const offer = await createOffer(author.id, {
+      matchGender: "MIXED",
+      format: "DOUBLES",
+    });
+    expect(offer.matchGender).toBe("MIXED");
+  });
+});
+
+describe("player_favorites (PD3, migration 20261117110000_add_player_favorites)", () => {
+  it("keeps one row per pair and refuses a player as their own favourite", async () => {
+    const [me, them] = await Promise.all([createPlayer(), createPlayer()]);
+    await db.playerFavorite.create({
+      data: { userId: me.id, favoriteId: them.id },
+    });
+    await expect(
+      db.playerFavorite.create({
+        data: { userId: me.id, favoriteId: them.id },
+      }),
+    ).rejects.toMatchObject({ code: "P2002" });
+    await expectDbRejection(
+      db.playerFavorite.create({ data: { userId: me.id, favoriteId: me.id } }),
+      {
+        code: PG.checkViolation,
+        mentions: "player_favorites_not_self_check",
+      },
+    );
+  });
+
+  it("goes away with either player", async () => {
+    const [me, them] = await Promise.all([createPlayer(), createPlayer()]);
+    await db.playerFavorite.create({
+      data: { userId: me.id, favoriteId: them.id },
+    });
+    await db.user.delete({ where: { id: them.id } });
+    expect(await db.playerFavorite.count({ where: { userId: me.id } })).toBe(0);
+  });
+});
+
+describe("sparring_offers invite token (PD3, migration 20261117120000_add_offer_invite_token)", () => {
+  it("has no link by default and never gives two offers the same token", async () => {
+    const author = await createPlayer();
+    const first = await createOffer(author.id);
+    expect(first.inviteToken).toBeNull();
+
+    const token = `pd3-${randomUUID()}`;
+    await db.sparringOffer.update({
+      where: { id: first.id },
+      data: { inviteToken: token },
+    });
+    await expect(
+      createOffer(author.id, { inviteToken: token }),
+    ).rejects.toMatchObject({ code: "P2002" });
+    // Any number of offers can have the link off.
+    await createOffer(author.id);
+    await createOffer(author.id);
+  });
+});
+
+describe("play_intents (PD2, migration 20261116210000_add_play_intent_sport)", () => {
+  const intent = (userId: string, date: string) => ({
+    userId,
+    date: new Date(`${date}T00:00:00Z`),
+    times: ["evening"],
+    districts: ["KROWODRZA" as const],
+    expiresAt: hoursFromNow(24),
+  });
+
+  it("makes an intent tennis by default", async () => {
+    const player = await createPlayer();
+    const row = await db.playIntent.create({
+      data: intent(player.id, "2030-01-10"),
+    });
+    expect(row.sport).toBe("TENNIS");
+  });
+
+  it("refuses padel singles, allows padel doubles", async () => {
+    const player = await createPlayer();
+    await expectDbRejection(
+      db.playIntent.create({
+        data: { ...intent(player.id, "2030-01-10"), sport: "PADEL" },
+      }),
+      {
+        code: PG.checkViolation,
+        mentions: "play_intents_padel_doubles_check",
+      },
+    );
+    const row = await db.playIntent.create({
+      data: {
+        ...intent(player.id, "2030-01-10"),
+        sport: "PADEL",
+        format: "DOUBLES",
+      },
+    });
+    expect(row.sport).toBe("PADEL");
+  });
+
+  it("allows one intent per day per sport, not two in the same sport", async () => {
+    const player = await createPlayer();
+    await db.playIntent.create({ data: intent(player.id, "2030-01-10") });
+    await db.playIntent.create({
+      data: {
+        ...intent(player.id, "2030-01-10"),
+        sport: "PADEL",
+        format: "DOUBLES",
+      },
+    });
+    // Prisma's own code for a unique violation (the new index on user,
+    // sport and date).
+    await expect(
+      db.playIntent.create({ data: intent(player.id, "2030-01-10") }),
+    ).rejects.toMatchObject({ code: "P2002" });
+  });
+});
+
+describe("courts (PD2, migration 20261116220000_add_court_sport)", () => {
+  it("makes a court tennis by default and keeps a padel one", async () => {
+    const { club, court } = await createBookableClub();
+    expect(court.sport).toBe("TENNIS");
+    const padel = await db.court.create({
+      data: {
+        clubId: club.id,
+        name: "Padel 1",
+        surface: "ARTIFICIAL_GRASS",
+        sport: "PADEL",
+      },
+    });
+    expect(padel.sport).toBe("PADEL");
   });
 });
 

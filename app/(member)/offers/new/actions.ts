@@ -8,11 +8,13 @@ import { captureEvent } from "@/lib/analytics/posthog";
 import { requireOnboardedUser } from "@/lib/auth/require-onboarded-user";
 import { db } from "@/lib/db";
 import { blockedRefusal } from "@/lib/moderation/block-rules";
+import { notifyFavoriters } from "@/lib/notifications/favorite-offer";
 import { notifyInterestedPlayers } from "@/lib/notifications/new-offer";
 import {
   activeOffersWhere,
   MAX_ACTIVE_OFFERS,
 } from "@/lib/offers/active-offers";
+import { genderFits } from "@/lib/offers/match-gender";
 import { sendOfferInvite } from "@/lib/offers/send-invite";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
 import {
@@ -38,6 +40,15 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
   const parsed = offerSchema(t).safeParse(input);
   if (!parsed.success) {
     return offerFieldErrors(parsed.error);
+  }
+
+  // Slice PD3: a man can't post a women's game he couldn't play in himself
+  // (and the other way round). The form only offers the author's own.
+  if (!genderFits(parsed.data.matchGender, author.gender)) {
+    return {
+      ok: false,
+      fieldErrors: { matchGender: t("matchGenderNotYours") },
+    };
   }
 
   // Limits (tasks 6.17, 6.16, decision 2026-10-14): the active-offer count
@@ -90,15 +101,32 @@ export async function createOffer(input: unknown): Promise<CreateOfferResult> {
 
   // Task 5.16: "new offer for my level", to players nearby and at a
   // matching level — never blocks the redirect below on itself failing.
-  await notifyInterestedPlayers({
-    offerId: created.id,
-    authorId: author.id,
-    sport: offer.sport,
-    district: place.district ?? null,
-    ntrpMin: offer.ntrpMin ?? null,
-    ntrpMax: offer.ntrpMax ?? null,
-    startsAt: offer.startsAt,
-  });
+  // A private game (slice PD3) is announced to nobody: its link is how
+  // players find it.
+  if (offer.visibility === "PUBLIC") {
+    const reached = await notifyInterestedPlayers({
+      offerId: created.id,
+      authorId: author.id,
+      sport: offer.sport,
+      matchGender: offer.matchGender,
+      district: place.district ?? null,
+      ntrpMin: offer.ntrpMin ?? null,
+      ntrpMax: offer.ntrpMax ?? null,
+      startsAt: offer.startsAt,
+    });
+    // PD3.4: players who keep the author as a favourite hear about it too.
+    // Best-effort, like the invite below — the offer is already saved.
+    await notifyFavoriters(
+      {
+        offerId: created.id,
+        authorId: author.id,
+        matchGender: offer.matchGender,
+      },
+      reached,
+    ).catch((error: unknown) => {
+      console.error("Favourite-offer notification failed:", error);
+    });
+  }
 
   await captureEvent("offer_created", author.id, {
     sport: offer.sport,

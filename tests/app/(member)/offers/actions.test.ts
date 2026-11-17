@@ -16,6 +16,7 @@ const {
   offerCreate,
   redirect,
   notifyInterestedPlayers,
+  notifyFavoriters,
   checkRateLimit,
 } = vi.hoisted(() => ({
   requireOnboardedUser: vi.fn(),
@@ -30,6 +31,7 @@ const {
     >(),
   redirect: vi.fn(),
   notifyInterestedPlayers: vi.fn(),
+  notifyFavoriters: vi.fn(),
   checkRateLimit: vi.fn(),
 }));
 
@@ -42,6 +44,7 @@ vi.mock("@/lib/db", () => ({
 }));
 // The matching push is its own concern (lib/notifications/new-offer.test.ts).
 vi.mock("@/lib/notifications/new-offer", () => ({ notifyInterestedPlayers }));
+vi.mock("@/lib/notifications/favorite-offer", () => ({ notifyFavoriters }));
 // Rate limiting (6.16-6.18) is its own concern
 // (lib/rate-limit/check-rate-limit.test.ts); here only that a limit refuses
 // the post matters (tested explicitly below).
@@ -56,10 +59,11 @@ describe("createOffer", () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-11T10:00:00Z"));
-    requireOnboardedUser.mockResolvedValue({ id: ME });
+    requireOnboardedUser.mockResolvedValue({ id: ME, gender: "MALE" });
     offerCount.mockResolvedValue(0);
     offerCreate.mockResolvedValue({ id: OFFER });
-    notifyInterestedPlayers.mockResolvedValue(undefined);
+    notifyInterestedPlayers.mockResolvedValue([]);
+    notifyFavoriters.mockResolvedValue([]);
     checkRateLimit.mockResolvedValue({ ok: true });
   });
 
@@ -119,6 +123,8 @@ describe("createOffer", () => {
       data: {
         sport: "TENNIS",
         format: "SINGLES",
+        matchGender: "ANY",
+        visibility: "PUBLIC",
         hasPartner: false,
         startsAt: new Date("2026-10-20T16:00:00Z"),
         durationMinutes: 90,
@@ -134,11 +140,55 @@ describe("createOffer", () => {
       offerId: OFFER,
       authorId: ME,
       sport: "TENNIS",
+      matchGender: "ANY",
       district: "KROWODRZA",
       ntrpMin: null,
       ntrpMax: null,
       startsAt: new Date("2026-10-20T16:00:00.000Z"),
     });
+  });
+
+  // Slice PD3, task PD3.2: a private game is found by its link only.
+  it("saves a private game without announcing it to anyone", async () => {
+    await createOffer({ ...valid, visibility: "PRIVATE" });
+
+    expect(offerCreate.mock.calls[0]?.[0].data.visibility).toBe("PRIVATE");
+    expect(notifyInterestedPlayers).not.toHaveBeenCalled();
+    expect(notifyFavoriters).not.toHaveBeenCalled();
+  });
+
+  // Slice PD3, task PD3.4.
+  it("tells the author's fans, minus those the level push reached", async () => {
+    notifyInterestedPlayers.mockResolvedValue(["neighbour"]);
+
+    await createOffer(valid);
+
+    expect(notifyFavoriters).toHaveBeenCalledWith(
+      { offerId: OFFER, authorId: ME, matchGender: "ANY" },
+      ["neighbour"],
+    );
+  });
+
+  it("still opens the offer when the favourites push fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    notifyFavoriters.mockRejectedValue(new Error("boom"));
+
+    await createOffer(valid);
+
+    expect(redirect).toHaveBeenCalledWith(`/offers/${OFFER}?created=1`);
+  });
+
+  // Slice PD3, task PD3.1.
+  it("lets a man post a men's game but not a women's one", async () => {
+    const refused = await createOffer({ ...valid, matchGender: "WOMEN" });
+
+    expect(refused).toMatchObject({ ok: false });
+    expect(refused.fieldErrors).toHaveProperty("matchGender");
+    expect(offerCreate).not.toHaveBeenCalled();
+
+    await createOffer({ ...valid, matchGender: "MEN" });
+
+    expect(offerCreate.mock.calls[0]?.[0].data.matchGender).toBe("MEN");
   });
 
   it("takes the author from the session, not from the request", async () => {

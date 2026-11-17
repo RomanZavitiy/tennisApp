@@ -193,7 +193,14 @@ export function HowItWorks() {
   );
 }
 
-const QUESTIONS = ["free", "rating", "booking", "city", "app"] as const;
+const QUESTIONS = [
+  "free",
+  "rating",
+  "padel",
+  "booking",
+  "city",
+  "app",
+] as const;
 
 export function Faq() {
   const t = useTranslations("LandingPage.faq");

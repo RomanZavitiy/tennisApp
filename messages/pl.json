@@ -1,7 +1,7 @@
 {
   "Metadata": {
     "siteName": "SpinBuddy",
-    "description": "Znajdź partnera do sparingu i kort w Krakowie."
+    "description": "Znajdź partnera do tenisa lub padla i kort w Krakowie."
   },
   "LanguageSwitcher": {
     "label": "Język",
@@ -11,7 +11,7 @@
     }
   },
   "SiteFooter": {
-    "tagline": "Tablica sparingowa dla Krakowa: partnerzy na Twoim poziomie, wszystkie korty na jednej mapie i ranking oparty na prawdziwych meczach.",
+    "tagline": "Tablica sparingowa tenisa i padla dla Krakowa: partnerzy na Twoim poziomie, wszystkie korty na jednej mapie i ranking oparty na prawdziwych meczach.",
     "terms": "Regulamin",
     "privacy": "Prywatność",
     "play": "Gra",
@@ -108,6 +108,10 @@
     "INTENT_FOR_YOUR_OFFER": {
       "title": "Ktoś szuka gry jak Twoja",
       "body": "Zawodnik dodał ogłoszenie \"szukam gry\", które pasuje do jednej z Twoich otwartych ofert."
+    },
+    "FAVORITE_POSTED_OFFER": {
+      "title": "Ulubiony gracz dodał grę",
+      "body": "Gracz z Twoich ulubionych szuka partnerów."
     }
   },
   "SystemMessages": {
@@ -162,6 +166,7 @@
     "postAnOffer": "Dodaj ofertę",
     "yourOffer": "{count, plural, =0 {Twoja oferta} one {Twoja oferta · # prośba} few {Twoja oferta · # prośby} many {Twoja oferta · # próśb} other {Twoja oferta · # próśb}}",
     "youAreIn": "Grasz",
+    "private": "Prywatna",
     "requestSent": "Prośba wysłana"
   },
   "MyBookings": {
@@ -185,6 +190,7 @@
     "myBookings": "Moje rezerwacje",
     "matchHistory": "Historia meczów",
     "blockedPlayers": "Zablokowani zawodnicy",
+    "favoritePlayers": "Ulubieni gracze",
     "account": "Konto",
     "photo": "Zdjęcie profilowe",
     "editProfile": "Edytuj profil",
@@ -205,6 +211,7 @@
   },
   "OfferForm": {
     "formatLabel": "Format",
+    "matchGenderLabel": "Dla kogo",
     "singles": "Singiel",
     "doubles": "Debel",
     "hasPartner": "Mam już partnera",
@@ -223,6 +230,10 @@
     "anySurface": "Każda nawierzchnia",
     "courtLabel": "Kort",
     "commentLabel": "Komentarz",
+    "visibilityLabel": "Kto widzi grę",
+    "visibilityHint": "Prywatna gra nie pojawia się na tablicy i nikt nie dostaje o niej powiadomienia. Wyślij link wybranym graczom.",
+    "visibilityPublic": "Wszyscy — widoczna na tablicy",
+    "visibilityPrivate": "Tylko osoby z linkiem",
     "commentHint": "Opcjonalnie, maksymalnie {max} znaków.",
     "posting": "Publikowanie…",
     "submit": "Opublikuj ogłoszenie",
@@ -264,9 +275,11 @@
     "formLabel": "Filtruj ogłoszenia",
     "dateLabel": "Data",
     "districtLabel": "Dzielnica",
+    "clubLabel": "Klub",
     "any": "Każdy",
     "ntrpLabel": "Mój poziom (NTRP)",
     "formatLabel": "Format",
+    "genderLabel": "Typ meczu",
     "timeLabel": "Pora dnia",
     "time": {
       "morning": "Rano (przed 12:00)",
@@ -287,8 +300,12 @@
     "whereLabel": "Gdzie",
     "levelLabel": "Poziom",
     "surfaceLabel": "Nawierzchnia",
+    "matchGenderLabel": "Typ meczu",
     "courtLabel": "Kort",
     "statusCancelled": "Odwołane",
+    "privateGame": "Gra prywatna",
+    "invitedByLink": "{author} zaprasza Cię do tej gry.",
+    "takeThePlace": "Zajmij miejsce",
     "statusStarted": "Już się zaczęło",
     "postedBy": "Dodane przez",
     "signInToJoin": "Zaloguj się, aby się zgłosić",
@@ -395,6 +412,12 @@
     "resultAnnulled": "Administrator rozpatrzył sprzeciw i unieważnił ten wynik ({score})."
   },
   "OfferLabels": {
+    "matchGender": {
+      "ANY": "Dla wszystkich",
+      "MEN": "Tylko mężczyźni",
+      "WOMEN": "Tylko kobiety",
+      "MIXED": "Mikst"
+    },
     "duration": "{hours, number} godz.",
     "singles": "Singiel",
     "doubles": "Debel",
@@ -532,6 +555,7 @@
     "title": "Zarezerwuj kort — {club}",
     "notFound": "Rezerwacja niedostępna",
     "dateLabel": "Data",
+    "sportLabel": "Sport",
     "durationLabel": "Czas trwania:",
     "durationOption": "{minutes} min",
     "courtLabel": "Kort",
@@ -608,6 +632,24 @@
     "notFound": "Zawodnik nie znaleziony",
     "matchHistory": "Historia meczów",
     "reportThisPlayer": "Zgłoś tego zawodnika"
+  },
+  "FavoritePlayerButton": {
+    "add": "Dodaj do ulubionych",
+    "remove": "W ulubionych"
+  },
+  "FavoritePlayersList": {
+    "none": "Nie masz jeszcze ulubionych graczy. Dodaj kogoś z jego profilu.",
+    "aPlayer": "Zawodnik"
+  },
+  "FavoriteRefusal": {
+    "SELF": "Nie możesz dodać siebie.",
+    "BLOCKED": "Nie możesz dodać tego zawodnika.",
+    "TOO_MANY": "Lista ulubionych jest pełna (20 graczy)."
+  },
+  "InviteFavoritesButton": {
+    "invite": "Zaproś ulubionych",
+    "inviting": "Zapraszanie…",
+    "invited": "{count, plural, =0 {Nie ma już kogo zaprosić z ulubionych.} one {Zaproszono # gracza.} few {Zaproszono # graczy.} many {Zaproszono # graczy.} other {Zaproszono # gracza.}}"
   },
   "BlockPlayerButton": {
     "block": "Zablokuj",
@@ -687,6 +729,27 @@
   "ReportButton": {
     "defaultLabel": "Zgłoś"
   },
+  "InviteLinkSection": {
+    "title": "Link z zaproszeniem",
+    "onHint": "Każdy, komu wyślesz ten link, od razu zajmuje wolne miejsce, bez Twojej akceptacji. Link przestaje działać, gdy gra jest pełna albo gdy go wyłączysz lub utworzysz nowy.",
+    "offHint": "Włącz link dla znajomych: kto go otworzy i się zaloguje, od razu zajmuje wolne miejsce.",
+    "turnOn": "Włącz link z zaproszeniem",
+    "copy": "Kopiuj link",
+    "copied": "Link skopiowany!",
+    "replace": "Utwórz nowy link",
+    "turnOff": "Wyłącz"
+  },
+  "InviteLinkRefusal": {
+    "INVALID_LINK": "Ten link z zaproszeniem już nie działa. Poproś autora o nowy.",
+    "OWN_OFFER": "To Twoja własna oferta.",
+    "BLOCKED": "Nie możesz dołączyć do tej oferty.",
+    "STARTED": "Ta gra już się zaczęła.",
+    "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
+    "WRONG_GENDER": "Ta gra jest dla zawodników innej płci.",
+    "FULL": "Ta gra jest już pełna.",
+    "ALREADY_IN": "Już grasz w tej grze.",
+    "DECLINED": "Autor odrzucił Twoje zgłoszenie."
+  },
   "ShareOfferButton": {
     "share": "Udostępnij",
     "linkCopied": "Link skopiowany!"
@@ -751,6 +814,7 @@
     "resultNotFound": "Ten wynik nie istnieje.",
     "noShowManualConfirmRefused": "Zgłoszenia niejawienia się nie potwierdza się ręcznie — zgłoś sprzeciw albo poczekaj, aż rozstrzygnie się automatycznie po 72 godzinach.",
     "courtNotFound": "Ten kort nie istnieje.",
+    "courtWrongSport": "Ten kort jest do innego sportu niż Twoja gra.",
     "slotTaken": "Ten termin właśnie został zajęty. Wybierz inną godzinę.",
     "tooManyPendingBookings": "Masz już {max} prośby czekające na decyzję. Poczekaj, aż któraś zostanie potwierdzona albo odrzucona, zanim wyślesz kolejną.",
     "bookingNotFound": "Ta prośba o rezerwację nie istnieje.",
@@ -778,6 +842,7 @@
     "BLOCKED": "Nie możesz dołączyć do tej oferty.",
     "STARTED": "Ta gra już się zaczęła.",
     "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
+    "WRONG_GENDER": "Ta gra jest dla zawodników innej płci.",
     "ALREADY_REQUESTED": "Zgłoszenie do tej gry zostało już wysłane.",
     "DECLINED": "Autor odrzucił to zgłoszenie."
   },
@@ -832,6 +897,10 @@
       "courtStatusRequired": "Wybierz status kortu.",
       "commentTooLong": "Komentarz może mieć maksymalnie {max} znaków.",
       "partnerNeedsDoubles": "Partnera można dodać tylko do gry deblowej.",
+      "matchGenderRequired": "Wybierz, dla kogo jest gra.",
+      "mixedNeedsDoubles": "Mikst to zawsze debel.",
+      "visibilityRequired": "Wybierz, kto widzi grę.",
+      "matchGenderNotYours": "Możesz dodać mecz tylko dla mężczyzn lub tylko dla kobiet, w którym sam(a) możesz zagrać.",
       "clubOrDistrictRequired": "Wybierz klub albo dzielnicę.",
       "levelRangeInverted": "Najwyższy poziom nie może być niższy od najniższego.",
       "padelNeedsDoubles": "Mecz padla to zawsze debel."
@@ -881,7 +950,8 @@
       "datePast": "Wybierz dzisiejszą lub późniejszą datę.",
       "timesRequired": "Wybierz co najmniej jedną porę dnia.",
       "districtsRequired": "Wybierz co najmniej jedną dzielnicę.",
-      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków."
+      "noteTooLong": "Notatka może mieć maksymalnie {max} znaków.",
+      "padelNeedsDoubles": "Mecz padla to zawsze debel."
     }
   },
   "OnboardingPage": {
@@ -1063,6 +1133,7 @@
     "BLOCKED": "Nie możesz zaprosić tego zawodnika.",
     "STARTED": "Ta gra już się zaczęła.",
     "NOT_OPEN": "Ta oferta nie przyjmuje już zawodników.",
+    "WRONG_GENDER": "Ta gra nie jest dla zawodników tej płci.",
     "ALREADY_JOINED": "Ten zawodnik ma już zgłoszenie do tej oferty.",
     "ALREADY_INVITED": "Ten zawodnik jest już zaproszony.",
     "DECLINED": "Ten zawodnik odrzucił już zaproszenie do tej oferty."
@@ -1097,6 +1168,7 @@
     "BLOCKED": "Nie możesz dołączyć do rezerwy tej oferty.",
     "STARTED": "Ta gra już się zaczęła.",
     "NOT_FULL": "Ta oferta ma jeszcze wolne miejsca — zgłoś się normalnie.",
+    "WRONG_GENDER": "Ta gra jest dla zawodników innej płci.",
     "ALREADY_JOINED": "Masz już zgłoszenie na tę ofertę.",
     "ALREADY_WAITLISTED": "Jesteś już na liście rezerwowej.",
     "DECLINED": "Autor odrzucił Twoje zgłoszenie."
@@ -1130,6 +1202,7 @@
   },
   "LookingForGamePage": {
     "title": "Szukają gry",
+    "titlePadel": "Szukają gry w padla",
     "subtitle": "Dodaj czego szukasz albo przeglądaj, czego szukają inni zawodnicy.",
     "backToFeed": "Wróć do ofert",
     "postYours": "Dodaj czego szukasz",
@@ -1149,6 +1222,8 @@
   "IntentCard": {
     "aPlayer": "Zawodnik",
     "summary": "{date} · {districts} · {times} · {format}",
+    "summaryPadel": "{date} · {districts} · {times}",
+    "padelLevel": "poziom {level, number, ::.0}",
     "createAndInvite": "Stwórz grę i zaproś"
   },
   "PlayTodayPage": {
@@ -1191,16 +1266,16 @@
   },
   "BrandPanel": {
     "eyebrow": "SpinBuddy · Kraków",
-    "title": "Mniej szukania. Więcej tenisa.",
+    "title": "Mniej szukania. Więcej grania.",
     "point1": "Partnerzy na Twoim poziomie, ułożeni według bliskości rankingu",
     "point2": "Wszystkie krakowskie kluby na jednej mapie, z rezerwacją",
     "point3": "Ranking, który zmienia się tylko po potwierdzonym meczu"
   },
   "LandingPage": {
-    "eyebrow": "Tenis w Krakowie · za darmo",
-    "title": "Znajdź partnera do tenisa",
+    "eyebrow": "Tenis i padel w Krakowie · za darmo",
+    "title": "Znajdź partnera do tenisa lub padla",
     "titleAccent": "na swoim poziomie.",
-    "subtitle": "SpinBuddy to tablica sparingowa dla Krakowa. Napisz, kiedy chcesz grać, poznaj graczy na swoim poziomie, wybierz kort na mapie i buduj ranking na podstawie prawdziwych meczów.",
+    "subtitle": "SpinBuddy to tablica sparingowa tenisa i padla dla Krakowa. Napisz, kiedy chcesz grać, poznaj graczy na swoim poziomie, wybierz kort na mapie i buduj ranking na podstawie prawdziwych meczów.",
     "join": "Dołącz za darmo",
     "browseOffers": "Przeglądaj oferty sparingów",
     "findCourt": "Znajdź kort",
@@ -1321,6 +1396,10 @@
       "rating": {
         "question": "Jak działa ranking?",
         "answer": "Zaczynasz od poziomu NTRP, który wybierasz samodzielnie. Po meczu jeden gracz wpisuje wynik, a drugi go potwierdza — dopiero wtedy zmienia się ELO obu graczy. Im więcej meczów zapiszesz, tym jest dokładniejszy."
+      },
+      "padel": {
+        "question": "To dla tenisa czy dla padla?",
+        "answer": "Dla obu. Przełącznik Tenis / Padel u góry strony zmienia oferty, kluby i skalę poziomu. W padla gra się zawsze we czwórkę, a swój poziom padla (1–7) ustawiasz w profilu. Ranking z potwierdzonych meczów działa na razie tylko w tenisie."
       },
       "booking": {
         "question": "Czy mogę tu zarezerwować kort?",

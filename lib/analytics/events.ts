@@ -32,13 +32,15 @@ type EventProperties = {
   invite_accepted: Record<string, never>;
   invite_declined: Record<string, never>;
   invite_expired: Record<string, never>;
+  /** PD3.3: a player took a place through an offer's invite link. */
+  invite_link_joined: Record<string, never>;
   candidates_viewed: { count: number };
   candidate_invited: { rank: number };
   waitlist_joined: Record<string, never>;
   waitlist_spot_offered: Record<string, never>;
   waitlist_spot_taken: Record<string, never>;
   waitlist_spot_passed: Record<string, never>;
-  intent_posted: Record<string, never>;
+  intent_posted: { sport: Sport };
   intent_invited: Record<string, never>;
   intent_converted: Record<string, never>;
   play_today_viewed: Record<string, never>;
@@ -51,7 +53,13 @@ type EventProperties = {
 // Where "Invite to game" (slice S1) was clicked from. "playAgain" is Q.2's
 // own trigger; "intent" is U2.3's "Invite to my game" on a PlayIntent card.
 export type InviteSource =
-  "profile" | "leaderboard" | "candidates" | "playAgain" | "intent";
+  | "profile"
+  | "leaderboard"
+  | "candidates"
+  | "playAgain"
+  | "intent"
+  // PD3.4: "invite my favourites" on the author's own offer.
+  | "favorites";
 
 export type AnalyticsEvent = keyof EventProperties;
 

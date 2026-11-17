@@ -10,6 +10,7 @@ import { blockedRefusal } from "@/lib/moderation/block-rules";
 import { notifyMatchingOfferAuthors } from "@/lib/notifications/intent-notify";
 import { playIntentExpiresAt } from "@/lib/offers/play-intent";
 import { checkRateLimit } from "@/lib/rate-limit/check-rate-limit";
+import { playerLevel } from "@/lib/sport/sport";
 import {
   playIntentFieldErrors,
   playIntentSchema,
@@ -17,7 +18,8 @@ import {
 } from "@/lib/validation/play-intent";
 
 // "Хочу зіграти" (slice U2, task U2.1): posting replaces the day's intent
-// if one already exists (the unique index on userId+date) — a player
+// in that sport if one already exists (the unique index on
+// userId+sport+date, slice PD2) — a player
 // changing their mind a few times in one day doesn't need a "cancel"
 // button first, just a new post for the same date.
 export async function postPlayIntent(
@@ -48,12 +50,15 @@ export async function postPlayIntent(
     return { ok: false, fieldErrors: { date: t("dateRequired") } };
   }
 
-  const { date, times, districts, format, note } = parsed.data;
+  const { sport, date, times, districts, format, note } = parsed.data;
   const dateColumn = new Date(`${date}T00:00:00Z`);
   await db.playIntent.upsert({
-    where: { userId_date: { userId: player.id, date: dateColumn } },
+    where: {
+      userId_sport_date: { userId: player.id, sport, date: dateColumn },
+    },
     create: {
       userId: player.id,
+      sport,
       date: dateColumn,
       times,
       districts,
@@ -64,7 +69,7 @@ export async function postPlayIntent(
     update: { times, districts, format, note, expiresAt },
   });
 
-  await captureEvent("intent_posted", player.id, {});
+  await captureEvent("intent_posted", player.id, { sport });
 
   // Best-effort — a player's post must land even if the matching push
   // fails for some reason (lib/notifications/new-offer.ts follows the
@@ -75,7 +80,9 @@ export async function postPlayIntent(
     times,
     districts,
     format,
-    selfRatedNtrp: player.selfRatedNtrp,
+    sport,
+    level: playerLevel(player, sport),
+    gender: player.gender,
   }).catch((error: unknown) => {
     console.error("Intent-match notification failed:", error);
   });

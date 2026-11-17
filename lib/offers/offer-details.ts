@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { db } from "@/lib/db";
 import type { JoinStatus } from "@/lib/generated/prisma/enums";
+import { requiredGender } from "@/lib/offers/match-gender";
 import { playersNeeded } from "@/lib/offers/players-needed";
 import { waitlistPosition } from "@/lib/offers/waitlist-rules";
 import { computeReliability, type Reliability } from "@/lib/rating/reliability";
@@ -96,6 +97,8 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
       status: true,
       sport: true,
       format: true,
+      matchGender: true,
+      visibility: true,
       hasPartner: true,
       startsAt: true,
       durationMinutes: true,
@@ -186,6 +189,19 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
         )
       : null;
 
+  // Slice PD3: a men's or women's game tells a viewer it isn't for them
+  // instead of offering "Ask to join". Only looked up when it matters.
+  const required = requiredGender(offer.matchGender);
+  const viewerFitsGender =
+    viewerId && !isAuthor && required
+      ? (
+          await db.user.findUnique({
+            where: { id: viewerId },
+            select: { gender: true },
+          })
+        )?.gender === required
+      : true;
+
   const { _count, author, bookings, ...details } = offer;
   return {
     offer: {
@@ -201,6 +217,7 @@ export async function getOfferDetails(id: string, viewerId: string | null) {
     viewerJoin,
     viewerInvite,
     viewerWaitlistPosition,
+    viewerFitsGender,
     joins,
   };
 }

@@ -1,7 +1,7 @@
 {
   "Metadata": {
     "siteName": "SpinBuddy",
-    "description": "Find a sparring partner and a court in Kraków."
+    "description": "Find a tennis or padel partner and a court in Kraków."
   },
   "LanguageSwitcher": {
     "label": "Language",
@@ -11,7 +11,7 @@
     }
   },
   "SiteFooter": {
-    "tagline": "The tennis sparring board for Kraków: partners at your level, every court on one map, and a rating built from real matches.",
+    "tagline": "The tennis and padel sparring board for Kraków: partners at your level, every court on one map, and a rating built from real matches.",
     "terms": "Terms",
     "privacy": "Privacy",
     "play": "Play",
@@ -108,6 +108,10 @@
     "INTENT_FOR_YOUR_OFFER": {
       "title": "Someone's looking for your kind of game",
       "body": "A player posted a \"looking for a game\" intent that matches one of your open offers."
+    },
+    "FAVORITE_POSTED_OFFER": {
+      "title": "A favourite player posted a game",
+      "body": "A player from your favourites is looking for partners."
     }
   },
   "SystemMessages": {
@@ -162,6 +166,7 @@
     "postAnOffer": "Post an offer",
     "yourOffer": "{count, plural, =0 {Your offer} one {Your offer · # request} other {Your offer · # requests}}",
     "youAreIn": "You're in",
+    "private": "Private",
     "requestSent": "Request sent"
   },
   "MyBookings": {
@@ -185,6 +190,7 @@
     "myBookings": "My bookings",
     "matchHistory": "Match history",
     "blockedPlayers": "Blocked players",
+    "favoritePlayers": "Favourite players",
     "account": "Account",
     "photo": "Profile photo",
     "editProfile": "Edit profile",
@@ -205,6 +211,7 @@
   },
   "OfferForm": {
     "formatLabel": "Format",
+    "matchGenderLabel": "Who is it for",
     "singles": "Singles",
     "doubles": "Doubles",
     "hasPartner": "I already have a partner",
@@ -223,6 +230,10 @@
     "anySurface": "Any surface",
     "courtLabel": "Court",
     "commentLabel": "Comment",
+    "visibilityLabel": "Who can see it",
+    "visibilityHint": "A private game is not shown in the feed or announced to anyone. Share its link with the players you want.",
+    "visibilityPublic": "Everyone — shown in the feed",
+    "visibilityPrivate": "Only people with the link",
     "commentHint": "Optional, up to {max} characters.",
     "posting": "Posting…",
     "submit": "Post offer",
@@ -264,9 +275,11 @@
     "formLabel": "Filter offers",
     "dateLabel": "Date",
     "districtLabel": "District",
+    "clubLabel": "Club",
     "any": "Any",
     "ntrpLabel": "My level (NTRP)",
     "formatLabel": "Format",
+    "genderLabel": "Match type",
     "timeLabel": "Time of day",
     "time": {
       "morning": "Morning (before 12:00)",
@@ -287,8 +300,12 @@
     "whereLabel": "Where",
     "levelLabel": "Level",
     "surfaceLabel": "Surface",
+    "matchGenderLabel": "Match type",
     "courtLabel": "Court",
     "statusCancelled": "Cancelled",
+    "privateGame": "Private game",
+    "invitedByLink": "{author} invited you to this game.",
+    "takeThePlace": "Take the place",
     "statusStarted": "Already started",
     "postedBy": "Posted by",
     "signInToJoin": "Sign in to join",
@@ -395,6 +412,12 @@
     "resultAnnulled": "An admin reviewed the dispute and annulled this result ({score})."
   },
   "OfferLabels": {
+    "matchGender": {
+      "ANY": "Anyone",
+      "MEN": "Men only",
+      "WOMEN": "Women only",
+      "MIXED": "Mixed"
+    },
     "duration": "{hours, number} h",
     "singles": "Singles",
     "doubles": "Doubles",
@@ -532,6 +555,7 @@
     "title": "Book a court — {club}",
     "notFound": "Booking not available",
     "dateLabel": "Date",
+    "sportLabel": "Sport",
     "durationLabel": "Duration:",
     "durationOption": "{minutes} min",
     "courtLabel": "Court",
@@ -608,6 +632,24 @@
     "notFound": "Player not found",
     "matchHistory": "Match history",
     "reportThisPlayer": "Report this player"
+  },
+  "FavoritePlayerButton": {
+    "add": "Add to favourites",
+    "remove": "In favourites"
+  },
+  "FavoritePlayersList": {
+    "none": "No favourite players yet. Add one from a player's profile.",
+    "aPlayer": "A player"
+  },
+  "FavoriteRefusal": {
+    "SELF": "You can't add yourself.",
+    "BLOCKED": "You can't add this player.",
+    "TOO_MANY": "Your favourites list is full (20 players)."
+  },
+  "InviteFavoritesButton": {
+    "invite": "Invite my favourites",
+    "inviting": "Inviting…",
+    "invited": "{count, plural, =0 {No favourites left to invite.} one {Invited # favourite.} other {Invited # favourites.}}"
   },
   "BlockPlayerButton": {
     "block": "Block",
@@ -687,6 +729,27 @@
   "ReportButton": {
     "defaultLabel": "Report"
   },
+  "InviteLinkSection": {
+    "title": "Invite link",
+    "onHint": "Anyone you send this link to takes a free place straight away, without your accept. It stops working when the game is full, or when you turn it off or make a new one.",
+    "offHint": "Turn on a link to send to friends: whoever opens it and signs in takes a free place straight away.",
+    "turnOn": "Turn on the invite link",
+    "copy": "Copy the link",
+    "copied": "Link copied!",
+    "replace": "Make a new link",
+    "turnOff": "Turn off"
+  },
+  "InviteLinkRefusal": {
+    "INVALID_LINK": "This invite link doesn't work any more. Ask the author for a new one.",
+    "OWN_OFFER": "This is your own offer.",
+    "BLOCKED": "You can't join this offer.",
+    "STARTED": "This game has already started.",
+    "NOT_OPEN": "This offer is no longer taking players.",
+    "WRONG_GENDER": "This game is for players of another gender.",
+    "FULL": "This game is already full.",
+    "ALREADY_IN": "You're already in this game.",
+    "DECLINED": "The author has declined your request."
+  },
   "ShareOfferButton": {
     "share": "Share",
     "linkCopied": "Link copied!"
@@ -751,6 +814,7 @@
     "resultNotFound": "This result doesn't exist.",
     "noShowManualConfirmRefused": "A no-show report isn't confirmed manually — dispute it, or leave it to settle on its own after 72 hours.",
     "courtNotFound": "This court doesn't exist.",
+    "courtWrongSport": "This court is for a different sport than your game.",
     "slotTaken": "That slot was just taken. Pick another time.",
     "tooManyPendingBookings": "You already have {max} requests waiting on a decision. Wait for one to be confirmed or declined before sending another.",
     "bookingNotFound": "This booking request doesn't exist.",
@@ -778,6 +842,7 @@
     "BLOCKED": "You can't join this offer.",
     "STARTED": "This game has already started.",
     "NOT_OPEN": "This offer is no longer taking players.",
+    "WRONG_GENDER": "This game is for players of another gender.",
     "ALREADY_REQUESTED": "You have already asked to join.",
     "DECLINED": "The author has declined your request."
   },
@@ -832,6 +897,10 @@
       "courtStatusRequired": "Choose the court status.",
       "commentTooLong": "Keep the comment under {max} characters.",
       "partnerNeedsDoubles": "A partner can only be added to a doubles game.",
+      "matchGenderRequired": "Choose who the game is for.",
+      "mixedNeedsDoubles": "A mixed game is always doubles.",
+      "visibilityRequired": "Choose who can see the game.",
+      "matchGenderNotYours": "You can only post a men's or women's game you could play in yourself.",
       "clubOrDistrictRequired": "Choose a club or a district.",
       "levelRangeInverted": "The highest level can't be below the lowest.",
       "padelNeedsDoubles": "A padel game is always doubles."
@@ -881,7 +950,8 @@
       "datePast": "Choose today or a later date.",
       "timesRequired": "Choose at least one time of day.",
       "districtsRequired": "Choose at least one district.",
-      "noteTooLong": "Keep the note under {max} characters."
+      "noteTooLong": "Keep the note under {max} characters.",
+      "padelNeedsDoubles": "A padel game is always doubles."
     }
   },
   "OnboardingPage": {
@@ -1063,6 +1133,7 @@
     "BLOCKED": "You can't invite this player.",
     "STARTED": "This game has already started.",
     "NOT_OPEN": "This offer is no longer taking players.",
+    "WRONG_GENDER": "This game isn't open to this player's gender.",
     "ALREADY_JOINED": "This player already has a request on this offer.",
     "ALREADY_INVITED": "This player is already invited.",
     "DECLINED": "This player already declined an invite to this offer."
@@ -1097,6 +1168,7 @@
     "BLOCKED": "You can't join this offer's reserve list.",
     "STARTED": "This game has already started.",
     "NOT_FULL": "This offer still has places — ask to join instead.",
+    "WRONG_GENDER": "This game is for players of another gender.",
     "ALREADY_JOINED": "You already have a request on this offer.",
     "ALREADY_WAITLISTED": "You're already on the reserve list.",
     "DECLINED": "The author has declined your request."
@@ -1130,6 +1202,7 @@
   },
   "LookingForGamePage": {
     "title": "Looking for a game",
+    "titlePadel": "Looking for a padel game",
     "subtitle": "Post what you're after, or browse what other players are looking for.",
     "backToFeed": "Back to offers",
     "postYours": "Post what you're looking for",
@@ -1149,6 +1222,8 @@
   "IntentCard": {
     "aPlayer": "A player",
     "summary": "{date} · {districts} · {times} · {format}",
+    "summaryPadel": "{date} · {districts} · {times}",
+    "padelLevel": "level {level, number, ::.0}",
     "createAndInvite": "Create a game and invite"
   },
   "PlayTodayPage": {
@@ -1191,16 +1266,16 @@
   },
   "BrandPanel": {
     "eyebrow": "SpinBuddy · Kraków",
-    "title": "Less searching. More tennis.",
+    "title": "Less searching. More playing.",
     "point1": "Partners at your level, ranked by how close your ratings are",
     "point2": "Every Kraków club on one map, with a way to book",
     "point3": "A rating that moves only when a real match is confirmed"
   },
   "LandingPage": {
-    "eyebrow": "Tennis in Kraków · free to use",
-    "title": "Find a tennis partner",
+    "eyebrow": "Tennis and padel in Kraków · free to use",
+    "title": "Find a tennis or padel partner",
     "titleAccent": "at your level.",
-    "subtitle": "SpinBuddy is the sparring board for Kraków. Say when you want to play, meet players as good as you, pick a court on the map and build a rating from real matches.",
+    "subtitle": "SpinBuddy is the tennis and padel sparring board for Kraków. Say when you want to play, meet players as good as you, pick a court on the map and build a rating from real matches.",
     "join": "Join for free",
     "browseOffers": "Browse sparring offers",
     "findCourt": "Find a court",
@@ -1321,6 +1396,10 @@
       "rating": {
         "question": "How does the rating work?",
         "answer": "You start from the NTRP level you pick yourself. After a match one player enters the score and the other confirms it — only then does the ELO of both players change. The more matches you log, the more accurate it gets."
+      },
+      "padel": {
+        "question": "Is it for tennis or for padel?",
+        "answer": "Both. The Tennis / Padel switch at the top of the page changes the offers, the clubs and the level scale. A padel game is always for four players, and you set your padel level (1–7) in your profile. The rating from confirmed matches is tennis-only for now."
       },
       "booking": {
         "question": "Can I book a court here?",

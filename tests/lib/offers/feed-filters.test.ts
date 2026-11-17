@@ -8,7 +8,12 @@ import {
 } from "@/lib/offers/feed-filters";
 
 const NOW = new Date("2026-10-11T10:00:00Z");
-const BASE = [{ status: "OPEN" }, { startsAt: { gt: NOW } }];
+// A private game (slice PD3) is never in the feed, whatever the filters.
+const BASE = [
+  { status: "OPEN" },
+  { startsAt: { gt: NOW } },
+  { visibility: "PUBLIC" },
+];
 
 describe("parseFeedFilters", () => {
   it("reads every filter from the URL", () => {
@@ -243,5 +248,35 @@ describe("sport (PD1)", () => {
   it("accepts the padel scale's level 1.0 as a filter", () => {
     expect(parseFeedFilters({ ntrp: "1.0" })).toEqual({ ntrp: 1 });
     expect(parseFeedFilters({ ntrp: "0.5" })).toEqual({});
+  });
+});
+
+// Slice PD3, task PD3.1: the "match type" filter.
+describe("the gender filter", () => {
+  it("reads ?gender=, ignoring a value that isn't a match type", () => {
+    expect(parseFeedFilters({ gender: "WOMEN" })).toEqual({ gender: "WOMEN" });
+    expect(parseFeedFilters({ gender: "FEMALE" })).toEqual({});
+  });
+
+  it("narrows the query to that match type and survives in the link", () => {
+    const where = feedWhere({ gender: "MIXED" }, new Date("2026-11-17T10:00Z"));
+    expect(where.AND).toContainEqual({ matchGender: "MIXED" });
+    expect(feedHref({ gender: "MIXED" })).toBe("/offers?gender=MIXED");
+  });
+});
+
+// Slice PD3, task PD3.5: games at one club.
+describe("the club filter", () => {
+  const CLUB = "11111111-1111-4111-8111-111111111111";
+
+  it("reads ?club= only when it is a club id", () => {
+    expect(parseFeedFilters({ club: CLUB })).toEqual({ club: CLUB });
+    expect(parseFeedFilters({ club: "olsza" })).toEqual({});
+  });
+
+  it("narrows the query to that club and survives in the link", () => {
+    const where = feedWhere({ club: CLUB }, new Date("2026-11-17T10:00Z"));
+    expect(where.AND).toContainEqual({ clubId: CLUB });
+    expect(feedHref({ club: CLUB })).toBe(`/offers?club=${CLUB}`);
   });
 });

@@ -25,7 +25,10 @@ import { getCurrentUser } from "@/lib/auth/require-user";
 import { joinRefusal } from "@/lib/offers/join-rules";
 import { waitlistJoinRefusal } from "@/lib/offers/waitlist-rules";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
+import { getInviteToken, inviteLinkIsValid } from "@/lib/offers/invite-link";
 import { getOfferCandidates } from "@/lib/offers/offer-candidates";
+import { joinByInviteLink } from "@/app/offers/[id]/invite-link-actions";
+import { countFavorites } from "@/lib/players/favorites";
 import { getOfferDetails, type OfferDetails } from "@/lib/offers/offer-details";
 import {
   formatLabel,
@@ -45,7 +48,7 @@ import { DISTRICT_LABELS } from "@/lib/profile/options";
 // Typed by hand, like /players/[id]: generated PageProps need `next typegen`.
 type OfferPageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; invite?: string }>;
 };
 
 export async function generateMetadata({
@@ -74,6 +77,10 @@ export async function generateMetadata({
     description,
     openGraph: { title, description },
     twitter: { title, description },
+    // Slice PD3: a private game is for people who were given its link.
+    ...(offer.visibility === "PRIVATE"
+      ? { robots: { index: false, follow: false } }
+      : {}),
   };
 }
 
@@ -86,7 +93,8 @@ export default async function OfferPage({
   const { id } = await params;
   // createOffer (3.4) redirects here with ?created=1 — "the first offer
   // created" (task 5.15), flagged client-side below.
-  const { created } = await searchParams;
+  // ?invite=<token> is the game's invite link (slice PD3, task PD3.3).
+  const { created, invite } = await searchParams;
   const viewer = await getCurrentUser();
   const details = await getOfferDetails(id, viewer?.id ?? null);
   if (!details) {
@@ -96,9 +104,31 @@ export default async function OfferPage({
   const started = offer.startsAt <= new Date();
   // "Кого запросити" (task S2.2): only for the author, only while OPEN.
   const candidates =
-    details.isAuthor && offer.status === "OPEN"
+    details.isAuthor &&
+    offer.status === "OPEN" &&
+    // A private game (slice PD3) is filled by its link, not by suggestions.
+    offer.visibility === "PUBLIC"
       ? await getOfferCandidates(offer.id)
       : [];
+
+  // PD3.3. The author sees their own link; anyone else who came through a
+  // link that is still the current one gets "Take the place" instead of
+  // "Ask to join". The token itself is only ever sent to the author.
+  const inviteToken = details.isAuthor ? await getInviteToken(offer.id) : null;
+  const linkToken =
+    !details.isAuthor &&
+    invite !== undefined &&
+    (await inviteLinkIsValid(offer.id, invite))
+      ? invite
+      : undefined;
+  const loginNext = linkToken
+    ? `/offers/${offer.id}?invite=${linkToken}`
+    : `/offers/${offer.id}`;
+
+  // PD3.4: "Invite my favourites" is only worth showing to an author who
+  // has some.
+  const hasFavorites =
+    details.isAuthor && viewer ? (await countFavorites(viewer.id)) > 0 : false;
 
   const t = await getTranslations("OfferPage");
   const tOfferLabels = await getTranslations("OfferLabels");
@@ -123,6 +153,14 @@ export default async function OfferPage({
         offer.sport,
       ),
     },
+    ...(offer.matchGender !== "ANY"
+      ? [
+          {
+            label: t("matchGenderLabel"),
+            value: tOfferLabels(`matchGender.${offer.matchGender}`),
+          },
+        ]
+      : []),
     ...(offer.surface
       ? [{ label: t("surfaceLabel"), value: tSurface(offer.surface) }]
       : []),
@@ -140,6 +178,7 @@ export default async function OfferPage({
         <div className="surface p-6 sm:p-8">
           <p className="text-sm text-muted-foreground">
             {formatLabel(tOfferLabels, offer)}
+            {offer.visibility === "PRIVATE" && ` · ${t("privateGame")}`}
           </p>
           <div className="flex items-start justify-between gap-3">
             <h1 className="mt-1 text-3xl font-bold tracking-tight">
@@ -180,6 +219,7 @@ export default async function OfferPage({
           {offer.club && (
             <OfferBookingSection
               offerId={offer.id}
+              sport={offer.sport}
               club={offer.club}
               isAuthor={details.isAuthor}
               courtStatus={offer.courtStatus}
@@ -195,7 +235,7 @@ export default async function OfferPage({
           <section>
             {!viewer ? (
               <Link
-                href={`/login?next=${encodeURIComponent(`/offers/${offer.id}`)}`}
+                href={`/login?next=${encodeURIComponent(loginNext)}`}
                 className={buttonVariants()}
               >
                 {t("signInToJoin")}
@@ -206,9 +246,15 @@ export default async function OfferPage({
                 started={started}
                 viewerId={viewer.id}
                 candidates={candidates}
+                hasFavorites={hasFavorites}
+                inviteToken={inviteToken}
               />
             ) : (
-              <PlayerView details={details} viewerId={viewer.id} />
+              <PlayerView
+                details={details}
+                viewerId={viewer.id}
+                inviteLinkToken={linkToken}
+              />
             )}
           </section>
           {viewer && !details.isAuthor && (
@@ -228,9 +274,12 @@ export default async function OfferPage({
 function PlayerView({
   details,
   viewerId,
+  inviteLinkToken,
 }: {
   details: OfferDetails;
   viewerId: string;
+  /** PD3.3: set when the viewer opened the game's current invite link. */
+  inviteLinkToken?: string | undefined;
 }) {
   const t = useTranslations("OfferPage");
   const tJoinRefusal = useTranslations("JoinRefusal");
@@ -306,6 +355,33 @@ function PlayerView({
     );
   }
 
+  // PD3.3: the link is the author's "yes" — a free place is taken at once,
+  // no request to wait on. joinByInviteLink re-checks everything.
+  if (
+    inviteLinkToken &&
+    offer.status === "OPEN" &&
+    offer.startsAt > new Date() &&
+    details.spotsLeft > 0 &&
+    details.viewerFitsGender &&
+    viewerJoin?.status !== "DECLINED"
+  ) {
+    return (
+      <div className="space-y-3">
+        <p className="font-medium">
+          {t("invitedByLink", {
+            author: offer.author.name ?? t("defaultAuthorName"),
+          })}
+        </p>
+        <OfferActionButton
+          action={joinByInviteLink.bind(null, offer.id, inviteLinkToken)}
+          label={t("takeThePlace")}
+          pendingLabel={t("accepting")}
+          trackMeaningfulAction
+        />
+      </div>
+    );
+  }
+
   // T.2: a FULL offer takes no new direct requests, but a line to join
   // instead — joinRefusal below would just say "no longer taking players".
   if (offer.status === "FULL" && offer.startsAt > new Date()) {
@@ -319,6 +395,7 @@ function PlayerView({
           existingJoin: viewerJoin,
           alreadyWaitlisted: details.viewerWaitlistPosition !== null,
           now: new Date(),
+          fitsGender: details.viewerFitsGender,
         })}
       />
     );
@@ -329,6 +406,7 @@ function PlayerView({
     playerId: viewerId,
     existing: viewerJoin,
     now: new Date(),
+    fitsGender: details.viewerFitsGender,
   });
   if (refusal) {
     return <p className="text-muted-foreground">{tJoinRefusal(refusal)}</p>;

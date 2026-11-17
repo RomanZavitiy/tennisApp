@@ -37,9 +37,16 @@ export default async function PlayTodayPage() {
   // Slice PD1: today's games in the header switcher's sport, against the
   // viewer's level in that sport.
   const sport = await getCurrentSport();
+  const now = new Date();
   const [feed, myOpenOffers] = await Promise.all([
-    getPlayTodayFeed(viewer.id, playerLevel(viewer, sport), new Date(), sport),
-    getMyOpenOffers(viewer.id),
+    getPlayTodayFeed(
+      viewer.id,
+      playerLevel(viewer, sport),
+      now,
+      sport,
+      viewer.gender,
+    ),
+    getMyOpenOffers(viewer.id, now, sport),
   ]);
   const t = await getTranslations("PlayTodayPage");
   const isEmpty = feed.offers.length === 0 && feed.intents.length === 0;

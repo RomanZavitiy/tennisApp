@@ -3,7 +3,9 @@ import { z } from "zod";
 import {
   CourtStatus,
   District,
+  MatchGender,
   OfferFormat,
+  OfferVisibility,
   Sport,
   Surface,
 } from "@/lib/generated/prisma/enums";
@@ -44,6 +46,13 @@ export function offerSchema(t: ValidationT) {
       // request without one is tennis, as every offer was before padel.
       sport: z.enum(Sport).default("TENNIS"),
       format: z.enum(OfferFormat, t("formatRequired")).default("SINGLES"),
+      // Slice PD3: who the game is for. Whether the author is one of
+      // them is createOffer's check — the schema doesn't know the author.
+      matchGender: z.enum(MatchGender, t("matchGenderRequired")).default("ANY"),
+      // Slice PD3: PRIVATE keeps the game out of every list and push.
+      visibility: z
+        .enum(OfferVisibility, t("visibilityRequired"))
+        .default("PUBLIC"),
       hasPartner: z.boolean().default(false),
       // Kraków wall-clock time from <input type="datetime-local">, stored as
       // the UTC instant it means.
@@ -112,6 +121,14 @@ export function offerSchema(t: ValidationT) {
           message: t("padelNeedsDoubles"),
         });
       }
+      // "Mixed" means mixed pairs (CHECK in the migration).
+      if (offer.matchGender === "MIXED" && offer.format !== "DOUBLES") {
+        ctx.addIssue({
+          code: "custom",
+          path: ["matchGender"],
+          message: t("mixedNeedsDoubles"),
+        });
+      }
       const levels = levelsFor(offer.sport);
       for (const field of ["ntrpMin", "ntrpMax"] as const) {
         const level = offer[field];
@@ -175,6 +192,8 @@ export type CreateOfferResult = {
 const OFFER_FIELDS: (keyof OfferInput)[] = [
   "sport",
   "format",
+  "matchGender",
+  "visibility",
   "hasPartner",
   "startsAt",
   "durationMinutes",

@@ -98,7 +98,11 @@ describe("getOfferFeed", () => {
 
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
-      AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
+      AND: [
+        { status: "OPEN" },
+        { startsAt: { gt: NOW } },
+        { visibility: "PUBLIC" },
+      ],
     });
     expect(query.orderBy).toEqual([{ startsAt: "asc" }, { id: "asc" }]);
   });
@@ -198,6 +202,7 @@ describe("getOfferFeed", () => {
       AND: [
         { status: "OPEN" },
         { startsAt: { gt: NOW } },
+        { visibility: "PUBLIC" },
         { format: "DOUBLES" },
       ],
     });
@@ -210,7 +215,11 @@ describe("getOfferFeed", () => {
 
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
-      AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
+      AND: [
+        { status: "OPEN" },
+        { startsAt: { gt: NOW } },
+        { visibility: "PUBLIC" },
+      ],
     });
   });
 
@@ -238,7 +247,13 @@ describe("getOfferFeed", () => {
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
       AND: [
-        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        {
+          AND: [
+            { status: "OPEN" },
+            { startsAt: { gt: NOW } },
+            { visibility: "PUBLIC" },
+          ],
+        },
         { id: { notIn: ["2", "5"] } },
       ],
     });
@@ -252,7 +267,13 @@ describe("getOfferFeed", () => {
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
       AND: [
-        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        {
+          AND: [
+            { status: "OPEN" },
+            { startsAt: { gt: NOW } },
+            { visibility: "PUBLIC" },
+          ],
+        },
         { id: { in: ["2"] } },
       ],
     });
@@ -263,7 +284,11 @@ describe("getOfferFeed", () => {
 
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
-      AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }],
+      AND: [
+        { status: "OPEN" },
+        { startsAt: { gt: NOW } },
+        { visibility: "PUBLIC" },
+      ],
     });
   });
 
@@ -282,7 +307,13 @@ describe("getOfferFeed", () => {
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
       AND: [
-        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        {
+          AND: [
+            { status: "OPEN" },
+            { startsAt: { gt: NOW } },
+            { visibility: "PUBLIC" },
+          ],
+        },
         { authorId: { notIn: ["blocker-or-blocked-1"] } },
       ],
     });
@@ -297,7 +328,13 @@ describe("getOfferFeed", () => {
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
       AND: [
-        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        {
+          AND: [
+            { status: "OPEN" },
+            { startsAt: { gt: NOW } },
+            { visibility: "PUBLIC" },
+          ],
+        },
         { id: { in: ["2"] } },
         { authorId: { notIn: ["blocker-1"] } },
       ],
@@ -345,7 +382,13 @@ describe("getClubOffers", () => {
     const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(query.where).toEqual({
       AND: [
-        { AND: [{ status: "OPEN" }, { startsAt: { gt: NOW } }] },
+        {
+          AND: [
+            { status: "OPEN" },
+            { startsAt: { gt: NOW } },
+            { visibility: "PUBLIC" },
+          ],
+        },
         { clubId: "club-1" },
       ],
     });

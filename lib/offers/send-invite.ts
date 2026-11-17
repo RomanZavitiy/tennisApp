@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { isBlockedEitherWay } from "@/lib/moderation/personal-block";
 import { inviteRefusal, type InviteRefusal } from "@/lib/offers/invite-rules";
+import { genderFits } from "@/lib/offers/match-gender";
 import { notify } from "@/lib/notifications/notify";
 
 export type SendInviteOutcome =
@@ -25,13 +26,18 @@ export async function sendOfferInvite(
 ): Promise<SendInviteOutcome> {
   const offer = await db.sparringOffer.findUnique({
     where: { id: offerId },
-    select: { authorId: true, status: true, startsAt: true },
+    select: {
+      authorId: true,
+      status: true,
+      startsAt: true,
+      matchGender: true,
+    },
   });
   if (!offer) {
     return { ok: false, refusal: "NOT_FOUND" };
   }
 
-  const [existingInvite, existingJoin, blocked] = await Promise.all([
+  const [existingInvite, existingJoin, blocked, invitee] = await Promise.all([
     db.offerInvite.findUnique({
       where: { offerId_inviteeId: { offerId, inviteeId } },
       select: { status: true },
@@ -41,6 +47,8 @@ export async function sendOfferInvite(
       select: { status: true },
     }),
     isBlockedEitherWay(inviterId, inviteeId),
+    // Slice PD3: a men's or women's game only invites players it's for.
+    db.user.findUnique({ where: { id: inviteeId }, select: { gender: true } }),
   ]);
 
   const refusal = inviteRefusal({
@@ -55,6 +63,7 @@ export async function sendOfferInvite(
     existingJoin,
     now,
     blocked,
+    fitsGender: genderFits(offer.matchGender, invitee?.gender),
   });
   if (refusal) {
     return { ok: false, refusal };

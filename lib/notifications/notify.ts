@@ -8,6 +8,7 @@ import { appUrl } from "@/lib/notifications/app-url";
 import en from "@/messages/en.json";
 import pl from "@/messages/pl.json";
 import { recordNotification } from "@/lib/notifications/inbox";
+import { withSportName } from "@/lib/offers/offer-labels";
 import { createUnsubscribeToken } from "@/lib/notifications/unsubscribe-token";
 import { sendPush } from "@/lib/push/send-push";
 
@@ -41,7 +42,8 @@ export type NotificationEvent =
   | { kind: "INVITE_RECEIVED"; offerId: string }
   | { kind: "INVITE_ACCEPTED"; offerId: string }
   | { kind: "SPOT_OPENED"; offerId: string }
-  | { kind: "INTENT_FOR_YOUR_OFFER"; offerId: string };
+  | { kind: "INTENT_FOR_YOUR_OFFER"; offerId: string }
+  | { kind: "FAVORITE_POSTED_OFFER"; offerId: string };
 
 type Kind = NotificationEvent["kind"];
 
@@ -65,6 +67,9 @@ const CATEGORY: Record<Kind, "matches" | "newOffers"> = {
   // share its category too — notify()'s own gate and the pre-filtering in
   // lib/notifications/intent-notify.ts must check the same toggle.
   INTENT_FOR_YOUR_OFFER: "newOffers",
+  // PD3.4: the same toggle and daily cap as the two above
+  // (lib/notifications/favorite-offer.ts).
+  FAVORITE_POSTED_OFFER: "newOffers",
 };
 
 // Decision 2026-10-14: email fallback exists only for "new join request,
@@ -132,19 +137,27 @@ async function deliver(
     }
   }
 
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: {
-      email: true,
-      locale: true,
-      notifyMatches: true,
-      notifyNewOffers: true,
-      notifyEmailFallback: true,
-      pushSubscriptions: {
-        select: { id: true, endpoint: true, p256dh: true, auth: true },
+  const [user, offer] = await Promise.all([
+    db.user.findUnique({
+      where: { id: userId },
+      select: {
+        email: true,
+        locale: true,
+        notifyMatches: true,
+        notifyNewOffers: true,
+        notifyEmailFallback: true,
+        pushSubscriptions: {
+          select: { id: true, endpoint: true, p256dh: true, auth: true },
+        },
       },
-    },
-  });
+    }),
+    // Slice PD2: a player can have tennis and padel games at once, so a
+    // padel one is named in the title ("Padel · New request to join").
+    db.sparringOffer.findUnique({
+      where: { id: event.offerId },
+      select: { sport: true },
+    }),
+  ]);
   if (!user) {
     return;
   }
@@ -163,7 +176,16 @@ async function deliver(
     messages: MESSAGES[locale],
     namespace: "PushNotifications",
   });
-  const title = tNotifications(`${event.kind}.title`);
+  const tOfferLabels = createTranslator({
+    locale: locale.toLowerCase(),
+    messages: MESSAGES[locale],
+    namespace: "OfferLabels",
+  });
+  const title = withSportName(
+    tNotifications(`${event.kind}.title`),
+    offer?.sport ?? "TENNIS",
+    tOfferLabels("padel.badge"),
+  );
   const body = tNotifications(`${event.kind}.body`);
   const path = `/offers/${event.offerId}`;
 
