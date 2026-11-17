@@ -1105,6 +1105,9 @@
     "body": "Your account and personal data have been removed. Thanks for using SpinBuddy.",
     "home": "Back to home"
   },
+  "OfferActionButton": {
+    "failed": "That didn't go through. Try again in a moment."
+  },
   "ErrorPage": {
     "title": "Something went wrong",
     "body": "This didn't load. If you just did something (sent a request, accepted a player), reload the page first — it may already be saved.",
