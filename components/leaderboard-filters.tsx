@@ -7,6 +7,7 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import type { Sport } from "@/lib/generated/prisma/enums";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import {
   leaderboardHref,
@@ -20,8 +21,11 @@ import {
 // JavaScript is needed.
 export function LeaderboardFiltersForm({
   filters,
+  sport = "TENNIS",
 }: {
   filters: LeaderboardFilters;
+  /** Slice PD4: the level bands are on this sport's scale. */
+  sport?: Sport;
 }) {
   const t = useTranslations("LeaderboardFilters");
   const active = Object.keys(filters).length > 0;
@@ -55,7 +59,9 @@ export function LeaderboardFiltersForm({
         </NativeSelect>
       </div>
       <div className="space-y-1">
-        <Label htmlFor="leaderboard-filter-level">{t("levelLabel")}</Label>
+        <Label htmlFor="leaderboard-filter-level">
+          {sport === "PADEL" ? t("padelLevelLabel") : t("levelLabel")}
+        </Label>
         <NativeSelect
           id="leaderboard-filter-level"
           name="level"
@@ -65,7 +71,9 @@ export function LeaderboardFiltersForm({
           <NativeSelectOption value="">{t("any")}</NativeSelectOption>
           {NTRP_BAND_KEYS.map((level) => (
             <NativeSelectOption key={level} value={level}>
-              {t(`level.${level}`)}
+              {sport === "PADEL"
+                ? t(`padelLevel.${level}`)
+                : t(`level.${level}`)}
             </NativeSelectOption>
           ))}
         </NativeSelect>

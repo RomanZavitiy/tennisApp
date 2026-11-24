@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { NTRP_LEVELS } from "@/lib/profile/options";
-import { STARTING_ELO, startingElo } from "@/lib/rating/starting-elo";
+import {
+  STARTING_ELO,
+  startingElo,
+  startingPadelElo,
+} from "@/lib/rating/starting-elo";
+import { PADEL_LEVELS } from "@/lib/sport/sport";
 
 describe("startingElo", () => {
   it.each([
@@ -31,6 +36,30 @@ describe("startingElo", () => {
     "refuses NTRP %d, which is off the scale",
     (ntrp) => {
       expect(() => startingElo(ntrp)).toThrow(RangeError);
+    },
+  );
+});
+
+describe("startingPadelElo (slice PD4)", () => {
+  it.each([
+    [1, 1000],
+    [1.5, 1100],
+    [3.5, 1500],
+    [7, 2200],
+  ])("padel level %d starts at %i", (level, elo) => {
+    expect(startingPadelElo(level)).toBe(elo);
+  });
+
+  it("gives every padel level its own, rising value", () => {
+    const elos = PADEL_LEVELS.map(startingPadelElo);
+    expect(new Set(elos).size).toBe(PADEL_LEVELS.length);
+    expect([...elos].sort((a, b) => a - b)).toEqual(elos);
+  });
+
+  it.each([0.5, 1.2, 7.5, Number.NaN])(
+    "refuses padel level %d, which is off the scale",
+    (level) => {
+      expect(() => startingPadelElo(level)).toThrow(RangeError);
     },
   );
 });

@@ -5,6 +5,7 @@ import {
   FEEDBACK_WINDOW_DAYS,
   getGivenFeedback,
   isFeedbackWindowOpen,
+  submitDoublesFeedback,
   submitMatchFeedback,
 } from "@/lib/feedback/match-feedback";
 
@@ -13,16 +14,19 @@ const {
   matchFeedbackFindMany,
   createManyAndReturn,
   userBlockFindFirst,
+  doublesResultFindUnique,
 } = vi.hoisted(() => ({
   matchResultFindUnique: vi.fn(),
   matchFeedbackFindMany: vi.fn(),
   createManyAndReturn: vi.fn(),
   userBlockFindFirst: vi.fn(),
+  doublesResultFindUnique: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({
   db: {
     matchResult: { findUnique: matchResultFindUnique },
+    doublesResult: { findUnique: doublesResultFindUnique },
     matchFeedback: {
       findMany: matchFeedbackFindMany,
       createManyAndReturn,
@@ -213,6 +217,83 @@ describe("submitMatchFeedback", () => {
       ],
       select: { id: true },
       skipDuplicates: true,
+    });
+  });
+});
+
+describe("submitDoublesFeedback (slice PD4)", () => {
+  const P2 = "44444444-4444-4444-8444-444444444444";
+  const NOW = new Date(CONFIRMED_AT.getTime() + 86_400_000);
+  const confirmedGame = {
+    status: "CONFIRMED",
+    updatedAt: CONFIRMED_AT,
+    offer: { authorId: AUTHOR, joins: [{ userId: PLAYER }, { userId: P2 }] },
+  };
+
+  beforeEach(() => {
+    doublesResultFindUnique.mockResolvedValue(confirmedGame);
+    userBlockFindFirst.mockResolvedValue(null);
+    createManyAndReturn.mockResolvedValue([{ id: "f1" }]);
+  });
+
+  it("saves a tags-only row for one other player of the game", async () => {
+    const outcome = await submitDoublesFeedback(
+      "d1",
+      PLAYER,
+      P2,
+      ["GOOD_GAME"],
+      NOW,
+    );
+
+    expect(outcome).toEqual({ ok: true });
+    expect(createManyAndReturn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [
+          {
+            doublesResultId: "d1",
+            giverId: PLAYER,
+            receiverId: P2,
+            tags: ["GOOD_GAME"],
+            levelSignal: null,
+          },
+        ],
+      }),
+    );
+  });
+
+  it("refuses rating yourself or someone who wasn't in the game", async () => {
+    expect(await submitDoublesFeedback("d1", PLAYER, PLAYER, [], NOW)).toEqual({
+      ok: false,
+      refusal: "NOT_PARTICIPANT",
+    });
+    expect(
+      await submitDoublesFeedback("d1", PLAYER, OUTSIDER, [], NOW),
+    ).toEqual({ ok: false, refusal: "NOT_PARTICIPANT" });
+  });
+
+  it("refuses before confirmation and after the 7-day window", async () => {
+    doublesResultFindUnique.mockResolvedValueOnce({
+      ...confirmedGame,
+      status: "PENDING",
+    });
+    expect(await submitDoublesFeedback("d1", PLAYER, P2, [], NOW)).toEqual({
+      ok: false,
+      refusal: "NOT_CONFIRMED",
+    });
+
+    const late = new Date(CONFIRMED_AT.getTime() + 8 * 86_400_000);
+    expect(await submitDoublesFeedback("d1", PLAYER, P2, [], late)).toEqual({
+      ok: false,
+      refusal: "WINDOW_CLOSED",
+    });
+  });
+
+  it("refuses a second rating of the same player", async () => {
+    createManyAndReturn.mockResolvedValue([]);
+
+    expect(await submitDoublesFeedback("d1", PLAYER, P2, [], NOW)).toEqual({
+      ok: false,
+      refusal: "ALREADY_GIVEN",
     });
   });
 });

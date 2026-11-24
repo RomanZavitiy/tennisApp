@@ -158,7 +158,8 @@
     "reliability": "Reliability",
     "record": "Won–lost",
     "played": "{count, plural, one {# match} other {# matches}} played",
-    "padel": "Padel: level {level, number, ::.0}"
+    "padel": "Padel: level {level, number, ::.0}",
+    "padelElo": "Padel ELO {elo}"
   },
   "MyGames": {
     "none": "No upcoming games. Find one on the board, or post your own.",
@@ -455,7 +456,8 @@
     "noneMatchFilters": "No players match these filters.",
     "noPlayersYet": "No ranked players yet.",
     "eyebrow": "Kraków ranking",
-    "subtitle": "Everyone starts from their self-rated level; confirmed match results move the ELO from there."
+    "subtitle": "Everyone starts from their self-rated level; confirmed match results move the ELO from there.",
+    "padelSubtitle": "Padel: everyone starts from their declared padel level; confirmed doubles results move the padel ELO from there."
   },
   "LeaderboardFilters": {
     "formLabel": "Filter the leaderboard",
@@ -469,7 +471,14 @@
       "expert": "Expert (6.0–7.0)"
     },
     "submit": "Filter",
-    "clear": "Clear"
+    "clear": "Clear",
+    "padelLevelLabel": "Level (padel)",
+    "padelLevel": {
+      "beginner": "Beginner (1.0–2.5)",
+      "intermediate": "Intermediate (3.0–4.0)",
+      "advanced": "Advanced (4.5–5.5)",
+      "expert": "Expert (6.0–7.0)"
+    }
   },
   "LeaderboardRow": {
     "aPlayer": "A player",
@@ -1466,5 +1475,44 @@
     "LEFT": "Left side",
     "RIGHT": "Right side",
     "BOTH": "Both sides"
+  },
+  "DoublesResult": {
+    "you": "You",
+    "aPlayer": "A player",
+    "authorsPartner": "partner",
+    "submitSummary": "Submit result",
+    "modeScore": "We played",
+    "modeNoShow": "Someone didn't show up",
+    "whoPlayedWith": "Who played with {name}?",
+    "whoDidntCome": "Who didn't come?",
+    "pickWhoDidntCome": "Pick who didn't come.",
+    "reporting": "Reporting…",
+    "reportNoShow": "Report no-show",
+    "scoreLine": "{viewerPair} vs {otherPair}: {score}",
+    "pending": "{reporter} reported: {line}. Waiting for the other pair to confirm.",
+    "confirmed": "Confirmed: {line}.",
+    "disputed": "Result disputed ({line}). It doesn't count for anyone's rating.",
+    "tennisNoRating": "Doubles results don't change the singles tennis rating.",
+    "yourPadelElo": "Your padel ELO: {change}.",
+    "padelNotRated": "Padel ratings didn't change: not everyone in the game has a padel level.",
+    "noShowPending": "{reporter} reported that {who} didn't come. {who} can dispute it within 72 hours.",
+    "noShowConfirmed": "{who} didn't come — confirmed after 72 hours with no dispute.",
+    "noShowDisputed": "The no-show report about {who} was disputed and doesn't count.",
+    "confirm": "Confirm",
+    "confirming": "Confirming…",
+    "dispute": "Dispute",
+    "disputing": "Disputing…",
+    "rateThePlayers": "Rate the players"
+  },
+  "DoublesResultRefusal": {
+    "NOT_PARTICIPANT": "This isn't your game.",
+    "NOT_DOUBLES": "Only doubles games record a result here.",
+    "NOT_FULL": "Only a game where every place was taken records a result.",
+    "NOT_STARTED": "This game hasn't started yet.",
+    "ALREADY_SUBMITTED": "A result has already been filed for this game.",
+    "BAD_PAIRS": "Pick who played with the author.",
+    "BAD_NO_SHOW": "Pick another player from this game.",
+    "NOT_OPPONENT": "Only the other pair can confirm or dispute this result.",
+    "NOT_PENDING": "This result has already been settled."
   }
 }

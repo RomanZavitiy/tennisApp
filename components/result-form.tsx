@@ -32,11 +32,15 @@ export function ResultForm({
   onNoShow,
   viewerParty,
   opponentName,
+  sideLabels,
 }: {
   action: (values: MatchScoreInput) => Promise<ActionResult>;
-  onNoShow: () => Promise<ActionResult>;
+  /** Without it there's no no-show checkbox (doubles has its own, PD4). */
+  onNoShow?: () => Promise<ActionResult>;
   viewerParty: MatchParty;
   opponentName: string;
+  /** Slice PD4: the two pairs' names, instead of "You" / the opponent. */
+  sideLabels?: { author: string; player: string };
 }) {
   const t = useTranslations("ResultForm");
   const tValidation = useTranslations("Validation.matchResult");
@@ -59,8 +63,10 @@ export function ResultForm({
   });
   const { fields, append, remove } = useFieldArray({ control, name: "sets" });
 
-  const authorLabel = viewerParty === "AUTHOR" ? t("you") : opponentName;
-  const playerLabel = viewerParty === "PLAYER" ? t("you") : opponentName;
+  const authorLabel =
+    sideLabels?.author ?? (viewerParty === "AUTHOR" ? t("you") : opponentName);
+  const playerLabel =
+    sideLabels?.player ?? (viewerParty === "PLAYER" ? t("you") : opponentName);
 
   async function onSubmitScore(values: MatchScoreInput) {
     const result = await action(values);
@@ -70,6 +76,9 @@ export function ResultForm({
   }
 
   async function onSubmitNoShow() {
+    if (!onNoShow) {
+      return;
+    }
     setNoShowPending(true);
     const result = await onNoShow();
     setNoShowPending(false);
@@ -163,16 +172,18 @@ export function ResultForm({
         <ErrorText error={errors.winner} />
       </fieldset>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={noShow}
-          onChange={(event) => {
-            setNoShow(event.target.checked);
-          }}
-        />
-        {t("opponentNoShow")}
-      </label>
+      {onNoShow && (
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={noShow}
+            onChange={(event) => {
+              setNoShow(event.target.checked);
+            }}
+          />
+          {t("opponentNoShow")}
+        </label>
+      )}
 
       <ErrorText error={errors.root} />
 

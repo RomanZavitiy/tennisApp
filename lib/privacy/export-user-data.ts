@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { firstNameAndInitial } from "@/lib/privacy/opponent-name";
+import { doublesSideOf } from "@/lib/offers/doubles-result-rules";
+import type { DoublesEloChange } from "@/lib/rating/doubles-elo";
 
 // "Download my data" (task 6.14): everything the task asks for — profile,
 // offers, join requests, the user's own chat messages, and matches — in one
@@ -21,6 +23,8 @@ export type UserDataExport = {
     padelSide: string | null;
     elo: number | null;
     matchesPlayed: number;
+    padelElo: number | null;
+    padelMatchesPlayed: number;
     locale: string;
     createdAt: string;
   };
@@ -60,6 +64,21 @@ export type UserDataExport = {
     noShowParty: "me" | "opponent" | null;
     createdAt: string;
   }>;
+  /** Slice PD4: doubles results the user played in, from their side. */
+  doublesMatches: Array<{
+    id: string;
+    status: string;
+    sport: string;
+    startsAt: string;
+    /** Null on a no-show report — there are no pairs. */
+    myPair: "author's pair" | "other pair" | null;
+    score: unknown;
+    winner: "my pair" | "other pair" | null;
+    reportedByMe: boolean;
+    noShowWasMe: boolean;
+    myPadelElo: { before: number; after: number } | null;
+    createdAt: string;
+  }>;
   followedClubs: Array<{
     slug: string;
     name: string;
@@ -68,97 +87,134 @@ export type UserDataExport = {
 };
 
 export async function exportUserData(userId: string): Promise<UserDataExport> {
-  const [user, offers, joins, messages, matchResults, clubFollows] =
-    await Promise.all([
-      db.user.findUniqueOrThrow({
-        where: { id: userId },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          birthDate: true,
-          gender: true,
-          district: true,
-          selfRatedNtrp: true,
-          padelLevel: true,
-          padelSide: true,
-          elo: true,
-          matchesPlayed: true,
-          locale: true,
-          createdAt: true,
-        },
-      }),
-      db.sparringOffer.findMany({
-        where: { authorId: userId },
-        select: {
-          id: true,
-          status: true,
-          sport: true,
-          format: true,
-          matchGender: true,
-          visibility: true,
-          startsAt: true,
-          district: true,
-          clubId: true,
-          comment: true,
-          courtStatus: true,
-          createdAt: true,
-        },
-        orderBy: { createdAt: "asc" },
-      }),
-      db.offerJoin.findMany({
-        where: { userId },
-        select: { id: true, offerId: true, status: true, createdAt: true },
-        orderBy: { createdAt: "asc" },
-      }),
-      db.message.findMany({
-        where: { senderId: userId },
-        select: {
-          id: true,
-          offerJoinId: true,
-          offerId: true,
-          content: true,
-          createdAt: true,
-        },
-        orderBy: { createdAt: "asc" },
-      }),
-      db.matchResult.findMany({
-        where: {
-          offerJoin: { OR: [{ userId }, { offer: { authorId: userId } }] },
-        },
-        select: {
-          id: true,
-          status: true,
-          score: true,
-          winner: true,
-          reportedBy: true,
-          noShowParty: true,
-          createdAt: true,
-          offerJoin: {
-            select: {
-              userId: true,
-              user: { select: { name: true } },
-              offer: {
-                select: {
-                  authorId: true,
-                  startsAt: true,
-                  author: { select: { name: true } },
-                },
+  const [
+    user,
+    offers,
+    joins,
+    messages,
+    matchResults,
+    clubFollows,
+    doublesResults,
+  ] = await Promise.all([
+    db.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        birthDate: true,
+        gender: true,
+        district: true,
+        selfRatedNtrp: true,
+        padelLevel: true,
+        padelSide: true,
+        elo: true,
+        matchesPlayed: true,
+        padelElo: true,
+        padelMatchesPlayed: true,
+        locale: true,
+        createdAt: true,
+      },
+    }),
+    db.sparringOffer.findMany({
+      where: { authorId: userId },
+      select: {
+        id: true,
+        status: true,
+        sport: true,
+        format: true,
+        matchGender: true,
+        visibility: true,
+        startsAt: true,
+        district: true,
+        clubId: true,
+        comment: true,
+        courtStatus: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.offerJoin.findMany({
+      where: { userId },
+      select: { id: true, offerId: true, status: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.message.findMany({
+      where: { senderId: userId },
+      select: {
+        id: true,
+        offerJoinId: true,
+        offerId: true,
+        content: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.matchResult.findMany({
+      where: {
+        offerJoin: { OR: [{ userId }, { offer: { authorId: userId } }] },
+      },
+      select: {
+        id: true,
+        status: true,
+        score: true,
+        winner: true,
+        reportedBy: true,
+        noShowParty: true,
+        createdAt: true,
+        offerJoin: {
+          select: {
+            userId: true,
+            user: { select: { name: true } },
+            offer: {
+              select: {
+                authorId: true,
+                startsAt: true,
+                author: { select: { name: true } },
               },
             },
           },
         },
-        orderBy: { createdAt: "asc" },
-      }),
-      db.clubFollow.findMany({
-        where: { userId },
-        select: {
-          createdAt: true,
-          club: { select: { slug: true, name: true } },
-        },
-        orderBy: { createdAt: "asc" },
-      }),
-    ]);
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.clubFollow.findMany({
+      where: { userId },
+      select: {
+        createdAt: true,
+        club: { select: { slug: true, name: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.doublesResult.findMany({
+      where: {
+        OR: [
+          { offer: { authorId: userId } },
+          { offer: { joins: { some: { userId, status: "ACCEPTED" } } } },
+          { authorPartnerId: userId },
+          { opponent1Id: userId },
+          { opponent2Id: userId },
+          { reportedById: userId },
+          { noShowUserId: userId },
+        ],
+      },
+      select: {
+        id: true,
+        status: true,
+        score: true,
+        winner: true,
+        authorPartnerId: true,
+        opponent1Id: true,
+        opponent2Id: true,
+        reportedById: true,
+        noShowUserId: true,
+        eloChanges: true,
+        createdAt: true,
+        offer: { select: { authorId: true, sport: true, startsAt: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
 
   return {
     exportedAt: new Date().toISOString(),
@@ -204,6 +260,37 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
         // Never null, unlike winner/noShowParty — every result has a filer.
         reportedBy: result.reportedBy === selfParty ? "me" : "opponent",
         noShowParty: relativeTo(result.noShowParty),
+        createdAt: result.createdAt.toISOString(),
+      };
+    }),
+    doublesMatches: doublesResults.map((result) => {
+      const side = doublesSideOf(
+        { ...result, authorId: result.offer.authorId },
+        userId,
+      );
+      const changes = (result.eloChanges ?? []) as DoublesEloChange[];
+      const mine = changes.find((change) => change.userId === userId);
+      return {
+        id: result.id,
+        status: result.status,
+        sport: result.offer.sport,
+        startsAt: result.offer.startsAt.toISOString(),
+        myPair:
+          side === null
+            ? null
+            : side === "AUTHOR"
+              ? ("author's pair" as const)
+              : ("other pair" as const),
+        score: result.score,
+        winner:
+          result.winner === null || side === null
+            ? null
+            : result.winner === side
+              ? ("my pair" as const)
+              : ("other pair" as const),
+        reportedByMe: result.reportedById === userId,
+        noShowWasMe: result.noShowUserId === userId,
+        myPadelElo: mine ? { before: mine.before, after: mine.after } : null,
         createdAt: result.createdAt.toISOString(),
       };
     }),

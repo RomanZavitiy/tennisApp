@@ -10,6 +10,10 @@ const { autoConfirmExpiredResults, runNotificationReminders } = vi.hoisted(
   }),
 );
 vi.mock("@/lib/rating/auto-confirm", () => ({ autoConfirmExpiredResults }));
+const autoConfirmExpiredDoublesResults = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/rating/doubles-cron", () => ({
+  autoConfirmExpiredDoublesResults,
+}));
 vi.mock("@/lib/notifications/reminders", () => ({ runNotificationReminders }));
 
 function request(authorization?: string, job?: string) {
@@ -28,6 +32,7 @@ describe("GET /api/cron", () => {
     vi.clearAllMocks();
     process.env.CRON_SECRET = "test-secret";
     autoConfirmExpiredResults.mockResolvedValue(3);
+    autoConfirmExpiredDoublesResults.mockResolvedValue(1);
   });
 
   afterEach(() => {
@@ -61,7 +66,10 @@ describe("GET /api/cron", () => {
     const response = await GET(request("Bearer test-secret"));
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ autoConfirmed: 3 });
+    await expect(response.json()).resolves.toEqual({
+      autoConfirmed: 3,
+      autoConfirmedDoubles: 1,
+    });
     expect(autoConfirmExpiredResults).toHaveBeenCalledTimes(1);
     expect(runNotificationReminders).not.toHaveBeenCalled();
   });

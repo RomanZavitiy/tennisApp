@@ -30,6 +30,8 @@ function row(
     district: overrides.district === undefined ? null : overrides.district,
     elo: overrides.elo ?? 1500,
     matchesPlayed: overrides.matchesPlayed ?? 0,
+    padelElo: null as number | null,
+    padelMatchesPlayed: 0,
     scheduledMatches: overrides.scheduledMatches ?? 0,
     noShows: overrides.noShows ?? 0,
     lateCancellations: overrides.lateCancellations ?? 0,
@@ -124,6 +126,47 @@ describe("getLeaderboard", () => {
     expect(players[0]).toMatchObject({
       district: "PODGORZE",
       matchesPlayed: 12,
+    });
+  });
+
+  describe("padel (slice PD4)", () => {
+    it("ranks by the padel ELO, among players who have one", async () => {
+      await getLeaderboard({}, "PADEL");
+
+      const query = findMany.mock.calls[0]?.[0] as Record<string, unknown>;
+      expect(query.where).toEqual({
+        AND: [
+          { onboardingCompletedAt: { not: null } },
+          { blockedAt: null },
+          { padelElo: { not: null } },
+        ],
+      });
+      expect(query.orderBy).toEqual([{ padelElo: "desc" }, { id: "asc" }]);
+    });
+
+    it("filters the level on the padel scale", async () => {
+      await getLeaderboard({ level: "beginner" }, "PADEL");
+
+      const query = findMany.mock.calls[0]?.[0] as {
+        where: { AND: unknown[] };
+      };
+      expect(query.where.AND).toContainEqual({
+        padelLevel: { gte: 1, lte: 2.5 },
+      });
+    });
+
+    it("shows the padel rating and padel match count", async () => {
+      findMany.mockResolvedValue([
+        {
+          ...row("1", { elo: 1900, matchesPlayed: 9 }),
+          padelElo: 1300,
+          padelMatchesPlayed: 2,
+        },
+      ]);
+
+      const [player] = await getLeaderboard({}, "PADEL");
+
+      expect(player).toMatchObject({ elo: 1300, matchesPlayed: 2 });
     });
   });
 });

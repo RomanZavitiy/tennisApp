@@ -19,6 +19,8 @@ export type PublicProfile = {
   /** Slice PD2: null for a player who doesn't play padel. */
   padelLevel: number | null;
   padelSide: PadelSide | null;
+  /** Slice PD4: the padel rating, null without a padel level. */
+  padelElo: number | null;
   avatarPath: string | null;
   /** Current ELO (task 4.9) — moves only on a confirmed result (4.8). */
   elo: number;
@@ -49,6 +51,7 @@ export async function getPublicProfile(
       selfRatedNtrp: true,
       padelLevel: true,
       padelSide: true,
+      padelElo: true,
       avatarPath: true,
       elo: true,
       scheduledMatches: true,
@@ -77,6 +80,7 @@ export async function getPublicProfile(
     selfRatedNtrp: row.selfRatedNtrp,
     padelLevel: row.padelLevel,
     padelSide: row.padelSide,
+    padelElo: row.padelElo,
     avatarPath: row.avatarPath,
     elo: row.elo,
     reliability: computeReliability(row),

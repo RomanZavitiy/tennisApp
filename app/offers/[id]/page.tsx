@@ -17,6 +17,7 @@ import { AuthorView } from "@/components/offer-author-view";
 import { OfferBookingSection } from "@/components/offer-booking-section";
 import { PlayerLink } from "@/components/player-link";
 import { ReportButton } from "@/components/report-button";
+import { DoublesResultSection } from "@/components/doubles-result-section";
 import { ResultSection } from "@/components/result-section";
 import { ShareOfferButton } from "@/components/share-offer-button";
 import { buttonVariants } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import { getOfferCandidates } from "@/lib/offers/offer-candidates";
 import { joinByInviteLink } from "@/app/offers/[id]/invite-link-actions";
 import { countFavorites } from "@/lib/players/favorites";
 import { getOfferDetails, type OfferDetails } from "@/lib/offers/offer-details";
+import { getDoublesGameView } from "@/lib/offers/doubles-details";
 import {
   formatLabel,
   levelLabel,
@@ -129,6 +131,12 @@ export default async function OfferPage({
   // has some.
   const hasFavorites =
     details.isAuthor && viewer ? (await countFavorites(viewer.id)) > 0 : false;
+
+  // Slice PD4: a doubles game's result, for the people who played it.
+  const doublesGame =
+    viewer && offer.format === "DOUBLES" && started
+      ? await getDoublesGameView(offer.id, viewer.id)
+      : null;
 
   const t = await getTranslations("OfferPage");
   const tOfferLabels = await getTranslations("OfferLabels");
@@ -254,6 +262,13 @@ export default async function OfferPage({
                 details={details}
                 viewerId={viewer.id}
                 inviteLinkToken={linkToken}
+              />
+            )}
+            {viewer && doublesGame && (
+              <DoublesResultSection
+                offerId={offer.id}
+                viewerId={viewer.id}
+                game={doublesGame}
               />
             )}
           </section>

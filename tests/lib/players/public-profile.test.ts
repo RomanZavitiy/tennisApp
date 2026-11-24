@@ -86,6 +86,7 @@ describe("getPublicProfile", () => {
         selfRatedNtrp: true,
         padelLevel: true,
         padelSide: true,
+        padelElo: true,
         avatarPath: true,
         elo: true,
         scheduledMatches: true,
