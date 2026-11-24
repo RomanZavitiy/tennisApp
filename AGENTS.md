@@ -7,9 +7,12 @@ not small PRs.
 
 ## 1. Project in one paragraph
 
-A tennis matchFinder web app for Kraków: players find a court on a map, post/browse
+A tennis and padel matchFinder web app for Kraków: players find a court on a map, post/browse
 "looking for a sparring partner" offers, and keep a profile with a self-declared level
-that turns into an ELO-style rating as real matches get logged. Inspired by
+that turns into an ELO-style rating as real matches get logged. Padel (`docs/PADEL-PLAN.md`)
+is the second sport in the same app: a Tennis/Padel switch (cookie `SB_SPORT`) picks the
+offers, clubs and level scale; padel games are always doubles, with a padel level (1–7) and
+a padel rating of its own; account, chat, notifications and moderation are shared. Inspired by
 twojtenis.pl's sparring board, court map and profile — nothing else from that product is
 in scope. V1 adds request-based court booking for partner clubs (SpinBuddy-owned
 availability, no payments, no sync with third-party booking sites — decision 2026-10-21;
