@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { PageShell } from "@/components/page-shell";
 import { BookingLink } from "@/components/booking-link";
+import { ClubEventList } from "@/components/club-event-list";
 import { ExternalLink } from "@/components/external-link";
 import {
   FollowClubButton,
@@ -21,6 +22,7 @@ import {
   getClub,
   getClubFollowInfo,
 } from "@/lib/clubs/club-details";
+import { getClubEvents } from "@/lib/clubs/club-events";
 import { isFeatureEnabled } from "@/lib/features";
 import { getClubOffers } from "@/lib/offers/feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
@@ -54,6 +56,11 @@ export default async function ClubPage({ params }: ClubPageProps) {
   const followInfo = isFeatureEnabled("clubChat")
     ? await getClubFollowInfo(club.id, viewer?.id ?? null)
     : null;
+  // Club news (PD5.1) is pushed to followers, so it's shown only while
+  // following exists (lib/features.ts).
+  const events = isFeatureEnabled("clubChat")
+    ? await getClubEvents(club.id)
+    : [];
   // "Coaches at this club" only links into /coaches, so it goes away with
   // that section (lib/features.ts).
   const coaches = isFeatureEnabled("coaches")
@@ -178,6 +185,13 @@ export default async function ClubPage({ params }: ClubPageProps) {
             <section className="mt-6">
               <h2 className="font-semibold">{t("prices")}</h2>
               <p className="mt-1 whitespace-pre-line">{club.priceInfo}</p>
+            </section>
+          )}
+
+          {events.length > 0 && (
+            <section className="mt-6">
+              <h2 className="font-semibold">{t("news")}</h2>
+              <ClubEventList events={events} />
             </section>
           )}
 

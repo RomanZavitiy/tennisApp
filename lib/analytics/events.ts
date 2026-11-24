@@ -13,7 +13,7 @@ export type Sport = "TENNIS" | "PADEL";
 type EventProperties = {
   signup_completed: Record<string, never>;
   offer_created: { sport: Sport; format: OfferFormat; hasClub: boolean };
-  join_requested: { format: OfferFormat };
+  join_requested: { sport: Sport; format: OfferFormat };
   join_accepted: { format: OfferFormat };
   message_sent: Record<string, never>;
   booking_outbound_clicked: { target: OutboundTarget };
@@ -28,6 +28,8 @@ type EventProperties = {
   club_followed: Record<string, never>;
   club_unfollowed: Record<string, never>;
   club_message_sent: Record<string, never>;
+  /** PD5.1: club staff posted news; how many followers got a push. */
+  club_event_posted: { followers_notified: number };
   invite_sent: { source: InviteSource };
   invite_accepted: Record<string, never>;
   invite_declined: Record<string, never>;

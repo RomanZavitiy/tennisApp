@@ -9,8 +9,14 @@ import {
   declineBooking,
   removeBlock,
 } from "@/app/(club)/club/[clubId]/actions";
+import {
+  deleteClubEvent,
+  postClubEvent,
+} from "@/app/(club)/club/[clubId]/event-actions";
 import { AddBlockForm } from "@/components/add-block-form";
 import { AdminActionForm } from "@/components/admin-action-form";
+import { ClubEventForm } from "@/components/club-event-form";
+import { ClubEventList } from "@/components/club-event-list";
 import {
   blockForSlot,
   bookingForSlot,
@@ -18,7 +24,9 @@ import {
   getPendingQueue,
 } from "@/lib/booking/get-club-panel-data";
 import { requireClubStaff } from "@/lib/auth/require-club-staff";
+import { getClubEvents } from "@/lib/clubs/club-events";
 import { db } from "@/lib/db";
+import { isFeatureEnabled } from "@/lib/features";
 import {
   formatKrakowTime,
   formatKrakowTimeRange,
@@ -55,10 +63,14 @@ export default async function ClubPanelPage({
   const today = todayInKrakow();
   const tomorrow = addDays(today, 1);
 
-  const [pending, todayDay, tomorrowDay] = await Promise.all([
+  // Club news (PD5.1) goes to followers, so it's switched off together
+  // with following (lib/features.ts).
+  const newsEnabled = isFeatureEnabled("clubChat");
+  const [pending, todayDay, tomorrowDay, events] = await Promise.all([
     getPendingQueue(clubId),
     getClubPanelDay(clubId, today),
     getClubPanelDay(clubId, tomorrow),
+    newsEnabled ? getClubEvents(clubId) : Promise.resolve([]),
   ]);
   if (!club || !todayDay || !tomorrowDay) {
     notFound();
@@ -241,6 +253,45 @@ export default async function ClubPanelPage({
           />
         </div>
       </section>
+
+      {newsEnabled && (
+        <section>
+          <h2 className="font-semibold">{t("newsTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("newsHint")}</p>
+          <div className="mt-2 max-w-md">
+            <ClubEventForm
+              action={postClubEvent.bind(null, clubId)}
+              labels={{
+                title: t("newsTitleLabel"),
+                body: t("newsBodyLabel"),
+                submit: t("postNews"),
+                submitting: t("postingNews"),
+                done: t("newsPosted"),
+              }}
+            />
+          </div>
+          {events.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">{t("noNews")}</p>
+          ) : (
+            <ClubEventList
+              events={events}
+              actionFor={(event) => (
+                <AdminActionForm
+                  actions={[
+                    {
+                      key: "delete",
+                      label: t("deleteNews"),
+                      pendingLabel: t("deletingNews"),
+                      variant: "outline",
+                      run: deleteClubEvent.bind(null, event.id),
+                    },
+                  ]}
+                />
+              )}
+            />
+          )}
+        </section>
+      )}
     </div>
   );
 }

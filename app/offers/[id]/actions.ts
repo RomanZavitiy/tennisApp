@@ -75,6 +75,7 @@ export async function requestToJoin(
       startsAt: true,
       format: true,
       matchGender: true,
+      sport: true,
     },
   });
   if (!offer) {
@@ -141,7 +142,10 @@ export async function requestToJoin(
   // Task 5.16: "new join request", to the author — on a reopened request
   // too, since it's a fresh ask either way.
   await notify(offer.authorId, { kind: "JOIN_REQUESTED", offerId: id.data });
-  await captureEvent("join_requested", player.id, { format: offer.format });
+  await captureEvent("join_requested", player.id, {
+    sport: offer.sport,
+    format: offer.format,
+  });
 
   revalidatePath(`/offers/${id.data}`);
   return { ok: true };
