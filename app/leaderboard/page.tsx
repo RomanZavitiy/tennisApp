@@ -11,6 +11,7 @@ import { getCurrentUser } from "@/lib/auth/require-user";
 import { getLeaderboard } from "@/lib/leaderboard/get-leaderboard";
 import { getMyOpenOffers } from "@/lib/offers/my-open-offers";
 import { requireFeature } from "@/lib/require-feature";
+import { getCurrentSport } from "@/lib/sport/current-sport";
 import { parseLeaderboardFilters } from "@/lib/validation/leaderboard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,7 +35,9 @@ export default async function LeaderboardPage({
   await connection();
   const params = await searchParams;
   const filters = parseLeaderboardFilters(params);
-  const players = await getLeaderboard(filters);
+  // Slice PD4: one ladder per sport, the one the header switch is on.
+  const sport = await getCurrentSport();
+  const players = await getLeaderboard(filters, sport);
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("LeaderboardPage");
   // "Invite to game" (task S1.4): the same list of the viewer's own open
@@ -47,10 +50,12 @@ export default async function LeaderboardPage({
       <PageHeader
         eyebrow={t("eyebrow")}
         title={t("title")}
-        subtitle={t("subtitle")}
+        subtitle={sport === "PADEL" ? t("padelSubtitle") : t("subtitle")}
       />
 
-      <ListingLayout sidebar={<LeaderboardFiltersForm filters={filters} />}>
+      <ListingLayout
+        sidebar={<LeaderboardFiltersForm filters={filters} sport={sport} />}
+      >
         {players.length === 0 ? (
           <EmptyState icon={<TrophyIcon />}>
             {filtered ? t("noneMatchFilters") : t("noPlayersYet")}

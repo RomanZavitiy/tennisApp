@@ -25,11 +25,17 @@ function toggled<T>(list: readonly T[], value: T): T[] {
  */
 export function RateOpponentForm({
   action,
+  tagOptions = TAGS,
+  withLevelSignal = true,
 }: {
   action: (input: {
     tags: FeedbackTag[];
     levelSignal: LevelSignal | null;
   }) => Promise<FeedbackActionResult>;
+  /** Slice PD4: a padel game leaves out the NTRP tag. */
+  tagOptions?: readonly FeedbackTag[];
+  /** Slice PD4: doubles feedback is tags only. */
+  withLevelSignal?: boolean;
 }) {
   const t = useTranslations("RateOpponentForm");
   const tTag = useTranslations("FeedbackTag");
@@ -62,7 +68,7 @@ export function RateOpponentForm({
     >
       <fieldset className="space-y-1.5">
         <legend className="text-sm font-medium">{t("tagsLabel")}</legend>
-        {TAGS.map((tag) => (
+        {tagOptions.map((tag) => (
           <label key={tag} className="flex items-center gap-1.5 text-sm">
             <input
               type="checkbox"
@@ -75,33 +81,37 @@ export function RateOpponentForm({
           </label>
         ))}
       </fieldset>
-      <fieldset className="space-y-1.5">
-        <legend className="text-sm font-medium">{t("levelSignalLabel")}</legend>
-        <label className="flex items-center gap-1.5 text-sm">
-          <input
-            type="radio"
-            name="levelSignal"
-            checked={levelSignal === null}
-            onChange={() => {
-              setLevelSignal(null);
-            }}
-          />
-          {t("levelSignalNone")}
-        </label>
-        {LEVEL_SIGNALS.map((signal) => (
-          <label key={signal} className="flex items-center gap-1.5 text-sm">
+      {withLevelSignal && (
+        <fieldset className="space-y-1.5">
+          <legend className="text-sm font-medium">
+            {t("levelSignalLabel")}
+          </legend>
+          <label className="flex items-center gap-1.5 text-sm">
             <input
               type="radio"
               name="levelSignal"
-              checked={levelSignal === signal}
+              checked={levelSignal === null}
               onChange={() => {
-                setLevelSignal(signal);
+                setLevelSignal(null);
               }}
             />
-            {tLevelSignal(signal)}
+            {t("levelSignalNone")}
           </label>
-        ))}
-      </fieldset>
+          {LEVEL_SIGNALS.map((signal) => (
+            <label key={signal} className="flex items-center gap-1.5 text-sm">
+              <input
+                type="radio"
+                name="levelSignal"
+                checked={levelSignal === signal}
+                onChange={() => {
+                  setLevelSignal(signal);
+                }}
+              />
+              {tLevelSignal(signal)}
+            </label>
+          ))}
+        </fieldset>
+      )}
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}

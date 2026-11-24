@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { District } from "@/lib/generated/prisma/enums";
+import { District, type Sport } from "@/lib/generated/prisma/enums";
 
 // Leaderboard filters (task L.3): live in the URL (/leaderboard?district=…&level=…),
 // same approach as the offer feed's (lib/offers/feed-filters.ts) and the court
@@ -22,6 +22,21 @@ export const NTRP_BANDS: Record<NtrpBand, { min: number; max: number }> = {
   advanced: { min: 4.5, max: 5.5 },
   expert: { min: 6, max: 7 },
 };
+
+/** The same four bands on the padel scale, 1.0–7.0 (slice PD4). */
+export const PADEL_BANDS: Record<NtrpBand, { min: number; max: number }> = {
+  beginner: { min: 1, max: 2.5 },
+  intermediate: { min: 3, max: 4 },
+  advanced: { min: 4.5, max: 5.5 },
+  expert: { min: 6, max: 7 },
+};
+
+/** The level bands of a sport's own scale. */
+export function levelBandsFor(
+  sport: Sport,
+): Record<NtrpBand, { min: number; max: number }> {
+  return sport === "PADEL" ? PADEL_BANDS : NTRP_BANDS;
+}
 
 export type LeaderboardFilters = {
   district?: District;

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { runNotificationReminders } from "@/lib/notifications/reminders";
 import { autoConfirmExpiredResults } from "@/lib/rating/auto-confirm";
+import { autoConfirmExpiredDoublesResults } from "@/lib/rating/doubles-cron";
 
 // The cron endpoint (task 5.8), now two jobs behind the same route and the
 // same secret (decision 2026-10-15, "Cron"): the default action auto-
@@ -27,5 +28,7 @@ export async function GET(request: NextRequest) {
   }
 
   const autoConfirmed = await autoConfirmExpiredResults();
-  return NextResponse.json({ autoConfirmed });
+  // Slice PD4: doubles results, counted separately so a log shows which.
+  const autoConfirmedDoubles = await autoConfirmExpiredDoublesResults();
+  return NextResponse.json({ autoConfirmed, autoConfirmedDoubles });
 }

@@ -79,6 +79,15 @@ model User {
   /// Confirmed matches played; 0 means the ELO is still the starting one.
   matchesPlayed Int  @default(0) @map("matches_played")
 
+  // Padel rating (slice PD4, decision 2026-11-24): its own ELO, never mixed
+  // with the tennis one above. Set from padelLevel (startingPadelElo) and
+  // re-set when the level changes, until the first confirmed padel result;
+  // from then on only confirmed doubles results move it. Null while the
+  // player has no padel level — CHECK: positive when set.
+  padelElo           Int? @map("padel_elo")
+  /// Confirmed padel results played; 0 means padelElo is still the starting one.
+  padelMatchesPlayed Int  @default(0) @map("padel_matches_played")
+
   // Reliability (tasks 4.10-4.12, decision 2026-10-14 "Надійність гравця").
   // All three are counters, not derived from current state: an accepted
   // join later withdrawn no longer shows ACCEPTED, and no history table
@@ -190,6 +199,12 @@ model User {
   feedbackGiven           MatchFeedback[]    @relation("FeedbackGiven")
   /// Feedback this player received from an opponent after a match (slice W).
   feedbackReceived        MatchFeedback[]    @relation("FeedbackReceived")
+  /// Doubles results (slice PD4): every seat this player can hold in one.
+  doublesAsAuthorPartner  DoublesResult[]    @relation("DoublesAuthorPartner")
+  doublesAsOpponent1      DoublesResult[]    @relation("DoublesOpponent1")
+  doublesAsOpponent2      DoublesResult[]    @relation("DoublesOpponent2")
+  doublesReported         DoublesResult[]    @relation("DoublesReportedBy")
+  doublesNoShows          DoublesResult[]    @relation("DoublesNoShow")
 
   // Discoverability (slice S2, task S2.3, owner decision 2026-11-07): whether
   // this player can appear in another author's "candidates to invite" list
@@ -570,6 +585,8 @@ model SparringOffer {
   dismissals     OfferDismissal[]
   /// Players waiting in line while this offer is FULL (slice T).
   waitlist       OfferWaitlist[]
+  /// A doubles game's result (slice PD4) — at most one per game.
+  doublesResult  DoublesResult?
 
   @@index([authorId])
   @@index([clubId])
@@ -909,8 +926,12 @@ model MatchFeedback {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  matchResultId String      @map("match_result_id") @db.Uuid
-  matchResult   MatchResult @relation(fields: [matchResultId], references: [id], onDelete: Cascade)
+  /// Exactly one of matchResultId / doublesResultId is set (CHECK in the
+  /// PD4 migration): a singles result, or a doubles one (slice PD4).
+  matchResultId   String?        @map("match_result_id") @db.Uuid
+  matchResult     MatchResult?   @relation(fields: [matchResultId], references: [id], onDelete: Cascade)
+  doublesResultId String?        @map("doubles_result_id") @db.Uuid
+  doublesResult   DoublesResult? @relation(fields: [doublesResultId], references: [id], onDelete: Cascade)
 
   giverId String @map("giver_id") @db.Uuid
   giver   User   @relation("FeedbackGiven", fields: [giverId], references: [id], onDelete: Cascade)
@@ -932,10 +953,75 @@ model MatchFeedback {
   /// own unique offerJoinId, but keyed by giver since a match has two
   /// possible givers, not one result.
   @@unique([matchResultId, giverId])
+  /// In doubles a giver rates each of the other players once (slice PD4).
+  @@unique([doublesResultId, giverId, receiverId])
   /// The badge/hint aggregate's own query shape: every feedback a player
   /// has received.
   @@index([receiverId])
   @@map("match_feedback")
+}
+
+/// A doubles game's result (slice PD4, decision 2026-11-24): who played with
+/// whom, the score, and who confirms it — padel and tennis doubles alike.
+/// Separate from MatchResult, which belongs to one join (two players); a
+/// doubles game has four. The pairs are "the author's pair" (the author and
+/// authorPartner) and "the other pair" (opponent1, opponent2), so score and
+/// winner reuse MatchResult's AUTHOR / PLAYER convention: AUTHOR is the
+/// author's pair. Only a padel result moves a rating (padelElo); a tennis
+/// doubles result is recorded without touching the singles ELO.
+///
+/// Either a score (pairs, score, winner set) or a no-show report
+/// (noShowUserId set, the rest null) — CHECK in the migration. Restrict on
+/// every foreign key, same reasoning as MatchResult: results are rating
+/// history, and a User row is never deleted, only redacted (6.15).
+model DoublesResult {
+  id        String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status    MatchResultStatus @default(PENDING)
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  offerId String        @unique @map("offer_id") @db.Uuid
+  offer   SparringOffer @relation(fields: [offerId], references: [id], onDelete: Restrict)
+
+  /// The author's partner. Null on a score when the author brought their own
+  /// partner (offer.hasPartner) — a mark, not an account.
+  authorPartnerId String? @map("author_partner_id") @db.Uuid
+  authorPartner   User?   @relation("DoublesAuthorPartner", fields: [authorPartnerId], references: [id], onDelete: Restrict)
+  opponent1Id     String? @map("opponent1_id") @db.Uuid
+  opponent1       User?   @relation("DoublesOpponent1", fields: [opponent1Id], references: [id], onDelete: Restrict)
+  opponent2Id     String? @map("opponent2_id") @db.Uuid
+  opponent2       User?   @relation("DoublesOpponent2", fields: [opponent2Id], references: [id], onDelete: Restrict)
+
+  /// Same shape as MatchResult.score: per set, the author's pair's games
+  /// ("author") and the other pair's ("player").
+  score  Json?
+  winner MatchParty?
+
+  /// Who filed it; anyone in the other pair confirms or disputes a score.
+  reportedById String @map("reported_by_id") @db.Uuid
+  reportedBy   User   @relation("DoublesReportedBy", fields: [reportedById], references: [id], onDelete: Restrict)
+  /// A no-show report: the one player who didn't come. Only they may
+  /// dispute it; otherwise the cron settles it as NO_SHOW after 72h.
+  noShowUserId String? @map("no_show_user_id") @db.Uuid
+  noShowUser   User?   @relation("DoublesNoShow", fields: [noShowUserId], references: [id], onDelete: Restrict)
+
+  /// now + 72h at filing, same as MatchResult.
+  autoConfirmAt        DateTime  @map("auto_confirm_at") @db.Timestamptz
+  resultReminderSentAt DateTime? @map("result_reminder_sent_at") @db.Timestamptz
+
+  /// Padel only, set once when CONFIRMED and every player had a padel
+  /// rating: [{ userId, before, after }] for each account in the game.
+  eloChanges Json? @map("elo_changes")
+
+  feedback MatchFeedback[]
+
+  @@index([authorPartnerId])
+  @@index([opponent1Id])
+  @@index([opponent2Id])
+  @@index([reportedById])
+  @@index([noShowUserId])
+  @@index([status, autoConfirmAt])
+  @@map("doubles_results")
 }
 
 /// A click on a club's booking link or phone number, from `/clubs/[id]` or an

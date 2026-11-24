@@ -47,7 +47,11 @@ export async function getGivenFeedback(
     where: { giverId, matchResultId: { in: matchResultIds } },
     select: { matchResultId: true, tags: true, levelSignal: true },
   });
-  return new Map(rows.map((row) => [row.matchResultId, row]));
+  return new Map(
+    rows.flatMap((row) =>
+      row.matchResultId ? [[row.matchResultId, row] as const] : [],
+    ),
+  );
 }
 
 export type SubmitFeedbackRefusal =
@@ -171,4 +175,78 @@ export async function getPendingFeedback(
       opponentId: match.opponentId,
       opponentName: match.opponentName,
     }));
+}
+
+// Doubles (slice PD4): the same rules, but a giver rates each of the other
+// players in the game separately — partner and opponents alike — once each.
+// Tags only: the level signal calibrates the declared NTRP from singles
+// opponents (level-signal.ts), and a doubles impression of one player is
+// mixed with their partner's play.
+
+/** The players `giverId` already rated for one doubles result. */
+export async function getRatedInDoubles(
+  doublesResultId: string,
+  giverId: string,
+): Promise<Set<string>> {
+  const rows = await db.matchFeedback.findMany({
+    where: { doublesResultId, giverId },
+    select: { receiverId: true },
+  });
+  return new Set(rows.map((row) => row.receiverId));
+}
+
+/** "Rate a player" after a confirmed doubles result. */
+export async function submitDoublesFeedback(
+  doublesResultId: string,
+  giverId: string,
+  receiverId: string,
+  tags: FeedbackTag[],
+  now: Date = new Date(),
+): Promise<SubmitFeedbackOutcome> {
+  const result = await db.doublesResult.findUnique({
+    where: { id: doublesResultId },
+    select: {
+      status: true,
+      updatedAt: true,
+      offer: {
+        select: {
+          authorId: true,
+          joins: { where: { status: "ACCEPTED" }, select: { userId: true } },
+        },
+      },
+    },
+  });
+  if (!result) {
+    return { ok: false, refusal: "MATCH_NOT_FOUND" };
+  }
+  if (result.status !== "CONFIRMED") {
+    return { ok: false, refusal: "NOT_CONFIRMED" };
+  }
+  const players = [
+    result.offer.authorId,
+    ...result.offer.joins.map((join) => join.userId),
+  ];
+  if (
+    giverId === receiverId ||
+    !players.includes(giverId) ||
+    !players.includes(receiverId)
+  ) {
+    return { ok: false, refusal: "NOT_PARTICIPANT" };
+  }
+  if (!isFeedbackWindowOpen(result.updatedAt, now)) {
+    return { ok: false, refusal: "WINDOW_CLOSED" };
+  }
+  if (await isBlockedEitherWay(giverId, receiverId)) {
+    return { ok: false, refusal: "BLOCKED" };
+  }
+
+  const created = await db.matchFeedback.createManyAndReturn({
+    data: [{ doublesResultId, giverId, receiverId, tags, levelSignal: null }],
+    select: { id: true },
+    skipDuplicates: true,
+  });
+  if (created.length === 0) {
+    return { ok: false, refusal: "ALREADY_GIVEN" };
+  }
+  return { ok: true };
 }

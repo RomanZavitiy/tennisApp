@@ -57,6 +57,9 @@ export function ProfileHero({
           <p className="mt-1 text-sm font-medium">
             {t("padel", { level: profile.padelLevel })}
             {profile.padelSide && ` · ${tSide(profile.padelSide)}`}
+            {/* Slice PD4: its own rating, next to the level it started from. */}
+            {profile.padelElo !== null &&
+              ` · ${t("padelElo", { elo: profile.padelElo })}`}
           </p>
         )}
         <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">

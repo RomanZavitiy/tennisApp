@@ -34,6 +34,9 @@ const {
 vi.mock("next/server", () => ({ connection: () => Promise.resolve() }));
 vi.mock("@/lib/db", () => ({ db: {} }));
 vi.mock("@/lib/leaderboard/get-leaderboard", () => ({ getLeaderboard }));
+vi.mock("@/lib/sport/current-sport", () => ({
+  getCurrentSport: () => Promise.resolve("TENNIS"),
+}));
 vi.mock("@/lib/coaches/get-coaches", () => ({ getCoaches }));
 vi.mock("@/lib/clubs/club-details", () => ({ getClub, getClubFollowInfo }));
 vi.mock("@/lib/messages/thread-data", () => ({ getClubThread }));
@@ -82,7 +85,7 @@ describe("/leaderboard", () => {
     features.leaderboard = true;
 
     await expect(LeaderboardPage(noSearch)).resolves.toBeTruthy();
-    expect(getLeaderboard).toHaveBeenCalledWith({});
+    expect(getLeaderboard).toHaveBeenCalledWith({}, "TENNIS");
   });
 });
 

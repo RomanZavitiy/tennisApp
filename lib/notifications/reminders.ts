@@ -4,6 +4,7 @@ import { notify, notifyBookingDecided } from "@/lib/notifications/notify";
 import { toKrakowLocal } from "@/lib/offers/krakow-time";
 import { promoteNextWaitlistEntry } from "@/lib/offers/promote-waitlist";
 import { isWaitlistOfferStale } from "@/lib/offers/waitlist-rules";
+import { sendDoublesResultReminders } from "@/lib/rating/doubles-cron";
 
 // The time-based pushes (tasks 5.10, 5.16), run by the hourly GitHub Actions
 // workflow against /api/cron?job=reminders (decision 2026-10-15, "Cron").
@@ -275,7 +276,10 @@ export async function runNotificationReminders(
   return {
     matchReminders: await sendMatchReminders(now),
     howDidItGoPrompts: await sendHowDidItGoPrompts(now),
-    resultConfirmationReminders: await sendResultConfirmationReminders(now),
+    // Singles and doubles (slice PD4) results alike.
+    resultConfirmationReminders:
+      (await sendResultConfirmationReminders(now)) +
+      (await sendDoublesResultReminders(now)),
     autoDeclinedBookings: await autoDeclinePendingBookings(now),
     expiredInvites: await expirePendingInvites(now),
     waitlistsAdvanced: await advanceStaleWaitlistOffers(now),

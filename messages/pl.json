@@ -158,7 +158,8 @@
     "reliability": "Rzetelność",
     "record": "Wygrane–przegrane",
     "played": "{count, plural, one {# mecz rozegrany} few {# mecze rozegrane} many {# meczów rozegranych} other {# meczów rozegranych}}",
-    "padel": "Padel: poziom {level, number, ::.0}"
+    "padel": "Padel: poziom {level, number, ::.0}",
+    "padelElo": "ELO w padlu {elo}"
   },
   "MyGames": {
     "none": "Brak nadchodzących gier. Znajdź grę na tablicy albo dodaj własną ofertę.",
@@ -455,7 +456,8 @@
     "noneMatchFilters": "Żaden zawodnik nie spełnia tych filtrów.",
     "noPlayersYet": "Brak sklasyfikowanych zawodników.",
     "eyebrow": "Ranking Krakowa",
-    "subtitle": "Każdy zaczyna od poziomu, który sam zadeklarował; potwierdzone wyniki meczów zmieniają ELO."
+    "subtitle": "Każdy zaczyna od poziomu, który sam zadeklarował; potwierdzone wyniki meczów zmieniają ELO.",
+    "padelSubtitle": "Padel: każdy zaczyna od zadeklarowanego poziomu padlowego; potwierdzone wyniki debla zmieniają ELO w padlu."
   },
   "LeaderboardFilters": {
     "formLabel": "Filtruj ranking",
@@ -469,7 +471,14 @@
       "expert": "Ekspert (6.0–7.0)"
     },
     "submit": "Filtruj",
-    "clear": "Wyczyść"
+    "clear": "Wyczyść",
+    "padelLevelLabel": "Poziom (padel)",
+    "padelLevel": {
+      "beginner": "Początkujący (1.0–2.5)",
+      "intermediate": "Średniozaawansowany (3.0–4.0)",
+      "advanced": "Zaawansowany (4.5–5.5)",
+      "expert": "Ekspert (6.0–7.0)"
+    }
   },
   "LeaderboardRow": {
     "aPlayer": "Zawodnik",
@@ -1466,5 +1475,44 @@
     "LEFT": "Lewa strona",
     "RIGHT": "Prawa strona",
     "BOTH": "Obie strony"
+  },
+  "DoublesResult": {
+    "you": "Ty",
+    "aPlayer": "Gracz",
+    "authorsPartner": "partner",
+    "submitSummary": "Dodaj wynik",
+    "modeScore": "Zagraliśmy",
+    "modeNoShow": "Ktoś nie przyszedł",
+    "whoPlayedWith": "Kto grał z {name}?",
+    "whoDidntCome": "Kto nie przyszedł?",
+    "pickWhoDidntCome": "Wybierz, kto nie przyszedł.",
+    "reporting": "Zgłaszanie…",
+    "reportNoShow": "Zgłoś nieobecność",
+    "scoreLine": "{viewerPair} vs {otherPair}: {score}",
+    "pending": "{reporter} zgłosił(a): {line}. Czekamy na potwierdzenie drugiej pary.",
+    "confirmed": "Potwierdzono: {line}.",
+    "disputed": "Wynik zakwestionowany ({line}). Nie liczy się do niczyjego rankingu.",
+    "tennisNoRating": "Wyniki debla nie zmieniają rankingu tenisowego w singlu.",
+    "yourPadelElo": "Twoje ELO w padlu: {change}.",
+    "padelNotRated": "Rankingi padlowe się nie zmieniły: nie każdy w tej grze ma poziom padlowy.",
+    "noShowPending": "{reporter} zgłosił(a), że {who} nie przyszedł/nie przyszła. {who} może to zakwestionować w ciągu 72 godzin.",
+    "noShowConfirmed": "{who} nie przyszedł/nie przyszła — potwierdzone po 72 godzinach bez sprzeciwu.",
+    "noShowDisputed": "Zgłoszenie nieobecności {who} zostało zakwestionowane i się nie liczy.",
+    "confirm": "Potwierdź",
+    "confirming": "Potwierdzanie…",
+    "dispute": "Zakwestionuj",
+    "disputing": "Kwestionowanie…",
+    "rateThePlayers": "Oceń graczy"
+  },
+  "DoublesResultRefusal": {
+    "NOT_PARTICIPANT": "To nie jest Twoja gra.",
+    "NOT_DOUBLES": "Tutaj wynik zapisują tylko gry deblowe.",
+    "NOT_FULL": "Wynik zapisuje tylko gra, w której zajęto wszystkie miejsca.",
+    "NOT_STARTED": "Ta gra jeszcze się nie zaczęła.",
+    "ALREADY_SUBMITTED": "Wynik tej gry został już zgłoszony.",
+    "BAD_PAIRS": "Wybierz, kto grał z autorem.",
+    "BAD_NO_SHOW": "Wybierz innego gracza z tej gry.",
+    "NOT_OPPONENT": "Tylko druga para może potwierdzić lub zakwestionować ten wynik.",
+    "NOT_PENDING": "Ten wynik został już rozstrzygnięty."
   }
 }

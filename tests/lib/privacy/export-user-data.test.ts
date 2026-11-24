@@ -12,6 +12,7 @@ const {
   messageFindMany,
   matchResultFindMany,
   clubFollowFindMany,
+  doublesResultFindMany,
 } = vi.hoisted(() => ({
   userFindUniqueOrThrow: vi.fn(),
   offerFindMany: vi.fn(),
@@ -19,6 +20,7 @@ const {
   messageFindMany: vi.fn(),
   matchResultFindMany: vi.fn(),
   clubFollowFindMany: vi.fn(),
+  doublesResultFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -29,6 +31,7 @@ vi.mock("@/lib/db", () => ({
     message: { findMany: messageFindMany },
     matchResult: { findMany: matchResultFindMany },
     clubFollow: { findMany: clubFollowFindMany },
+    doublesResult: { findMany: doublesResultFindMany },
   },
 }));
 
@@ -53,6 +56,46 @@ describe("exportUserData", () => {
     messageFindMany.mockResolvedValue([]);
     matchResultFindMany.mockResolvedValue([]);
     clubFollowFindMany.mockResolvedValue([]);
+    doublesResultFindMany.mockResolvedValue([]);
+  });
+
+  it("exports a doubles result from the user's own pair's side (PD4)", async () => {
+    doublesResultFindMany.mockResolvedValue([
+      {
+        id: "doubles-1",
+        status: "CONFIRMED",
+        score: [
+          { author: 4, player: 6 },
+          { author: 3, player: 6 },
+        ],
+        winner: "PLAYER",
+        authorPartnerId: "partner",
+        opponent1Id: ME,
+        opponent2Id: "other",
+        reportedById: "partner",
+        noShowUserId: null,
+        eloChanges: [{ userId: ME, before: 1500, after: 1520 }],
+        createdAt: new Date("2026-11-20T10:00:00Z"),
+        offer: {
+          authorId: OPPONENT_AS_AUTHOR,
+          sport: "PADEL",
+          startsAt: new Date("2026-11-19T17:00:00Z"),
+        },
+      },
+    ]);
+
+    const result = await exportUserData(ME);
+
+    expect(result.doublesMatches).toEqual([
+      expect.objectContaining({
+        sport: "PADEL",
+        myPair: "other pair",
+        winner: "my pair",
+        reportedByMe: false,
+        noShowWasMe: false,
+        myPadelElo: { before: 1500, after: 1520 },
+      }),
+    ]);
   });
 
   it("includes only the exported user's own profile, offers, joins and messages", async () => {

@@ -1,4 +1,5 @@
 import { NTRP_LEVELS } from "@/lib/profile/options";
+import { PADEL_LEVEL_MIN, PADEL_LEVELS } from "@/lib/sport/sport";
 
 // A new player's ELO, from the NTRP level they chose in their profile (task
 // 4.1; the table is an owner decision in decisions.md). Each half step of
@@ -33,4 +34,19 @@ export function startingElo(ntrp: number): number {
     throw new RangeError(`NTRP ${String(ntrp)} is not on the 1.5–7.0 scale.`);
   }
   return elo;
+}
+
+/**
+ * The starting padel ELO for a declared padel level (slice PD4, decision
+ * 2026-11-24): the same 100 points per half level as tennis, from 1000 at
+ * 1.0 up to 2200 at 7.0. A separate scale and a separate rating, so the two
+ * never need to line up. Throws off the scale, like `startingElo`.
+ */
+export function startingPadelElo(level: number): number {
+  if (!PADEL_LEVELS.includes(level)) {
+    throw new RangeError(
+      `Padel level ${String(level)} is not on the 1.0–7.0 scale.`,
+    );
+  }
+  return 1000 + Math.round((level - PADEL_LEVEL_MIN) * 200);
 }

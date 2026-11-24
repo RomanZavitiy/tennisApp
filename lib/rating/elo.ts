@@ -24,10 +24,12 @@ function expectedScore(rating: number, opponentRating: number): number {
 }
 
 /**
- * A player's new ELO after one confirmed match. `matchesPlayed` is theirs
- * alone — confirmed matches played before this one, not the opponent's.
+ * How many points a match moves a rating of `elo` against `opponentElo`,
+ * with the K of a player who has `matchesPlayed` confirmed matches —
+ * rounded, before the floor. Doubles (slice PD4) calls it with each pair's
+ * average rating and each player's own match count.
  */
-export function computeEloChange({
+export function eloDelta({
   elo,
   opponentElo,
   outcome,
@@ -40,7 +42,23 @@ export function computeEloChange({
 }): number {
   const actual = outcome === "WIN" ? 1 : 0;
   const expected = expectedScore(elo, opponentElo);
-  const k = kFactor(matchesPlayed);
-  const next = Math.round(elo + k * (actual - expected));
-  return Math.max(MIN_ELO, next);
+  return Math.round(kFactor(matchesPlayed) * (actual - expected));
+}
+
+/** A rating after a change, never below the floor of 100. */
+export function withEloFloor(elo: number): number {
+  return Math.max(MIN_ELO, elo);
+}
+
+/**
+ * A player's new ELO after one confirmed match. `matchesPlayed` is theirs
+ * alone — confirmed matches played before this one, not the opponent's.
+ */
+export function computeEloChange(input: {
+  elo: number;
+  opponentElo: number;
+  outcome: MatchOutcome;
+  matchesPlayed: number;
+}): number {
+  return withEloFloor(input.elo + eloDelta(input));
 }
