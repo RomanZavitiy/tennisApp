@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { blockedCounterpartIds } from "@/lib/moderation/personal-block";
 import { rankCandidates, type Candidate } from "@/lib/matching/candidates";
+import { requiredGender } from "@/lib/offers/match-gender";
 import { playerLevel } from "@/lib/sport/sport";
 
 // "Kого запросити" (task S2.2): loads the pool for one open offer, already
@@ -22,6 +23,7 @@ export async function getOfferCandidates(
     select: {
       authorId: true,
       sport: true,
+      matchGender: true,
       district: true,
       ntrpMin: true,
       ntrpMax: true,
@@ -53,9 +55,12 @@ export async function getOfferCandidates(
     ...invitedRows.map((row) => row.inviteeId),
   ]);
 
+  // Slice PD3: a men's or women's game only suggests players it is for.
+  const gender = requiredGender(offer.matchGender);
   const pool = await db.user.findMany({
     where: {
       id: { notIn: [...excludedIds] },
+      ...(gender ? { gender } : {}),
       district: offer.district,
       discoverable: true,
       blockedAt: null,

@@ -8,7 +8,7 @@ import { MarkNotificationsRead } from "@/components/mark-notifications-read";
 import { requireUser } from "@/lib/auth/require-user";
 import { listNotifications } from "@/lib/notifications/inbox";
 import { formatKrakowTime } from "@/lib/offers/krakow-time";
-import { placeLabel } from "@/lib/offers/offer-labels";
+import { placeLabel, withSportName } from "@/lib/offers/offer-labels";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +20,15 @@ export async function generateMetadata(): Promise<Metadata> {
 // The list behind the header bell (slice K2b): every event notify() recorded,
 // newest first, each linking to its offer. Unread ones are marked as they
 // were when the page was rendered; MarkNotificationsRead then clears them,
-// so the next visit shows them as read.
+// so the next visit shows them as read. A padel game's row names the sport
+// (slice PD2), the same way its push and email did.
 export default async function NotificationsPage() {
   await connection();
   const user = await requireUser();
   const notifications = await listNotifications(user.id);
   const t = await getTranslations("NotificationsPage");
   const tKind = await getTranslations("PushNotifications");
+  const tOfferLabels = await getTranslations("OfferLabels");
   const format = await getFormatter();
   const now = new Date();
 
@@ -61,7 +63,11 @@ export default async function NotificationsPage() {
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-3">
                       <span className={cn(unread && "font-semibold")}>
-                        {tKind(`${notification.kind}.title`)}
+                        {withSportName(
+                          tKind(`${notification.kind}.title`),
+                          offer.sport,
+                          tOfferLabels("padel.badge"),
+                        )}
                         {unread && (
                           <span className="sr-only"> ({t("unread")})</span>
                         )}

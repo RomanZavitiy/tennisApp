@@ -125,6 +125,7 @@ describe("requestBooking", () => {
       name: "Court 1",
       active: true,
       clubId: CLUB,
+      sport: "TENNIS",
     });
     getDayGrid.mockResolvedValue(freeGrid());
     bookingCreate.mockResolvedValue({ id: BOOKING });
@@ -163,13 +164,13 @@ describe("requestBooking", () => {
   });
 
   it("stores offerId when the requester is that offer's author", async () => {
-    offerFindUnique.mockResolvedValue({ authorId: ME });
+    offerFindUnique.mockResolvedValue({ authorId: ME, sport: "TENNIS" });
 
     await requestBooking({ ...validInput, offerId: OFFER });
 
     expect(offerFindUnique).toHaveBeenCalledWith({
       where: { id: OFFER },
-      select: { authorId: true },
+      select: { authorId: true, sport: true },
     });
     expect(bookingCreate).toHaveBeenCalledWith({
       data: {
@@ -181,6 +182,28 @@ describe("requestBooking", () => {
         offerId: OFFER,
       },
     });
+  });
+
+  // Slice PD2: confirming the booking marks the game's court as booked, so
+  // it has to be a court of the game's sport.
+  it("refuses a tennis court for the author's padel game", async () => {
+    offerFindUnique.mockResolvedValue({ authorId: ME, sport: "PADEL" });
+
+    const result = await requestBooking({ ...validInput, offerId: OFFER });
+
+    expect(result).toMatchObject({ ok: false });
+    expect(bookingCreate).not.toHaveBeenCalled();
+  });
+
+  it("ignores the sport of an offer the requester doesn't own", async () => {
+    offerFindUnique.mockResolvedValue({
+      authorId: "someone-else",
+      sport: "PADEL",
+    });
+
+    await requestBooking({ ...validInput, offerId: OFFER });
+
+    expect(bookingCreate).toHaveBeenCalledTimes(1);
   });
 
   it("drops offerId when the requester isn't that offer's author", async () => {

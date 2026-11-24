@@ -20,6 +20,7 @@ import { isBlockedEitherWay } from "@/lib/moderation/personal-block";
 import { notify } from "@/lib/notifications/notify";
 import { canCancelOffer } from "@/lib/offers/cancel-rules";
 import { joinRefusal } from "@/lib/offers/join-rules";
+import { genderFits } from "@/lib/offers/match-gender";
 import {
   ACTION_ACTOR,
   joinChangeRefusal,
@@ -68,7 +69,13 @@ export async function requestToJoin(
 
   const offer = await db.sparringOffer.findUnique({
     where: { id: id.data },
-    select: { authorId: true, status: true, startsAt: true, format: true },
+    select: {
+      authorId: true,
+      status: true,
+      startsAt: true,
+      format: true,
+      matchGender: true,
+    },
   });
   if (!offer) {
     return { ok: false, message: tErrors("offerNotFound") };
@@ -85,6 +92,7 @@ export async function requestToJoin(
     existing,
     now: new Date(),
     blocked: await isBlockedEitherWay(player.id, offer.authorId),
+    fitsGender: genderFits(offer.matchGender, player.gender),
   });
   if (refusal) {
     return { ok: false, message: tJoinRefusal(refusal) };

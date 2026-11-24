@@ -1,13 +1,14 @@
 import { db } from "@/lib/db";
 import { levelMatches } from "@/lib/matching/offer-interest";
 import { blockedCounterpartIds } from "@/lib/moderation/personal-block";
-import type { Sport } from "@/lib/generated/prisma/enums";
+import type { Gender, Sport } from "@/lib/generated/prisma/enums";
 import type { FeedFilters } from "@/lib/offers/feed-filters";
 import {
   feedOfferSelect,
   toFeedOffer,
   type FeedOffer,
 } from "@/lib/offers/feed";
+import { matchGendersOpenTo } from "@/lib/offers/match-gender";
 import { PLAY_TODAY_WINDOW_HOURS } from "@/lib/offers/play-today";
 import {
   getPlayIntentFeed,
@@ -23,7 +24,7 @@ export type PlayTodayFeed = {
 /**
  * "Грати сьогодні" (task U3.1): open offers starting within the next
  * PLAY_TODAY_WINDOW_HOURS that match the viewer's own level, plus today's
- * intents (slice U2) — no pagination or ELO ranking, same "stays small
+ * intents (slice U2), both in one sport (slices PD1, PD2) — no pagination or ELO ranking, same "stays small
  * enough" assumption as getClubOffers. The viewer's own offers are left
  * out: there's nothing to join on your own game here.
  */
@@ -31,16 +32,20 @@ export async function getPlayTodayFeed(
   viewerId: string,
   viewerNtrp: number | null,
   now: Date = new Date(),
-  // Slice PD1: `viewerNtrp` is the viewer's level in this sport. Intents
-  // have no sport yet (PD2) — they are tennis, so padel shows none.
+  // Slice PD1: `viewerNtrp` is the viewer's level in this sport.
   sport: Sport = "TENNIS",
+  // Slice PD3: leaves out men's or women's games the viewer couldn't join.
+  // Left out — unrestricted and mixed games only.
+  viewerGender?: Gender,
 ): Promise<PlayTodayFeed> {
   const blockedIds = await blockedCounterpartIds(viewerId);
 
   const rows = await db.sparringOffer.findMany({
     where: {
       status: "OPEN",
+      visibility: "PUBLIC",
       sport,
+      matchGender: { in: matchGendersOpenTo(viewerGender) },
       authorId: { notIn: [viewerId, ...blockedIds] },
       startsAt: {
         gt: now,
@@ -56,13 +61,11 @@ export async function getPlayTodayFeed(
     .filter((offer) => levelMatches(viewerNtrp, offer.ntrpMin, offer.ntrpMax));
 
   const todayFilters: FeedFilters = {
+    sport,
     date: todayInKrakow(now),
     ...(viewerNtrp !== null ? { ntrp: viewerNtrp } : {}),
   };
-  const intents =
-    sport === "TENNIS"
-      ? await getPlayIntentFeed(viewerId, todayFilters, now)
-      : [];
+  const intents = await getPlayIntentFeed(viewerId, todayFilters, now);
 
   return { offers, intents };
 }

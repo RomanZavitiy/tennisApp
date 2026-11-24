@@ -16,11 +16,13 @@ import { Textarea } from "@/components/ui/textarea";
 import type {
   District,
   OfferFormat,
+  Gender,
   Sport,
 } from "@/lib/generated/prisma/enums";
 import { CourtStatus, Surface } from "@/lib/generated/prisma/enums";
 import { DEFAULT_OFFER_DURATION, OFFER_DURATIONS } from "@/lib/offers/duration";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
+import { genderFits, MATCH_GENDERS } from "@/lib/offers/match-gender";
 import { levelsFor } from "@/lib/sport/sport";
 import {
   COMMENT_MAX,
@@ -47,6 +49,7 @@ export type ClubOption = {
 export function OfferForm({
   action,
   sport,
+  authorGender,
   clubs,
   defaultDistrict,
   defaultClubId,
@@ -62,6 +65,9 @@ export function OfferForm({
   /** Slice PD1: the sport the header switcher shows. Padel is always
    * doubles, on its own level scale, with no surface to pick. */
   sport: Sport;
+  /** Slice PD3: decides which single-gender game the author may post —
+   * a men's game for a man, a women's game for a woman. */
+  authorGender: Gender;
   clubs: ClubOption[];
   defaultDistrict: District;
   /** Pre-selected from "Create an offer at this club" (task 2.10). */
@@ -99,6 +105,8 @@ export function OfferForm({
     defaultValues: {
       sport,
       format: isPadel ? "DOUBLES" : (defaultFormat ?? "SINGLES"),
+      matchGender: "ANY",
+      visibility: "PUBLIC",
       startsAt: defaultStartsAt ?? "",
       durationMinutes: String(defaultDurationMinutes ?? DEFAULT_OFFER_DURATION),
       clubId: presetClub?.id ?? "",
@@ -173,6 +181,27 @@ export function OfferForm({
         )}
         <ErrorText id="hasPartner" error={errors.hasPartner} />
       </fieldset>
+
+      <Field
+        id="matchGender"
+        label={t("matchGenderLabel")}
+        error={errors.matchGender}
+      >
+        <NativeSelect
+          id="matchGender"
+          className="w-full"
+          {...aria("matchGender", errors.matchGender)}
+          {...register("matchGender")}
+        >
+          {MATCH_GENDERS.filter((option) =>
+            genderFits(option, authorGender),
+          ).map((option) => (
+            <NativeSelectOption key={option} value={option}>
+              {tOfferLabels(`matchGender.${option}`)}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+      </Field>
 
       <div className="space-y-2">
         <p className="text-sm font-medium">{t("startsAtLabel")}</p>
@@ -322,6 +351,27 @@ export function OfferForm({
               {tCourtStatus(value)}
             </NativeSelectOption>
           ))}
+        </NativeSelect>
+      </Field>
+
+      <Field
+        id="visibility"
+        label={t("visibilityLabel")}
+        hint={t("visibilityHint")}
+        error={errors.visibility}
+      >
+        <NativeSelect
+          id="visibility"
+          className="w-full"
+          {...aria("visibility", errors.visibility)}
+          {...register("visibility")}
+        >
+          <NativeSelectOption value="PUBLIC">
+            {t("visibilityPublic")}
+          </NativeSelectOption>
+          <NativeSelectOption value="PRIVATE">
+            {t("visibilityPrivate")}
+          </NativeSelectOption>
         </NativeSelect>
       </Field>
 

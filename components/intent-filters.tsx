@@ -6,17 +6,27 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import type { Sport } from "@/lib/generated/prisma/enums";
 import { TIMES_OF_DAY, type FeedFilters } from "@/lib/offers/feed-filters";
-import { DISTRICT_LABELS, NTRP_LEVELS } from "@/lib/profile/options";
+import { DISTRICT_LABELS } from "@/lib/profile/options";
+import { levelsFor } from "@/lib/sport/sport";
 import { todayInKrakow } from "@/lib/validation/profile";
 
 /**
  * "Шукають гру"'s own filters (task U2.2's "ті самі" filters as the offer
  * feed) — date, district, level, format, time of day, the same URL shape
  * as OfferFilters/parseFeedFilters, minus duration and courtBooked, which
- * a PlayIntent has no equivalent of.
+ * a PlayIntent has no equivalent of. `sport` (slice PD2) decides the level
+ * scale and hides the format for padel, the same as OfferFilters.
  */
-export function IntentFilters({ filters }: { filters: FeedFilters }) {
+export function IntentFilters({
+  filters,
+  sport,
+}: {
+  filters: FeedFilters;
+  sport: Sport;
+}) {
+  const isPadel = sport === "PADEL";
   const t = useTranslations("OfferFilters");
   const tOfferLabels = useTranslations("OfferLabels");
 
@@ -57,7 +67,9 @@ export function IntentFilters({ filters }: { filters: FeedFilters }) {
         </NativeSelect>
       </div>
       <div className="space-y-1">
-        <Label htmlFor="intent-filter-ntrp">{t("ntrpLabel")}</Label>
+        <Label htmlFor="intent-filter-ntrp">
+          {t(isPadel ? "padelLevelLabel" : "ntrpLabel")}
+        </Label>
         <NativeSelect
           id="intent-filter-ntrp"
           name="ntrp"
@@ -65,30 +77,32 @@ export function IntentFilters({ filters }: { filters: FeedFilters }) {
           defaultValue={filters.ntrp?.toFixed(1) ?? ""}
         >
           <NativeSelectOption value="">{t("any")}</NativeSelectOption>
-          {NTRP_LEVELS.map((level) => (
+          {levelsFor(sport).map((level) => (
             <NativeSelectOption key={level} value={level.toFixed(1)}>
               {level.toFixed(1)}
             </NativeSelectOption>
           ))}
         </NativeSelect>
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="intent-filter-format">{t("formatLabel")}</Label>
-        <NativeSelect
-          id="intent-filter-format"
-          name="format"
-          className="w-full"
-          defaultValue={filters.format ?? ""}
-        >
-          <NativeSelectOption value="">{t("any")}</NativeSelectOption>
-          <NativeSelectOption value="SINGLES">
-            {tOfferLabels("singles")}
-          </NativeSelectOption>
-          <NativeSelectOption value="DOUBLES">
-            {tOfferLabels("doubles")}
-          </NativeSelectOption>
-        </NativeSelect>
-      </div>
+      {!isPadel && (
+        <div className="space-y-1">
+          <Label htmlFor="intent-filter-format">{t("formatLabel")}</Label>
+          <NativeSelect
+            id="intent-filter-format"
+            name="format"
+            className="w-full"
+            defaultValue={filters.format ?? ""}
+          >
+            <NativeSelectOption value="">{t("any")}</NativeSelectOption>
+            <NativeSelectOption value="SINGLES">
+              {tOfferLabels("singles")}
+            </NativeSelectOption>
+            <NativeSelectOption value="DOUBLES">
+              {tOfferLabels("doubles")}
+            </NativeSelectOption>
+          </NativeSelect>
+        </div>
+      )}
       <div className="space-y-1">
         <Label htmlFor="intent-filter-time">{t("timeLabel")}</Label>
         <NativeSelect

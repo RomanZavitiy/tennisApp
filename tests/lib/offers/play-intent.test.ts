@@ -31,7 +31,8 @@ describe("intentMatchesFilters", () => {
     times: ["evening"],
     districts: ["STARE_MIASTO"],
     format: "SINGLES",
-    selfRatedNtrp: 3.5,
+    sport: "TENNIS",
+    level: 3.5,
   };
 
   it("matches with no filters at all", () => {
@@ -64,6 +65,17 @@ describe("intentMatchesFilters", () => {
     expect(intentMatchesFilters(INTENT, { ntrp: 3.5 })).toBe(true);
     expect(intentMatchesFilters(INTENT, { ntrp: 4.0 })).toBe(true);
     expect(intentMatchesFilters(INTENT, { ntrp: 5.0 })).toBe(false);
+  });
+
+  it("matches only its own sport, or any when the filter names none (PD2)", () => {
+    expect(intentMatchesFilters(INTENT, { sport: "TENNIS" })).toBe(true);
+    expect(intentMatchesFilters(INTENT, { sport: "PADEL" })).toBe(false);
+  });
+
+  it("never matches a level filter when the poster has no level", () => {
+    expect(
+      intentMatchesFilters({ ...INTENT, level: null }, { ntrp: 3.5 }),
+    ).toBe(false);
   });
 });
 

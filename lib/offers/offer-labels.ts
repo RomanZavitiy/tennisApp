@@ -61,6 +61,20 @@ export function levelLabel(
   return t("anyLevel");
 }
 
+/**
+ * A line about one game in a list that mixes both sports — "My games", the
+ * bell, a push or email title (slice PD2). A padel game is named as such
+ * ("Padel · New request to join"); a tennis line reads as it always did.
+ * `padelName` is the caller's translated word, "OfferLabels.padel.badge".
+ */
+export function withSportName(
+  text: string,
+  sport: Sport,
+  padelName: string,
+): string {
+  return sport === "PADEL" ? `${padelName} · ${text}` : text;
+}
+
 /** "Club name, District", or whichever of the two the offer has. */
 export function placeLabel(
   offer: { club: { name: string } | null; district: District | null },

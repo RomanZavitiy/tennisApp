@@ -36,9 +36,11 @@ export function minutesFromHHMM(time: string): number {
 
 // One court a SPINBUDDY club declares (K.6). `pricePerHourPln` omitted or
 // null both mean "unknown" — never invented, same convention as the club's
-// own `priceInfo`.
+// own `priceInfo`. `sport` (slice PD2) left out means tennis; it has to be
+// one of the club's own `sports` (checked on the club record below).
 export const courtRecordSchema = z.strictObject({
   name: z.string().trim().min(1).max(60),
+  sport: z.enum(Sport).default("TENNIS"),
   surface: z.enum(Surface),
   indoor: z.boolean(),
   pricePerHourPln: z.int().positive().nullable().optional(),
@@ -61,77 +63,92 @@ export const courtHoursRecordSchema = z
 export type CourtHoursRecord = z.output<typeof courtHoursRecordSchema>;
 
 // Strict, so a misspelt key ("phnoe") fails instead of quietly dropping data.
-export const clubSchema = z.strictObject({
-  slug: z
-    .string()
-    .max(60)
-    .regex(
-      /^[a-z0-9]+(-[a-z0-9]+)*$/,
-      "Use lowercase words joined by hyphens.",
-    ),
-  name: z.string().trim().min(1).max(100),
-  address: z.string().trim().min(1).max(200),
-  district: z.enum(District).nullable(),
-  latitude: z
-    .number()
-    .min(KRAKOW_BOUNDS.minLatitude, "Not in Kraków.")
-    .max(KRAKOW_BOUNDS.maxLatitude, "Not in Kraków."),
-  longitude: z
-    .number()
-    .min(KRAKOW_BOUNDS.minLongitude, "Not in Kraków.")
-    .max(KRAKOW_BOUNDS.maxLongitude, "Not in Kraków."),
-  courtCount: z.int().min(1),
-  surfaces: z
-    .array(z.enum(Surface))
-    .refine(
-      (surfaces) => new Set(surfaces).size === surfaces.length,
-      "List each surface once.",
-    ),
-  indoor: z.enum(IndoorCourts).nullable(),
-  // Slice PD1: which sports the club has. Left out of the file — tennis,
-  // what every club was before padel existed.
-  sports: z
-    .array(z.enum(Sport))
-    .min(1)
-    .refine(
-      (sports) => new Set(sports).size === sports.length,
-      "List each sport once.",
-    )
-    .default(["TENNIS"]),
-  priceInfo: z.string().trim().min(1).max(300).nullable(),
-  phone: z.string().trim().min(1).max(30).nullable(),
-  websiteUrl: httpUrl.max(500).nullable(),
-  bookingUrl: httpUrl.max(500).nullable(),
-  // Slice K (decision 2026-10-21): a club may switch itself into
-  // SpinBuddy-run booking here and declare its courts/hours. All three are
-  // optional so every club already in the file keeps validating as-is;
-  // omitted means EXTERNAL_LINK with no courts yet, the same as the Club
-  // table's own defaults.
-  bookingMode: z.enum(BookingMode).optional().default("EXTERNAL_LINK"),
-  courts: z
-    .array(courtRecordSchema)
-    .optional()
-    .default([])
-    .refine(
-      (courts) => new Set(courts.map((c) => c.name)).size === courts.length,
-      "List each court name once.",
-    ),
-  hours: z
-    .array(courtHoursRecordSchema)
-    .optional()
-    .default([])
-    .refine(
-      (hours) => new Set(hours.map((h) => h.weekday)).size === hours.length,
-      "List each weekday once.",
-    ),
-  verifiedAt: z.iso
-    .date()
-    .refine((date) => date <= todayInKrakow(), "That date is in the future."),
-  // Where the details come from (DoD 2.2). Kept in the file, not the database.
-  source: httpUrl,
-  // Fields still holding stand-in values (see the 2.2a data). File-only too.
-  todo: z.array(z.string()).optional(),
-});
+export const clubSchema = z
+  .strictObject({
+    slug: z
+      .string()
+      .max(60)
+      .regex(
+        /^[a-z0-9]+(-[a-z0-9]+)*$/,
+        "Use lowercase words joined by hyphens.",
+      ),
+    name: z.string().trim().min(1).max(100),
+    address: z.string().trim().min(1).max(200),
+    district: z.enum(District).nullable(),
+    latitude: z
+      .number()
+      .min(KRAKOW_BOUNDS.minLatitude, "Not in Kraków.")
+      .max(KRAKOW_BOUNDS.maxLatitude, "Not in Kraków."),
+    longitude: z
+      .number()
+      .min(KRAKOW_BOUNDS.minLongitude, "Not in Kraków.")
+      .max(KRAKOW_BOUNDS.maxLongitude, "Not in Kraków."),
+    courtCount: z.int().min(1),
+    surfaces: z
+      .array(z.enum(Surface))
+      .refine(
+        (surfaces) => new Set(surfaces).size === surfaces.length,
+        "List each surface once.",
+      ),
+    indoor: z.enum(IndoorCourts).nullable(),
+    // Slice PD1: which sports the club has. Left out of the file — tennis,
+    // what every club was before padel existed.
+    sports: z
+      .array(z.enum(Sport))
+      .min(1)
+      .refine(
+        (sports) => new Set(sports).size === sports.length,
+        "List each sport once.",
+      )
+      .default(["TENNIS"]),
+    priceInfo: z.string().trim().min(1).max(300).nullable(),
+    phone: z.string().trim().min(1).max(30).nullable(),
+    websiteUrl: httpUrl.max(500).nullable(),
+    bookingUrl: httpUrl.max(500).nullable(),
+    // Slice K (decision 2026-10-21): a club may switch itself into
+    // SpinBuddy-run booking here and declare its courts/hours. All three are
+    // optional so every club already in the file keeps validating as-is;
+    // omitted means EXTERNAL_LINK with no courts yet, the same as the Club
+    // table's own defaults.
+    bookingMode: z.enum(BookingMode).optional().default("EXTERNAL_LINK"),
+    courts: z
+      .array(courtRecordSchema)
+      .optional()
+      .default([])
+      .refine(
+        (courts) => new Set(courts.map((c) => c.name)).size === courts.length,
+        "List each court name once.",
+      ),
+    hours: z
+      .array(courtHoursRecordSchema)
+      .optional()
+      .default([])
+      .refine(
+        (hours) => new Set(hours.map((h) => h.weekday)).size === hours.length,
+        "List each weekday once.",
+      ),
+    verifiedAt: z.iso
+      .date()
+      .refine((date) => date <= todayInKrakow(), "That date is in the future."),
+    // Where the details come from (DoD 2.2). Kept in the file, not the database.
+    source: httpUrl,
+    // Fields still holding stand-in values (see the 2.2a data). File-only too.
+    todo: z.array(z.string()).optional(),
+  })
+  .superRefine((club, ctx) => {
+    // Slice PD2: a padel court at a club that doesn't list padel is a
+    // typo in one of the two places — the club page and the booking grid
+    // would disagree about what the club offers.
+    club.courts.forEach((court, index) => {
+      if (!club.sports.includes(court.sport)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["courts", index, "sport"],
+          message: "The club's sports don't include this court's sport.",
+        });
+      }
+    });
+  });
 
 export type ClubRecord = z.output<typeof clubSchema>;
 

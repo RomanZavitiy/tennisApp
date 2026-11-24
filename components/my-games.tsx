@@ -4,15 +4,17 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { formatKrakowTimeRange } from "@/lib/offers/krakow-time";
 import type { MyGame } from "@/lib/offers/my-games";
-import { placeLabel } from "@/lib/offers/offer-labels";
+import { placeLabel, withSportName } from "@/lib/offers/offer-labels";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
 import { cn } from "@/lib/utils";
 
 // The player's upcoming games on their own profile (slice K6), each linking
 // to its offer, with where they stand: their own offer (and requests to
-// answer), in, or still waiting on the author.
+// answer), in, or still waiting on the author. Tennis and padel games share
+// the list (slice PD2); a padel one says so before its place.
 export function MyGames({ games }: { games: MyGame[] }) {
   const t = useTranslations("MyGames");
+  const tOfferLabels = useTranslations("OfferLabels");
   const format = useFormatter();
 
   if (games.length === 0) {
@@ -51,10 +53,15 @@ export function MyGames({ games }: { games: MyGame[] }) {
                 )}
               </span>
               <span className="block text-sm text-muted-foreground">
-                {placeLabel(
-                  game,
-                  game.district ? DISTRICT_LABELS[game.district] : null,
+                {withSportName(
+                  placeLabel(
+                    game,
+                    game.district ? DISTRICT_LABELS[game.district] : null,
+                  ),
+                  game.sport,
+                  tOfferLabels("padel.badge"),
                 )}
+                {game.visibility === "PRIVATE" && ` · ${t("private")}`}
               </span>
             </span>
             <span

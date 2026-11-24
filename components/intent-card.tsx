@@ -4,43 +4,33 @@ import Link from "next/link";
 import { InvitePlayerButton } from "@/components/invite-player-button";
 import { PlayerAvatar } from "@/components/player-avatar";
 import { buttonVariants } from "@/components/ui/button";
-import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
-import type { TimeOfDay } from "@/lib/offers/feed-filters";
 import type { MyOpenOffer } from "@/lib/offers/my-open-offers";
 import { intentInviteParams } from "@/lib/offers/play-intent";
+import type { PlayIntentCard } from "@/lib/offers/play-intent-feed";
 import { DISTRICT_LABELS } from "@/lib/profile/options";
-
-export type IntentCardData = {
-  id: string;
-  date: string;
-  times: TimeOfDay[];
-  districts: District[];
-  format: OfferFormat;
-  note: string | null;
-  user: {
-    id: string;
-    name: string | null;
-    avatarPath: string | null;
-    selfRatedNtrp: number | null;
-  };
-};
 
 /**
  * One "Шукають гру" card (slice U2, task U2.2). `myOpenOffers` is null for
  * the viewer's own card (no inviting yourself) — otherwise task U2.3's
  * "Запросити в мою гру" when there's an open offer to invite into, or
  * "Створити гру і запросити" with a prefilled form when there isn't.
+ * Both pages that list these cards show one sport, the header switcher's
+ * (slice PD2), so `myOpenOffers` and the prefilled form are in the card's
+ * own sport. A padel card shows the padel level and no format: padel is
+ * always doubles.
  */
 export function IntentCard({
   intent,
   myOpenOffers,
 }: {
-  intent: IntentCardData;
+  intent: PlayIntentCard;
   myOpenOffers: MyOpenOffer[] | null;
 }) {
   const t = useTranslations("IntentCard");
   const tOfferFilters = useTranslations("OfferFilters");
   const tOfferLabels = useTranslations("OfferLabels");
+  const isPadel = intent.sport === "PADEL";
+  const { level } = intent.user;
 
   return (
     <li className="rounded-2xl border bg-card p-4 shadow-xs">
@@ -55,12 +45,14 @@ export function IntentCard({
         />
         <span>
           {intent.user.name ?? t("aPlayer")}
-          {intent.user.selfRatedNtrp !== null &&
-            ` · NTRP ${intent.user.selfRatedNtrp.toFixed(1)}`}
+          {level !== null &&
+            (isPadel
+              ? ` · ${t("padelLevel", { level })}`
+              : ` · NTRP ${level.toFixed(1)}`)}
         </span>
       </Link>
       <p className="mt-1 text-sm text-muted-foreground">
-        {t("summary", {
+        {t(isPadel ? "summaryPadel" : "summary", {
           date: intent.date,
           districts: intent.districts
             .map((district) => DISTRICT_LABELS[district])

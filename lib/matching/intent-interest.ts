@@ -1,4 +1,8 @@
-import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  OfferFormat,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import {
   hasPushCapacityNow,
   levelMatches,
@@ -20,7 +24,9 @@ export type PlayIntentInfo = {
   times: readonly TimeOfDay[];
   districts: readonly District[];
   format: OfferFormat;
-  selfRatedNtrp: number | null;
+  sport: Sport;
+  /** The intent owner's level in the intent's sport (slice PD2). */
+  level: number | null;
 };
 
 export type OpenOfferForIntent = PushThrottleState & {
@@ -30,13 +36,15 @@ export type OpenOfferForIntent = PushThrottleState & {
   ntrpMin: number | null;
   ntrpMax: number | null;
   format: OfferFormat;
+  sport: Sport;
   startsAt: Date;
 };
 
 /**
  * Whether `offer` is worth a push to its author because `intent` just
- * matched it: not the intent's own author, one of the wanted districts,
- * same format, the intent owner's level within the offer's range, the
+ * matched it: not the intent's own author, the same sport, one of the
+ * wanted districts, same format, the intent owner's level in that sport
+ * within the offer's range, the
  * offer's Kraków calendar date and time-of-day inside what the intent
  * asked for, and the author's own push throttle has room (task U2.4,
  * "same limit as NEW_OFFER_FOR_LEVEL").
@@ -49,13 +57,16 @@ export function offerMatchesIntent(
   if (offer.authorId === intent.userId) {
     return false;
   }
+  if (offer.sport !== intent.sport) {
+    return false;
+  }
   if (offer.district === null || !intent.districts.includes(offer.district)) {
     return false;
   }
   if (offer.format !== intent.format) {
     return false;
   }
-  if (!levelMatches(intent.selfRatedNtrp, offer.ntrpMin, offer.ntrpMax)) {
+  if (!levelMatches(intent.level, offer.ntrpMin, offer.ntrpMax)) {
     return false;
   }
   if (warsawDateString(offer.startsAt) !== intent.date) {

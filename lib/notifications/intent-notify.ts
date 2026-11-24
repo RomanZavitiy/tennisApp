@@ -1,17 +1,23 @@
 import { db } from "@/lib/db";
-import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  Gender,
+  OfferFormat,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import {
   offersMatchingIntent,
   type OpenOfferForIntent,
 } from "@/lib/matching/intent-interest";
 import { warsawDateString } from "@/lib/matching/offer-interest";
 import { notify } from "@/lib/notifications/notify";
+import { matchGendersOpenTo } from "@/lib/offers/match-gender";
 import type { TimeOfDay } from "@/lib/offers/feed-filters";
 
 // "Push авторам відкритих оферт, які підходять під намір" (task U2.4):
 // called once, right after postPlayIntent (app/offers/looking/actions.ts)
 // saves the row. Narrows by district/format in the query — the rest of
-// the matching rule (level, date, time of day, the daily cap, quiet
+// the matching rule (sport, level, date, time of day, the daily cap, quiet
 // hours) is lib/matching/intent-interest.ts, pure and already tested
 // there. Same shape as lib/notifications/new-offer.ts, swapped: there a
 // new offer looks for interested players, here a new intent looks for
@@ -24,6 +30,7 @@ function toOffer(row: {
   ntrpMin: number | null;
   ntrpMax: number | null;
   format: OfferFormat;
+  sport: Sport;
   startsAt: Date;
   author: {
     notifyNewOffers: boolean;
@@ -38,6 +45,7 @@ function toOffer(row: {
     ntrpMin: row.ntrpMin,
     ntrpMax: row.ntrpMax,
     format: row.format,
+    sport: row.sport,
     startsAt: row.startsAt,
     notifyNewOffers: row.author.notifyNewOffers,
     offerPushSentOn: row.author.offerPushSentOn
@@ -54,7 +62,12 @@ export async function notifyMatchingOfferAuthors(
     times: readonly TimeOfDay[];
     districts: readonly District[];
     format: OfferFormat;
-    selfRatedNtrp: number | null;
+    sport: Sport;
+    level: number | null;
+    /** Slice PD3: the poster's own gender — a men's or women's game they
+     * couldn't join isn't told about them. Left out — unrestricted games
+     * only. */
+    gender?: Gender;
   },
   now: Date = new Date(),
 ): Promise<void> {
@@ -66,9 +79,13 @@ export async function notifyMatchingOfferAuthors(
     where: {
       authorId: { not: intent.userId },
       status: "OPEN",
+      // Slice PD3: a private game is filled by its link, not by strangers.
+      visibility: "PUBLIC",
       startsAt: { gt: now },
       district: { in: [...intent.districts] },
       format: intent.format,
+      sport: intent.sport,
+      matchGender: { in: matchGendersOpenTo(intent.gender) },
       author: { notifyNewOffers: true },
     },
     select: {
@@ -78,6 +95,7 @@ export async function notifyMatchingOfferAuthors(
       ntrpMin: true,
       ntrpMax: true,
       format: true,
+      sport: true,
       startsAt: true,
       author: {
         select: {

@@ -1,5 +1,9 @@
 import { db } from "@/lib/db";
-import type { District, NotificationKind } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  NotificationKind,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import type { NotificationEvent } from "@/lib/notifications/notify";
 
 // The in-app notification list behind the header bell (slice K2a). notify()
@@ -16,6 +20,8 @@ export type InboxNotification = {
   readAt: Date | null;
   offer: {
     id: string;
+    /** Slice PD2: the list mixes both sports. */
+    sport: Sport;
     startsAt: Date;
     district: District | null;
     club: { name: string } | null;
@@ -74,6 +80,7 @@ export async function listNotifications(
       offer: {
         select: {
           id: true,
+          sport: true,
           startsAt: true,
           district: true,
           club: { select: { name: true } },

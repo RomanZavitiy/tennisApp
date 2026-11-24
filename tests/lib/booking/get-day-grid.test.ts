@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getDayGrid } from "@/lib/booking/get-day-grid";
+import {
+  dayGridForSport,
+  getDayGrid,
+  gridSports,
+  pickGridSport,
+  type DayGrid,
+} from "@/lib/booking/get-day-grid";
 
 const { findFirst, findBookings, findBlocks } = vi.hoisted(() => ({
   findFirst: vi.fn(),
@@ -29,6 +35,7 @@ const CLUB_ROW = {
     {
       id: COURT_ID,
       name: "Court 1",
+      sport: "TENNIS",
       surface: "CLAY",
       indoor: false,
       pricePerHourPln: 80,
@@ -109,5 +116,54 @@ describe("getDayGrid", () => {
         },
       }),
     );
+  });
+});
+
+// Slice PD2: a partner club with both sports shows one sport's courts.
+describe("the grid by sport", () => {
+  const court = (id: string, sport: "TENNIS" | "PADEL") => ({
+    id,
+    name: id,
+    sport,
+    surface: "ARTIFICIAL_GRASS" as const,
+    indoor: true,
+    pricePerHourPln: null,
+  });
+  const BOTH: DayGrid = {
+    club: { id: CLUB_ID, name: "KKS Olsza" },
+    courts: [court("p1", "PADEL"), court("t1", "TENNIS"), court("p2", "PADEL")],
+    grid: [
+      { courtId: "p1", slots: [] },
+      { courtId: "t1", slots: [] },
+      { courtId: "p2", slots: [] },
+    ],
+  };
+  const TENNIS_ONLY: DayGrid = {
+    ...BOTH,
+    courts: [court("t1", "TENNIS")],
+    grid: [{ courtId: "t1", slots: [] }],
+  };
+
+  it("lists the sports that have courts, tennis first", () => {
+    expect(gridSports(BOTH)).toEqual(["TENNIS", "PADEL"]);
+    expect(gridSports(TENNIS_ONLY)).toEqual(["TENNIS"]);
+    expect(gridSports({ ...BOTH, courts: [], grid: [] })).toEqual([]);
+  });
+
+  it("keeps only one sport's courts and their slots, in order", () => {
+    const padel = dayGridForSport(BOTH, "PADEL");
+    expect(padel.courts.map((c) => c.id)).toEqual(["p1", "p2"]);
+    expect(padel.grid.map((g) => g.courtId)).toEqual(["p1", "p2"]);
+    expect(padel.club).toEqual(BOTH.club);
+  });
+
+  it("picks the sport from the URL, then the switcher, then what the club has", () => {
+    const both = gridSports(BOTH);
+    expect(pickGridSport(both, "PADEL", "TENNIS")).toBe("PADEL");
+    expect(pickGridSport(both, undefined, "PADEL")).toBe("PADEL");
+    expect(pickGridSport(both, "SQUASH", "TENNIS")).toBe("TENNIS");
+    // A tennis-only club ignores a padel link and a padel switcher.
+    expect(pickGridSport(["TENNIS"], "PADEL", "PADEL")).toBe("TENNIS");
+    expect(pickGridSport([], undefined, "TENNIS")).toBeNull();
   });
 });

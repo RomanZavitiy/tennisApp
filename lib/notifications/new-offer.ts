@@ -8,6 +8,7 @@ import {
 } from "@/lib/matching/offer-interest";
 import { notify } from "@/lib/notifications/notify";
 import type { TimeOfDay } from "@/lib/offers/feed-filters";
+import { requiredGender } from "@/lib/offers/match-gender";
 import { playerLevel } from "@/lib/sport/sport";
 
 // "New offer for my level" (task 5.16): called once, right after createOffer
@@ -52,15 +53,20 @@ function toCandidate(
 export async function notifyInterestedPlayers(
   offer: NewOfferInfo & { offerId: string },
   now: Date = new Date(),
-): Promise<void> {
+  // The players it reached — the favourites push (PD3.4) skips them, so
+  // nobody hears about one offer twice.
+): Promise<string[]> {
   // No district, no match (lib/matching's own rule) — skip the query too.
   if (!offer.district) {
-    return;
+    return [];
   }
 
+  // Slice PD3: a men's or women's game only reaches players it is for.
+  const gender = requiredGender(offer.matchGender ?? "ANY");
   const rows = await db.user.findMany({
     where: {
       id: { not: offer.authorId },
+      ...(gender ? { gender } : {}),
       // U1.3: the candidate's own district still matches as before U1;
       // OR widens the pool to players who named this one as preferred too.
       OR: [
@@ -107,4 +113,5 @@ export async function notifyInterestedPlayers(
             },
     });
   }
+  return matches.map((match) => match.userId);
 }

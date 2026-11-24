@@ -73,6 +73,14 @@ export default async function OffersPage({
     new Date(),
     showHidden,
   );
+  // The "Club" filter's options (slice PD3): the active sport's clubs.
+  const clubs = showHidden
+    ? []
+    : await db.club.findMany({
+        where: { sports: { has: sport } },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      });
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("OffersPage");
 
@@ -187,7 +195,7 @@ export default async function OffersPage({
         <ListingLayout
           sidebar={
             <>
-              <OfferFilters filters={filters} sport={sport} />
+              <OfferFilters filters={filters} sport={sport} clubs={clubs} />
               {/* "Шукають гру" (U2.2), "Грати сьогодні" (U3.1) and the
                   hidden offers: signed-in players only — a guest sees none
                   of these links, same gate the pages enforce themselves. */}
@@ -199,13 +207,9 @@ export default async function OffersPage({
                   <SideLink href="/offers/today" icon={<ZapIcon />}>
                     {t("playToday")}
                   </SideLink>
-                  {/* "Looking for a game" posts have no sport yet (PD2):
-                      they are tennis. */}
-                  {!isPadel && (
-                    <SideLink href="/offers/looking" icon={<UsersIcon />}>
-                      {t("lookingForGame")}
-                    </SideLink>
-                  )}
+                  <SideLink href="/offers/looking" icon={<UsersIcon />}>
+                    {t("lookingForGame")}
+                  </SideLink>
                   <SideLink href="/offers?show=hidden" icon={<EyeOffIcon />}>
                     {t("showHidden")}
                   </SideLink>

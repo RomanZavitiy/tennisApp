@@ -1,4 +1,8 @@
-import type { District, OfferFormat } from "@/lib/generated/prisma/enums";
+import type {
+  District,
+  OfferFormat,
+  Sport,
+} from "@/lib/generated/prisma/enums";
 import { levelMatches } from "@/lib/matching/offer-interest";
 import {
   nextDay,
@@ -29,19 +33,26 @@ export type IntentSummary = {
   times: readonly TimeOfDay[];
   districts: readonly District[];
   format: OfferFormat;
-  selfRatedNtrp: number | null;
+  sport: Sport;
+  /** The poster's own level in the intent's sport (slice PD2): NTRP for
+   * tennis, the padel level for padel. */
+  level: number | null;
 };
 
 /**
  * Whether `intent` matches the offer feed's own filters (task U2.2: "ті
  * самі" filters). `ntrp` compares against the one level an intent has —
- * the poster's own — the same tolerance levelMatches already gives an
- * offer's declared range (lib/matching/offer-interest.ts).
+ * the poster's own, in the intent's sport — the same tolerance
+ * levelMatches already gives an offer's declared range
+ * (lib/matching/offer-interest.ts). `sport` unset means both sports.
  */
 export function intentMatchesFilters(
   intent: IntentSummary,
   filters: FeedFilters,
 ): boolean {
+  if (filters.sport && filters.sport !== intent.sport) {
+    return false;
+  }
   if (filters.date && filters.date !== intent.date) {
     return false;
   }
@@ -56,7 +67,7 @@ export function intentMatchesFilters(
   }
   if (
     filters.ntrp !== undefined &&
-    !levelMatches(intent.selfRatedNtrp, filters.ntrp, filters.ntrp)
+    !levelMatches(intent.level, filters.ntrp, filters.ntrp)
   ) {
     return false;
   }

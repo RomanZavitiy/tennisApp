@@ -3,6 +3,7 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 import type {
   CourtStatus,
   District,
+  MatchGender,
   OfferFormat,
   Sport,
   Surface,
@@ -33,6 +34,8 @@ export type FeedOffer = {
   id: string;
   sport: Sport;
   format: OfferFormat;
+  /** Slice PD3: who the game is for; the card marks anything but ANY. */
+  matchGender: MatchGender;
   hasPartner: boolean;
   startsAt: Date;
   durationMinutes: number;
@@ -73,6 +76,7 @@ export const feedOfferSelect = {
   id: true,
   sport: true,
   format: true,
+  matchGender: true,
   hasPartner: true,
   startsAt: true,
   durationMinutes: true,

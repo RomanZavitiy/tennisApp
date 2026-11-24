@@ -6,15 +6,21 @@ import {
   notifyBookingRequested,
 } from "@/lib/notifications/notify";
 
-const { userFindUnique, pushSubscriptionDelete, offerJoinUpdateMany } =
-  vi.hoisted(() => ({
-    userFindUnique: vi.fn(),
-    pushSubscriptionDelete: vi.fn(),
-    offerJoinUpdateMany: vi.fn(),
-  }));
+const {
+  userFindUnique,
+  offerFindUnique,
+  pushSubscriptionDelete,
+  offerJoinUpdateMany,
+} = vi.hoisted(() => ({
+  userFindUnique: vi.fn(),
+  offerFindUnique: vi.fn(),
+  pushSubscriptionDelete: vi.fn(),
+  offerJoinUpdateMany: vi.fn(),
+}));
 vi.mock("@/lib/db", () => ({
   db: {
     user: { findUnique: userFindUnique },
+    sparringOffer: { findUnique: offerFindUnique },
     pushSubscription: { delete: pushSubscriptionDelete },
     offerJoin: { updateMany: offerJoinUpdateMany },
   },
@@ -57,6 +63,7 @@ function user(over: Partial<Record<string, unknown>> = {}) {
 describe("notify", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    offerFindUnique.mockResolvedValue({ sport: "TENNIS" });
     offerJoinUpdateMany.mockResolvedValue({ count: 1 });
     pushSubscriptionDelete.mockResolvedValue(undefined);
     sendEmail.mockResolvedValue({ ok: true });
@@ -92,6 +99,40 @@ describe("notify", () => {
 
     expect(sendEmail).toHaveBeenCalledWith(
       expect.objectContaining({ to: "player@example.com" }),
+    );
+  });
+
+  // Slice PD2: one player, games in both sports — the title says which.
+  it("names padel in the push title and the email subject", async () => {
+    offerFindUnique.mockResolvedValue({ sport: "PADEL" });
+    userFindUnique.mockResolvedValue(user());
+    sendPush.mockResolvedValue({ ok: true });
+
+    await notify(USER, { kind: "JOIN_REQUESTED", offerId: "offer-1" }, NOW);
+
+    expect(sendPush).toHaveBeenCalledWith(
+      SUB,
+      expect.objectContaining({ title: "Padel · New request to join" }),
+    );
+
+    userFindUnique.mockResolvedValue(user({ pushSubscriptions: [] }));
+    await notify(USER, { kind: "JOIN_REQUESTED", offerId: "offer-1" }, NOW);
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: "Padel · New request to join" }),
+    );
+  });
+
+  it("still notifies when the offer is gone, as a tennis title", async () => {
+    offerFindUnique.mockResolvedValue(null);
+    userFindUnique.mockResolvedValue(user());
+    sendPush.mockResolvedValue({ ok: true });
+
+    await notify(USER, { kind: "JOIN_REQUESTED", offerId: "offer-1" }, NOW);
+
+    expect(sendPush).toHaveBeenCalledWith(
+      SUB,
+      expect.objectContaining({ title: "New request to join" }),
     );
   });
 
