@@ -165,18 +165,31 @@ export const TEST_CLUB_SLUG_PREFIX = "e2e-";
 
 // Adds a club straight to the shared database (clubs have no other write
 // path besides `pnpm clubs:load`). The caller deletes it afterwards by id.
+// A tennis club unless `sports` says otherwise (slice PD5, the padel flow).
 export async function createTestClub(
   admin: ReturnType<typeof createAdminClient>,
-  club: { name: string; address: string; latitude: number; longitude: number },
+  {
+    sports = ["TENNIS"],
+    ...club
+  }: {
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    sports?: ("TENNIS" | "PADEL")[];
+  },
 ): Promise<string> {
+  const padelOnly = !sports.includes("TENNIS");
   const { data, error } = await admin
     .from("clubs")
     .insert({
       ...club,
+      sports,
       slug: `${TEST_CLUB_SLUG_PREFIX}${randomUUID()}`,
       district: "STARE_MIASTO",
       court_count: 1,
-      surfaces: ["CLAY"],
+      // Padel courts have no surface to pick (decision 2.11: empty = unknown).
+      surfaces: padelOnly ? [] : ["CLAY"],
       indoor: "NONE",
       verified_at: new Date().toISOString().slice(0, 10),
     })
