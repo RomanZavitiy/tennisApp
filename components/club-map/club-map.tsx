@@ -9,8 +9,10 @@ import { type RefObject, useEffect, useRef } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 
 import { useClubSelection } from "@/components/club-selection";
+import type { Sport } from "@/lib/generated/prisma/enums";
 
-import { markerIconDefault } from "./marker-icon";
+import { markerIcons } from "./marker-icon";
+import { markerKindFor } from "./marker-kind";
 
 // Rynek Główny, the middle of the city: the view while there are no clubs.
 const KRAKOW_CENTER: [number, number] = [50.0614, 19.9366];
@@ -27,6 +29,8 @@ export type ClubMapMarker = {
   address: string;
   latitude: number;
   longitude: number;
+  /** Picks the pin (PD5.2): tennis, padel, or both. */
+  sports: Sport[];
 };
 
 export type ClubMapProps = {
@@ -62,7 +66,7 @@ export default function ClubMap({ markers }: ClubMapProps) {
         <Marker
           key={marker.id}
           position={[marker.latitude, marker.longitude]}
-          icon={markerIconDefault}
+          icon={markerIcons[markerKindFor(marker.sports)]}
           title={marker.name}
           alt={marker.name}
           ref={(leafletMarker) => {
