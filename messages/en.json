@@ -239,7 +239,9 @@
     "posting": "Posting…",
     "submit": "Post offer",
     "padelPlayersLabel": "Players",
-    "padelFormat": "Padel is played two against two: the game needs four players."
+    "padelFormat": "Padel is played two against two: the game needs four players.",
+    "padelLevelFromLabel": "Level from (1–7)",
+    "padelLevelToLabel": "Level to (1–7)"
   },
   "OffersPage": {
     "title": "Sparring offers",
@@ -529,7 +531,8 @@
     "noOffers": "No open offers at this club right now.",
     "createOfferHere": "Create an offer at this club",
     "clubChat": "Club chat",
-    "coachesHere": "Coaches at this club"
+    "coachesHere": "Coaches at this club",
+    "news": "Club news"
   },
   "FollowClubButton": {
     "follow": "Follow",
@@ -612,7 +615,17 @@
     "blockReasonLabel": "Reason (optional)",
     "addBlock": "Add block",
     "addingBlock": "Adding…",
-    "blockAdded": "Block added."
+    "blockAdded": "Block added.",
+    "newsTitle": "Club news",
+    "newsHint": "Shown on the club page and sent as a push to its followers.",
+    "newsTitleLabel": "Title",
+    "newsBodyLabel": "What is happening",
+    "postNews": "Post",
+    "postingNews": "Posting…",
+    "newsPosted": "Posted. Followers will get a push.",
+    "noNews": "No news yet.",
+    "deleteNews": "Delete",
+    "deletingNews": "Deleting…"
   },
   "OfferBookingSection": {
     "aboutClub": "About {name}",
@@ -833,7 +846,8 @@
     "blockNotFound": "This block doesn't exist.",
     "blockOverlapsBooking": "That time overlaps a request or confirmed booking. Confirm or decline it first.",
     "blockOverlapsBlock": "That time overlaps another block. Pick a different time.",
-    "inviteNotFound": "This invite doesn't exist."
+    "inviteNotFound": "This invite doesn't exist.",
+    "clubEventNotFound": "This news item no longer exists."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "This isn't your match.",
@@ -961,6 +975,13 @@
       "districtsRequired": "Choose at least one district.",
       "noteTooLong": "Keep the note under {max} characters.",
       "padelNeedsDoubles": "A padel game is always doubles."
+    },
+    "clubEvent": {
+      "titleRequired": "Add a title.",
+      "titleTooLong": "Keep the title under {max} characters.",
+      "bodyRequired": "Write what is happening.",
+      "bodyTooLong": "Keep it under {max} characters.",
+      "tooManyToday": "A club can post up to 3 news items a day. Try again tomorrow."
     }
   },
   "OnboardingPage": {
@@ -1408,7 +1429,7 @@
       },
       "padel": {
         "question": "Is it for tennis or for padel?",
-        "answer": "Both. The Tennis / Padel switch at the top of the page changes the offers, the clubs and the level scale. A padel game is always for four players, and you set your padel level (1–7) in your profile. The rating from confirmed matches is tennis-only for now."
+        "answer": "Both. The Tennis / Padel switch at the top of the page changes the offers, the clubs and the level scale. A padel game is always for four players, and you set your padel level (1–7) in your profile. Confirmed padel results build a padel rating of its own, apart from your tennis one."
       },
       "booking": {
         "question": "Can I book a court here?",

@@ -472,3 +472,46 @@ describe("match_results", () => {
     );
   });
 });
+
+describe("club_events (PD5, migration 20261124120000_add_club_events)", () => {
+  it("refuses a blank title or text", async () => {
+    const { club } = await createBookableClub();
+    for (const blank of [
+      {
+        title: "   ",
+        body: "text",
+        check: "club_events_title_not_blank_check",
+      },
+      {
+        title: "Title",
+        body: " \n ",
+        check: "club_events_body_not_blank_check",
+      },
+    ]) {
+      await expectDbRejection(
+        db.clubEvent.create({
+          data: { clubId: club.id, title: blank.title, body: blank.body },
+        }),
+        { code: PG.checkViolation, mentions: blank.check },
+      );
+    }
+  });
+
+  it("keeps the news without an author when that account goes, and drops it with the club", async () => {
+    const [{ club }, staff] = await Promise.all([
+      createBookableClub(),
+      createPlayer(),
+    ]);
+    const event = await db.clubEvent.create({
+      data: { clubId: club.id, authorId: staff.id, title: "T", body: "B" },
+    });
+
+    await db.user.delete({ where: { id: staff.id } });
+    expect(
+      (await db.clubEvent.findUnique({ where: { id: event.id } }))?.authorId,
+    ).toBeNull();
+
+    await db.club.delete({ where: { id: club.id } });
+    expect(await db.clubEvent.count({ where: { id: event.id } })).toBe(0);
+  });
+});

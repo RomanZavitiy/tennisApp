@@ -26,6 +26,7 @@ export async function searchClubs(
       longitude: true,
       bookingUrl: true,
       phone: true,
+      sports: true,
     },
     orderBy: { name: "asc" },
   });

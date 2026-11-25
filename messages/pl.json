@@ -239,7 +239,9 @@
     "posting": "Publikowanie…",
     "submit": "Opublikuj ogłoszenie",
     "padelPlayersLabel": "Gracze",
-    "padelFormat": "W padla gra się dwóch na dwóch: mecz wymaga czterech graczy."
+    "padelFormat": "W padla gra się dwóch na dwóch: mecz wymaga czterech graczy.",
+    "padelLevelFromLabel": "Poziom od (1–7)",
+    "padelLevelToLabel": "Poziom do (1–7)"
   },
   "OffersPage": {
     "title": "Oferty sparingowe",
@@ -529,7 +531,8 @@
     "noOffers": "Brak otwartych ogłoszeń w tym klubie.",
     "createOfferHere": "Dodaj ogłoszenie w tym klubie",
     "clubChat": "Czat klubu",
-    "coachesHere": "Trenerzy w tym klubie"
+    "coachesHere": "Trenerzy w tym klubie",
+    "news": "Aktualności klubu"
   },
   "FollowClubButton": {
     "follow": "Obserwuj",
@@ -612,7 +615,17 @@
     "blockReasonLabel": "Powód (opcjonalny)",
     "addBlock": "Dodaj blokadę",
     "addingBlock": "Dodawanie…",
-    "blockAdded": "Blokada dodana."
+    "blockAdded": "Blokada dodana.",
+    "newsTitle": "Aktualności klubu",
+    "newsHint": "Pokazywane na stronie klubu i wysyłane jako push do obserwujących.",
+    "newsTitleLabel": "Tytuł",
+    "newsBodyLabel": "Co się dzieje",
+    "postNews": "Opublikuj",
+    "postingNews": "Publikowanie…",
+    "newsPosted": "Opublikowano. Obserwujący dostaną push.",
+    "noNews": "Brak aktualności.",
+    "deleteNews": "Usuń",
+    "deletingNews": "Usuwanie…"
   },
   "OfferBookingSection": {
     "aboutClub": "O klubie {name}",
@@ -833,7 +846,8 @@
     "blockNotFound": "Ta blokada nie istnieje.",
     "blockOverlapsBooking": "Ten termin pokrywa się z prośbą albo potwierdzoną rezerwacją. Najpierw ją potwierdź albo odrzuć.",
     "blockOverlapsBlock": "Ten termin pokrywa się z inną blokadą. Wybierz inny termin.",
-    "inviteNotFound": "To zaproszenie nie istnieje."
+    "inviteNotFound": "To zaproszenie nie istnieje.",
+    "clubEventNotFound": "Ta aktualność już nie istnieje."
   },
   "SubmitResultRefusal": {
     "NOT_PARTICIPANT": "To nie jest Twój mecz.",
@@ -961,6 +975,13 @@
       "districtsRequired": "Wybierz co najmniej jedną dzielnicę.",
       "noteTooLong": "Notatka może mieć maksymalnie {max} znaków.",
       "padelNeedsDoubles": "Mecz padla to zawsze debel."
+    },
+    "clubEvent": {
+      "titleRequired": "Dodaj tytuł.",
+      "titleTooLong": "Tytuł może mieć najwyżej {max} znaków.",
+      "bodyRequired": "Napisz, co się dzieje.",
+      "bodyTooLong": "Tekst może mieć najwyżej {max} znaków.",
+      "tooManyToday": "Klub może dodać najwyżej 3 aktualności dziennie. Spróbuj jutro."
     }
   },
   "OnboardingPage": {
@@ -1408,7 +1429,7 @@
       },
       "padel": {
         "question": "To dla tenisa czy dla padla?",
-        "answer": "Dla obu. Przełącznik Tenis / Padel u góry strony zmienia oferty, kluby i skalę poziomu. W padla gra się zawsze we czwórkę, a swój poziom padla (1–7) ustawiasz w profilu. Ranking z potwierdzonych meczów działa na razie tylko w tenisie."
+        "answer": "Dla obu. Przełącznik Tenis / Padel u góry strony zmienia oferty, kluby i skalę poziomu. W padla gra się zawsze we czwórkę, a swój poziom padla (1–7) ustawiasz w profilu. Potwierdzone wyniki w padla budują osobny ranking padlowy, niezależny od tenisowego."
       },
       "booking": {
         "question": "Czy mogę tu zarezerwować kort?",

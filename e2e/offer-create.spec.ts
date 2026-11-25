@@ -16,6 +16,9 @@ import {
 const clubName = `E2E Offer Club ${randomUUID().slice(0, 8)}`;
 let admin: ReturnType<typeof createAdminClient>;
 let clubId: string;
+// Slice PD5 (PD5.3): the same flow in padel, at a padel-only club.
+const padelClubName = `E2E Padel Club ${randomUUID().slice(0, 8)}`;
+let padelClubId: string;
 
 test.beforeAll(async () => {
   admin = createAdminClient();
@@ -24,6 +27,13 @@ test.beforeAll(async () => {
     address: "Testowa 1, 30-001 Kraków",
     latitude: 50.07,
     longitude: 19.92,
+  });
+  padelClubId = await createTestClub(admin, {
+    name: padelClubName,
+    address: "Testowa 2, 30-001 Kraków",
+    latitude: 50.071,
+    longitude: 19.921,
+    sports: ["PADEL"],
   });
 });
 
@@ -49,9 +59,23 @@ async function pickStart(page: Page, day: string, time: string) {
 }
 
 test.afterAll(async () => {
-  const { error } = await admin.from("clubs").delete().eq("id", clubId);
+  const { error } = await admin
+    .from("clubs")
+    .delete()
+    .in("id", [clubId, padelClubId]);
   if (error) throw error;
 });
+
+// The header's Tennis / Padel switch (slice PD1): sets the cookie, then the
+// page re-renders in place.
+async function switchSport(page: Page, sport: "Tennis" | "Padel") {
+  const button = page
+    .getByRole("group", { name: "Sport" })
+    .first()
+    .getByRole("button", { name: sport });
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+}
 
 test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   const user = await signIn();
@@ -124,6 +148,64 @@ test("a player posts a doubles offer at a club", async ({ page, signIn }) => {
   await expect(card).toContainText("Doubles · has a partner");
   await expect(card).toContainText("2 spots left");
   await expect(card).toContainText(clubName);
+});
+
+test("a player switches to padel, posts a padel game and sees it in the padel feed", async ({
+  page,
+  signIn,
+}) => {
+  const user = await signIn();
+  const name = `E2E Padel ${randomUUID().slice(0, 8)}`;
+  await completeTestProfile(admin, user.id, { name, district: "PODGORZE" });
+  const day = toKrakowLocal(new Date(Date.now() + 3 * 86_400_000)).slice(0, 10);
+
+  await page.goto("/offers");
+  await switchSport(page, "Padel");
+  await page.getByRole("link", { name: "Post an offer" }).first().click();
+  await expect(page).toHaveURL("/offers/new");
+  await expect(
+    page.getByRole("heading", { name: "New padel game" }),
+  ).toBeVisible();
+
+  // Padel is always four players: no singles/doubles choice, no surface,
+  // and only padel clubs to pick from.
+  await expect(page.getByLabel("Singles")).toBeHidden();
+  await expect(page.getByLabel("Surface")).toHaveCount(0);
+  const club = page.getByLabel("Club", { exact: true });
+  await expect(club.locator("option", { hasText: clubName })).toHaveCount(0);
+
+  await pickStart(page, day, "19:00");
+  await club.selectOption({ label: padelClubName });
+  await page.getByLabel("Level from (1–7)").selectOption("3.0");
+  await page.getByLabel("Level to (1–7)").selectOption("4.5");
+  await page.getByRole("button", { name: "Post offer" }).click();
+
+  await expect(page).toHaveURL(/\/offers\/[0-9a-f-]{36}(\?.*)?$/);
+  const id = page.url().split("/").pop()?.split("?")[0];
+  const { data, error } = await admin
+    .from("sparring_offers")
+    .select("*")
+    .eq("id", id)
+    .single<Record<string, unknown>>();
+  if (error) throw error;
+  expect(data).toMatchObject({
+    author_id: user.id,
+    sport: "PADEL",
+    format: "DOUBLES",
+    club_id: padelClubId,
+    ntrp_min: 3,
+    ntrp_max: 4.5,
+    surface: null,
+  });
+
+  // As a guest: the padel feed lists it, the tennis feed doesn't.
+  await page.context().clearCookies();
+  await page.goto("/offers");
+  const card = page.getByRole("listitem").filter({ hasText: `by ${name}` });
+  await expect(card).toHaveCount(0);
+  await switchSport(page, "Padel");
+  await expect(card).toContainText(padelClubName);
+  await expect(card).toContainText("Padel");
 });
 
 test("the club page's CTA pre-selects its club on the form (task 2.10)", async ({

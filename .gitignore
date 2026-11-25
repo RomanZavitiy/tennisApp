@@ -59,3 +59,6 @@ next-env.d.ts
 /graphify-out/cost.json
 /graphify-out/.graphify_python
 /graphify-out/.graphify_root
+
+# Claude Code local files (launch config, worktrees, scratch)
+/.claude/

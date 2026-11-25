@@ -296,7 +296,11 @@ export function OfferForm({
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
-        <Field id="ntrpMin" label={t("levelFromLabel")} error={errors.ntrpMin}>
+        <Field
+          id="ntrpMin"
+          label={t(isPadel ? "padelLevelFromLabel" : "levelFromLabel")}
+          error={errors.ntrpMin}
+        >
           <NtrpSelect
             id="ntrpMin"
             error={errors.ntrpMin}
@@ -305,7 +309,11 @@ export function OfferForm({
             {...register("ntrpMin", { setValueAs: ntrpValue })}
           />
         </Field>
-        <Field id="ntrpMax" label={t("levelToLabel")} error={errors.ntrpMax}>
+        <Field
+          id="ntrpMax"
+          label={t(isPadel ? "padelLevelToLabel" : "levelToLabel")}
+          error={errors.ntrpMax}
+        >
           <NtrpSelect
             id="ntrpMax"
             error={errors.ntrpMax}

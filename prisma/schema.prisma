@@ -175,6 +175,8 @@ model User {
   bookingDecisions        Booking[]          @relation("BookingDecidedBy")
   /// Court blocks this player created, as club staff.
   courtBlocksCreated      CourtBlock[]
+  /// Club news posted from the club panel (slice PD5, task PD5.1).
+  clubEventsPosted        ClubEvent[]
   /// Club tips this player filed (slice M).
   clubSubmissionsFiled    ClubSubmission[]   @relation("ClubSubmissionsFiled")
   /// Club tips this admin reviewed (slice M).
@@ -294,6 +296,8 @@ model Club {
   /// Coaches who teach here (slice P) — implicit many-to-many, owner-curated
   /// on both sides, loaded the same way as the club itself (task P.2).
   coaches        Coach[]
+  /// News the club's staff post from the club panel (slice PD5, PD5.1).
+  events         ClubEvent[]
 
   @@map("clubs")
 }
@@ -812,6 +816,34 @@ model ClubFollow {
   @@unique([userId, clubId])
   @@index([clubId])
   @@map("club_follows")
+}
+
+/// A piece of club news (slice PD5, task PD5.1): a tournament, an open
+/// evening, new padel courts. Posted by the club's staff from the club
+/// panel, listed on the club's page, pushed to its followers. Shown, posted
+/// and pushed only while the `clubChat` flag is on (lib/features.ts) —
+/// followers exist only with it. RLS on, no policies: only the server reads
+/// and writes this table.
+model ClubEvent {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  clubId String @map("club_id") @db.Uuid
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  /// The staff member who posted it; the news stays with the club if that
+  /// account is deleted.
+  authorId String? @map("author_id") @db.Uuid
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  /// Non-blank (CHECKs in the migration); the shorter limits a staff member
+  /// can type are the Zod schema's (lib/validation/club-event.ts).
+  title String @db.VarChar(100)
+  body  String @db.VarChar(1000)
+
+  @@index([clubId, createdAt])
+  @@index([authorId])
+  @@map("club_events")
 }
 
 /// A chat message, in one of three threads (decision 3.1, extended
