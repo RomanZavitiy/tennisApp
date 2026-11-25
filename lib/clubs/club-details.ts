@@ -40,6 +40,7 @@ export async function getClub(id: string) {
       name: true,
       address: true,
       district: true,
+      sports: true,
       courtCount: true,
       surfaces: true,
       indoor: true,

@@ -48,6 +48,8 @@ test("anyone can see a club's details and book on the club's site", async ({
   await expect(page).toHaveTitle(new RegExp(`^${name}`));
   await expect(page.getByText("Testowa 1, 30-001 Kraków")).toBeVisible();
   await expect(page.getByText("Stare Miasto")).toBeVisible();
+  // The club's own sports, whatever the header switch says (slice PD5).
+  await expect(page.getByRole("definition").first()).toHaveText("Tennis");
   await expect(page.getByText("Clay, Artificial clay")).toBeVisible();
   await expect(page.getByText("Covered in winter (bubble)")).toBeVisible();
   await expect(page.getByText("Summer: 60 zł/h")).toBeVisible();

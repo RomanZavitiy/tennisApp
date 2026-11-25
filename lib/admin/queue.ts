@@ -3,6 +3,7 @@ import type {
   District,
   MatchParty,
   ReportReason,
+  Sport,
 } from "@/lib/generated/prisma/enums";
 
 // What the admin queue (task 6.3) shows: open reports, currently blocked
@@ -126,6 +127,56 @@ export async function getOpenClubSubmissions(): Promise<OpenClubSubmission[]> {
       districtGuess: true,
       notes: true,
       submittedBy: { select: { id: true, name: true } },
+    },
+  });
+}
+
+type QueuePlayer = { id: string; name: string | null };
+
+export type DisputedDoublesResult = {
+  id: string;
+  score: unknown;
+  winner: MatchParty | null;
+  offer: {
+    id: string;
+    sport: Sport;
+    startsAt: Date;
+    author: QueuePlayer;
+  };
+  authorPartner: QueuePlayer | null;
+  opponent1: QueuePlayer | null;
+  opponent2: QueuePlayer | null;
+  reportedBy: QueuePlayer;
+  noShowUser: QueuePlayer | null;
+};
+
+const queuePlayer = { select: { id: true, name: true } } as const;
+
+/** Slice PD4: a doubles game's score or no-show report, disputed by the
+ * other pair or the named player, waiting on an admin like a singles one. */
+export async function getDisputedDoublesResults(): Promise<
+  DisputedDoublesResult[]
+> {
+  return db.doublesResult.findMany({
+    where: { status: "DISPUTED" },
+    orderBy: { updatedAt: "asc" },
+    select: {
+      id: true,
+      score: true,
+      winner: true,
+      offer: {
+        select: {
+          id: true,
+          sport: true,
+          startsAt: true,
+          author: queuePlayer,
+        },
+      },
+      authorPartner: queuePlayer,
+      opponent1: queuePlayer,
+      opponent2: queuePlayer,
+      reportedBy: queuePlayer,
+      noShowUser: queuePlayer,
     },
   });
 }

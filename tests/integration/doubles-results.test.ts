@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  annulDisputedDoublesResult,
+  confirmDisputedDoublesResult,
+} from "@/app/admin/actions";
+import {
   confirmDoublesResult,
+  disputeDoublesResult,
   rateDoublesPlayer,
   submitDoublesNoShow,
   submitDoublesResult,
@@ -228,5 +233,81 @@ describe("a doubles no-show report", () => {
     expect([a.noShows, b.noShows, c.noShows]).toEqual([0, 0, 1]);
     expect(c.scheduledMatches).toBe(1);
     expect(c.padelElo).toBe(1500);
+  });
+});
+
+// The admin queue for a disputed doubles result (slice PD4 follow-up,
+// migration 20261125100000_add_admin_action_doubles_result).
+describe("a disputed doubles result in the admin queue", () => {
+  async function disputedScore() {
+    const game = await createPlayedPadelGame();
+    await runAs(game.p1.id, () =>
+      submitDoublesResult(game.offer.id, {
+        ...SCORE,
+        authorPartnerId: game.p1.id,
+      }),
+    );
+    const result = await db.doublesResult.findUniqueOrThrow({
+      where: { offerId: game.offer.id },
+    });
+    expect(
+      await runAs(game.p2.id, () => disputeDoublesResult(result.id)),
+    ).toEqual({ ok: true });
+    const admin = await createPlayer({ name: "Admin", isAdmin: true });
+    return { ...game, result, admin };
+  }
+
+  it("an admin's confirm moves the padel ELO once and is logged", async () => {
+    const { author, p1, p2, p3, result, admin } = await disputedScore();
+
+    const outcomes = await Promise.all([
+      runAs(admin.id, () => confirmDisputedDoublesResult(result.id)),
+      runAs(admin.id, () => confirmDisputedDoublesResult(result.id)),
+    ]);
+    expect(outcomes.filter((outcome) => outcome.ok)).toHaveLength(1);
+
+    const [a, b, c, d] = await padelRatings(author.id, p1.id, p2.id, p3.id);
+    expect([a.padelElo, b.padelElo, c.padelElo, d.padelElo]).toEqual([
+      1520, 1520, 1480, 1480,
+    ]);
+    expect(
+      (await db.doublesResult.findUniqueOrThrow({ where: { id: result.id } }))
+        .status,
+    ).toBe("CONFIRMED");
+    const logged = await db.adminAction.findMany({
+      where: { doublesResultId: result.id },
+    });
+    expect(logged.map((row) => row.action)).toEqual(["CONFIRM_RESULT"]);
+  });
+
+  it("an admin's annul leaves every rating and counter as it was", async () => {
+    const { author, p2, result, admin } = await disputedScore();
+
+    expect(
+      await runAs(admin.id, () => annulDisputedDoublesResult(result.id)),
+    ).toEqual({ ok: true });
+
+    const [a, c] = await padelRatings(author.id, p2.id);
+    expect([a.padelElo, c.padelElo]).toEqual([1500, 1500]);
+    expect([a.scheduledMatches, c.scheduledMatches]).toEqual([0, 0]);
+    expect(
+      (await db.doublesResult.findUniqueOrThrow({ where: { id: result.id } }))
+        .status,
+    ).toBe("ANNULLED");
+    // Settled once: a confirm after the annul is refused.
+    expect(
+      (await runAs(admin.id, () => confirmDisputedDoublesResult(result.id))).ok,
+    ).toBe(false);
+  });
+
+  it("refuses an admin action that points at nothing", async () => {
+    const admin = await createPlayer({ name: "Admin", isAdmin: true });
+
+    await expectDbRejection(
+      db.adminAction.create({
+        data: { adminId: admin.id, action: "CONFIRM_RESULT" },
+      }),
+      { code: PG.checkViolation, mentions: "admin_actions_has_target_check" },
+    );
   });
 });

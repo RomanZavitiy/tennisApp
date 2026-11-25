@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   type ClubSelection,
@@ -21,6 +21,18 @@ export function ClubsView({ list, map }: { list: ReactNode; map: ReactNode }) {
   const t = useTranslations("ClubsView");
   const [view, setView] = useState<View>("list");
   const [selection, setSelection] = useState<ClubSelection>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  // A club picked far down the list on a phone switches to the map, but the
+  // page keeps its scroll: the map would sit above the screen. Bring it in
+  // whenever it isn't fully in view (on desktop it usually already is).
+  useEffect(() => {
+    if (selection?.from !== "list") return;
+    const box = mapRef.current?.getBoundingClientRect();
+    if (box && (box.top < 0 || box.bottom > window.innerHeight)) {
+      mapRef.current?.scrollIntoView({ block: "nearest" });
+    }
+  }, [selection]);
 
   const selectionContext = useMemo<ClubSelectionContextValue>(
     () => ({
@@ -60,8 +72,11 @@ export function ClubsView({ list, map }: { list: ReactNode; map: ReactNode }) {
             {list}
           </div>
           <div
+            ref={mapRef}
             className={cn(
-              "h-[28rem] lg:block lg:h-[max(34rem,calc(100dvh-23rem))]",
+              // scroll-mt: when scrolled to, clears the sticky header — and on
+              // a phone keeps the List/Map switch above the map in view too.
+              "h-[28rem] scroll-mt-40 lg:block lg:h-[max(34rem,calc(100dvh-23rem))] lg:scroll-mt-24",
               view === "map" ? "block" : "hidden",
             )}
           >

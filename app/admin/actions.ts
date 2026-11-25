@@ -6,12 +6,16 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { db } from "@/lib/db";
 import type { AdminActionType } from "@/lib/generated/prisma/enums";
+import {
+  lockDoublesResult,
+  settleDoublesResult,
+} from "@/lib/rating/apply-doubles";
 import { applyMatchEloFromJoin } from "@/lib/rating/apply-elo";
 import { applyNoShow } from "@/lib/rating/reliability";
 
-// The admin queue's six actions (task 6.3): dismiss / hide / block for a
+// The admin queue's actions (task 6.3): dismiss / hide / block for a
 // report, unblock for a currently-blocked player, confirm / annul for a
-// disputed result. Every one starts with requireAdmin() — the page's own
+// disputed result — singles, or doubles since slice PD4. Every one starts with requireAdmin() — the page's own
 // 404 is only the first gate, not the only one (6.2's DoD) — and logs an
 // AdminAction, same "who, what, when, why" shape regardless of which.
 
@@ -21,6 +25,7 @@ const REPORT_NOT_FOUND = "This report doesn't exist.";
 const ALREADY_HANDLED = "This report was already handled.";
 const PLAYER_NOT_FOUND = "This player doesn't exist.";
 const RESULT_NOT_FOUND = "This result doesn't exist.";
+const NOT_DISPUTED = "This result isn't disputed.";
 const HIDE_MESSAGE_TEXT = "[Message removed by a moderator]";
 
 async function logAction(
@@ -30,6 +35,7 @@ async function logAction(
     reportId?: string;
     targetUserId?: string;
     matchResultId?: string;
+    doublesResultId?: string;
   },
   reason: string | undefined,
 ): Promise<void> {
@@ -228,7 +234,7 @@ export async function confirmDisputedResult(
       },
     });
     if (!result || result.status !== "DISPUTED") {
-      return { ok: false as const, message: "This result isn't disputed." };
+      return { ok: false as const, message: NOT_DISPUTED };
     }
 
     if (result.noShowParty) {
@@ -279,9 +285,77 @@ export async function annulDisputedResult(
     data: { status: "ANNULLED" },
   });
   if (count === 0) {
-    return { ok: false, message: "This result isn't disputed." };
+    return { ok: false, message: NOT_DISPUTED };
   }
   await logAction(admin.id, "ANNUL_RESULT", { matchResultId: id.data }, reason);
+  revalidatePath("/admin/results");
+  return { ok: true };
+}
+
+/**
+ * Settles a DISPUTED doubles result in the filer's favour (slice PD4): the
+ * same write as the other pair's confirm or the 72h cron —
+ * settleDoublesResult — so a score moves padel ELO once and a no-show
+ * report counts against the named player, just reached from DISPUTED.
+ */
+export async function confirmDisputedDoublesResult(
+  doublesResultId: unknown,
+  reason?: string,
+): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+
+  const id = z.uuid().safeParse(doublesResultId);
+  if (!id.success) {
+    return { ok: false, message: RESULT_NOT_FOUND };
+  }
+
+  const outcome = await db.$transaction(async (tx) => {
+    const result = await lockDoublesResult(tx, id.data);
+    if (!result || result.status !== "DISPUTED") {
+      return { ok: false as const, message: NOT_DISPUTED };
+    }
+    await settleDoublesResult(tx, result);
+    return { ok: true as const };
+  });
+  if (!outcome.ok) {
+    return outcome;
+  }
+
+  await logAction(
+    admin.id,
+    "CONFIRM_RESULT",
+    { doublesResultId: id.data },
+    reason,
+  );
+  revalidatePath("/admin/results");
+  return { ok: true };
+}
+
+/** The doubles mirror of annul: the dispute stands, no counter or rating moves. */
+export async function annulDisputedDoublesResult(
+  doublesResultId: unknown,
+  reason?: string,
+): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+
+  const id = z.uuid().safeParse(doublesResultId);
+  if (!id.success) {
+    return { ok: false, message: RESULT_NOT_FOUND };
+  }
+
+  const { count } = await db.doublesResult.updateMany({
+    where: { id: id.data, status: "DISPUTED" },
+    data: { status: "ANNULLED" },
+  });
+  if (count === 0) {
+    return { ok: false, message: NOT_DISPUTED };
+  }
+  await logAction(
+    admin.id,
+    "ANNUL_RESULT",
+    { doublesResultId: id.data },
+    reason,
+  );
   revalidatePath("/admin/results");
   return { ok: true };
 }

@@ -27,7 +27,7 @@ export async function getOfferCandidates(
       district: true,
       ntrpMin: true,
       ntrpMax: true,
-      author: { select: { elo: true } },
+      author: { select: { elo: true, padelElo: true } },
     },
   });
   if (!offer || offer.district === null) {
@@ -74,6 +74,7 @@ export async function getOfferCandidates(
       selfRatedNtrp: true,
       padelLevel: true,
       elo: true,
+      padelElo: true,
       scheduledMatches: true,
       noShows: true,
       lateCancellations: true,
@@ -84,12 +85,14 @@ export async function getOfferCandidates(
   return rankCandidates(
     // Slice PD1: each player's level in the offer's own sport, so a padel
     // offer only suggests players who declared a padel level.
-    pool.map(({ padelLevel, ...player }) => ({
+    // Slice PD4: and ranked by the padel ELO, the author's too.
+    pool.map(({ padelLevel, padelElo, ...player }) => ({
       ...player,
       selfRatedNtrp: playerLevel(
         { selfRatedNtrp: player.selfRatedNtrp, padelLevel },
         offer.sport,
       ),
+      elo: offer.sport === "PADEL" ? padelElo : player.elo,
     })),
     {
       authorId: offer.authorId,
@@ -97,6 +100,6 @@ export async function getOfferCandidates(
       ntrpMin: offer.ntrpMin,
       ntrpMax: offer.ntrpMax,
     },
-    offer.author.elo,
+    offer.sport === "PADEL" ? offer.author.padelElo : offer.author.elo,
   );
 }
