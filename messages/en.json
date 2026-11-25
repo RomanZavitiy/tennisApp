@@ -517,6 +517,7 @@
   },
   "ClubPage": {
     "notFound": "Club not found",
+    "sports": "Sports",
     "courts": "Courts",
     "surface": "Surface",
     "indoor": "Indoor",

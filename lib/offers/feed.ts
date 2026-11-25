@@ -92,6 +92,7 @@ export const feedOfferSelect = {
       name: true,
       avatarPath: true,
       elo: true,
+      padelElo: true,
       scheduledMatches: true,
       noShows: true,
       lateCancellations: true,
@@ -159,7 +160,7 @@ export async function getOfferFeed(
   const viewer = viewerId
     ? await db.user.findUnique({
         where: { id: viewerId },
-        select: { elo: true },
+        select: { elo: true, padelElo: true },
       })
     : null;
 
@@ -215,13 +216,16 @@ export async function getOfferFeed(
 
   // Pairs each offer with its author's ELO, purely for ranking below — kept
   // out of FeedOffer itself, which only has the author's id and name.
+  // Slice PD4: padel has a rating of its own, so a padel feed ranks by the
+  // padel ELO on both sides; an offer's own sport picks the author's.
+  const viewerElo = filters.sport === "PADEL" ? viewer?.padelElo : viewer?.elo;
   const ranked = rankByEloCloseness(
     matching.map((row) => ({
       offer: toFeedOffer(row),
-      elo: row.author.elo,
+      elo: row.sport === "PADEL" ? row.author.padelElo : row.author.elo,
       startsAt: row.startsAt,
     })),
-    viewer?.elo ?? null,
+    viewerElo ?? null,
   ).map((entry) => entry.offer);
 
   const start = (page - 1) * FEED_PAGE_SIZE;

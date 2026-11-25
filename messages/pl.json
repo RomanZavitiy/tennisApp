@@ -517,6 +517,7 @@
   },
   "ClubPage": {
     "notFound": "Klub nie znaleziony",
+    "sports": "Sporty",
     "courts": "Korty",
     "surface": "Nawierzchnia",
     "indoor": "Pod dachem",
