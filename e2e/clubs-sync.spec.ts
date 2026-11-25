@@ -7,7 +7,8 @@ import { createAdminClient, createTestClub } from "./support/supabase-admin";
 // Two test clubs, named so they sort to the end of the list, below any real
 // clubs. "Far" is at the city's edge, so the map has to move to center it;
 // "near" is away from the points the other club specs use, as they run in
-// parallel.
+// parallel, and ~2 km from any real club in prisma/data/clubs.json — a real
+// pin on top of it would take the click.
 const suffix = randomUUID().slice(0, 8);
 const far = { name: `Zz E2E Far ${suffix}`, id: "" };
 const near = { name: `Zz E2E Near ${suffix}`, id: "" };
@@ -24,8 +25,8 @@ test.beforeAll(async () => {
   near.id = await createTestClub(admin, {
     name: near.name,
     address: "Near Street 1, Kraków",
-    latitude: 50.0564,
-    longitude: 19.9266,
+    latitude: 50.03,
+    longitude: 19.99,
   });
 });
 
@@ -56,12 +57,17 @@ test("a club clicked in the list is shown on the map with its popup", async ({
   await expect(page.locator(".leaflet-popup")).toContainText(far.name);
   await expect(marker).toBeInViewport();
   // Centered across. Not checked down: the popup pans the map to fit above.
-  const mapBox = await map.boundingBox();
-  const markerBox = await marker.boundingBox();
-  if (!mapBox || !markerBox) throw new Error("Map or marker has no box.");
-  expect(
-    Math.abs(markerBox.x + markerBox.width / 2 - (mapBox.x + mapBox.width / 2)),
-  ).toBeLessThan(5);
+  // Polled: the zoom animates for a few hundred ms after the popup opens.
+  await expect
+    .poll(async () => {
+      const mapBox = await map.boundingBox();
+      const markerBox = await marker.boundingBox();
+      if (!mapBox || !markerBox) return Infinity;
+      return Math.abs(
+        markerBox.x + markerBox.width / 2 - (mapBox.x + mapBox.width / 2),
+      );
+    })
+    .toBeLessThan(5);
 });
 
 test("a marker click highlights its club in the list and scrolls to it", async ({

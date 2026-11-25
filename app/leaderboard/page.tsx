@@ -41,9 +41,12 @@ export default async function LeaderboardPage({
   const filtered = Object.keys(filters).length > 0;
   const t = await getTranslations("LeaderboardPage");
   // "Invite to game" (task S1.4): the same list of the viewer's own open
-  // offers on every row — loaded once, not per player.
+  // offers on every row — loaded once, not per player. Only games of the
+  // ladder's sport: a padel ladder doesn't invite to a tennis game.
   const viewer = await getCurrentUser();
-  const myOpenOffers = viewer ? await getMyOpenOffers(viewer.id) : null;
+  const myOpenOffers = viewer
+    ? await getMyOpenOffers(viewer.id, new Date(), sport)
+    : null;
 
   return (
     <PageShell>

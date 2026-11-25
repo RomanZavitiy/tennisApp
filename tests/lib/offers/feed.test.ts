@@ -37,6 +37,8 @@ function row(
     hasPartner?: boolean;
     accepted?: number;
     elo?: number | null;
+    padelElo?: number | null;
+    sport?: string;
     startsAt?: Date;
     authorId?: string;
     courtStatus?: string;
@@ -44,6 +46,7 @@ function row(
 ) {
   return {
     id: String(id),
+    sport: offer.sport ?? "TENNIS",
     format: offer.format ?? "SINGLES",
     hasPartner: offer.hasPartner ?? false,
     startsAt: offer.startsAt ?? new Date("2026-10-20T16:00:00Z"),
@@ -58,6 +61,7 @@ function row(
       id: offer.authorId ?? "a",
       name: "Ola",
       elo: offer.elo === undefined ? 1500 : offer.elo,
+      padelElo: offer.padelElo ?? null,
       scheduledMatches: 0,
       noShows: 0,
       lateCancellations: 0,
@@ -348,6 +352,18 @@ describe("getOfferFeed", () => {
     findMany.mockResolvedValue([far, near]);
 
     const feed = await getOfferFeed(1, {}, "viewer-1", NOW);
+
+    expect(feed.offers.map((offer) => offer.id)).toEqual(["1", "2"]);
+  });
+
+  it("ranks a padel feed by the padel ELO, not the tennis one", async () => {
+    findUnique.mockResolvedValue({ elo: 1900, padelElo: 1200 });
+    // Tennis ELOs say the opposite of the padel ones.
+    const padelNear = row(1, { sport: "PADEL", elo: 1000, padelElo: 1250 });
+    const padelFar = row(2, { sport: "PADEL", elo: 1900, padelElo: 1800 });
+    findMany.mockResolvedValue([padelFar, padelNear]);
+
+    const feed = await getOfferFeed(1, { sport: "PADEL" }, "viewer-1", NOW);
 
     expect(feed.offers.map((offer) => offer.id)).toEqual(["1", "2"]);
   });

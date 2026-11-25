@@ -70,9 +70,16 @@ export default async function ClubPage({ params }: ClubPageProps) {
   const t = await getTranslations("ClubPage");
   const tSurface = await getTranslations("Surface");
   const tIndoor = await getTranslations("IndoorCourts");
+  const tSport = await getTranslations("SportSwitcher.names");
   const format = await getFormatter();
 
+  // The club's own sports, whatever the header switch says (PADEL-PLAN,
+  // principle 2): a tennis player should see that a club also has padel.
   const facts: { label: string; value: ReactNode }[] = [
+    {
+      label: t("sports"),
+      value: club.sports.map((sport) => tSport(sport)).join(" · "),
+    },
     { label: t("courts"), value: String(club.courtCount) },
   ];
   if (club.surfaces.length > 0) {
