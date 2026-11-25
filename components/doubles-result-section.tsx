@@ -85,7 +85,9 @@ export function DoublesResultSection({
             ? t("noShowPending", { reporter, who })
             : result.status === "NO_SHOW"
               ? t("noShowConfirmed", { who })
-              : t("noShowDisputed", { who })}
+              : result.status === "ANNULLED"
+                ? t("noShowAnnulled", { who })
+                : t("noShowDisputed", { who })}
         </p>
         {canSettle && (
           <OfferActionButton
@@ -131,7 +133,9 @@ export function DoublesResultSection({
           ? t("pending", { reporter, line })
           : result.status === "CONFIRMED"
             ? t("confirmed", { line })
-            : t("disputed", { line })}
+            : result.status === "ANNULLED"
+              ? t("annulled", { line })
+              : t("disputed", { line })}
       </p>
       {result.status === "CONFIRMED" && (
         <p className="text-muted-foreground">

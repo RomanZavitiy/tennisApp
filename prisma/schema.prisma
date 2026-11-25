@@ -529,12 +529,12 @@ model SparringOffer {
   // playersNeeded() in lib/offers computes it from format and hasPartner.
   /// Which sport this game is (slice PD1). A padel offer is always DOUBLES
   /// (CHECK in the migration): padel is played two against two.
-  sport           Sport       @default(TENNIS)
-  format          OfferFormat @default(SINGLES)
+  sport           Sport           @default(TENNIS)
+  format          OfferFormat     @default(SINGLES)
   /// Who the game is for (slice PD3): anyone, men, women, or mixed doubles.
   /// MEN / WOMEN are enforced when a player asks to join or is invited
   /// (lib/offers/match-gender.ts); MIXED is doubles-only (CHECK).
-  matchGender     MatchGender @default(ANY) @map("match_gender")
+  matchGender     MatchGender     @default(ANY) @map("match_gender")
   /// Slice PD3: a PRIVATE game is left out of every list and push — the
   /// feed, a club's page, "play today", "new offer" pushes, invite
   /// candidates — and is reached only through its link.
@@ -545,26 +545,26 @@ model SparringOffer {
   /// selected for anyone but the author (lib/offers/invite-link.ts).
   inviteToken     String?         @unique @map("invite_token") @db.VarChar(64)
   /// Doubles only: the author brings their own partner (a mark, not an account).
-  hasPartner      Boolean     @default(false) @map("has_partner")
+  hasPartner      Boolean         @default(false) @map("has_partner")
   /// Stored in UTC, shown in Europe/Warsaw.
-  startsAt        DateTime    @map("starts_at") @db.Timestamptz
+  startsAt        DateTime        @map("starts_at") @db.Timestamptz
   /// How long the court is wanted for (slice K5): 60, 90, 120 or 180
   /// minutes (CHECK in the migration). Rows from before K5 get the default.
-  durationMinutes Int         @default(90) @map("duration_minutes")
+  durationMinutes Int             @default(90) @map("duration_minutes")
   /// Set together with a club or on its own; at least one of the two is set.
   /// Empty for an offer at a club outside the city limits.
   district        District?
   /// Wanted level in steps of 0.5; empty — any level. Tennis: NTRP,
   /// 1.5–7.0. Padel: the padel scale, 1.0–7.0 (slice PD1) — the column
   /// names stay "ntrp" from before padel existed.
-  ntrpMin         Float?      @map("ntrp_min")
-  ntrpMax         Float?      @map("ntrp_max")
+  ntrpMin         Float?          @map("ntrp_min")
+  ntrpMax         Float?          @map("ntrp_max")
   /// Empty — any surface.
   surface         Surface?
-  comment         String?     @db.VarChar(500)
+  comment         String?         @db.VarChar(500)
   /// Whether the court is already booked (task 3.22). Default: the author
   /// books once a sparring partner is confirmed.
-  courtStatus     CourtStatus @default(WILL_BOOK) @map("court_status")
+  courtStatus     CourtStatus     @default(WILL_BOOK) @map("court_status")
 
   // Reminder pushes (task 5.10/5.16, hourly cron): each sent at most once,
   // so an hourly run that catches an offer two hours in a row doesn't
@@ -1030,8 +1030,8 @@ model DoublesResult {
   winner MatchParty?
 
   /// Who filed it; anyone in the other pair confirms or disputes a score.
-  reportedById String @map("reported_by_id") @db.Uuid
-  reportedBy   User   @relation("DoublesReportedBy", fields: [reportedById], references: [id], onDelete: Restrict)
+  reportedById String  @map("reported_by_id") @db.Uuid
+  reportedBy   User    @relation("DoublesReportedBy", fields: [reportedById], references: [id], onDelete: Restrict)
   /// A no-show report: the one player who didn't come. Only they may
   /// dispute it; otherwise the cron settles it as NO_SHOW after 72h.
   noShowUserId String? @map("no_show_user_id") @db.Uuid
@@ -1045,7 +1045,8 @@ model DoublesResult {
   /// rating: [{ userId, before, after }] for each account in the game.
   eloChanges Json? @map("elo_changes")
 
-  feedback MatchFeedback[]
+  feedback     MatchFeedback[]
+  adminActions AdminAction[]
 
   @@index([authorPartnerId])
   @@index([opponent1Id])
@@ -1126,7 +1127,8 @@ model Report {
 /// on the action: a report-queue action sets reportId (BLOCK_PLAYER also
 /// sets targetUserId, for a blocked-players list that outlives the report);
 /// UNBLOCK_PLAYER and the autoblock set only targetUserId; the disputed-
-/// results tab sets only matchResultId.
+/// results tab sets only matchResultId, or only doublesResultId for a
+/// doubles game (slice PD4).
 model AdminAction {
   id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz
@@ -1148,10 +1150,14 @@ model AdminAction {
   matchResultId String?      @map("match_result_id") @db.Uuid
   matchResult   MatchResult? @relation(fields: [matchResultId], references: [id], onDelete: SetNull)
 
+  doublesResultId String?        @map("doubles_result_id") @db.Uuid
+  doublesResult   DoublesResult? @relation(fields: [doublesResultId], references: [id], onDelete: SetNull)
+
   @@index([adminId])
   @@index([reportId])
   @@index([targetUserId])
   @@index([matchResultId])
+  @@index([doublesResultId])
   @@map("admin_actions")
 }
 

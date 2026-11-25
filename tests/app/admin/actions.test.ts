@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  annulDisputedDoublesResult,
   annulDisputedResult,
   blockFromReport,
+  confirmDisputedDoublesResult,
   confirmDisputedResult,
   dismissReport,
   hideReport,
@@ -27,8 +29,11 @@ const {
   userUpdateMany,
   adminActionCreate,
   resultUpdateMany,
+  doublesUpdateMany,
   applyMatchEloFromJoin,
   applyNoShow,
+  lockDoublesResult,
+  settleDoublesResult,
   tx,
 } = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
@@ -41,8 +46,11 @@ const {
   userUpdateMany: vi.fn(),
   adminActionCreate: vi.fn(),
   resultUpdateMany: vi.fn(),
+  doublesUpdateMany: vi.fn(),
   applyMatchEloFromJoin: vi.fn(),
   applyNoShow: vi.fn(),
+  lockDoublesResult: vi.fn(),
+  settleDoublesResult: vi.fn(),
   tx: {
     $queryRaw: vi.fn(),
     matchResult: { findUnique: vi.fn() },
@@ -62,11 +70,16 @@ vi.mock("@/lib/db", () => ({
     user: { update: userUpdate, updateMany: userUpdateMany },
     adminAction: { create: adminActionCreate },
     matchResult: { updateMany: resultUpdateMany },
+    doublesResult: { updateMany: doublesUpdateMany },
     $transaction: (run: (client: typeof tx) => Promise<unknown>) => run(tx),
   },
 }));
 vi.mock("@/lib/rating/apply-elo", () => ({ applyMatchEloFromJoin }));
 vi.mock("@/lib/rating/reliability", () => ({ applyNoShow }));
+vi.mock("@/lib/rating/apply-doubles", () => ({
+  lockDoublesResult,
+  settleDoublesResult,
+}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 describe("admin actions require an admin", () => {
@@ -75,6 +88,19 @@ describe("admin actions require an admin", () => {
 
     await expect(dismissReport(REPORT)).rejects.toThrow("not-found");
     expect(reportUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("so do the doubles result actions", async () => {
+    requireAdmin.mockRejectedValue(new Error("not-found"));
+
+    await expect(confirmDisputedDoublesResult(RESULT)).rejects.toThrow(
+      "not-found",
+    );
+    await expect(annulDisputedDoublesResult(RESULT)).rejects.toThrow(
+      "not-found",
+    );
+    expect(lockDoublesResult).not.toHaveBeenCalled();
+    expect(doublesUpdateMany).not.toHaveBeenCalled();
   });
 });
 
@@ -373,5 +399,96 @@ describe("annulDisputedResult", () => {
       ok: false,
       message: "This result isn't disputed.",
     });
+  });
+});
+
+// Slice PD4: disputed doubles results, settled through the same write as
+// the other pair's confirm and the cron (apply-doubles.ts, tested on a real
+// database in tests/integration/doubles-results.test.ts).
+describe("confirmDisputedDoublesResult", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireAdmin.mockResolvedValue({ id: ADMIN });
+  });
+
+  it("settles a disputed doubles result and logs it against that result", async () => {
+    const locked = { id: RESULT, status: "DISPUTED" };
+    lockDoublesResult.mockResolvedValue(locked);
+
+    await expect(confirmDisputedDoublesResult(RESULT)).resolves.toEqual({
+      ok: true,
+    });
+
+    expect(lockDoublesResult).toHaveBeenCalledWith(tx, RESULT);
+    expect(settleDoublesResult).toHaveBeenCalledWith(tx, locked);
+    expect(adminActionCreate).toHaveBeenCalledWith({
+      data: {
+        adminId: ADMIN,
+        action: "CONFIRM_RESULT",
+        reason: undefined,
+        doublesResultId: RESULT,
+      },
+    });
+  });
+
+  it.each([["PENDING"], ["CONFIRMED"], ["ANNULLED"]])(
+    "refuses a %s doubles result",
+    async (status) => {
+      lockDoublesResult.mockResolvedValue({ id: RESULT, status });
+
+      await expect(confirmDisputedDoublesResult(RESULT)).resolves.toEqual({
+        ok: false,
+        message: "This result isn't disputed.",
+      });
+      expect(settleDoublesResult).not.toHaveBeenCalled();
+      expect(adminActionCreate).not.toHaveBeenCalled();
+    },
+  );
+
+  it("refuses an id that isn't a UUID without reading anything", async () => {
+    await expect(confirmDisputedDoublesResult("nope")).resolves.toEqual({
+      ok: false,
+      message: "This result doesn't exist.",
+    });
+    expect(lockDoublesResult).not.toHaveBeenCalled();
+  });
+});
+
+describe("annulDisputedDoublesResult", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireAdmin.mockResolvedValue({ id: ADMIN });
+  });
+
+  it("annuls a disputed doubles result without settling it", async () => {
+    doublesUpdateMany.mockResolvedValue({ count: 1 });
+
+    await expect(
+      annulDisputedDoublesResult(RESULT, "both pairs disagree"),
+    ).resolves.toEqual({ ok: true });
+
+    expect(doublesUpdateMany).toHaveBeenCalledWith({
+      where: { id: RESULT, status: "DISPUTED" },
+      data: { status: "ANNULLED" },
+    });
+    expect(settleDoublesResult).not.toHaveBeenCalled();
+    expect(adminActionCreate).toHaveBeenCalledWith({
+      data: {
+        adminId: ADMIN,
+        action: "ANNUL_RESULT",
+        reason: "both pairs disagree",
+        doublesResultId: RESULT,
+      },
+    });
+  });
+
+  it("refuses a doubles result that isn't disputed", async () => {
+    doublesUpdateMany.mockResolvedValue({ count: 0 });
+
+    await expect(annulDisputedDoublesResult(RESULT)).resolves.toEqual({
+      ok: false,
+      message: "This result isn't disputed.",
+    });
+    expect(adminActionCreate).not.toHaveBeenCalled();
   });
 });
