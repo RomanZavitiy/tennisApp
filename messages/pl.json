@@ -1150,6 +1150,15 @@
     "home": "Wróć na stronę główną",
     "reference": "Numer błędu: {digest}"
   },
+  "NotFoundPage": {
+    "title": "Nie znaleziono strony",
+    "body": "Ta strona nie istnieje albo nie jest już dostępna — oferta mogła zostać usunięta albo w linku jest literówka.",
+    "offers": "Przeglądaj oferty",
+    "home": "Wróć na stronę główną"
+  },
+  "Loading": {
+    "label": "Wczytywanie…"
+  },
   "TermsPage": {
     "title": "Regulamin",
     "draftNotice": "Wersja robocza — czeka na przegląd prawny. Ta strona jest zastępnikiem do czasu gotowości ostatecznego tekstu.",

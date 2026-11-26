@@ -1150,6 +1150,15 @@
     "home": "Back to home",
     "reference": "Error reference: {digest}"
   },
+  "NotFoundPage": {
+    "title": "Page not found",
+    "body": "This page doesn't exist or isn't available any more — an offer may have been removed, or the link has a typo.",
+    "offers": "Browse offers",
+    "home": "Back to home"
+  },
+  "Loading": {
+    "label": "Loading…"
+  },
   "TermsPage": {
     "title": "Terms",
     "draftNotice": "Draft — pending legal review. This page is a placeholder until the final text is ready.",
